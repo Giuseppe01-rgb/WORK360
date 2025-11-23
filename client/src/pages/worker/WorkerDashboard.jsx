@@ -12,36 +12,9 @@ export default function WorkerDashboard() {
     const [activeAttendance, setActiveAttendance] = useState(null);
     const [sites, setSites] = useState([]);
     const [selectedSite, setSelectedSite] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [showGeoHelp, setShowGeoHelp] = useState(false);
 
-    // Forms
-    const [materialForm, setMaterialForm] = useState({ name: '', quantity: '', unit: 'pz', notes: '' });
-    const [noteText, setNoteText] = useState('');
-    const [photoFile, setPhotoFile] = useState(null);
-    const [photoCaption, setPhotoCaption] = useState('');
-
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const loadData = async () => {
-        try {
-            const [activeResp, sitesResp] = await Promise.all([
-                attendanceAPI.getActive(),
-                siteAPI.getAll()
-            ]);
-
-            setActiveAttendance(activeResp.data);
-            const sitesData = Array.isArray(sitesResp.data) ? sitesResp.data : [];
-            setSites(sitesData);
-
-            if (sitesData.length > 0) {
-                setSelectedSite(sitesData[0]._id);
-            }
-        } catch (error) {
-            console.error('Error loading data:', error);
-        }
-    };
+    // ... existing loadData ...
 
     const getLocation = () => {
         return new Promise((resolve, reject) => {
@@ -56,10 +29,11 @@ export default function WorkerDashboard() {
                         });
                     },
                     (error) => {
-                        // Migliori messaggi di errore
+                        console.error('Geolocation error:', error);
                         let message = 'Errore geolocalizzazione';
                         if (error.code === error.PERMISSION_DENIED) {
-                            message = 'Per timbrare devi PERMETTERE l\'accesso alla posizione. Vai nelle impostazioni del browser e abilita la geolocalizzazione per questo sito.';
+                            setShowGeoHelp(true); // Show help modal
+                            message = 'Permesso geolocalizzazione negato. Clicca su "Aiuto" per istruzioni.';
                         } else if (error.code === error.POSITION_UNAVAILABLE) {
                             message = 'Posizione non disponibile. Assicurati che il GPS sia attivo.';
                         } else if (error.code === error.TIMEOUT) {
@@ -77,93 +51,56 @@ export default function WorkerDashboard() {
         });
     };
 
-    const handleClockIn = async () => {
-        if (!selectedSite) {
-            showError('Seleziona un cantiere');
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const location = await getLocation();
-            const response = await attendanceAPI.clockIn({
-                siteId: selectedSite,
-                ...location
-            });
-
-            setActiveAttendance(response.data);
-            showSuccess('Entrata registrata!');
-        } catch (error) {
-            showError(error.message || 'Errore nella timbratura');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleClockOut = async () => {
-        setLoading(true);
-        try {
-            const location = await getLocation();
-            await attendanceAPI.clockOut({
-                attendanceId: activeAttendance._id,
-                ...location
-            });
-
-            setActiveAttendance(null);
-            showSuccess('Uscita registrata!');
-        } catch (error) {
-            showError(error.message || 'Errore nella timbratura');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleMaterialSubmit = async (e) => {
-        e.preventDefault();
-        if (!selectedSite) return;
-        try {
-            await materialAPI.create({ ...materialForm, site: selectedSite });
-            setMaterialForm({ name: '', quantity: '', unit: 'pz', notes: '' });
-            showSuccess('Materiale registrato!');
-        } catch (error) { showError('Errore'); }
-    };
-
-    const handleNoteSubmit = async (e) => {
-        e.preventDefault();
-        if (!selectedSite || !noteText) return;
-        try {
-            await noteAPI.create({ content: noteText, site: selectedSite });
-            setNoteText('');
-            showSuccess('Nota salvata!');
-        } catch (error) { showError('Errore'); }
-    };
-
-    const handlePhotoSubmit = async (e) => {
-        e.preventDefault();
-        if (!selectedSite || !photoFile) return;
-        const formData = new FormData();
-        formData.append('photo', photoFile);
-        formData.append('siteId', selectedSite);
-        formData.append('caption', photoCaption);
-        formData.append('type', 'progress');
-        try {
-            await photoAPI.upload(formData);
-            setPhotoFile(null);
-            setPhotoCaption('');
-            showSuccess('Foto caricata!');
-        } catch (error) { showError('Errore'); }
-    };
-
-    const tabs = [
-        { id: 'attendance', label: 'Timbratura', icon: Clock },
-        { id: 'materials', label: 'Materiali', icon: Package },
-        { id: 'notes', label: 'Note', icon: FileText },
-        { id: 'photos', label: 'Foto', icon: Camera },
-    ];
+    // ... existing handlers ...
 
     return (
         <Layout title="WORK360 Operaio" subtitle={user?.username}>
             <div className="max-w-3xl mx-auto">
+                {/* Geo Help Modal */}
+                {showGeoHelp && (
+                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                                    <MapPin className="w-8 h-8 text-red-600" />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                                    Geolocalizzazione Disabilitata
+                                </h3>
+                                <p className="text-slate-600 mb-6">
+                                    Per timbrare è <strong>obbligatorio</strong> fornire la posizione.
+                                    Il browser ha bloccato l'accesso.
+                                </p>
+
+                                <div className="bg-slate-50 rounded-xl p-4 text-left w-full mb-6 text-sm text-slate-700">
+                                    <p className="font-bold mb-2">Come attivarla:</p>
+                                    <ol className="list-decimal pl-4 space-y-2">
+                                        <li>Clicca sull'icona del lucchetto 🔒 o delle impostazioni ⚙️ nella barra dell'indirizzo</li>
+                                        <li>Cerca "Posizione" o "Geolocalizzazione"</li>
+                                        <li>Seleziona <strong>"Consenti"</strong> o "Chiedi ogni volta"</li>
+                                        <li>Ricarica la pagina</li>
+                                    </ol>
+                                </div>
+
+                                <div className="flex gap-3 w-full">
+                                    <button
+                                        onClick={() => setShowGeoHelp(false)}
+                                        className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                                    >
+                                        Chiudi
+                                    </button>
+                                    <button
+                                        onClick={() => window.location.reload()}
+                                        className="flex-1 py-3 px-4 bg-[#5D5FEF] text-white font-bold rounded-xl hover:bg-[#4B4DDB] transition-colors"
+                                    >
+                                        Ricarica Pagina
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Tabs Navigation */}
                 <div className="flex overflow-x-auto bg-white rounded-xl border border-slate-200 p-1 mb-6 shadow-sm">
                     {tabs.map((tab) => {

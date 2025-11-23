@@ -81,7 +81,7 @@ export default function LoginPage() {
                 {/* Logo Section */}
                 <div className="mb-8 flex flex-col items-center">
                     <img
-                        src="/logo.png"
+                        src="/logo.png?v=2"
                         alt="WORK360 Logo"
                         className="w-32 h-32 mb-4 object-contain"
                     />
