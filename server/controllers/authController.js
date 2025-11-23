@@ -17,7 +17,7 @@ const register = async (req, res) => {
         if (parts.length === 3 && parts[0] === 'admin') {
             // Owner registration
             role = 'owner';
-            const compName = parts[2];
+            const compName = parts[2].trim();
 
             // Check if company exists or create new one (case-insensitive)
             company = await Company.findOne({ name: { $regex: new RegExp(`^${compName}$`, 'i') } });
@@ -33,8 +33,8 @@ const register = async (req, res) => {
             const compName = parts[1].trim();
             console.log(`Worker registration: searching for company '${compName}'`);
 
-            // Company must exist for worker registration (case-insensitive)
-            company = await Company.findOne({ name: { $regex: new RegExp(`^${compName}$`, 'i') } });
+            // Company must exist for worker registration (case-insensitive, ignores surrounding spaces in DB)
+            company = await Company.findOne({ name: { $regex: new RegExp(`^\\s*${compName}\\s*$`, 'i') } });
             console.log('Company found:', company);
 
             if (!company) {
