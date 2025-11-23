@@ -16,7 +16,7 @@ const clockIn = async (req, res) => {
         // Check if user already has an active attendance (not clocked out)
         const activeAttendance = await Attendance.findOne({
             user: req.user._id,
-            clockOut: { $exists: false }
+            'clockOut.time': { $exists: false }
         });
 
         if (activeAttendance) {
@@ -140,7 +140,7 @@ const getActiveAttendance = async (req, res) => {
     try {
         const attendance = await Attendance.findOne({
             user: req.user._id,
-            clockOut: { $exists: false }
+            'clockOut.time': { $exists: false }
         }).populate('site', 'name address');
 
         res.json(attendance);
