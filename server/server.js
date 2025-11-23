@@ -12,8 +12,22 @@ connectDB();
 
 // Middleware
 // CORS configuration
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://work-360.vercel.app',
+    'https://work360-production.up.railway.app'
+];
+
 app.use(cors({
-    origin: '*', // Allow all origins (or specify http://localhost:5173 for production)
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(null, true); // Allow all for now
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
