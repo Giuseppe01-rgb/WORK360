@@ -129,7 +129,10 @@ export default function WorkerDashboard() {
         setLoading(true);
         try {
             const location = await getLocation();
-            await attendanceAPI.clockOut({ location });
+            await attendanceAPI.clockOut({
+                attendanceId: activeAttendance._id,
+                ...location
+            });
             setActiveAttendance(null);
             setSelectedSite('');
             showSuccess('Uscita registrata con successo');
