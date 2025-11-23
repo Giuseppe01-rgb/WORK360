@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// Production API URL (hardcoded for deployment)
+const API_URL = 'https://work360-production-d4f3.up.railway.app/api';
 
 const api = axios.create({
     baseURL: API_URL,

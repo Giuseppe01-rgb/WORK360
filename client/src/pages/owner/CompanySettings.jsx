@@ -51,7 +51,7 @@ export default function CompanySettings() {
                 logo: null
             });
             if (data.logo) {
-                setLogoPreview(`${import.meta.env.VITE_API_URL}${data.logo}`);
+                setLogoPreview(`https://work360-production-d4f3.up.railway.app${data.logo}`);
             }
             setLoading(false);
         } catch (error) {
