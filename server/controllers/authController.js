@@ -30,10 +30,13 @@ const register = async (req, res) => {
         } else if (parts.length === 2) {
             // Worker registration
             role = 'worker';
-            const compName = parts[1];
+            const compName = parts[1].trim();
+            console.log(`Worker registration: searching for company '${compName}'`);
 
             // Company must exist for worker registration (case-insensitive)
             company = await Company.findOne({ name: { $regex: new RegExp(`^${compName}$`, 'i') } });
+            console.log('Company found:', company);
+
             if (!company) {
                 return res.status(400).json({ message: `Azienda "${compName}" non trovata. Verifica il nome o chiedi al titolare.` });
             }

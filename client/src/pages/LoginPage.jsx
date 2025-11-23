@@ -68,7 +68,9 @@ export default function LoginPage() {
                 }
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Si è verificato un errore');
+            console.error('Registration error:', err);
+            const msg = err.response?.data?.message || err.message || 'Si è verificato un errore';
+            setError(msg);
         } finally {
             setLoading(false);
         }
