@@ -46,7 +46,7 @@ export default function WorkerDashboard() {
     const getLocation = () => {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
-                reject(new Error('Geolocalizzazione non supportata'));
+                reject(new Error('Geolocalizzazione non supportata dal tuo browser'));
             } else {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -55,7 +55,23 @@ export default function WorkerDashboard() {
                             longitude: position.coords.longitude
                         });
                     },
-                    (error) => reject(error)
+                    (error) => {
+                        // Migliori messaggi di errore
+                        let message = 'Errore geolocalizzazione';
+                        if (error.code === error.PERMISSION_DENIED) {
+                            message = 'Per timbrare devi PERMETTERE l\'accesso alla posizione. Vai nelle impostazioni del browser e abilita la geolocalizzazione per questo sito.';
+                        } else if (error.code === error.POSITION_UNAVAILABLE) {
+                            message = 'Posizione non disponibile. Assicurati che il GPS sia attivo.';
+                        } else if (error.code === error.TIMEOUT) {
+                            message = 'Timeout: impossibile ottenere la posizione. Riprova.';
+                        }
+                        reject(new Error(message));
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
                 );
             }
         });
