@@ -19,11 +19,11 @@ const register = async (req, res) => {
             role = 'owner';
             const compName = parts[2];
 
-            // Check if company exists or create new one
-            company = await Company.findOne({ name: compName });
+            // Check if company exists or create new one (case-insensitive)
+            company = await Company.findOne({ name: { $regex: new RegExp(`^${compName}$`, 'i') } });
             if (!company) {
                 company = await Company.create({
-                    name: compName,
+                    name: compName, // Store as provided, or could force lowercase
                     ownerName: parts[1]
                 });
             }
@@ -32,10 +32,10 @@ const register = async (req, res) => {
             role = 'worker';
             const compName = parts[1];
 
-            // Company must exist for worker registration
-            company = await Company.findOne({ name: compName });
+            // Company must exist for worker registration (case-insensitive)
+            company = await Company.findOne({ name: { $regex: new RegExp(`^${compName}$`, 'i') } });
             if (!company) {
-                return res.status(400).json({ message: 'Azienda non trovata. Il titolare deve registrarsi prima.' });
+                return res.status(400).json({ message: `Azienda "${compName}" non trovata. Verifica il nome o chiedi al titolare.` });
             }
         } else {
             return res.status(400).json({

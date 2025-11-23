@@ -270,6 +270,7 @@ export default function WorkerDashboard() {
                                     onChange={(e) => setSelectedSite(e.target.value)}
                                 >
                                     <option value="">Scegli un cantiere...</option>
+                                    {sites.length === 0 && <option disabled>Nessun cantiere trovato (Verifica con il titolare)</option>}
                                     {sites.map(site => (
                                         <option key={site._id} value={site._id}>{site.name}</option>
                                     ))}
