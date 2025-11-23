@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-    LayoutDashboard,
     Users,
     Building2,
     FileText,
@@ -14,8 +13,15 @@ import {
     PenTool,
     HardHat,
     ChevronRight,
+    ChevronDown,
+    ChevronUp,
     Settings,
-    Bell
+    Bell,
+    Clock,
+    Zap,
+    StickyNote,
+    Camera,
+    FileCheck
 } from 'lucide-react';
 
 export default function Layout({ children, title }) {
@@ -23,26 +29,45 @@ export default function Layout({ children, title }) {
     const location = useLocation();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isWorkerFunctionsOpen, setIsWorkerFunctionsOpen] = useState(false);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
+    // Owner menu with collapsible submenu
     const ownerLinks = [
         { path: '/owner', label: 'Cantieri', icon: Building2 },
-        { path: '/owner/quotes', label: 'Preventivi & SAL', icon: FileText },
+        {
+            path: '/owner/worker-functions',
+            label: 'Funzioni Operaio',
+            icon: HardHat,
+            submenu: [
+                { path: '/owner/worker-functions?tab=attendance', label: 'Timbratura', icon: Clock },
+                { path: '/owner/worker-functions?tab=materials', label: 'Materiali', icon: Package },
+                { path: '/owner/worker-functions?tab=daily-report', label: 'Rapporto Giornaliero', icon: FileCheck },
+                { path: '/owner/worker-functions?tab=economies', label: 'Economie', icon: Zap },
+                { path: '/owner/worker-functions?tab=notes', label: 'Note', icon: StickyNote },
+                { path: '/owner/worker-functions?tab=photos', label: 'Foto', icon: Camera },
+            ]
+        },
         { path: '/owner/attendance', label: 'Presenze', icon: Users },
-        { path: '/owner/analytics', label: 'Analytics', icon: BarChart3 },
         { path: '/owner/suppliers', label: 'Magazzino', icon: Package },
+        { path: '/owner/quotes', label: 'Preventivi e SAL', icon: FileText },
         { path: '/owner/signature', label: 'Firma Digitale', icon: PenTool },
-        { path: '/owner/worker-functions', label: 'Funzioni Operaio', icon: HardHat },
-        { path: '/owner/settings', label: 'Impostazioni Azienda', icon: Settings },
+        { path: '/owner/analytics', label: 'Analytics', icon: BarChart3 },
+        { path: '/owner/settings', label: 'Dati Azienda', icon: Settings },
     ];
 
+    // Worker menu with all tabs as individual items
     const workerLinks = [
-        { path: '/worker', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/worker/attendance', label: 'Timbratura', icon: Users },
+        { path: '/worker?tab=attendance', label: 'Timbratura', icon: Clock },
+        { path: '/worker?tab=materials', label: 'Materiali', icon: Package },
+        { path: '/worker?tab=daily-report', label: 'Rapporto Giornaliero', icon: FileCheck },
+        { path: '/worker?tab=economies', label: 'Economie', icon: Zap },
+        { path: '/worker?tab=notes', label: 'Note', icon: StickyNote },
+        { path: '/worker?tab=photos', label: 'Foto', icon: Camera },
     ];
 
     const links = user?.role === 'owner' ? ownerLinks : workerLinks;
@@ -70,7 +95,53 @@ export default function Layout({ children, title }) {
                 <nav className="flex-1 overflow-y-auto py-8 px-4 space-y-1.5">
                     {links.map((link) => {
                         const Icon = link.icon;
-                        const isActive = location.pathname === link.path;
+                        const isActive = location.pathname === link.path ||
+                            (link.submenu && link.submenu.some(sub => location.pathname + location.search === sub.path));
+
+                        // If it has submenu (Funzioni Operaio)
+                        if (link.submenu) {
+                            return (
+                                <div key={link.path}>
+                                    <button
+                                        onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
+                                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group ${isActive
+                                            ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 translate-x-1'
+                                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
+                                        {link.label}
+                                        {isWorkerFunctionsOpen ?
+                                            <ChevronUp className="w-4 h-4 ml-auto" /> :
+                                            <ChevronDown className="w-4 h-4 ml-auto" />
+                                        }
+                                    </button>
+                                    {isWorkerFunctionsOpen && (
+                                        <div className="ml-4 mt-1.5 space-y-1">
+                                            {link.submenu.map((sublink) => {
+                                                const SubIcon = sublink.icon;
+                                                const isSubActive = location.pathname + location.search === sublink.path;
+                                                return (
+                                                    <Link
+                                                        key={sublink.path}
+                                                        to={sublink.path}
+                                                        className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isSubActive
+                                                            ? 'bg-slate-100 text-slate-900'
+                                                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                                            }`}
+                                                    >
+                                                        <SubIcon className="w-4 h-4" />
+                                                        {sublink.label}
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        }
+
+                        // Regular menu item
                         return (
                             <Link
                                 key={link.path}
@@ -154,7 +225,54 @@ export default function Layout({ children, title }) {
                             <nav className="flex-1 space-y-2 overflow-y-auto">
                                 {links.map((link) => {
                                     const Icon = link.icon;
-                                    const isActive = location.pathname === link.path;
+                                    const isActive = location.pathname === link.path ||
+                                        (link.submenu && link.submenu.some(sub => location.pathname + location.search === sub.path));
+
+                                    // If it has submenu (Funzioni Operaio)
+                                    if (link.submenu) {
+                                        return (
+                                            <div key={link.path}>
+                                                <button
+                                                    onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
+                                                    className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-base font-bold transition-all ${isActive
+                                                        ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/20'
+                                                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                                        }`}
+                                                >
+                                                    <Icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                                                    {link.label}
+                                                    {isWorkerFunctionsOpen ?
+                                                        <ChevronUp className="w-5 h-5 ml-auto" /> :
+                                                        <ChevronDown className="w-5 h-5 ml-auto" />
+                                                    }
+                                                </button>
+                                                {isWorkerFunctionsOpen && (
+                                                    <div className="ml-6 mt-2 space-y-1">
+                                                        {link.submenu.map((sublink) => {
+                                                            const SubIcon = sublink.icon;
+                                                            const isSubActive = location.pathname + location.search === sublink.path;
+                                                            return (
+                                                                <Link
+                                                                    key={sublink.path}
+                                                                    to={sublink.path}
+                                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isSubActive
+                                                                        ? 'bg-slate-100 text-slate-900'
+                                                                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                                                        }`}
+                                                                >
+                                                                    <SubIcon className="w-5 h-5" />
+                                                                    {sublink.label}
+                                                                </Link>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+
+                                    // Regular menu item
                                     return (
                                         <Link
                                             key={link.path}

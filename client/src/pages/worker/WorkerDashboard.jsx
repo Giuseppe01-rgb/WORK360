@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -8,7 +9,8 @@ import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus }
 export default function WorkerDashboard() {
     const { user } = useAuth();
     const { showSuccess, showError } = useToast();
-    const [activeTab, setActiveTab] = useState('attendance');
+    const [searchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'attendance';
     const [activeAttendance, setActiveAttendance] = useState(null);
     const [sites, setSites] = useState([]);
     const [selectedSite, setSelectedSite] = useState('');
@@ -201,13 +203,6 @@ export default function WorkerDashboard() {
         }
     };
 
-    const tabs = [
-        { id: 'attendance', label: 'Timbratura', icon: Clock },
-        { id: 'materials', label: 'Materiali', icon: Package },
-        { id: 'notes', label: 'Note', icon: FileText },
-        { id: 'photos', label: 'Foto', icon: Camera },
-    ];
-
     return (
         <Layout title="WORK360 Operaio" subtitle={user?.username}>
             <div className="max-w-3xl mx-auto">
@@ -256,25 +251,7 @@ export default function WorkerDashboard() {
                     </div>
                 )}
 
-                {/* Tabs Navigation */}
-                <div className="flex overflow-x-auto bg-white rounded-xl border border-slate-200 p-1 mb-6 shadow-sm">
-                    {tabs.map((tab) => {
-                        const Icon = tab.icon;
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
-                                    ? 'bg-slate-900 text-white shadow-md'
-                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                                    }`}
-                            >
-                                <Icon className="w-4 h-4" />
-                                {tab.label}
-                            </button>
-                        );
-                    })}
-                </div>
+
 
 
 
@@ -494,6 +471,44 @@ export default function WorkerDashboard() {
                                 Carica Foto
                             </button>
                         </form>
+                    </div>
+                )}
+
+                {/* DAILY REPORT TAB */}
+                {activeTab === 'daily-report' && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                        <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                            <FileText className="w-6 h-6 text-slate-900" />
+                            Rapporto Giornaliero
+                        </h3>
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                                <FileText className="w-10 h-10 text-slate-400" />
+                            </div>
+                            <h4 className="text-lg font-bold text-slate-900 mb-2">Funzione in arrivo</h4>
+                            <p className="text-slate-500 max-w-md">
+                                La funzionalità per compilare il rapporto giornaliero sarà disponibile a breve.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* ECONOMIES TAB */}
+                {activeTab === 'economies' && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                        <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                            <FileText className="w-6 h-6 text-slate-900" />
+                            Economie
+                        </h3>
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                                <FileText className="w-10 h-10 text-slate-400" />
+                            </div>
+                            <h4 className="text-lg font-bold text-slate-900 mb-2">Funzione in arrivo</h4>
+                            <p className="text-slate-500 max-w-md">
+                                La funzionalità per registrare le economie sarà disponibile a breve.
+                            </p>
+                        </div>
                     </div>
                 )}
             </div>
