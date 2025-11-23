@@ -29,7 +29,7 @@ export default function WorkerDashboard() {
         try {
             const [sitesData, attendanceData] = await Promise.all([
                 siteAPI.getAll(),
-                attendanceAPI.getCurrentStatus()
+                attendanceAPI.getActive()
             ]);
             setSites(sitesData.data);
             if (attendanceData.data && attendanceData.data.active) {
@@ -40,6 +40,33 @@ export default function WorkerDashboard() {
             console.error('Error loading data:', error);
         }
     };
+
+    // ... existing getLocation ...
+
+    // ... existing handlers ...
+
+    // Custom Select Component for better UI
+    const CustomSelect = ({ value, onChange, options, placeholder, disabled }) => (
+        <div className="relative">
+            <select
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium appearance-none focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                value={value}
+                onChange={onChange}
+                disabled={disabled}
+            >
+                <option value="">{placeholder}</option>
+                {options.length === 0 && <option disabled>Nessun cantiere trovato (Verifica con il titolare)</option>}
+                {options.map(opt => (
+                    <option key={opt._id} value={opt._id}>{opt.name}</option>
+                ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </div>
+    );
 
     const getLocation = () => {
         return new Promise((resolve, reject) => {
@@ -264,17 +291,12 @@ export default function WorkerDashboard() {
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     Seleziona Cantiere
                                 </label>
-                                <select
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                                <CustomSelect
                                     value={selectedSite}
                                     onChange={(e) => setSelectedSite(e.target.value)}
-                                >
-                                    <option value="">Scegli un cantiere...</option>
-                                    {sites.length === 0 && <option disabled>Nessun cantiere trovato (Verifica con il titolare)</option>}
-                                    {sites.map(site => (
-                                        <option key={site._id} value={site._id}>{site.name}</option>
-                                    ))}
-                                </select>
+                                    options={sites}
+                                    placeholder="Scegli un cantiere..."
+                                />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -329,15 +351,12 @@ export default function WorkerDashboard() {
                         <form onSubmit={handleMaterialSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
-                                <select
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                <CustomSelect
                                     value={selectedSite}
                                     onChange={(e) => setSelectedSite(e.target.value)}
-                                    required
-                                >
-                                    <option value="">Seleziona...</option>
-                                    {sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-                                </select>
+                                    options={sites}
+                                    placeholder="Seleziona..."
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Materiale</label>
@@ -392,15 +411,12 @@ export default function WorkerDashboard() {
                         <form onSubmit={handleNoteSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
-                                <select
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                <CustomSelect
                                     value={selectedSite}
                                     onChange={(e) => setSelectedSite(e.target.value)}
-                                    required
-                                >
-                                    <option value="">Seleziona...</option>
-                                    {sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-                                </select>
+                                    options={sites}
+                                    placeholder="Seleziona..."
+                                />
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Nota</label>
@@ -433,15 +449,12 @@ export default function WorkerDashboard() {
                         <form onSubmit={handlePhotoSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
-                                <select
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                <CustomSelect
                                     value={selectedSite}
                                     onChange={(e) => setSelectedSite(e.target.value)}
-                                    required
-                                >
-                                    <option value="">Seleziona...</option>
-                                    {sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-                                </select>
+                                    options={sites}
+                                    placeholder="Seleziona..."
+                                />
                             </div>
 
                             <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer relative">
