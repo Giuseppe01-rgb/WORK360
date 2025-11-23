@@ -32,9 +32,11 @@ export default function WorkerDashboard() {
                 attendanceAPI.getActive()
             ]);
             setSites(sitesData.data);
-            if (attendanceData.data && attendanceData.data.active) {
+            if (attendanceData.data && attendanceData.data._id) {
                 setActiveAttendance(attendanceData.data);
-                setSelectedSite(attendanceData.data.siteId);
+                // Handle populated site object
+                const siteId = attendanceData.data.site?._id || attendanceData.data.site;
+                setSelectedSite(siteId);
             }
         } catch (error) {
             console.error('Error loading data:', error);

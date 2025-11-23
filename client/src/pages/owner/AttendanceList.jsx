@@ -46,9 +46,9 @@ export default function AttendanceList() {
 
             // Filter by status
             if (filters.status === 'active') {
-                data = data.filter(att => !att.clockOut);
+                data = data.filter(att => !att.clockOut?.time);
             } else if (filters.status === 'completed') {
-                data = data.filter(att => att.clockOut);
+                data = data.filter(att => att.clockOut?.time);
             }
 
             setAttendances(data);
@@ -59,7 +59,7 @@ export default function AttendanceList() {
     };
 
     const calculateDuration = (clockIn, clockOut) => {
-        if (!clockOut) return 'In corso...';
+        if (!clockOut?.time) return 'In corso...';
 
         const start = new Date(clockIn.time);
         const end = new Date(clockOut.time);
@@ -72,7 +72,7 @@ export default function AttendanceList() {
 
     const getTotalHours = () => {
         return attendances
-            .filter(att => att.clockOut)
+            .filter(att => att.clockOut?.time)
             .reduce((total, att) => {
                 const start = new Date(att.clockIn.time);
                 const end = new Date(att.clockOut.time);
@@ -172,7 +172,7 @@ export default function AttendanceList() {
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div className="text-sm font-medium text-slate-500 mb-1">In Corso</div>
                     <div className="text-3xl font-bold text-blue-600">
-                        {attendances.filter(att => !att.clockOut).length}
+                        {attendances.filter(att => !att.clockOut?.time).length}
                     </div>
                 </div>
 

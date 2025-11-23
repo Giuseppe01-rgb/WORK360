@@ -55,7 +55,7 @@ export default function Layout({ children, title }) {
                 <div className="h-20 flex items-center px-8 border-b border-slate-100">
                     <div className="flex items-center gap-3">
                         <img
-                            src="/logo.png"
+                            src="/assets/app-logo.png?v=2"
                             alt="WORK360"
                             className="w-12 h-12 object-contain"
                         />
@@ -119,7 +119,7 @@ export default function Layout({ children, title }) {
                 <header className="md:hidden bg-white border-b border-slate-200 sticky top-0 z-40 px-4 h-16 flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
                         <img
-                            src="/logo.png"
+                            src="/assets/app-logo.png?v=2"
                             alt="WORK360"
                             className="w-8 h-8 object-contain"
                         />
