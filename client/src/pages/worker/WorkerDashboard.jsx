@@ -53,6 +53,13 @@ export default function WorkerDashboard() {
 
     // ... existing handlers ...
 
+    const tabs = [
+        { id: 'attendance', label: 'Timbratura', icon: Clock },
+        { id: 'materials', label: 'Materiali', icon: Package },
+        { id: 'notes', label: 'Note', icon: FileText },
+        { id: 'photos', label: 'Foto', icon: Camera },
+    ];
+
     return (
         <Layout title="WORK360 Operaio" subtitle={user?.username}>
             <div className="max-w-3xl mx-auto">
