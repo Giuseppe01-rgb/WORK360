@@ -13,7 +13,7 @@ export default function WorkerDashboard() {
     const [sites, setSites] = useState([]);
     const [selectedSite, setSelectedSite] = useState('');
     const [showGeoHelp, setShowGeoHelp] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true); // Start loading to prevent flicker
 
     // Form states
     const [materialForm, setMaterialForm] = useState({ name: '', quantity: '', unit: '' });
@@ -40,70 +40,14 @@ export default function WorkerDashboard() {
             }
         } catch (error) {
             console.error('Error loading data:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
+    // ... existing CustomSelect ...
+
     // ... existing getLocation ...
-
-    // ... existing handlers ...
-
-    // Custom Select Component for better UI
-    const CustomSelect = ({ value, onChange, options, placeholder, disabled }) => (
-        <div className="relative">
-            <select
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 font-medium appearance-none focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all disabled:bg-slate-50 disabled:text-slate-400"
-                value={value}
-                onChange={onChange}
-                disabled={disabled}
-            >
-                <option value="">{placeholder}</option>
-                {options.length === 0 && <option disabled>Nessun cantiere trovato (Verifica con il titolare)</option>}
-                {options.map(opt => (
-                    <option key={opt._id} value={opt._id}>{opt.name}</option>
-                ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
-        </div>
-    );
-
-    const getLocation = () => {
-        return new Promise((resolve, reject) => {
-            if (!navigator.geolocation) {
-                reject(new Error('Geolocalizzazione non supportata dal tuo browser'));
-            } else {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        resolve({
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
-                        });
-                    },
-                    (error) => {
-                        console.error('Geolocation error:', error);
-                        let message = 'Errore geolocalizzazione';
-                        if (error.code === error.PERMISSION_DENIED) {
-                            setShowGeoHelp(true);
-                            message = 'Permesso geolocalizzazione negato. Clicca su "Aiuto" per istruzioni.';
-                        } else if (error.code === error.POSITION_UNAVAILABLE) {
-                            message = 'Posizione non disponibile. Assicurati che il GPS sia attivo.';
-                        } else if (error.code === error.TIMEOUT) {
-                            message = 'Timeout: impossibile ottenere la posizione. Riprova.';
-                        }
-                        reject(new Error(message));
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            }
-        });
-    };
 
     const handleClockIn = async () => {
         if (!selectedSite) {
@@ -116,7 +60,7 @@ export default function WorkerDashboard() {
             const location = await getLocation();
             const response = await attendanceAPI.clockIn({
                 siteId: selectedSite,
-                location
+                ...location // Spread location to send latitude/longitude at top level
             });
             setActiveAttendance(response.data);
             showSuccess('Entrata registrata con successo');
