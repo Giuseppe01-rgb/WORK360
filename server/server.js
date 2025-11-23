@@ -15,7 +15,8 @@ connectDB();
 const allowedOrigins = [
     'http://localhost:5173',
     'https://work-360.vercel.app',
-    'https://work360-production.up.railway.app'
+    'https://work360-production.up.railway.app',
+    'https://work360-production-d4f3.up.railway.app'
 ];
 
 app.use(cors({
