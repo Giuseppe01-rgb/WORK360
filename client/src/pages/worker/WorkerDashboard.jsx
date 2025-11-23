@@ -13,8 +13,33 @@ export default function WorkerDashboard() {
     const [sites, setSites] = useState([]);
     const [selectedSite, setSelectedSite] = useState('');
     const [showGeoHelp, setShowGeoHelp] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    // ... existing loadData ...
+    // Form states
+    const [materialForm, setMaterialForm] = useState({ name: '', quantity: '', unit: '' });
+    const [noteText, setNoteText] = useState('');
+    const [photoFile, setPhotoFile] = useState(null);
+    const [photoCaption, setPhotoCaption] = useState('');
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        try {
+            const [sitesData, attendanceData] = await Promise.all([
+                siteAPI.getAll(),
+                attendanceAPI.getCurrentStatus()
+            ]);
+            setSites(sitesData.data);
+            if (attendanceData.data && attendanceData.data.active) {
+                setActiveAttendance(attendanceData.data);
+                setSelectedSite(attendanceData.data.siteId);
+            }
+        } catch (error) {
+            console.error('Error loading data:', error);
+        }
+    };
 
     const getLocation = () => {
         return new Promise((resolve, reject) => {
@@ -32,7 +57,7 @@ export default function WorkerDashboard() {
                         console.error('Geolocation error:', error);
                         let message = 'Errore geolocalizzazione';
                         if (error.code === error.PERMISSION_DENIED) {
-                            setShowGeoHelp(true); // Show help modal
+                            setShowGeoHelp(true);
                             message = 'Permesso geolocalizzazione negato. Clicca su "Aiuto" per istruzioni.';
                         } else if (error.code === error.POSITION_UNAVAILABLE) {
                             message = 'Posizione non disponibile. Assicurati che il GPS sia attivo.';
@@ -51,7 +76,100 @@ export default function WorkerDashboard() {
         });
     };
 
-    // ... existing handlers ...
+    const handleClockIn = async () => {
+        if (!selectedSite) {
+            showError('Seleziona un cantiere');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const location = await getLocation();
+            const response = await attendanceAPI.clockIn({
+                siteId: selectedSite,
+                location
+            });
+            setActiveAttendance(response.data);
+            showSuccess('Entrata registrata con successo');
+        } catch (error) {
+            showError(error.message || 'Errore durante la timbratura');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleClockOut = async () => {
+        setLoading(true);
+        try {
+            const location = await getLocation();
+            await attendanceAPI.clockOut({ location });
+            setActiveAttendance(null);
+            setSelectedSite('');
+            showSuccess('Uscita registrata con successo');
+        } catch (error) {
+            showError(error.message || 'Errore durante la timbratura');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleMaterialSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedSite) {
+            showError('Seleziona un cantiere');
+            return;
+        }
+        try {
+            await materialAPI.create({
+                siteId: selectedSite,
+                ...materialForm
+            });
+            showSuccess('Materiale registrato');
+            setMaterialForm({ name: '', quantity: '', unit: '' });
+        } catch (error) {
+            showError('Errore salvataggio materiale');
+        }
+    };
+
+    const handleNoteSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedSite) {
+            showError('Seleziona un cantiere');
+            return;
+        }
+        try {
+            await noteAPI.create({
+                siteId: selectedSite,
+                content: noteText
+            });
+            showSuccess('Nota salvata');
+            setNoteText('');
+        } catch (error) {
+            showError('Errore salvataggio nota');
+        }
+    };
+
+    const handlePhotoSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedSite || !photoFile) {
+            showError('Seleziona cantiere e foto');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('photo', photoFile);
+        formData.append('siteId', selectedSite);
+        formData.append('caption', photoCaption);
+
+        try {
+            await photoAPI.upload(formData);
+            showSuccess('Foto caricata');
+            setPhotoFile(null);
+            setPhotoCaption('');
+        } catch (error) {
+            showError('Errore caricamento foto');
+        }
+    };
 
     const tabs = [
         { id: 'attendance', label: 'Timbratura', icon: Clock },
