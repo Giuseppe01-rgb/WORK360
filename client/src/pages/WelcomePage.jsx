@@ -17,7 +17,7 @@ export default function WelcomePage() {
                 <div className="mb-8 flex justify-center">
                     <div className="relative">
                         <img
-                            src="/assets/app-logo.png?v=2"
+                            src="/assets/app-logo.png?v=3"
                             alt="WORK360 Logo"
                             className="w-32 h-32 object-contain drop-shadow-2xl"
                         />

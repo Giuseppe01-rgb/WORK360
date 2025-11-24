@@ -1,17 +1,19 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const User = require('./models/User');
-const Company = require('./models/Company');
-const Site = require('./models/Site');
-const Attendance = require('./models/Attendance');
-const Material = require('./models/Material');
-const Equipment = require('./models/Equipment');
-const Note = require('./models/Note');
-const Photo = require('./models/Photo');
-const Quote = require('./models/Quote');
-const SAL = require('./models/SAL');
-const Supplier = require('./models/Supplier');
+const User = require('../models/User');
+const Company = require('../models/Company');
+const ConstructionSite = require('../models/ConstructionSite');
+const Attendance = require('../models/Attendance');
+const Material = require('../models/Material');
+const Equipment = require('../models/Equipment');
+const Note = require('../models/Note');
+const Photo = require('../models/Photo');
+const Quote = require('../models/Quote');
+const SAL = require('../models/SAL');
+const Supplier = require('../models/Supplier');
+const Document = require('../models/Document');
 
 async function resetDatabase() {
     try {
@@ -38,7 +40,7 @@ async function resetDatabase() {
         const counts = {
             users: await User.countDocuments(),
             companies: await Company.countDocuments(),
-            sites: await Site.countDocuments(),
+            sites: await ConstructionSite.countDocuments(),
             attendances: await Attendance.countDocuments(),
             materials: await Material.countDocuments(),
             equipment: await Equipment.countDocuments(),
@@ -47,6 +49,7 @@ async function resetDatabase() {
             quotes: await Quote.countDocuments(),
             sals: await SAL.countDocuments(),
             suppliers: await Supplier.countDocuments(),
+            documents: await Document.countDocuments(),
         };
 
         console.log('📊 Documenti attuali:');
@@ -70,7 +73,7 @@ async function resetDatabase() {
         await Company.deleteMany({});
         console.log('✅ Companies eliminate');
 
-        await Site.deleteMany({});
+        await ConstructionSite.deleteMany({});
         console.log('✅ Sites eliminati');
 
         await Attendance.deleteMany({});
@@ -96,6 +99,9 @@ async function resetDatabase() {
 
         await Supplier.deleteMany({});
         console.log('✅ Suppliers eliminati');
+
+        await Document.deleteMany({});
+        console.log('✅ Documents eliminati');
 
         console.log('\n🎉 Database completamente svuotato!');
         console.log('💡 Ora puoi ripartire da zero con l\'onboarding.\n');
