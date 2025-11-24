@@ -128,7 +128,6 @@ export default function CompanySettings() {
         data.append('email', formData.email);
         data.append('pec', formData.pec);
         data.append('phone', formData.phone);
-        data.append('phone', formData.phone);
         data.append('reaNumber', formData.reaNumber);
         data.append('shareCapital', formData.shareCapital);
         data.append('taxCode', formData.taxCode);

@@ -28,25 +28,28 @@ const updateCompany = async (req, res) => {
 
         const { name, ownerName, piva, phone, email, pec, address, reaNumber, shareCapital, taxCode, bankName, iban } = req.body;
 
-        const updateData = {
-            name,
-            ownerName,
-            piva,
-            phone,
-            email,
-            pec,
-            reaNumber,
-            shareCapital,
-            taxCode,
-            bankName,
-            iban,
-            address: typeof address === 'string' ? JSON.parse(address) : address
-        };
+        // Build update data - only include fields that are actually provided
+        const updateData = {};
+
+        if (name !== undefined) updateData.name = name;
+        if (ownerName !== undefined) updateData.ownerName = ownerName;
+        if (piva !== undefined) updateData.piva = piva;
+        if (phone !== undefined) updateData.phone = phone;
+        if (email !== undefined) updateData.email = email;
+        if (pec !== undefined) updateData.pec = pec;
+        if (reaNumber !== undefined) updateData.reaNumber = reaNumber;
+        if (shareCapital !== undefined) updateData.shareCapital = shareCapital;
+        if (taxCode !== undefined) updateData.taxCode = taxCode;
+        if (bankName !== undefined) updateData.bankName = bankName;
+        if (iban !== undefined) updateData.iban = iban;
+
+        if (address) {
+            updateData.address = typeof address === 'string' ? JSON.parse(address) : address;
+        }
 
         if (req.file) {
             console.log('Processing logo upload, size:', req.file.size, 'bytes');
             try {
-                // Convert buffer to base64
                 const b64 = Buffer.from(req.file.buffer).toString('base64');
                 const mimeType = req.file.mimetype;
                 updateData.logo = `data:${mimeType};base64,${b64}`;
@@ -57,11 +60,11 @@ const updateCompany = async (req, res) => {
             }
         }
 
-        console.log('Updating company with data:', Object.keys(updateData));
+        console.log('Updating company with fields:', Object.keys(updateData));
 
         const company = await Company.findByIdAndUpdate(
             req.user.company._id,
-            updateData,
+            { $set: updateData },
             { new: true, runValidators: true }
         );
 
