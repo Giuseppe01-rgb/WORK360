@@ -23,6 +23,7 @@ import {
     Camera,
     FileCheck
 } from 'lucide-react';
+import Tutorial from './Tutorial';
 
 export default function Layout({ children, title }) {
     const { user, logout } = useAuth();
@@ -105,7 +106,7 @@ export default function Layout({ children, title }) {
                                 <div key={link.path}>
                                     <button
                                         onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
-                                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group ${isActive
+                                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
                                             ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 translate-x-1'
                                             : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                                             }`}
@@ -147,7 +148,7 @@ export default function Layout({ children, title }) {
                             <Link
                                 key={link.path}
                                 to={link.path}
-                                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group ${isActive
+                                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
                                     ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 translate-x-1'
                                     : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                                     }`}
@@ -187,6 +188,7 @@ export default function Layout({ children, title }) {
 
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col md:pl-72 min-h-screen transition-all duration-300">
+                <Tutorial />
                 {/* Mobile Header */}
                 <header className="md:hidden bg-white border-b border-slate-200 sticky top-0 z-40 px-4 h-16 flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
