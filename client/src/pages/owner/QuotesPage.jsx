@@ -379,7 +379,7 @@ ${user?.company?.name || 'La tua azienda'}`;
                                             <input type="email" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.email} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, email: e.target.value } })} />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Telefono (WhatsApp)</label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Telefono</label>
                                             <input type="tel" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.phone} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, phone: e.target.value } })} />
                                         </div>
                                     </div>
@@ -434,6 +434,44 @@ ${user?.company?.name || 'La tua azienda'}`;
                                     </div>
                                 </section>
 
+                                {/* VAT Rate Selection */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Aliquota IVA</h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {[
+                                            { value: 22, label: '22% - Ordinaria', desc: 'Nuove costruzioni' },
+                                            { value: 10, label: '10% - Ridotta', desc: 'Manutenzione' },
+                                            { value: 4, label: '4% - Super ridotta', desc: 'Prima casa' },
+                                            { value: 0, label: 'Esente IVA', desc: 'Fuori campo IVA' }
+                                        ].map((rate) => (
+                                            <button
+                                                key={rate.value}
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, vatRate: rate.value })}
+                                                className={`p-4 rounded-xl border-2 transition-all text-left ${formData.vatRate === rate.value
+                                                        ? 'border-blue-600 bg-blue-50 shadow-sm'
+                                                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                                    }`}
+                                            >
+                                                <div className={`font-bold text-sm mb-1 ${formData.vatRate === rate.value ? 'text-blue-700' : 'text-slate-900'
+                                                    }`}>
+                                                    {rate.label}
+                                                </div>
+                                                <div className="text-xs text-slate-500">{rate.desc}</div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {/* Total */}
+                                <section>
+                                    <div className="flex justify-end">
+                                        <div className="bg-slate-900 text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-lg">
+                                            <span className="text-slate-300 font-medium">Totale Documento</span>
+                                            <span className="text-2xl font-bold">€{calculateTotal().toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </section>
                                 <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                                     <button type="button" onClick={resetForm} className="notranslate px-6 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg transition-colors">
                                         <span>Chiudi</span>

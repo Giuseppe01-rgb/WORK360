@@ -52,8 +52,14 @@ const generatePDFBuffer = (quote, company, user) => {
         doc.text(`€ ${quote.subtotal.toFixed(2)}`, 420, y, { width: 90, align: 'right' });
         y += 15;
 
-        doc.text(`IVA (${quote.vatRate}%):`, 350, y, { width: 70, align: 'right' });
-        doc.text(`€ ${quote.vatAmount.toFixed(2)}`, 420, y, { width: 90, align: 'right' });
+        // Show VAT line
+        if (quote.vatRate === 0) {
+            doc.text('Esente IVA:', 350, y, { width: 70, align: 'right' });
+            doc.text('€ 0.00', 420, y, { width: 90, align: 'right' });
+        } else {
+            doc.text(`IVA (${quote.vatRate}%):`, 350, y, { width: 70, align: 'right' });
+            doc.text(`€ ${quote.vatAmount.toFixed(2)}`, 420, y, { width: 90, align: 'right' });
+        }
         y += 20;
 
         doc.font('Helvetica-Bold').fontSize(14);
