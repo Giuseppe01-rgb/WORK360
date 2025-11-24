@@ -45,103 +45,106 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
-            <div className="w-full max-w-md">
-                {/* Logo */}
-                <div className="text-center mb-8">
-                    <img
-                        src="/assets/app-logo.png?v=3"
-                        alt="WORK360"
-                        className="w-20 h-20 mx-auto mb-4 object-contain"
-                    />
-                    <h1 className="text-3xl font-black text-white mb-2">Accedi a WORK360</h1>
-                    <p className="text-slate-400">Inserisci le credenziali fornite dal titolare</p>
-                </div>
+        <div className="min-h-screen flex items-center justify-center bg-accent p-4 font-sans">
+            <div className="bg-white rounded-3xl p-8 md:p-12 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-300">
 
-                {/* Login Card */}
-                <div className="bg-white rounded-2xl shadow-2xl p-8">
-                    {error && (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                            <p className="text-sm text-red-800 font-medium">{error}</p>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Username */}
-                        <div>
-                            <label className="block text-sm font-bold text-slate-900 mb-2">
-                                <UserIcon className="w-4 h-4 inline mr-2" />
-                                Username
-                            </label>
-                            <input
-                                type="text"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
-                                placeholder="mario.colora"
-                                required
-                                autoComplete="username"
-                            />
-                        </div>
-
-                        {/* Password */}
-                        <div>
-                            <label className="block text-sm font-bold text-slate-900 mb-2">
-                                <Lock className="w-4 h-4 inline mr-2" />
-                                Password
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all pr-12"
-                                    placeholder="••••••••••"
-                                    required
-                                    autoComplete="current-password"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="w-5 h-5" />
-                                    ) : (
-                                        <Eye className="w-5 h-5" />
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full px-6 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mt-6"
-                        >
-                            {loading ? 'Accesso in corso...' : 'Accedi'}
-                        </button>
-                    </form>
-
-                    {/* Back to Welcome */}
-                    <div className="mt-6 text-center">
-                        <button
-                            onClick={() => navigate('/')}
-                            className="text-sm text-slate-600 hover:text-slate-900 font-medium transition-colors"
-                        >
-                            ← Torna alla home
-                        </button>
+                {/* Circular Logo */}
+                <div className="mb-8 relative w-24 h-24 mx-auto flex items-center justify-center">
+                    <div className="absolute inset-0 border-[6px] border-accent rounded-full border-t-transparent -rotate-45"></div>
+                    <div className="flex flex-col items-center justify-center leading-none z-10">
+                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest mb-0.5">WORK</span>
+                        <span className="text-2xl font-black text-accent tracking-tighter">360</span>
                     </div>
                 </div>
 
-                {/* Help Text */}
-                <p className="text-center text-slate-400 text-sm mt-6">
-                    Non hai le credenziali? Chiedi al titolare della tua azienda.
-                </p>
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-black text-accent mb-2">Accedi</h1>
+                    <p className="text-text-light-blue font-medium">
+                        Accedi con le credenziali fornite dal tuo datore
+                    </p>
+                </div>
+
+                {/* Error Alert */}
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-red-800 font-medium">{error}</p>
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Username */}
+                    <div>
+                        <label className="block text-sm font-bold text-accent mb-2">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3.5 bg-input-bg border-transparent rounded-xl text-accent font-medium placeholder-input-placeholder focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                            placeholder="nome.nomeazienda"
+                            required
+                            autoComplete="username"
+                        />
+                    </div>
+
+                    {/* Password */}
+                    <div>
+                        <label className="block text-sm font-bold text-accent mb-2">
+                            Password
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3.5 bg-input-bg border-transparent rounded-xl text-accent font-medium placeholder-input-placeholder focus:outline-none focus:ring-2 focus:ring-accent transition-all pr-12"
+                                placeholder="Password"
+                                required
+                                autoComplete="current-password"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-input-placeholder hover:text-accent transition-colors"
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="w-5 h-5" />
+                                ) : (
+                                    <Eye className="w-5 h-5" />
+                                )}
+                            </button>
+                        </div>
+                        <div className="mt-2 text-right">
+                            <button type="button" className="text-xs font-bold text-progress-blue hover:underline">
+                                Hai dimenticato la password? Clicca qui.
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="space-y-3 pt-2">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full px-6 py-4 bg-accent text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Accesso in corso...' : 'Accedi'}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate('/')}
+                            className="w-full px-6 py-4 bg-white text-accent font-bold rounded-xl hover:bg-slate-50 transition-all border-2 border-accent"
+                        >
+                            Annulla
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

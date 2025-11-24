@@ -80,16 +80,12 @@ export default function Layout({ children, title }) {
             <aside className="hidden md:flex flex-col w-72 bg-white border-r border-slate-200 fixed h-full z-30 transition-all duration-300 shadow-sm">
                 {/* Brand */}
                 <div className="h-20 flex items-center px-8 border-b border-slate-100">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-full">
                         <img
                             src="/assets/app-logo.png?v=2"
                             alt="WORK360"
                             className="w-12 h-12 object-contain"
                         />
-                        <div className="flex flex-col leading-none">
-                            <span className="text-xl font-black tracking-tight text-slate-900">WORK360</span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Enterprise</span>
-                        </div>
                     </div>
                 </div>
 
@@ -316,7 +312,7 @@ export default function Layout({ children, title }) {
                 )}
 
                 {/* Main Content Area */}
-                <main className="flex-1 p-4 sm:p-8 lg:p-10 overflow-x-hidden bg-slate-50">
+                <main className="flex-1 p-4 sm:p-8 lg:p-10 overflow-x-hidden bg-site-bg">
                     {/* Top Bar (Desktop only - Contextual) */}
                     <div className="hidden md:flex items-center justify-between mb-10">
                         <div>
