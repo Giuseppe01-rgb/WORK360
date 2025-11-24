@@ -242,42 +242,188 @@ const generateQuotePDF = async (quote, company, user, res) => {
 };
 
 const generateSALPDF = (sal, company, site, res) => {
-    const doc = new PDFDocument({ margin: 50 });
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=sal-${sal.number}.pdf`);
 
     doc.pipe(res);
 
-    // Header
-    doc.fontSize(20).text(company.name, 50, 50);
-    doc.fontSize(10).text('STATO AVANZAMENTO LAVORI', 50, 80);
+    // --- HEADER (Carta Intestata) ---
+    let headerY = 45;
 
-    // Details
-    doc.fontSize(12).text(`Cantiere: ${site.name}`, 50, 150)
-        .text(`Indirizzo: ${site.address}`, 50, 165)
-        .text(`SAL N.: ${sal.number}`, 50, 190)
-        .text(`Data: ${new Date(sal.date).toLocaleDateString('it-IT')}`, 50, 205);
-
-    // Body
-    doc.moveDown(2);
-    doc.fontSize(14).text('Descrizione Lavori Eseguiti', 50, doc.y);
-    doc.fontSize(12).text(sal.description, 50, doc.y + 10);
-
-    doc.moveDown(2);
-    doc.text(`Percentuale Completamento: ${sal.completionPercentage}%`);
-    doc.font('Helvetica-Bold').text(`Importo Maturato: € ${sal.amount.toFixed(2)}`);
-
-    // Signature
-    if (sal.signature && fs.existsSync(sal.signature)) {
+    // Logo (Left)
+    if (company.logo) {
         try {
-            doc.moveDown(4);
-            doc.text('Firma:', 50, doc.y);
-            doc.image(sal.signature, 50, doc.y + 20, { width: 150 });
+            if (company.logo.startsWith('data:image')) {
+                const base64Data = company.logo.split(';base64,').pop();
+                const buffer = Buffer.from(base64Data, 'base64');
+                doc.image(buffer, 50, headerY, { width: 80 });
+            } else {
+                let logoPath = company.logo;
+                if (logoPath.startsWith('/')) logoPath = logoPath.substring(1);
+                const absolutePath = path.join(__dirname, '..', logoPath);
+                if (fs.existsSync(absolutePath)) {
+                    doc.image(absolutePath, 50, headerY, { width: 80 });
+                }
+            }
         } catch (e) {
-            console.error('Error loading signature:', e);
+            console.error('Error loading logo:', e);
         }
     }
+
+    // Company Details (Right)
+    doc.font('Helvetica-Bold').fontSize(16).text(company.name, 200, headerY, { align: 'right' });
+    doc.font('Helvetica').fontSize(9).fillColor('#444444');
+
+    let detailsY = headerY + 25;
+    const addDetail = (text) => {
+        if (text) {
+            doc.text(text, 200, detailsY, { align: 'right' });
+            detailsY += 12;
+        }
+    };
+
+    addDetail(company.address?.street);
+    addDetail(`${company.address?.cap || ''} ${company.address?.city || ''} (${company.address?.province || ''})`);
+    addDetail(`P.IVA: ${company.piva || '-'}`);
+    if (company.pec) addDetail(`PEC: ${company.pec}`);
+    if (company.phone) addDetail(`Tel: ${company.phone}`);
+
+    // Separator
+    doc.moveDown(2);
+    doc.strokeColor('#E2E8F0').lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+    doc.moveDown(2);
+
+    // --- DOCUMENT TITLE ---
+    doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text('STATO AVANZAMENTO LAVORI', 50, doc.y, { align: 'center' });
+    doc.moveDown(1.5);
+
+    // --- DOCUMENT INFO ---
+    const startY = doc.y;
+
+    // Left Column: Client Info
+    doc.font('Helvetica-Bold').fontSize(11).text('Committente:', 50, startY);
+    doc.font('Helvetica').fontSize(10);
+    doc.text(sal.client.name, 50, startY + 15);
+    if (sal.client.address) doc.text(sal.client.address, 50, startY + 30);
+    if (sal.client.vatNumber) doc.text(`P.IVA/C.F.: ${sal.client.vatNumber}`, 50, startY + 45);
+
+    // Right Column: SAL Info
+    doc.font('Helvetica-Bold').fontSize(10);
+    doc.text(`SAL N.: ${sal.number}`, 350, startY, { align: 'right' });
+    doc.font('Helvetica').fontSize(10);
+    doc.text(`Data Emissione: ${new Date(sal.date).toLocaleDateString('it-IT')}`, 350, startY + 15, { align: 'right' });
+    doc.text(`Periodo: ${new Date(sal.periodStart).toLocaleDateString('it-IT')} - ${new Date(sal.periodEnd).toLocaleDateString('it-IT')}`, 350, startY + 30, { align: 'right' });
+    doc.text(`Completamento: ${sal.completionPercentage}%`, 350, startY + 45, { align: 'right' });
+
+    doc.moveDown(4);
+
+    // --- CANTIERE SECTION ---
+    doc.font('Helvetica-Bold').fontSize(12).fillColor('#1E293B').text('Cantiere', 50, doc.y);
+    doc.moveDown(0.5);
+    doc.font('Helvetica').fontSize(10).fillColor('#334155');
+    doc.text(`Nome: ${site.name}`, 50, doc.y);
+    doc.text(`Indirizzo: ${site.address || 'N/D'}`, 50, doc.y + 15);
+    if (sal.cig) doc.text(`CIG: ${sal.cig}`, 50, doc.y + 30);
+    if (sal.cup) doc.text(`CUP: ${sal.cup}`, 50, doc.y + 45);
+
+    doc.moveDown(3);
+
+    // --- DESCRIZIONE LAVORI ---
+    doc.font('Helvetica-Bold').fontSize(12).fillColor('#1E293B').text('Descrizione Lavori Eseguiti', 50, doc.y);
+    doc.moveDown(0.5);
+    doc.font('Helvetica').fontSize(10).fillColor('#334155');
+    doc.text(sal.workDescription, 50, doc.y, { width: 495, align: 'justify' });
+
+    doc.moveDown(2);
+
+    // --- FINANCIAL BREAKDOWN ---
+    const financeY = doc.y;
+
+    doc.strokeColor('#CBD5E1').lineWidth(1).moveTo(50, financeY).lineTo(545, financeY).stroke();
+
+    const rowHeight = 20;
+    let currentY = financeY + 10;
+
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1E293B');
+
+    const addFinanceLine = (label, value, bold = false) => {
+        if (bold) {
+            doc.font('Helvetica-Bold').fontSize(11);
+        } else {
+            doc.font('Helvetica').fontSize(10);
+        }
+        doc.fillColor('#334155').text(label, 50, currentY);
+        doc.fillColor('#334155').text(`€ ${value.toFixed(2)}`, 400, currentY, { align: 'right', width: 145 });
+        currentY += rowHeight;
+    };
+
+    addFinanceLine('Valore Contratto', sal.contractValue);
+    addFinanceLine('Importo Lavori SAL Precedenti', sal.previousAmount);
+    doc.strokeColor('#E2E8F0').lineWidth(0.5).moveTo(50, currentY - 5).lineTo(545, currentY - 5).stroke();
+    addFinanceLine('Importo Lavori Questo SAL', sal.currentAmount, true);
+    addFinanceLine('Ritenuta di Garanzia (10%)', sal.retentionAmount);
+    if (sal.penalties > 0) {
+        addFinanceLine('Penali', sal.penalties);
+    }
+    doc.strokeColor('#E2E8F0').lineWidth(0.5).moveTo(50, currentY - 5).lineTo(545, currentY - 5).stroke();
+    addFinanceLine('Imponibile', sal.netAmount, true);
+    addFinanceLine(`IVA (${sal.vatRate}%)`, sal.vatAmount);
+
+    // Grand Total
+    doc.rect(50, currentY - 5, 495, 30).fill('#F1F5F9');
+    doc.fillColor('#0F172A').font('Helvetica-Bold').fontSize(14);
+    doc.text('TOTALE DOVUTO', 60, currentY + 3);
+    doc.text(`€ ${sal.totalAmount.toFixed(2)}`, 400, currentY + 3, { align: 'right', width: 135 });
+
+    currentY += 40;
+
+    // --- WORK SUPERVISOR (if present) ---
+    if (sal.workSupervisor && sal.workSupervisor.name) {
+        doc.moveDown(2);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor('#1E293B').text('Direttore Lavori', 50, doc.y);
+        doc.font('Helvetica').fontSize(10).fillColor('#334155');
+        doc.text(sal.workSupervisor.name, 50, doc.y + 15);
+        if (sal.workSupervisor.qualification) {
+            doc.text(sal.workSupervisor.qualification, 50, doc.y + 28);
+        }
+    }
+
+    // --- NOTES (if present) ---
+    if (sal.notes) {
+        doc.moveDown(2);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor('#1E293B').text('Note', 50, doc.y);
+        doc.font('Helvetica').fontSize(9).fillColor('#334155');
+        doc.text(sal.notes, 50, doc.y + 15, { width: 495 });
+    }
+
+    // --- FOOTER & SIGNATURES ---
+    const footerY = 700;
+    if (doc.y > footerY - 100) doc.addPage();
+
+    // Privacy
+    doc.fontSize(7).fillColor('#64748B');
+    doc.text('I dati personali sono trattati secondo il Regolamento UE 2016/679 (GDPR) esclusivamente per l\'esecuzione del contratto.', 50, footerY - 80, { width: 500, align: 'center' });
+
+    // Signatures
+    const sigY = footerY - 50;
+    doc.fillColor('#000000').fontSize(9).font('Helvetica-Bold');
+
+    // Left: Contractor Signature
+    doc.text('L\'Appaltatore', 50, sigY);
+    doc.text('_______________________', 50, sigY + 40);
+
+    // Center: Work Supervisor
+    if (sal.workSupervisor && sal.workSupervisor.name) {
+        doc.text('Il Direttore Lavori', 230, sigY);
+        doc.text('_______________________', 230, sigY + 40);
+    }
+
+    // Right: Client Approval
+    doc.text('Il Committente', 410, sigY);
+    doc.fontSize(7).font('Helvetica').text('(per accettazione)', 410, sigY + 12);
+    doc.text('_______________________', 410, sigY + 40);
 
     doc.end();
 };

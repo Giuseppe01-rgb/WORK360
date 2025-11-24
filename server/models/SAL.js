@@ -130,5 +130,3 @@ salSchema.pre('save', function (next) {
 });
 
 module.exports = mongoose.model('SAL', salSchema);
-
-module.exports = mongoose.model('SAL', salSchema);
