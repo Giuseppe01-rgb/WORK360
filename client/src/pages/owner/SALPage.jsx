@@ -13,10 +13,42 @@ export default function SALPage() {
         site: '',
         number: '',
         date: new Date().toISOString().split('T')[0],
-        description: '',
+
+        // Period of Work
+        periodStart: new Date().toISOString().split('T')[0],
+        periodEnd: new Date().toISOString().split('T')[0],
+
+        // Client Information
+        client: {
+            name: '',
+            fiscalCode: '',
+            address: '',
+            vatNumber: ''
+        },
+
+        // Work Description
+        workDescription: '',
+
+        // Financial Details
+        contractValue: 0,
+        previousAmount: 0,
+        currentAmount: 0,
         completionPercentage: 0,
-        amount: 0,
-        notes: ''
+        penalties: 0,
+        vatRate: 22,
+
+        // Optional Fields
+        workSupervisor: {
+            name: '',
+            qualification: ''
+        },
+        cig: '',
+        cup: '',
+        notes: '',
+
+        // Legacy (for backwards compatibility)
+        description: '',
+        amount: 0
     });
 
     useEffect(() => {
@@ -191,88 +223,324 @@ export default function SALPage() {
                             <p className="text-slate-500 mb-8">Compila i dati per generare lo Stato Avanzamento Lavori</p>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Cantiere</label>
-                                        <select
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                            value={formData.site}
-                                            onChange={(e) => setFormData({ ...formData, site: e.target.value })}
-                                            required
-                                        >
-                                            <option value="">Seleziona un cantiere...</option>
-                                            {sites.map(site => (
-                                                <option key={site._id} value={site._id}>{site.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                {/* Identification Section */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dati Generali</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Cantiere *</label>
+                                            <select
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.site}
+                                                onChange={(e) => setFormData({ ...formData, site: e.target.value })}
+                                                required
+                                            >
+                                                <option value="">Seleziona un cantiere...</option>
+                                                {sites.map(site => (
+                                                    <option key={site._id} value={site._id}>{site.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Numero SAL</label>
-                                        <input
-                                            type="text"
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                            value={formData.number}
-                                            onChange={(e) => setFormData({ ...formData, number: e.target.value })}
-                                            placeholder="Es: SAL-001"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Data</label>
-                                        <input
-                                            type="date"
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                            value={formData.date}
-                                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Descrizione Lavori</label>
-                                    <textarea
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[100px]"
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="Descrivi i lavori eseguiti..."
-                                        required
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Percentuale Completamento (%)</label>
-                                        <div className="relative">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Numero SAL *</label>
                                             <input
-                                                type="number"
-                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 pr-10"
-                                                value={formData.completionPercentage}
-                                                onChange={(e) => setFormData({ ...formData, completionPercentage: parseFloat(e.target.value) })}
-                                                min="0"
-                                                max="100"
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.number}
+                                                onChange={(e) => setFormData({ ...formData, number: e.target.value })}
+                                                placeholder="Es: SAL-001"
                                                 required
                                             />
-                                            <Percent className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione *</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.date}
+                                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio *</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.periodStart}
+                                                onChange={(e) => setFormData({ ...formData, periodStart: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine *</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.periodEnd}
+                                                onChange={(e) => setFormData({ ...formData, periodEnd: e.target.value })}
+                                                required
+                                            />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Importo Maturato (€)</label>
-                                        <div className="relative">
+                                </section>
+
+                                {/* Client Section */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Committente</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Nome/Ragione Sociale *</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.client.name}
+                                                onChange={(e) => setFormData({ ...formData, client: { ...formData.client, name: e.target.value } })}
+                                                placeholder="Nome committente"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">P.IVA / Codice Fiscale</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.client.vatNumber}
+                                                onChange={(e) => setFormData({ ...formData, client: { ...formData.client, vatNumber: e.target.value } })}
+                                                placeholder="12345678901"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Codice Fiscale (se diverso)</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.client.fiscalCode}
+                                                onChange={(e) => setFormData({ ...formData, client: { ...formData.client, fiscalCode: e.target.value } })}
+                                                placeholder="RSSMRA80A01H501Z"
+                                            />
+                                        </div>
+
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.client.address}
+                                                onChange={(e) => setFormData({ ...formData, client: { ...formData.client, address: e.target.value } })}
+                                                placeholder="Via Roma, 1 - 00100 Roma (RM)"
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Work Description */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Descrizione Lavori</h3>
+                                    <textarea
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[120px]"
+                                        value={formData.workDescription}
+                                        onChange={(e) => setFormData({ ...formData, workDescription: e.target.value })}
+                                        placeholder="Descrivi dettagliatamente i lavori eseguiti nel periodo indicato..."
+                                        required
+                                    />
+                                </section>
+
+                                {/* Financial Details */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dettagli Economici</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Valore Contratto (€) *</label>
                                             <input
                                                 type="number"
                                                 step="0.01"
-                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 pr-10"
-                                                value={formData.amount}
-                                                onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.contractValue}
+                                                onChange={(e) => setFormData({ ...formData, contractValue: parseFloat(e.target.value) || 0 })}
                                                 required
                                             />
-                                            <Euro className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Importo SAL Precedenti (€)</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.previousAmount}
+                                                onChange={(e) => setFormData({ ...formData, previousAmount: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Importo Questo SAL (€) *</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.currentAmount}
+                                                onChange={(e) => setFormData({ ...formData, currentAmount: parseFloat(e.target.value) || 0 })}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Completamento (%) *</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 pr-10"
+                                                    value={formData.completionPercentage}
+                                                    onChange={(e) => setFormData({ ...formData, completionPercentage: parseFloat(e.target.value) || 0 })}
+                                                    min="0"
+                                                    max="100"
+                                                    required
+                                                />
+                                                <Percent className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Penali (€)</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.penalties}
+                                                onChange={(e) => setFormData({ ...formData, penalties: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Aliquota IVA (%) *</label>
+                                            <select
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.vatRate}
+                                                onChange={(e) => setFormData({ ...formData, vatRate: parseFloat(e.target.value) })}
+                                                required
+                                            >
+                                                <option value="22">22% - Ordinaria</option>
+                                                <option value="10">10% - Ridotta</option>
+                                                <option value="4">4% - Super ridotta</option>
+                                                <option value="0">0% - Esente</option>
+                                            </select>
                                         </div>
                                     </div>
-                                </div>
+
+                                    {/* Financial Preview */}
+                                    {formData.currentAmount > 0 && (
+                                        <div className="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-4">
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-600">Importo Lavori:</span>
+                                                    <span className="font-semibold">€ {formData.currentAmount.toFixed(2)}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-600">Ritenuta Garanzia (10%):</span>
+                                                    <span className="font-semibold text-red-600">- € {(formData.currentAmount * 0.10).toFixed(2)}</span>
+                                                </div>
+                                                {formData.penalties > 0 && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-600">Penali:</span>
+                                                        <span className="font-semibold text-red-600">- € {formData.penalties.toFixed(2)}</span>
+                                                    </div>
+                                                )}
+                                                <div className="pt-2 border-t border-slate-200">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-600">Imponibile:</span>
+                                                        <span className="font-semibold">€ {(formData.currentAmount - formData.currentAmount * 0.10 - formData.penalties).toFixed(2)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-600">IVA ({formData.vatRate}%):</span>
+                                                        <span className="font-semibold">€ {((formData.currentAmount - formData.currentAmount * 0.10 - formData.penalties) * formData.vatRate / 100).toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="pt-2 border-t-2 border-slate-300">
+                                                    <div className="flex justify-between">
+                                                        <span className="font-bold text-slate-900">TOTALE DOVUTO:</span>
+                                                        <span className="text-lg font-bold text-slate-900">
+                                                            € {((formData.currentAmount - formData.currentAmount * 0.10 - formData.penalties) * (1 + formData.vatRate / 100)).toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </section>
+
+                                {/* Optional: Work Supervisor */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Direttore Lavori (Opzionale)</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Nome e Cognome</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.workSupervisor.name}
+                                                onChange={(e) => setFormData({ ...formData, workSupervisor: { ...formData.workSupervisor, name: e.target.value } })}
+                                                placeholder="Mario Rossi"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Qualifica</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.workSupervisor.qualification}
+                                                onChange={(e) => setFormData({ ...formData, workSupervisor: { ...formData.workSupervisor, qualification: e.target.value } })}
+                                                placeholder="Ingegnere, Architetto, Geometra..."
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Optional: Public Contract Codes */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Codici Appalto Pubblico (Opzionale)</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">CIG (Codice Identificativo Gara)</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.cig}
+                                                onChange={(e) => setFormData({ ...formData, cig: e.target.value })}
+                                                placeholder="1234567890"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">CUP (Codice Unico Progetto)</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={formData.cup}
+                                                onChange={(e) => setFormData({ ...formData, cup: e.target.value })}
+                                                placeholder="A12B34C56D78E90F123"
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Notes */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Note Aggiuntive</h3>
+                                    <textarea
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[80px]"
+                                        value={formData.notes}
+                                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                        placeholder="Note aggiuntive (eventuali varianti, annotazioni tecniche, etc.)"
+                                    />
+                                </section>
 
                                 <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                                     <button
