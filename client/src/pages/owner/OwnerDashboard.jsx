@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { siteAPI, analyticsAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
-    Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search
+    Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack }) => {

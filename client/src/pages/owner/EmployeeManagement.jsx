@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { userAPI } from '../../utils/api';
 import {
     Users, Plus, Edit, Trash2, X, CheckCircle, AlertCircle,
-    Mail, Phone, Calendar, User, Building2, Copy, Check
+    Mail, Phone, Calendar, User, Building2, Copy, Check, ChevronRight
 } from 'lucide-react';
 
 export default function EmployeeManagement() {
