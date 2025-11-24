@@ -191,7 +191,7 @@ const updateEmailConfig = async (req, res) => {
         const { encrypt } = require('../utils/encryption');
         const encryptedPassword = encrypt(password);
 
-        const company = await Company.findById(req.user.company); // Changed req.user.company._id to req.user.company
+        const company = await Company.findById(req.user.company._id || req.user.company);
         if (!company) {
             return res.status(404).json({ message: 'Azienda non trovata' });
         }
@@ -229,7 +229,7 @@ const updateEmailConfig = async (req, res) => {
 // Test email configuration
 const testEmailConfig = async (req, res) => {
     try {
-        const company = await Company.findById(req.user.company); // Changed req.user.company._id to req.user.company
+        const company = await Company.findById(req.user.company._id || req.user.company);
         if (!company || !company.emailConfig || !company.emailConfig.configured) {
             return res.status(400).json({
                 error: 'Email non configurata',
