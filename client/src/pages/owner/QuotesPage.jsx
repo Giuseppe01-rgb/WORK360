@@ -154,37 +154,35 @@ export default function QuotesPage() {
 
         setSending(true);
         try {
-            // Download PDF first
-            await downloadPDF(editingId);
+            // Call backend API to send email with PDF attachment
+            const subject = `Preventivo N. ${formData.number} - ${user?.company?.name || 'WORK360'}`;
+            const message = `Gentile ${formData.client.name},
 
-            // Prepare email data
-            const subject = `Preventivo ${formData.number || 'WORK360'}`;
-            const body = `Buongiorno ${formData.client.name},
+In allegato trova il preventivo richiesto (N. ${formData.number}).
 
-In allegato il preventivo richiesto.
+Dettagli preventivo:
+• Data: ${new Date(formData.date).toLocaleDateString('it-IT')}
+• Totale: €${calculateTotal().toFixed(2)}
 
-Dettagli:
-- Numero preventivo: ${formData.number}
-- Data: ${new Date(formData.date).toLocaleDateString('it-IT')}
-- Totale: €${calculateTotal().toFixed(2)}
+Rimaniamo a disposizione per qualsiasi chiarimento o modifica.
 
 Cordiali saluti,
-${user?.company?.name || 'La tua azienda'}`;
+${user?.company?.name || 'Il team WORK360'}`;
 
-            // Create Gmail compose URL
-            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(formData.client.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            await communicationAPI.sendEmailQuote(editingId, {
+                email: formData.client.email,
+                subject,
+                message
+            });
 
-            // Open Gmail in new tab
-            window.open(gmailUrl, '_blank');
-
-            showSuccess('✅ PDF scaricato! Gmail aperto - Allega manualmente il PDF dalla cartella Download.');
+            showSuccess('✅ Email inviata con successo con PDF allegato!');
             setTimeout(() => {
                 setShowSendModal(false);
                 resetForm();
             }, 2000);
         } catch (error) {
-            console.error('Error preparing email:', error);
-            showError('❌ Errore nella preparazione dell\'email');
+            console.error('Error sending email:', error);
+            showError(error.response?.data?.message || '❌ Errore nell\'invio dell\'email');
         } finally {
             setSending(false);
         }
@@ -449,8 +447,8 @@ ${user?.company?.name || 'La tua azienda'}`;
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, vatRate: rate.value })}
                                                 className={`p-4 rounded-xl border-2 transition-all text-left ${formData.vatRate === rate.value
-                                                        ? 'border-blue-600 bg-blue-50 shadow-sm'
-                                                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                                    ? 'border-blue-600 bg-blue-50 shadow-sm'
+                                                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                                                     }`}
                                             >
                                                 <div className={`font-bold text-sm mb-1 ${formData.vatRate === rate.value ? 'text-blue-700' : 'text-slate-900'
