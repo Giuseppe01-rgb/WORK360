@@ -39,6 +39,7 @@ export default function Layout({ children, title }) {
     // Owner menu with collapsible submenu
     const ownerLinks = [
         { path: '/owner', label: 'Cantieri', icon: Building2 },
+        { path: '/owner/employees', label: 'Lista Operai', icon: Users },
         {
             path: '/owner/worker-functions',
             label: 'Funzioni Operaio',

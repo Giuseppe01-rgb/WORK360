@@ -1,9 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { uploadSignature } = require('../controllers/userController');
+const {
+    uploadSignature,
+    getAllUsers,
+    createUser,
+    updateUser,
+    deleteUser
+} = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
-// Accept both base64 (body) and file upload
+// User management (owner only)
+router.get('/', protect, getAllUsers);
+router.post('/', protect, createUser);
+router.put('/:id', protect, updateUser);
+router.delete('/:id', protect, deleteUser);
+
+// Signature
 router.post('/signature', protect, uploadSignature);
 
 module.exports = router;

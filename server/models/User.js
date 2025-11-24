@@ -31,6 +31,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    email: {
+        type: String,
+        trim: true,
+        lowercase: true
+    },
+    phone: {
+        type: String,
+        trim: true
+    },
+    birthDate: {
+        type: Date
+    },
     signature: {
         type: String, // Path to signature image
         default: null

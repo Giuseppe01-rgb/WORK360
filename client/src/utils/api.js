@@ -112,6 +112,10 @@ export const salAPI = {
 export const userAPI = {
     getProfile: () => api.get('/auth/me'),
     updateSignature: (signatureDataURL) => api.post('/users/signature', { signature: signatureDataURL }),
+    getAll: () => api.get('/users'),
+    create: (data) => api.post('/users', data),
+    update: (id, data) => api.put(`/users/${id}`, data),
+    delete: (id) => api.delete(`/users/${id}`),
 };
 
 // Communication (Email & WhatsApp)

@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import WelcomePage from './pages/WelcomePage';
+import OnboardingPage from './pages/OnboardingPage';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import WorkerDashboard from './pages/worker/WorkerDashboard';
@@ -13,6 +15,7 @@ import QuotesPage from './pages/owner/QuotesPage';
 import SALPage from './pages/owner/SALPage';
 import SignaturePage from './pages/owner/SignaturePage';
 import CompanySettings from './pages/owner/CompanySettings';
+import EmployeeManagement from './pages/owner/EmployeeManagement';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
@@ -58,9 +61,10 @@ const RootRedirect = () => {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<WelcomePage />} />
+      <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/" element={<RootRedirect />} />
 
       {/* Worker Routes */}
       <Route
@@ -78,6 +82,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute requireOwner>
             <OwnerDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/owner/employees"
+        element={
+          <ProtectedRoute requireOwner>
+            <EmployeeManagement />
           </ProtectedRoute>
         }
       />
