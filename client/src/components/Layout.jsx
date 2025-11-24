@@ -208,107 +208,120 @@ export default function Layout({ children, title }) {
 
                 {/* Mobile Menu Overlay */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden fixed inset-0 z-50 bg-white animate-in fade-in duration-200">
-                        <div className="flex flex-col h-full p-4">
-                            <div className="flex justify-between items-center mb-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg shadow-slate-900/20">
-                                        <Building2 className="w-6 h-6 text-white" />
-                                    </div>
-                                    <span className="text-xl font-black text-slate-900">WORK360</span>
-                                </div>
-                                <button
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="p-2 text-slate-400 hover:text-slate-900 bg-slate-100 rounded-full"
-                                >
-                                    <X className="w-6 h-6" />
-                                </button>
-                            </div>
-                            <nav className="flex-1 space-y-2 overflow-y-auto">
-                                {links.map((link) => {
-                                    const Icon = link.icon;
-                                    const isActive = location.pathname === link.path ||
-                                        (link.submenu && link.submenu.some(sub => location.pathname + location.search === sub.path));
+                    <div className="md:hidden fixed inset-0 z-50 flex">
+                        {/* Backdrop */}
+                        <div
+                            className="fixed inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        ></div>
 
-                                    // If it has submenu (Funzioni Operaio)
-                                    if (link.submenu) {
+                        {/* Slide-over Panel */}
+                        <div className="relative w-[85%] max-w-[300px] bg-white h-full shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
+                            <div className="p-6 flex flex-col h-full">
+                                <div className="flex justify-between items-center mb-8">
+                                    <div className="flex items-center gap-3">
+                                        <img
+                                            src="/assets/logo-new.png"
+                                            alt="WORK360"
+                                            className="w-10 h-10 object-contain rounded-lg"
+                                        />
+                                        <span className="text-xl font-black text-slate-900">WORK360</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="p-2 text-slate-400 hover:text-slate-900 bg-slate-50 rounded-full border border-slate-100"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                <nav className="flex-1 space-y-2 overflow-y-auto pr-2">
+                                    {links.map((link) => {
+                                        const Icon = link.icon;
+                                        const isActive = location.pathname === link.path ||
+                                            (link.submenu && link.submenu.some(sub => location.pathname + location.search === sub.path));
+
+                                        // If it has submenu (Funzioni Operaio)
+                                        if (link.submenu) {
+                                            return (
+                                                <div key={link.path}>
+                                                    <button
+                                                        onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
+                                                        className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${isActive
+                                                            ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'
+                                                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                                                            }`}
+                                                    >
+                                                        <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                                                        <span className="flex-1 text-left">{link.label}</span>
+                                                        {isWorkerFunctionsOpen ?
+                                                            <ChevronUp className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} /> :
+                                                            <ChevronDown className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} />
+                                                        }
+                                                    </button>
+                                                    {isWorkerFunctionsOpen && (
+                                                        <div className="ml-4 mt-2 pl-4 border-l border-slate-100 space-y-1">
+                                                            {link.submenu.map((sublink) => {
+                                                                const SubIcon = sublink.icon;
+                                                                const isSubActive = location.pathname + location.search === sublink.path;
+                                                                return (
+                                                                    <Link
+                                                                        key={sublink.path}
+                                                                        to={sublink.path}
+                                                                        onClick={() => setIsMobileMenuOpen(false)}
+                                                                        className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isSubActive
+                                                                            ? 'text-slate-900 bg-slate-50 font-bold'
+                                                                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                                                            }`}
+                                                                    >
+                                                                        <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-slate-900' : 'bg-slate-300'}`}></span>
+                                                                        {sublink.label}
+                                                                    </Link>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        }
+
+                                        // Regular menu item
                                         return (
-                                            <div key={link.path}>
-                                                <button
-                                                    onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
-                                                    className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-base font-bold transition-all ${isActive
-                                                        ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/20'
-                                                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                                                        }`}
-                                                >
-                                                    <Icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                                                    {link.label}
-                                                    {isWorkerFunctionsOpen ?
-                                                        <ChevronUp className="w-5 h-5 ml-auto" /> :
-                                                        <ChevronDown className="w-5 h-5 ml-auto" />
-                                                    }
-                                                </button>
-                                                {isWorkerFunctionsOpen && (
-                                                    <div className="ml-6 mt-2 space-y-1">
-                                                        {link.submenu.map((sublink) => {
-                                                            const SubIcon = sublink.icon;
-                                                            const isSubActive = location.pathname + location.search === sublink.path;
-                                                            return (
-                                                                <Link
-                                                                    key={sublink.path}
-                                                                    to={sublink.path}
-                                                                    onClick={() => setIsMobileMenuOpen(false)}
-                                                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isSubActive
-                                                                        ? 'bg-slate-100 text-slate-900'
-                                                                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                                                                        }`}
-                                                                >
-                                                                    <SubIcon className="w-5 h-5" />
-                                                                    {sublink.label}
-                                                                </Link>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <Link
+                                                key={link.path}
+                                                to={link.path}
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${isActive
+                                                    ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'
+                                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                                                    }`}
+                                            >
+                                                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                                                {link.label}
+                                                {isActive && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>}
+                                            </Link>
                                         );
-                                    }
+                                    })}
+                                </nav>
 
-                                    // Regular menu item
-                                    return (
-                                        <Link
-                                            key={link.path}
-                                            to={link.path}
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                            className={`flex items-center gap-4 px-4 py-4 rounded-2xl text-base font-bold transition-all ${isActive
-                                                ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/20'
-                                                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                                                }`}
-                                        >
-                                            <Icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                                            {link.label}
-                                            {isActive && <ChevronRight className="w-5 h-5 ml-auto text-slate-500" />}
-                                        </Link>
-                                    );
-                                })}
-                            </nav>
-                            <div className="mt-auto pt-6 border-t border-slate-100">
-                                <div className="flex items-center gap-3 mb-6 px-2">
-                                    <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-900 font-bold border-2 border-white shadow-sm">
-                                        {user?.firstName?.charAt(0) || 'U'}
+                                <div className="mt-auto pt-6 border-t border-slate-100">
+                                    <div className="flex items-center gap-3 mb-6 px-2">
+                                        <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-700 font-bold border-2 border-white shadow-sm">
+                                            {user?.firstName?.charAt(0) || 'U'}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-slate-900 text-sm truncate">{user?.firstName} {user?.lastName}</p>
+                                            <p className="text-xs text-slate-500 capitalize truncate">{user?.role === 'owner' ? 'Amministratore' : 'Collaboratore'}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-bold text-slate-900 text-lg">{user?.firstName} {user?.lastName}</p>
-                                        <p className="text-sm text-slate-500 capitalize">{user?.role}</p>
-                                    </div>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center justify-center gap-2 w-full py-3 text-sm font-bold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-slate-200 hover:border-red-100"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        Disconnetti
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center justify-center gap-2 w-full py-4 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-lg shadow-red-600/20 transition-colors"
-                                >
-                                    <LogOut className="w-5 h-5" />
-                                    Esci dall'applicazione
-                                </button>
                             </div>
                         </div>
                     </div>
