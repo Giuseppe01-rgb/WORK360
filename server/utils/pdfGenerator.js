@@ -269,4 +269,4 @@ const generateSALPDF = (sal, company, site, res) => {
     doc.end();
 };
 
-module.exports = { generateQuotePDF, generateSALPDF };
+module.exports = { generateQuotePDF, generateQuotePDFBuffer, generateSALPDF };
