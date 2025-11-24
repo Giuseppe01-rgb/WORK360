@@ -43,7 +43,15 @@ export default function QuotesPage() {
         date: new Date().toISOString().split('T')[0],
         items: [{ description: '', quantity: 1, unitPrice: 0, total: 0 }],
         vatRate: 22,
-        notes: ''
+        items: [{ description: '', quantity: 1, unitPrice: 0, total: 0 }],
+        vatRate: 22,
+        notes: '',
+        // Contract Terms
+        validityDays: 30,
+        paymentTerms: '',
+        safetyCosts: 0,
+        workDuration: '',
+        legalNotes: ''
     });
 
     useEffect(() => {
@@ -203,7 +211,13 @@ ${user?.company?.name || 'Il team WORK360'}`;
             date: new Date().toISOString().split('T')[0],
             items: [{ description: '', quantity: 1, unitPrice: 0, total: 0 }],
             vatRate: 22,
-            notes: ''
+            vatRate: 22,
+            notes: '',
+            validityDays: 30,
+            paymentTerms: '',
+            safetyCosts: 0,
+            workDuration: '',
+            legalNotes: ''
         });
     };
 
@@ -379,6 +393,33 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Telefono</label>
                                             <input type="tel" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.phone} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, phone: e.target.value } })} />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Contract Terms */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Termini & Condizioni</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Validità Offerta (giorni)</label>
+                                            <input type="number" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.validityDays} onChange={(e) => setFormData({ ...formData, validityDays: parseInt(e.target.value) || 0 })} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Tempi di Esecuzione</label>
+                                            <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" placeholder="Es. 60 giorni lavorativi" value={formData.workDuration} onChange={(e) => setFormData({ ...formData, workDuration: e.target.value })} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Pagamento</label>
+                                            <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" placeholder="Es. Bonifico 30gg d.f." value={formData.paymentTerms} onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Oneri Sicurezza (€)</label>
+                                            <input type="number" step="0.01" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.safetyCosts} onChange={(e) => setFormData({ ...formData, safetyCosts: parseFloat(e.target.value) || 0 })} />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Note Legali Aggiuntive</label>
+                                            <textarea className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 h-20" placeholder="Eventuali clausole specifiche..." value={formData.legalNotes} onChange={(e) => setFormData({ ...formData, legalNotes: e.target.value })}></textarea>
                                         </div>
                                     </div>
                                 </section>

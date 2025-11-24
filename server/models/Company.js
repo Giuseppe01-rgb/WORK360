@@ -22,6 +22,11 @@ const companySchema = new mongoose.Schema({
     email: String,
     pec: String, // Posta Elettronica Certificata
     piva: String, // Partita IVA
+    taxCode: String, // Codice Fiscale (se diverso da P.IVA)
+    reaNumber: String, // Numero REA
+    shareCapital: String, // Capitale Sociale (es. "10.000,00 i.v.")
+    bankName: String, // Nome Banca
+    iban: String, // IBAN
     logo: String, // Path to logo image
     active: {
         type: Boolean,

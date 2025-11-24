@@ -31,6 +31,14 @@ const quoteSchema = new mongoose.Schema({
     vatRate: { type: Number, default: 22 },
     vatAmount: { type: Number, required: true },
     total: { type: Number, required: true },
+
+    // Contract Terms
+    validityDays: { type: Number, default: 30 },
+    paymentTerms: String,
+    safetyCosts: { type: Number, default: 0 },
+    workDuration: String,
+    legalNotes: String,
+
     notes: String,
     status: {
         type: String,

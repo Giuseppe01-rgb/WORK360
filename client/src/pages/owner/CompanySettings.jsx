@@ -24,7 +24,13 @@ export default function CompanySettings() {
             province: '',
             cap: ''
         },
-        logo: null
+        logo: null,
+        // Legal & Banking
+        reaNumber: '',
+        shareCapital: '',
+        taxCode: '',
+        bankName: '',
+        iban: ''
     });
 
     useEffect(() => {
@@ -48,7 +54,12 @@ export default function CompanySettings() {
                     province: data.address?.province || '',
                     cap: data.address?.cap || ''
                 },
-                logo: null
+                logo: null,
+                reaNumber: data.reaNumber || '',
+                shareCapital: data.shareCapital || '',
+                taxCode: data.taxCode || '',
+                bankName: data.bankName || '',
+                iban: data.iban || ''
             });
             if (data.logo) {
                 setLogoPreview(`https://work360-production-d4f3.up.railway.app${data.logo}`);
@@ -93,6 +104,12 @@ export default function CompanySettings() {
         data.append('email', formData.email);
         data.append('pec', formData.pec);
         data.append('phone', formData.phone);
+        data.append('phone', formData.phone);
+        data.append('reaNumber', formData.reaNumber);
+        data.append('shareCapital', formData.shareCapital);
+        data.append('taxCode', formData.taxCode);
+        data.append('bankName', formData.bankName);
+        data.append('iban', formData.iban);
         data.append('address', JSON.stringify(formData.address));
         if (formData.logo) {
             data.append('logo', formData.logo);
@@ -298,6 +315,75 @@ export default function CompanySettings() {
                                             onChange={handleChange}
                                             className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
                                             placeholder="00100"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr className="border-slate-100" />
+
+                        {/* Legal & Banking */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-[#5D5FEF]" />
+                                Dati Legali & Bancari
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Codice Fiscale</label>
+                                    <input
+                                        type="text"
+                                        name="taxCode"
+                                        value={formData.taxCode}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                        placeholder="Se diverso da P.IVA"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Numero REA</label>
+                                    <input
+                                        type="text"
+                                        name="reaNumber"
+                                        value={formData.reaNumber}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                        placeholder="Es. RM-123456"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Capitale Sociale</label>
+                                    <input
+                                        type="text"
+                                        name="shareCapital"
+                                        value={formData.shareCapital}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                        placeholder="Es. € 10.000,00 i.v."
+                                    />
+                                </div>
+                                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="md:col-span-1">
+                                        <label className="block text-sm font-medium text-slate-700 mb-2">Banca</label>
+                                        <input
+                                            type="text"
+                                            name="bankName"
+                                            value={formData.bankName}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                            placeholder="Nome Banca"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-slate-700 mb-2">IBAN</label>
+                                        <input
+                                            type="text"
+                                            name="iban"
+                                            value={formData.iban}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                            placeholder="IT00 X000 0000 0000 0000 0000 000"
                                         />
                                     </div>
                                 </div>
