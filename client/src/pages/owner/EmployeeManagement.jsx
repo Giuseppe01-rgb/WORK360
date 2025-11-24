@@ -423,10 +423,10 @@ export default function EmployeeManagement() {
                 </div>
             )}
 
-            {/* Mobile FAB */}
+            {/* FAB - Always visible */}
             <button
                 onClick={() => setShowModal(true)}
-                className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-slate-900 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-40"
+                className="fixed bottom-6 right-6 w-14 h-14 bg-slate-900 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-40"
             >
                 <Plus className="w-7 h-7" />
             </button>
