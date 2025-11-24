@@ -89,11 +89,11 @@ export default function OnboardingPage() {
 
                 {/* Circular Logo */}
                 <div className="mb-6 relative w-20 h-20 mx-auto flex items-center justify-center">
-                    <div className="absolute inset-0 border-[5px] border-accent rounded-full border-t-transparent -rotate-45"></div>
-                    <div className="flex flex-col items-center justify-center leading-none z-10">
-                        <span className="text-[8px] font-bold text-accent uppercase tracking-widest mb-0.5">WORK</span>
-                        <span className="text-xl font-black text-accent tracking-tighter">360</span>
-                    </div>
+                    <img
+                        src="/assets/logo-new.png"
+                        alt="WORK360"
+                        className="w-full h-full object-contain rounded-full"
+                    />
                 </div>
 
                 {/* Header */}

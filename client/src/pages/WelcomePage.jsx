@@ -15,14 +15,11 @@ export default function WelcomePage() {
 
                 {/* Circular Logo */}
                 <div className="mb-6 relative w-48 h-48 flex items-center justify-center">
-                    {/* Outer Circle Ring (Simulated with border or SVG) */}
-                    <div className="absolute inset-0 border-[12px] border-accent rounded-full border-t-transparent -rotate-45"></div>
-
-                    {/* Inner Text */}
-                    <div className="flex flex-col items-center justify-center leading-none z-10">
-                        <span className="text-xs font-bold text-accent uppercase tracking-widest mb-1">WORK</span>
-                        <span className="text-4xl font-black text-accent tracking-tighter">360</span>
-                    </div>
+                    <img
+                        src="/assets/logo-new.png"
+                        alt="WORK360"
+                        className="w-full h-full object-contain rounded-full"
+                    />
                 </div>
 
                 {/* Subtitle */}
