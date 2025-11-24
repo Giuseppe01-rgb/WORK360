@@ -6,7 +6,7 @@ const { decrypt } = require('./encryption');
  * @param {Object} emailConfig - Company email configuration
  * @returns {Object} Nodemailer transporter
  */
-const createTransporter = (emailConfig) => {
+const createTransport = (emailConfig) => {
     if (!emailConfig || !emailConfig.user || !emailConfig.password) {
         throw new Error('Configurazione email mancante. Vai in Impostazioni Azienda per configurare l\'email.');
     }
@@ -30,7 +30,7 @@ const createTransporter = (emailConfig) => {
         transporterConfig.secure = emailConfig.port === 465; // true for 465, false for other ports
     }
 
-    return nodemailer.createTransporter(transporterConfig);
+    return nodemailer.createTransport(transporterConfig);
 };
 
 /**
@@ -43,7 +43,7 @@ const createTransporter = (emailConfig) => {
  * @param {string} filename - PDF filename
  */
 exports.sendEmailWithCompanyConfig = async (emailConfig, to, subject, html, pdfBuffer, filename) => {
-    const transporter = createTransporter(emailConfig);
+    const transporter = createTransport(emailConfig);
 
     const fromName = emailConfig.fromName || 'WORK360';
     const mailOptions = {
@@ -85,7 +85,7 @@ exports.sendEmailWithPDF = async (to, subject, html, pdfBuffer, filename) => {
         throw new Error('Email service not configured. Set EMAIL_USER and EMAIL_PASSWORD in .env');
     }
 
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
         service: process.env.EMAIL_SERVICE || 'gmail',
         auth: {
             user: process.env.EMAIL_USER,
@@ -121,7 +121,7 @@ exports.sendEmailWithPDF = async (to, subject, html, pdfBuffer, filename) => {
  * Send simple email without attachment
  */
 exports.sendEmail = async (to, subject, html) => {
-    const transporter = createTransporter();
+    const transporter = createTransport();
 
     if (!transporter) {
         throw new Error('Email service not configured');
