@@ -681,6 +681,364 @@ ${user?.company?.name || 'Il team WORK360'}`;
                 </div>
             )}
 
+
+            {/* Create Modal */}
+            {showSALModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl relative">
+                        <button
+                            onClick={() => setShowModal(false)}
+                            className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors"
+                        >
+                            <X className="w-6 h-6 text-slate-500" />
+                        </button>
+
+                        <div className="p-6 md:p-8">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Nuovo SAL</h2>
+                            <p className="text-slate-500 mb-8">Compila i dati per generare lo Stato Avanzamento Lavori</p>
+
+                            <form onSubmit={handleSALSubmit} className="space-y-6">
+                                {/* Identification Section */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dati Generali</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Cantiere *</label>
+                                            <select
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.site}
+                                                onChange={(e) => setSalFormData({ ...formData, site: e.target.value })}
+                                                required
+                                            >
+                                                <option value="">Seleziona un cantiere...</option>
+                                                {sites.map(site => (
+                                                    <option key={site._id} value={site._id}>{site.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Numero SAL *</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.number}
+                                                onChange={(e) => setSalFormData({ ...formData, number: e.target.value })}
+                                                placeholder="Es: SAL-001"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione *</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.date}
+                                                onChange={(e) => setSalFormData({ ...formData, date: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio *</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.periodStart}
+                                                onChange={(e) => setSalFormData({ ...formData, periodStart: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine *</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.periodEnd}
+                                                onChange={(e) => setSalFormData({ ...formData, periodEnd: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Client Section */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Committente</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Nome/Ragione Sociale *</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.client.name}
+                                                onChange={(e) => setSalFormData({ ...formData, client: { ...salFormData.client, name: e.target.value } })}
+                                                placeholder="Nome committente"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">P.IVA / Codice Fiscale</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.client.vatNumber}
+                                                onChange={(e) => setSalFormData({ ...formData, client: { ...salFormData.client, vatNumber: e.target.value } })}
+                                                placeholder="12345678901"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Codice Fiscale (se diverso)</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.client.fiscalCode}
+                                                onChange={(e) => setSalFormData({ ...formData, client: { ...salFormData.client, fiscalCode: e.target.value } })}
+                                                placeholder="RSSMRA80A01H501Z"
+                                            />
+                                        </div>
+
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.client.address}
+                                                onChange={(e) => setSalFormData({ ...formData, client: { ...salFormData.client, address: e.target.value } })}
+                                                placeholder="Via Roma, 1 - 00100 Roma (RM)"
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Work Description */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Descrizione Lavori</h3>
+                                    <textarea
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[120px]"
+                                        value={salFormData.workDescription}
+                                        onChange={(e) => setSalFormData({ ...formData, workDescription: e.target.value })}
+                                        placeholder="Descrivi dettagliatamente i lavori eseguiti nel periodo indicato..."
+                                        required
+                                    />
+                                </section>
+
+                                {/* Financial Details */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dettagli Economici</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Valore Contratto (€) *</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.contractValue}
+                                                onChange={(e) => setSalFormData({ ...formData, contractValue: parseFloat(e.target.value) || 0 })}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Importo SAL Precedenti (€)</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.previousAmount}
+                                                onChange={(e) => setSalFormData({ ...formData, previousAmount: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Importo Questo SAL (€) *</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.currentAmount}
+                                                onChange={(e) => setSalFormData({ ...formData, currentAmount: parseFloat(e.target.value) || 0 })}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Completamento (%) *</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 pr-10"
+                                                    value={salFormData.completionPercentage}
+                                                    onChange={(e) => setSalFormData({ ...formData, completionPercentage: parseFloat(e.target.value) || 0 })}
+                                                    min="0"
+                                                    max="100"
+                                                    required
+                                                />
+                                                <Percent className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Penali (€)</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.penalties}
+                                                onChange={(e) => setSalFormData({ ...formData, penalties: parseFloat(e.target.value) || 0 })}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Aliquota IVA (%) *</label>
+                                            <select
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.vatRate}
+                                                onChange={(e) => setSalFormData({ ...formData, vatRate: parseFloat(e.target.value) })}
+                                                required
+                                            >
+                                                <option value="22">22% - Ordinaria</option>
+                                                <option value="10">10% - Ridotta</option>
+                                                <option value="4">4% - Super ridotta</option>
+                                                <option value="0">0% - Esente</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Financial Preview */}
+                                    {salFormData.currentAmount > 0 && (
+                                        <div className="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-4">
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-600">Importo Lavori:</span>
+                                                    <span className="font-semibold">€ {salFormData.currentAmount.toFixed(2)}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-600">Ritenuta Garanzia (10%):</span>
+                                                    <span className="font-semibold text-red-600">- € {(salFormData.currentAmount * 0.10).toFixed(2)}</span>
+                                                </div>
+                                                {salFormData.penalties > 0 && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-600">Penali:</span>
+                                                        <span className="font-semibold text-red-600">- € {salFormData.penalties.toFixed(2)}</span>
+                                                    </div>
+                                                )}
+                                                <div className="pt-2 border-t border-slate-200">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-600">Imponibile:</span>
+                                                        <span className="font-semibold">€ {(salFormData.currentAmount - salFormData.currentAmount * 0.10 - salFormData.penalties).toFixed(2)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-600">IVA ({salFormData.vatRate}%):</span>
+                                                        <span className="font-semibold">€ {((salFormData.currentAmount - salFormData.currentAmount * 0.10 - salFormData.penalties) * salFormData.vatRate / 100).toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="pt-2 border-t-2 border-slate-300">
+                                                    <div className="flex justify-between">
+                                                        <span className="font-bold text-slate-900">TOTALE DOVUTO:</span>
+                                                        <span className="text-lg font-bold text-slate-900">
+                                                            € {((salFormData.currentAmount - salFormData.currentAmount * 0.10 - salFormData.penalties) * (1 + salFormData.vatRate / 100)).toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </section>
+
+                                {/* Optional: Work Supervisor */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Direttore Lavori (Opzionale)</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Nome e Cognome</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.workSupervisor.name}
+                                                onChange={(e) => setSalFormData({ ...formData, workSupervisor: { ...salFormData.workSupervisor, name: e.target.value } })}
+                                                placeholder="Mario Rossi"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Qualifica</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.workSupervisor.qualification}
+                                                onChange={(e) => setSalFormData({ ...formData, workSupervisor: { ...salFormData.workSupervisor, qualification: e.target.value } })}
+                                                placeholder="Ingegnere, Architetto, Geometra..."
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Optional: Public Contract Codes */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Codici Appalto Pubblico (Opzionale)</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">CIG (Codice Identificativo Gara)</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.cig}
+                                                onChange={(e) => setSalFormData({ ...formData, cig: e.target.value })}
+                                                placeholder="1234567890"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">CUP (Codice Unico Progetto)</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                value={salFormData.cup}
+                                                onChange={(e) => setSalFormData({ ...formData, cup: e.target.value })}
+                                                placeholder="A12B34C56D78E90F123"
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Notes */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Note Aggiuntive</h3>
+                                    <textarea
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[80px]"
+                                        value={salFormData.notes}
+                                        onChange={(e) => setSalFormData({ ...formData, notes: e.target.value })}
+                                        placeholder="Note aggiuntive (eventuali varianti, annotazioni tecniche, etc.)"
+                                    />
+                                </section>
+
+                                <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowModal(false)}
+                                        className="px-6 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
+                                    >
+                                        Annulla
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-8 py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all shadow-md flex items-center gap-2"
+                                    >
+                                        <CheckCircle className="w-5 h-5" />
+                                        Crea SAL
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Confirm Delete Dialog */}
             <ConfirmDialog
                 isOpen={deleteConfirm.isOpen}
