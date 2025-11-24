@@ -24,8 +24,9 @@ const createTransport = (emailConfig) => {
     // Use service shorthand (gmail, outlook) or custom SMTP
     if (emailConfig.service === 'gmail') {
         transporterConfig.host = 'smtp.gmail.com';
-        transporterConfig.port = 465;
-        transporterConfig.secure = true;
+        transporterConfig.port = 587;
+        transporterConfig.secure = false;
+        transporterConfig.requireTLS = true;
     } else if (emailConfig.service && emailConfig.service !== 'custom') {
         transporterConfig.service = emailConfig.service;
     } else {
