@@ -5,7 +5,9 @@ const {
     getAllUsers,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    updateEmailConfig,
+    testEmailConfig
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -17,5 +19,9 @@ router.delete('/:id', protect, deleteUser);
 
 // Signature
 router.post('/signature', protect, uploadSignature);
+
+// Email configuration
+router.put('/email-config', protect, updateEmailConfig);
+router.post('/email-config/test', protect, testEmailConfig);
 
 module.exports = router;

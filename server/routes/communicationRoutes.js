@@ -17,13 +17,25 @@ router.post('/send-email/quote/:id', protect, requireOwner, async (req, res) => 
             return res.status(403).json({ message: 'Non autorizzato' });
         }
 
+        const company = quote.company;
         const { email, subject, message } = req.body;
 
-        // Generate PDF
-        const pdfBuffer = await generateQuotePDFBuffer(quote, quote.company, req.user);
+        // Check if company has email configured (REQUIRED for multi-tenant)
+        if (!company.emailConfig || !company.emailConfig.configured || !company.emailConfig.user) {
+            return res.status(400).json({
+                error: 'Email non configurata',
+                message: 'Per inviare preventivi via email, devi prima configurare le credenziali email aziendali in Impostazioni Azienda.',
+                action: 'configure_email'
+            });
+        }
 
-        // Send email
-        await sendEmailWithPDF(
+        // Generate PDF
+        const pdfBuffer = await generateQuotePDFBuffer(quote, company, req.user);
+
+        // Send email using company-specific credentials
+        const { sendEmailWithCompanyConfig } = require('../utils/emailService');
+        await sendEmailWithCompanyConfig(
+            company.emailConfig,
             email,
             subject,
             `<p>${message.replace(/\n/g, '<br>')}</p>`,

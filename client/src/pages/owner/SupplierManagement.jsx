@@ -152,7 +152,7 @@ export default function SupplierManagement() {
 
             {/* Recommendations Section */}
             {recommendations.length > 0 && (
-                <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6 mb-8">
+                <div className="bg-blue-50 rounded-2xl p-6 mb-8">
                     <h3 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-blue-600" />
                         Raccomandazioni Intelligenti
@@ -165,7 +165,7 @@ export default function SupplierManagement() {
                         {recommendations.map((rec, idx) => (
                             <div
                                 key={idx}
-                                className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm"
+                                className="bg-white p-4 rounded-xl shadow-sm"
                             >
                                 <div className="font-bold text-slate-900 mb-2">
                                     {rec.category}
@@ -184,7 +184,7 @@ export default function SupplierManagement() {
 
             {/* Form */}
             {showForm && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-lg animate-in fade-in slide-in-from-top-4">
+                <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg animate-in fade-in slide-in-from-top-4">
                     <h2 className="text-xl font-bold text-slate-900 mb-6">
                         {editingSupplier ? 'Modifica Fornitore' : 'Nuovo Fornitore'}
                     </h2>
@@ -326,7 +326,7 @@ export default function SupplierManagement() {
                     </div>
                 ) : (
                     suppliers.map(supplier => (
-                        <div key={supplier._id} className="bg-white p-6 rounded-2xl border border-slate-200 hover:shadow-md transition-shadow group">
+                        <div key={supplier._id} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">

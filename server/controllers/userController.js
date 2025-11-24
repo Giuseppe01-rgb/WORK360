@@ -178,11 +178,102 @@ const uploadSignature = async (req, res) => {
     }
 };
 
+// Update company email configuration
+const updateEmailConfig = async (req, res) => {
+    try {
+        const { service, host, port, user, password, fromName } = req.body;
+
+        if (!user || !password) {
+            return res.status(400).json({ message: 'Email e password sono obbligatori' });
+        }
+
+        // Encrypt password before saving
+        const { encrypt } = require('../utils/encryption');
+        const encryptedPassword = encrypt(password);
+
+        const company = await Company.findById(req.user.company); // Changed req.user.company._id to req.user.company
+        if (!company) {
+            return res.status(404).json({ message: 'Azienda non trovata' });
+        }
+
+        company.emailConfig = {
+            service: service || 'gmail',
+            host,
+            port: port || 587,
+            user,
+            password: encryptedPassword,
+            fromName: fromName || company.name,
+            configured: true
+        };
+
+        await company.save();
+
+        res.json({
+            success: true,
+            message: 'Configurazione email salvata con successo',
+            emailConfig: {
+                service: company.emailConfig.service,
+                host: company.emailConfig.host,
+                port: company.emailConfig.port,
+                user: company.emailConfig.user,
+                fromName: company.emailConfig.fromName,
+                configured: company.emailConfig.configured
+            }
+        });
+    } catch (error) {
+        console.error('Error updating email config:', error);
+        res.status(500).json({ message: 'Errore nel salvataggio della configurazione email', error: error.message });
+    }
+};
+
+// Test email configuration
+const testEmailConfig = async (req, res) => {
+    try {
+        const company = await Company.findById(req.user.company); // Changed req.user.company._id to req.user.company
+        if (!company || !company.emailConfig || !company.emailConfig.configured) {
+            return res.status(400).json({
+                error: 'Email non configurata',
+                message: 'Configura prima le credenziali email'
+            });
+        }
+
+        const { sendEmailWithCompanyConfig } = require('../utils/emailService');
+
+        // Send test email
+        await sendEmailWithCompanyConfig(
+            company.emailConfig,
+            company.emailConfig.user, // Send to self
+            'Test Email WORK360',
+            `<h2>✅ Email Configurata Correttamente!</h2>
+             <p>La tua configurazione email per <strong>${company.name}</strong> funziona perfettamente.</p>
+             <p>Ora puoi inviare preventivi ai tuoi clienti via email.</p>
+             <br>
+             <p><em>WORK360 - Gestione Cantieri</em></p>`,
+            null,
+            null
+        );
+
+        res.json({
+            success: true,
+            message: `Email di test inviata a ${company.emailConfig.user}. Controlla la tua casella!`
+        });
+    } catch (error) {
+        console.error('Test email error:', error);
+        res.status(500).json({
+            error: 'Errore invio email di test',
+            message: error.message,
+            details: 'Verifica che le credenziali siano corrette. Se usi Gmail, assicurati di aver creato una App Password.'
+        });
+    }
+};
+
 module.exports = {
     uploadSignature,
     upload,
     getAllUsers,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    updateEmailConfig,
+    testEmailConfig
 };

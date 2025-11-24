@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import { companyAPI } from '../../utils/api';
+import { companyAPI, userAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Building2, Mail, Phone, MapPin, FileText, Upload, Save } from 'lucide-react';
+import { Building2, Mail, Phone, MapPin, FileText, Upload, Save, Send, CheckCircle } from 'lucide-react';
 
 export default function CompanySettings() {
     const { user } = useAuth();
@@ -11,6 +11,7 @@ export default function CompanySettings() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [logoPreview, setLogoPreview] = useState(null);
+    const [testingEmail, setTestingEmail] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         ownerName: '',
@@ -31,6 +32,15 @@ export default function CompanySettings() {
         taxCode: '',
         bankName: '',
         iban: ''
+    });
+    const [emailConfig, setEmailConfig] = useState({
+        service: 'gmail',
+        host: '',
+        port: 587,
+        user: '',
+        password: '',
+        fromName: '',
+        configured: false
     });
 
     useEffect(() => {
@@ -61,13 +71,27 @@ export default function CompanySettings() {
                 bankName: data.bankName || '',
                 iban: data.iban || ''
             });
+
+            // Set logo preview if exists
             if (data.logo) {
-                setLogoPreview(`https://work360-production-d4f3.up.railway.app${data.logo}`);
+                setLogoPreview(data.logo);
             }
-            setLoading(false);
+
+            // Load email config
+            if (data.emailConfig) {
+                setEmailConfig({
+                    service: data.emailConfig.service || 'gmail',
+                    host: data.emailConfig.host || '',
+                    port: data.emailConfig.port || 587,
+                    user: data.emailConfig.user || '',
+                    password: '', // Never load password
+                    fromName: data.emailConfig.fromName || '',
+                    configured: data.emailConfig.configured || false
+                });
+            }
         } catch (error) {
-            console.error('Error loading company:', error);
-            showError('Errore nel caricamento dati azienda');
+            showError(error.response?.data?.message || 'Errore nel caricamento dei dati');
+        } finally {
             setLoading(false);
         }
     };
@@ -124,6 +148,48 @@ export default function CompanySettings() {
             alert('Errore nell\'aggiornamento dati');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleEmailConfigChange = (e) => {
+        const { name, value } = e.target;
+        setEmailConfig(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSaveEmailConfig = async () => {
+        try {
+            if (!emailConfig.user || !emailConfig.password) {
+                showError('Email e password sono obbligatori');
+                return;
+            }
+
+            setSaving(true);
+            await userAPI.updateEmailConfig(emailConfig);
+            showSuccess('Configurazione email salvata! Prova a inviare un\'email di test.');
+
+            // Update configured flag
+            setEmailConfig(prev => ({ ...prev, configured: true, password: '' }));
+        } catch (error) {
+            showError(error.response?.data?.message || 'Errore nel salvataggioconfig email');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleTestEmail = async () => {
+        try {
+            if (!emailConfig.configured && !emailConfig.user) {
+                showError('Configura e salva prima le credenziali email');
+                return;
+            }
+
+            setTestingEmail(true);
+            const response = await userAPI.testEmailConfig();
+            showSuccess(response.data.message);
+        } catch (error) {
+            showError(error.response?.data?.message || 'Errore nell\'invio dell\'email di test');
+        } finally {
+            setTestingEmail(false);
         }
     };
 
@@ -387,6 +453,149 @@ export default function CompanySettings() {
                                         />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Email Configuration Section */}
+                        <div className="bg-white rounded-2xl shadow-sm p-8 mb-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-blue-100 rounded-xl">
+                                    <Mail className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-900">Configurazione Email</h2>
+                                    <p className="text-sm text-slate-500">Configura l'email per inviare preventivi ai clienti</p>
+                                </div>
+                            </div>
+
+                            {emailConfig.configured && (
+                                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3">
+                                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-green-900">Email Configurata</p>
+                                        <p className="text-xs text-green-700">Puoi inviare preventivi via email a {emailConfig.user}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Servizio Email</label>
+                                    <select
+                                        name="service"
+                                        value={emailConfig.service}
+                                        onChange={handleEmailConfigChange}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                    >
+                                        <option value="gmail">Gmail</option>
+                                        <option value="outlook">Outlook</option>
+                                        <option value="custom">Personalizzato</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Email *</label>
+                                    <input
+                                        type="email"
+                                        name="user"
+                                        value={emailConfig.user}
+                                        onChange={handleEmailConfigChange}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                        placeholder="azienda@gmail.com"
+                                    />
+                                </div>
+
+                                {emailConfig.service === 'custom' && (
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-2">Host SMTP</label>
+                                            <input
+                                                type="text"
+                                                name="host"
+                                                value={emailConfig.host}
+                                                onChange={handleEmailConfigChange}
+                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                                placeholder="smtp.example.com"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-2">Porta</label>
+                                            <input
+                                                type="number"
+                                                name="port"
+                                                value={emailConfig.port}
+                                                onChange={handleEmailConfigChange}
+                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">App Password *</label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        value={emailConfig.password}
+                                        onChange={handleEmailConfigChange}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                        placeholder="16-caratteri-app-password"
+                                    />
+                                    <p className="mt-2 text-xs text-blue-600 flex items-start gap-1">
+                                        <Mail className="w-4 h-4 mt-0.5" />
+                                        Se usi Gmail, genera una App Password da{' '}
+                                        <a
+                                            href="https://myaccount.google.com/apppasswords"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline hover:text-blue-800"
+                                        >
+                                            myaccount.google.com/apppasswords
+                                        </a>
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Nome Mittente</label>
+                                    <input
+                                        type="text"
+                                        name="fromName"
+                                        value={emailConfig.fromName || formData.name}
+                                        onChange={handleEmailConfigChange}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-[#5D5FEF]"
+                                        placeholder={formData.name || "Es. Edilizia Rossi Srl"}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={handleTestEmail}
+                                    disabled={testingEmail || !emailConfig.configured}
+                                    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {testingEmail ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Invio...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Send className="w-5 h-5" />
+                                            Testa Email
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSaveEmailConfig}
+                                    disabled={saving || !emailConfig.user || !emailConfig.password}
+                                    className="px-6 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    <Save className="w-5 h-5" />
+                                    Salva Configurazione Email
+                                </button>
                             </div>
                         </div>
 

@@ -257,7 +257,7 @@ export default function WorkerDashboard() {
 
                 {/* ATTENDANCE TAB */}
                 {activeTab === 'attendance' && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
                         <div className="mb-8">
                             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 mb-2">
                                 <Clock className="w-6 h-6 text-slate-900" />
@@ -323,7 +323,7 @@ export default function WorkerDashboard() {
 
                 {/* MATERIALS TAB */}
                 {activeTab === 'materials' && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
                         <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <Package className="w-6 h-6" />
                             Materiali Utilizzati
@@ -383,7 +383,7 @@ export default function WorkerDashboard() {
 
                 {/* NOTES TAB */}
                 {activeTab === 'notes' && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
                         <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <FileText className="w-6 h-6" />
                             Note di Lavoro
@@ -421,7 +421,7 @@ export default function WorkerDashboard() {
 
                 {/* PHOTOS TAB */}
                 {activeTab === 'photos' && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
                         <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <Camera className="w-6 h-6" />
                             Carica Foto
@@ -476,7 +476,7 @@ export default function WorkerDashboard() {
 
                 {/* DAILY REPORT TAB */}
                 {activeTab === 'daily-report' && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
                         <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <FileText className="w-6 h-6 text-slate-900" />
                             Rapporto Giornaliero
@@ -495,7 +495,7 @@ export default function WorkerDashboard() {
 
                 {/* ECONOMIES TAB */}
                 {activeTab === 'economies' && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
                         <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <FileText className="w-6 h-6 text-slate-900" />
                             Economie

@@ -116,6 +116,8 @@ export const userAPI = {
     create: (data) => api.post('/users', data),
     update: (id, data) => api.put(`/users/${id}`, data),
     delete: (id) => api.delete(`/users/${id}`),
+    updateEmailConfig: (data) => api.put('/users/email-config', data),
+    testEmailConfig: () => api.post('/users/email-config/test')
 };
 
 // Communication (Email & WhatsApp)

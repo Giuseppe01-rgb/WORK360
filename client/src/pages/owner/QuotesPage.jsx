@@ -43,8 +43,6 @@ export default function QuotesPage() {
         date: new Date().toISOString().split('T')[0],
         items: [{ description: '', quantity: 1, unitPrice: 0, total: 0 }],
         vatRate: 22,
-        items: [{ description: '', quantity: 1, unitPrice: 0, total: 0 }],
-        vatRate: 22,
         notes: '',
         // Contract Terms
         validityDays: 30,
@@ -103,6 +101,16 @@ export default function QuotesPage() {
 
     const calculateTotal = () => {
         return formData.items.reduce((sum, item) => sum + (item.total || 0), 0);
+    };
+
+    const calculateTotalWithVAT = () => {
+        const subtotal = calculateTotal();
+        const vatAmount = subtotal * (formData.vatRate / 100);
+        return {
+            subtotal,
+            vatAmount,
+            total: subtotal + vatAmount
+        };
     };
 
     const handleSubmit = async (e) => {
@@ -189,9 +197,22 @@ ${user?.company?.name || 'Il team WORK360'}`;
                 resetForm();
             }, 2000);
         } catch (error) {
-            console.error('Error sending email:', error);
-            const errorMsg = error.response?.data?.error || error.response?.data?.message || '❌ Errore nell\'invio dell\'email';
-            showError(errorMsg);
+            console.error('Email send error:', error);
+
+            // Check if error is about email not configured
+            if (error.response?.data?.action === 'configure_email') {
+                showError(
+                    <div>
+                        {error.response.data.message}
+                        <br />
+                        <a href="/impostazioni-azienda" className="underline font-semibold">
+                            Vai alle Impostazioni →
+                        </a>
+                    </div>
+                );
+            } else {
+                showError(error.response?.data?.message || 'Errore nell\'invio dell\'email');
+            }
         } finally {
             setSending(false);
         }
@@ -212,7 +233,6 @@ ${user?.company?.name || 'Il team WORK360'}`;
             date: new Date().toISOString().split('T')[0],
             items: [{ description: '', quantity: 1, unitPrice: 0, total: 0 }],
             vatRate: 22,
-            vatRate: 22,
             notes: '',
             validityDays: 30,
             paymentTerms: '',
@@ -223,7 +243,15 @@ ${user?.company?.name || 'Il team WORK360'}`;
     };
 
     const handleEdit = (quote) => {
-        setFormData(quote);
+        // Preserve company data when editing
+        setFormData({
+            ...quote,
+            company: {
+                name: companyData.name,
+                address: companyData.address,
+                piva: companyData.piva
+            }
+        });
         setEditingId(quote._id);
         setShowModal(true);
     };
@@ -335,7 +363,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             {/* Quotes Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {quotes.map(quote => (
-                    <div key={quote._id} className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow flex flex-col justify-between">
+                    <div key={quote._id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                         <div className="mb-6">
                             <div className="flex justify-between items-start mb-2">
                                 <div>
@@ -346,9 +374,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     value={quote.status}
                                     onChange={(e) => handleStatusChange(quote._id, e.target.value)}
                                     className={`text-xs font-bold px-3 py-1 rounded-full border-none focus:ring-0 cursor-pointer appearance-none text-center min-w-[80px] ${quote.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                                            quote.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                quote.status === 'sent' ? 'bg-blue-100 text-blue-700' :
-                                                    'bg-slate-100 text-slate-600'
+                                        quote.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                            quote.status === 'sent' ? 'bg-blue-100 text-blue-700' :
+                                                'bg-slate-100 text-slate-600'
                                         }`}
                                     onClick={(e) => e.stopPropagation()}
                                 >
@@ -521,9 +549,23 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     </div>
 
                                     <div className="flex justify-end mt-6">
-                                        <div className="bg-slate-900 text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-lg">
-                                            <span className="text-slate-300 font-medium">Totale Documento</span>
-                                            <span className="text-2xl font-bold">€{calculateTotal().toFixed(2)}</span>
+                                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 min-w-[300px]">
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-slate-600">Subtotale</span>
+                                                    <span className="font-semibold text-slate-900">€{calculateTotalWithVAT().subtotal.toFixed(2)}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-slate-600">IVA ({formData.vatRate}%)</span>
+                                                    <span className="font-semibold text-slate-900">€{calculateTotalWithVAT().vatAmount.toFixed(2)}</span>
+                                                </div>
+                                                <div className="pt-2 border-t border-slate-200">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="font-bold text-slate-900">Totale Documento</span>
+                                                        <span className="text-2xl font-bold text-slate-900">€{calculateTotalWithVAT().total.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
@@ -557,12 +599,26 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     </div>
                                 </section>
 
-                                {/* Total */}
+                                {/* Total with VAT Breakdown */}
                                 <section>
                                     <div className="flex justify-end">
-                                        <div className="bg-slate-900 text-white px-6 py-3 rounded-xl flex items-center gap-4 shadow-lg">
-                                            <span className="text-slate-300 font-medium">Totale Documento</span>
-                                            <span className="text-2xl font-bold">€{calculateTotal().toFixed(2)}</span>
+                                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 min-w-[350px]">
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-slate-600">Subtotale</span>
+                                                    <span className="font-semibold text-slate-900">€{calculateTotalWithVAT().subtotal.toFixed(2)}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-slate-600">IVA ({formData.vatRate}%)</span>
+                                                    <span className="font-semibold text-slate-900">€{calculateTotalWithVAT().vatAmount.toFixed(2)}</span>
+                                                </div>
+                                                <div className="pt-3 border-t-2 border-slate-300">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-lg font-bold text-slate-900">Totale Documento</span>
+                                                        <span className="text-3xl font-bold text-slate-900">€{calculateTotalWithVAT().total.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>

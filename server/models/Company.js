@@ -28,6 +28,25 @@ const companySchema = new mongoose.Schema({
     bankName: String, // Nome Banca
     iban: String, // IBAN
     logo: String, // Path to logo image
+    emailConfig: {
+        service: {
+            type: String,
+            default: 'gmail',
+            enum: ['gmail', 'outlook', 'custom']
+        },
+        host: String, // smtp.gmail.com
+        port: {
+            type: Number,
+            default: 587
+        },
+        user: String, // company@example.com
+        password: String, // Encrypted app password
+        fromName: String, // Display name in emails
+        configured: {
+            type: Boolean,
+            default: false
+        }
+    },
     active: {
         type: Boolean,
         default: true

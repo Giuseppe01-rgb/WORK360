@@ -43,7 +43,7 @@ export default function AnalyticsDashboard() {
     return (
         <Layout title="Analisi Dati">
             {/* Filter */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+            <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
                 <div className="flex items-center gap-4">
                     <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
                         <Filter className="w-5 h-5" />
@@ -68,7 +68,7 @@ export default function AnalyticsDashboard() {
 
             {/* Main Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="bg-white p-6 rounded-2xl shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
                             <Building2 className="w-5 h-5" />
@@ -80,7 +80,7 @@ export default function AnalyticsDashboard() {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="bg-white p-6 rounded-2xl shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 bg-green-50 rounded-lg text-green-600">
                             <Users className="w-5 h-5" />
@@ -92,7 +92,7 @@ export default function AnalyticsDashboard() {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="bg-white p-6 rounded-2xl shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
                             <Clock className="w-5 h-5" />
@@ -107,7 +107,7 @@ export default function AnalyticsDashboard() {
 
             {/* Weekly Hours */}
             {analytics?.weeklyHours && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+                <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-slate-400" />
                         Ore Settimanali
@@ -141,7 +141,7 @@ export default function AnalyticsDashboard() {
             )}
 
             {/* Site Statistics */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-8 shadow-sm">
+            <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-slate-400" />
                     Statistiche per Cantiere
@@ -164,8 +164,8 @@ export default function AnalyticsDashboard() {
                                         {stat.site.name}
                                     </h4>
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${stat.site.status === 'active' ? 'bg-green-100 text-green-700' :
-                                            stat.site.status === 'planned' ? 'bg-blue-100 text-blue-700' :
-                                                'bg-yellow-100 text-yellow-700'
+                                        stat.site.status === 'planned' ? 'bg-blue-100 text-blue-700' :
+                                            'bg-yellow-100 text-yellow-700'
                                         }`}>
                                         {stat.site.status === 'active' ? 'In Corso' : stat.site.status === 'planned' ? 'Pianificato' : 'Archiviato'}
                                     </span>
@@ -222,7 +222,7 @@ export default function AnalyticsDashboard() {
 
             {/* Material Summary */}
             {analytics?.materialSummary && analytics.materialSummary.length > 0 && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div className="bg-white rounded-2xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                         <Package className="w-5 h-5 text-slate-400" />
                         Riepilogo Materiali

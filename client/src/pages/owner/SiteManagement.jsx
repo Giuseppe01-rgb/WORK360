@@ -56,7 +56,7 @@ const SiteDetails = ({ site, onBack }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                <div className="bg-slate-50 p-6 rounded-2xl">
                     <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
                         <Clock className="w-4 h-4" /> Ore Totali
                     </h3>
@@ -64,7 +64,7 @@ const SiteDetails = ({ site, onBack }) => {
                         {report?.totalHours?.toFixed(2) || '0.00'} <span className="text-lg font-normal text-slate-500">h</span>
                     </p>
                 </div>
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                <div className="bg-slate-50 p-6 rounded-2xl">
                     <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
                         <Package className="w-4 h-4" /> Materiali
                     </h3>
@@ -72,7 +72,7 @@ const SiteDetails = ({ site, onBack }) => {
                         {report?.materials?.length || 0} <span className="text-lg font-normal text-slate-500">tipi</span>
                     </p>
                 </div>
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                <div className="bg-slate-50 p-6 rounded-2xl">
                     <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
                         <Users className="w-4 h-4" /> Dipendenti
                     </h3>
@@ -83,7 +83,7 @@ const SiteDetails = ({ site, onBack }) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                <div className="bg-white rounded-2xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                         <Users className="w-5 h-5 text-slate-400" />
                         Ore per Dipendente
@@ -102,7 +102,7 @@ const SiteDetails = ({ site, onBack }) => {
                     )}
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                <div className="bg-white rounded-2xl p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                         <Package className="w-5 h-5 text-slate-400" />
                         Materiali Utilizzati
@@ -266,7 +266,7 @@ export default function SiteManagement() {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 flex items-center justify-between">
+                <div className="bg-white p-6 rounded-2xl shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-sm font-semibold text-slate-500 mb-1">Tutti i Cantieri</p>
                         <p className="text-3xl font-bold text-slate-900">{totalSites}</p>
@@ -275,7 +275,7 @@ export default function SiteManagement() {
                         <Building2 className="w-6 h-6" />
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 flex items-center justify-between">
+                <div className="bg-white p-6 rounded-2xl shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-sm font-semibold text-slate-500 mb-1">In Corso</p>
                         <p className="text-3xl font-bold text-orange-600">{activeSites}</p>
@@ -284,7 +284,7 @@ export default function SiteManagement() {
                         <Clock className="w-6 h-6" />
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 flex items-center justify-between">
+                <div className="bg-white p-6 rounded-2xl shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-sm font-semibold text-slate-500 mb-1">Archiviati</p>
                         <p className="text-3xl font-bold text-green-600">{archivedSites}</p>
@@ -301,7 +301,7 @@ export default function SiteManagement() {
                     <div
                         key={site._id}
                         onClick={() => setSelectedSite(site)}
-                        className="bg-white p-6 rounded-2xl border border-slate-200 hover:shadow-md hover:border-blue-500 transition-all cursor-pointer group"
+                        className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group"
                     >
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
@@ -324,8 +324,8 @@ export default function SiteManagement() {
 
                             <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${site.status === 'active' ? 'bg-green-100 text-green-700' :
-                                        site.status === 'planned' ? 'bg-blue-100 text-blue-700' :
-                                            'bg-slate-100 text-slate-700'
+                                    site.status === 'planned' ? 'bg-blue-100 text-blue-700' :
+                                        'bg-slate-100 text-slate-700'
                                     }`}>
                                     {site.status === 'active' ? 'In Corso' : site.status === 'planned' ? 'Pianificato' : 'Archiviato'}
                                 </span>

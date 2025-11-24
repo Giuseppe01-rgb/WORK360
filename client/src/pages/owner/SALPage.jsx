@@ -121,7 +121,7 @@ export default function SALPage() {
             {/* SALs Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sals.map(sal => (
-                    <div key={sal._id} className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow flex flex-col justify-between">
+                    <div key={sal._id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                         <div className="mb-6">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-2 text-slate-900 font-bold text-lg">
