@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import {
-    Plus, Trash2, Eye, Mail, MessageCircle, FileText,
+    Plus, Trash2, Eye, Mail, FileText,
     Edit, Download, X, CheckCircle, AlertCircle, Search
 } from 'lucide-react';
 
@@ -185,40 +185,6 @@ ${user?.company?.name || 'La tua azienda'}`;
         } catch (error) {
             console.error('Error preparing email:', error);
             showError('❌ Errore nella preparazione dell\'email');
-        } finally {
-            setSending(false);
-        }
-    };
-
-    const handleSendViaWhatsApp = async () => {
-        if (!formData.client.phone) {
-            showError('Inserisci il telefono del cliente');
-            return;
-        }
-        if (!editingId) return;
-
-        setSending(true);
-        try {
-            await downloadPDF(editingId);
-            showSuccess('📥 PDF scaricato! Tra 2 secondi si aprirà WhatsApp: ricordati di allegare il PDF dalla cartella Download.');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            const response = await communicationAPI.sendWhatsAppQuote(editingId, {
-                phone: formData.client.phone,
-                message: `Ciao ${formData.client.name}, ecco il preventivo ${formData.number || 'richiesto'}! 📄`
-            });
-
-            if (response.data.whatsappLink) {
-                window.open(response.data.whatsappLink, '_blank');
-                setTimeout(() => {
-                    showSuccess('✅ WhatsApp aperto! ALLEGA MANUALMENTE il PDF dalla cartella Download prima di inviare.');
-                    setShowSendModal(false);
-                    resetForm();
-                }, 500);
-            }
-        } catch (error) {
-            console.error('Error sending WhatsApp:', error);
-            showError("❌ Errore nell'invio WhatsApp");
         } finally {
             setSending(false);
         }
@@ -515,13 +481,6 @@ ${user?.company?.name || 'La tua azienda'}`;
                                 className="w-full py-3 bg-[#5D5FEF] text-white font-semibold rounded-xl hover:bg-[#4B4DDB] transition-colors flex items-center justify-center gap-2"
                             >
                                 <Mail className="w-5 h-5" /> Invia via Email
-                            </button>
-                            <button
-                                onClick={handleSendViaWhatsApp}
-                                disabled={sending}
-                                className="w-full py-3 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <MessageCircle className="w-5 h-5" /> Invia via WhatsApp
                             </button>
                             <button
                                 onClick={() => setShowSendModal(false)}
