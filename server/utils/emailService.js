@@ -34,6 +34,11 @@ const createTransport = (emailConfig) => {
         transporterConfig.secure = emailConfig.port === 465; // true for 465, false for other ports
     }
 
+    // Add timeouts to prevent hanging
+    transporterConfig.connectionTimeout = 10000; // 10 seconds
+    transporterConfig.greetingTimeout = 5000;    // 5 seconds
+    transporterConfig.socketTimeout = 10000;     // 10 seconds
+
     return nodemailer.createTransport(transporterConfig);
 };
 
@@ -49,22 +54,26 @@ const createTransport = (emailConfig) => {
 exports.sendEmailWithCompanyConfig = async (emailConfig, to, subject, html, pdfBuffer, filename) => {
     const transporter = createTransport(emailConfig);
 
-    const fromName = emailConfig.fromName || 'WORK360';
-    const mailOptions = {
-        from: `${fromName} <${emailConfig.user}>`,
-        to,
-        subject,
-        html,
-        attachments: [
-            {
-                filename,
-                content: pdfBuffer,
-                contentType: 'application/pdf'
-            }
-        ]
-    };
-
     try {
+        // Verify connection first
+        await transporter.verify();
+        console.log('✅ SMTP Connection verified');
+
+        const fromName = emailConfig.fromName || 'WORK360';
+        const mailOptions = {
+            from: `${fromName} <${emailConfig.user}>`,
+            to,
+            subject,
+            html,
+            attachments: [
+                {
+                    filename,
+                    content: pdfBuffer,
+                    contentType: 'application/pdf'
+                }
+            ]
+        };
+
         const info = await transporter.sendMail(mailOptions);
         console.log('✉️  Email sent:', info.messageId);
         return info;
