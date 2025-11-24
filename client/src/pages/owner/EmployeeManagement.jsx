@@ -162,9 +162,11 @@ export default function EmployeeManagement() {
                         {employees.map(employee => (
                             <div
                                 key={employee._id}
-                                className="bg-white p-6 rounded-2xl border border-slate-200 hover:shadow-md transition-all"
+                                onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
+                                className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group relative"
                             >
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <ChevronRight className="absolute top-6 right-6 w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pr-8">
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
                                             <User className="w-7 h-7 text-slate-600" />

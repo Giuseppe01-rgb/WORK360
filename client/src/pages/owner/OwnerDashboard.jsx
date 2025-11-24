@@ -295,9 +295,10 @@ export default function OwnerDashboard() {
                             <div
                                 key={site._id}
                                 onClick={() => setSelectedSite(site)}
-                                className="bg-white p-6 rounded-2xl border border-slate-200 hover:shadow-lg hover:border-slate-300 transition-all cursor-pointer group animate-in fade-in slide-in-from-bottom-2"
+                                className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group animate-in fade-in slide-in-from-bottom-2 relative"
                             >
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <ChevronRight className="absolute top-6 right-6 w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pr-8">
                                     <div>
                                         <div className="flex items-center gap-3 mb-2">
                                             <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-slate-900 transition-colors">
