@@ -11,17 +11,17 @@ const {
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
-// User management (owner only)
+// Signature (must be before /:id routes)
+router.post('/signature', protect, uploadSignature);
+
+// Email configuration (must be before /:id routes)
+router.put('/email-config', protect, updateEmailConfig);
+router.post('/email-config/test', protect, testEmailConfig);
+
+// User management (owner only) - parameterized routes come last
 router.get('/', protect, getAllUsers);
 router.post('/', protect, createUser);
 router.put('/:id', protect, updateUser);
 router.delete('/:id', protect, deleteUser);
-
-// Signature
-router.post('/signature', protect, uploadSignature);
-
-// Email configuration
-router.put('/email-config', protect, updateEmailConfig);
-router.post('/email-config/test', protect, testEmailConfig);
 
 module.exports = router;
