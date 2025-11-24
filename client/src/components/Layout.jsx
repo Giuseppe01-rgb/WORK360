@@ -77,20 +77,21 @@ export default function Layout({ children, title }) {
     return (
         <div className="min-h-screen bg-slate-50 flex font-sans">
             {/* Sidebar (Desktop) */}
-            <aside className="hidden md:flex flex-col w-72 bg-white border-r border-slate-200 fixed h-full z-30 transition-all duration-300 shadow-sm">
+            <aside className="hidden md:flex flex-col w-72 bg-white border-r border-slate-100 fixed h-full z-30 transition-all duration-300">
                 {/* Brand */}
-                <div className="h-20 flex items-center px-8 border-b border-slate-100">
-                    <div className="flex items-center justify-center w-full">
+                <div className="h-20 flex items-center px-6">
+                    <div className="flex items-center gap-3">
                         <img
-                            src="/assets/app-logo.png?v=2"
+                            src="/assets/logo-new.png"
                             alt="WORK360"
-                            className="w-12 h-12 object-contain"
+                            className="w-10 h-10 object-contain rounded-lg"
                         />
+                        <span className="text-xl font-black tracking-tight text-slate-900">WORK360</span>
                     </div>
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 overflow-y-auto py-8 px-4 space-y-1.5">
+                <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
                     {links.map((link) => {
                         const Icon = link.icon;
                         const isActive = location.pathname === link.path ||
@@ -99,23 +100,23 @@ export default function Layout({ children, title }) {
                         // If it has submenu (Funzioni Operaio)
                         if (link.submenu) {
                             return (
-                                <div key={link.path}>
+                                <div key={link.path} className="mb-2">
                                     <button
                                         onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
-                                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
-                                            ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 translate-x-1'
-                                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
+                                            ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
+                                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                                             }`}
                                     >
-                                        <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
-                                        {link.label}
+                                        <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                                        <span className="flex-1 text-left">{link.label}</span>
                                         {isWorkerFunctionsOpen ?
-                                            <ChevronUp className="w-4 h-4 ml-auto" /> :
-                                            <ChevronDown className="w-4 h-4 ml-auto" />
+                                            <ChevronUp className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} /> :
+                                            <ChevronDown className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} />
                                         }
                                     </button>
                                     {isWorkerFunctionsOpen && (
-                                        <div className="ml-4 mt-1.5 space-y-1">
+                                        <div className="ml-4 mt-1 pl-4 border-l border-slate-100 space-y-1">
                                             {link.submenu.map((sublink) => {
                                                 const SubIcon = sublink.icon;
                                                 const isSubActive = location.pathname + location.search === sublink.path;
@@ -123,12 +124,12 @@ export default function Layout({ children, title }) {
                                                     <Link
                                                         key={sublink.path}
                                                         to={sublink.path}
-                                                        className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isSubActive
-                                                            ? 'bg-slate-100 text-slate-900'
+                                                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isSubActive
+                                                            ? 'text-slate-900 bg-slate-50'
                                                             : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                                                             }`}
                                                     >
-                                                        <SubIcon className="w-4 h-4" />
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-slate-900' : 'bg-slate-300'}`}></span>
                                                         {sublink.label}
                                                     </Link>
                                                 );
@@ -144,41 +145,41 @@ export default function Layout({ children, title }) {
                             <Link
                                 key={link.path}
                                 to={link.path}
-                                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 group nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
-                                    ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 translate-x-1'
-                                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group mb-1 nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
+                                    ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                                     }`}
                             >
-                                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
+                                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
                                 {link.label}
-                                {isActive && <ChevronRight className="w-4 h-4 ml-auto text-slate-400" />}
+                                {isActive && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>}
                             </Link>
                         );
                     })}
                 </nav>
 
                 {/* User Profile (Bottom Sidebar) */}
-                <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-                    <div className="flex items-center gap-3 mb-4 p-2 rounded-xl hover:bg-white transition-colors border border-transparent hover:border-slate-200 cursor-pointer group">
-                        <div className="w-10 h-10 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center text-slate-700 font-bold shadow-sm group-hover:border-slate-900 transition-colors">
+                <div className="p-4 border-t border-slate-100">
+                    <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                        <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-700 font-bold border-2 border-white shadow-sm">
                             {user?.firstName?.charAt(0) || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
+                            <p className="text-sm font-bold text-slate-900 truncate">
                                 {user?.firstName} {user?.lastName}
                             </p>
                             <p className="text-xs text-slate-500 truncate capitalize">
                                 {user?.role === 'owner' ? 'Amministratore' : 'Collaboratore'}
                             </p>
                         </div>
+                        <button
+                            onClick={handleLogout}
+                            className="p-2 text-slate-400 hover:text-red-600 transition-colors"
+                            title="Disconnetti"
+                        >
+                            <LogOut className="w-4 h-4" />
+                        </button>
                     </div>
-                    <button
-                        onClick={handleLogout}
-                        className="flex items-center justify-center gap-2 w-full px-4 py-3 text-xs font-bold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-slate-200 hover:border-red-100"
-                    >
-                        <LogOut className="w-4 h-4" />
-                        Disconnetti
-                    </button>
                 </div>
             </aside>
 

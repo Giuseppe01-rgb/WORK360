@@ -50,11 +50,11 @@ export default function LoginPage() {
 
                 {/* Circular Logo */}
                 <div className="mb-8 relative w-24 h-24 mx-auto flex items-center justify-center">
-                    <div className="absolute inset-0 border-[6px] border-accent rounded-full border-t-transparent -rotate-45"></div>
-                    <div className="flex flex-col items-center justify-center leading-none z-10">
-                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest mb-0.5">WORK</span>
-                        <span className="text-2xl font-black text-accent tracking-tighter">360</span>
-                    </div>
+                    <img
+                        src="/assets/logo-new.png"
+                        alt="WORK360"
+                        className="w-full h-full object-contain rounded-full"
+                    />
                 </div>
 
                 {/* Header */}
@@ -119,9 +119,9 @@ export default function LoginPage() {
                                 )}
                             </button>
                         </div>
-                        <div className="mt-2 text-right">
+                        <div className="mt-2 text-left">
                             <button type="button" className="text-xs font-bold text-progress-blue hover:underline">
-                                Hai dimenticato la password? Clicca qui.
+                                Hai dimenticato la password? Clicca qui per recuperarla
                             </button>
                         </div>
                     </div>
