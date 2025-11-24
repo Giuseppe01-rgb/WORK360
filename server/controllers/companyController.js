@@ -21,7 +21,12 @@ const getCompany = async (req, res) => {
 // @access  Private (Owner)
 const updateCompany = async (req, res) => {
     try {
-        const { name, ownerName, piva, phone, email, pec, address } = req.body;
+        console.log('=== UPDATE COMPANY REQUEST ===');
+        console.log('User company ID:', req.user?.company?._id);
+        console.log('Request body keys:', Object.keys(req.body));
+        console.log('File uploaded:', !!req.file);
+
+        const { name, ownerName, piva, phone, email, pec, address, reaNumber, shareCapital, taxCode, bankName, iban } = req.body;
 
         const updateData = {
             name,
@@ -30,15 +35,29 @@ const updateCompany = async (req, res) => {
             phone,
             email,
             pec,
+            reaNumber,
+            shareCapital,
+            taxCode,
+            bankName,
+            iban,
             address: typeof address === 'string' ? JSON.parse(address) : address
         };
 
         if (req.file) {
-            // Convert buffer to base64
-            const b64 = Buffer.from(req.file.buffer).toString('base64');
-            const mimeType = req.file.mimetype;
-            updateData.logo = `data:${mimeType};base64,${b64}`;
+            console.log('Processing logo upload, size:', req.file.size, 'bytes');
+            try {
+                // Convert buffer to base64
+                const b64 = Buffer.from(req.file.buffer).toString('base64');
+                const mimeType = req.file.mimetype;
+                updateData.logo = `data:${mimeType};base64,${b64}`;
+                console.log('Logo converted to base64, length:', updateData.logo.length);
+            } catch (logoError) {
+                console.error('Error converting logo to base64:', logoError);
+                throw new Error('Errore nella conversione del logo');
+            }
         }
+
+        console.log('Updating company with data:', Object.keys(updateData));
 
         const company = await Company.findByIdAndUpdate(
             req.user.company._id,
@@ -46,9 +65,21 @@ const updateCompany = async (req, res) => {
             { new: true, runValidators: true }
         );
 
+        if (!company) {
+            throw new Error('Azienda non trovata');
+        }
+
+        console.log('Company updated successfully');
         res.json(company);
     } catch (error) {
-        res.status(500).json({ message: 'Errore nell\'aggiornamento azienda', error: error.message });
+        console.error('=== COMPANY UPDATE ERROR ===');
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({
+            message: 'Errore nell\'aggiornamento azienda',
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
