@@ -34,7 +34,11 @@ router.post('/send-email/quote/:id', protect, requireOwner, async (req, res) => 
         res.json({ success: true, message: 'Email inviata con successo' });
     } catch (error) {
         console.error('Email send error:', error);
-        res.status(500).json({ message: 'Errore nell\'invio dell\'email', error: error.message });
+        res.status(500).json({
+            message: 'Errore nell\'invio dell\'email',
+            error: error.message,
+            details: error.response?.body || error.toString()
+        });
     }
 });
 

@@ -190,7 +190,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
             }, 2000);
         } catch (error) {
             console.error('Error sending email:', error);
-            showError(error.response?.data?.message || '❌ Errore nell\'invio dell\'email');
+            const errorMsg = error.response?.data?.error || error.response?.data?.message || '❌ Errore nell\'invio dell\'email';
+            showError(errorMsg);
         } finally {
             setSending(false);
         }
@@ -260,6 +261,45 @@ ${user?.company?.name || 'Il team WORK360'}`;
         }
     };
 
+    const handleStatusChange = async (quoteId, newStatus) => {
+        try {
+            // We need to send only the status update, but the API expects a full object or handles partials?
+            // Let's assume the update endpoint handles partial updates correctly as implemented in controller
+            // Actually controller implementation: const { company: _, ...updateData } = req.body; Object.assign(quote, ...);
+            // So we need to be careful not to overwrite items with empty array if we just send status.
+            // But wait, the controller does: const { items, vatRate = 22 } = updateData;
+            // And then maps items. If items is undefined, it might crash or clear items.
+            // Let's check controller again.
+
+            // Controller:
+            // const { items, vatRate = 22 } = updateData;
+            // const processedItems = items.map(...) -> This will crash if items is undefined!
+
+            // I need to fetch the quote first or send the existing items?
+            // Or better, I should fix the backend controller to handle partial updates properly without requiring items.
+            // But for now, let's just find the quote in our local state and send it all back with new status.
+
+            const quote = quotes.find(q => q._id === quoteId);
+            if (!quote) return;
+
+            const updateData = {
+                ...quote,
+                status: newStatus,
+                company: undefined // Remove company object/id to avoid issues
+            };
+
+            await quoteAPI.update(quoteId, updateData);
+
+            // Optimistic update
+            setQuotes(quotes.map(q => q._id === quoteId ? { ...q, status: newStatus } : q));
+            showSuccess('Stato aggiornato');
+        } catch (error) {
+            console.error('Error updating status:', error);
+            showError('Errore aggiornamento stato');
+            loadQuotes(); // Revert on error
+        }
+    };
+
     if (loading) {
         return (
             <Layout title="Preventivi">
@@ -298,10 +338,25 @@ ${user?.company?.name || 'Il team WORK360'}`;
                     <div key={quote._id} className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow flex flex-col justify-between">
                         <div className="mb-6">
                             <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-lg font-bold text-slate-900 line-clamp-1">{quote.client.name}</h3>
-                                <span className="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded">
-                                    {quote.number}
-                                </span>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900 line-clamp-1">{quote.client.name}</h3>
+                                    <span className="text-xs font-mono text-slate-500">{quote.number}</span>
+                                </div>
+                                <select
+                                    value={quote.status}
+                                    onChange={(e) => handleStatusChange(quote._id, e.target.value)}
+                                    className={`text-xs font-bold px-3 py-1 rounded-full border-none focus:ring-0 cursor-pointer appearance-none text-center min-w-[80px] ${quote.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                                            quote.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                quote.status === 'sent' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-slate-100 text-slate-600'
+                                        }`}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <option value="draft">Bozza</option>
+                                    <option value="sent">Inviato</option>
+                                    <option value="accepted">Accettato</option>
+                                    <option value="rejected">Rifiutato</option>
+                                </select>
                             </div>
                             <p className="text-sm text-slate-500 mb-4">
                                 {new Date(quote.date).toLocaleDateString('it-IT')}
