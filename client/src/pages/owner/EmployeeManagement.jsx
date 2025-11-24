@@ -151,20 +151,11 @@ export default function EmployeeManagement() {
             ) : (
                 // Employee List
                 <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h2 className="text-2xl font-bold text-slate-900">
-                                {employees.length} {employees.length === 1 ? 'Collaboratore' : 'Collaboratori'}
-                            </h2>
-                            <p className="text-slate-500">Gestisci il tuo team</p>
-                        </div>
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all flex items-center gap-2 shadow-sm"
-                        >
-                            <Plus className="w-5 h-5" />
-                            Aggiungi Persona
-                        </button>
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900">
+                            {employees.length} {employees.length === 1 ? 'Collaboratore' : 'Collaboratori'}
+                        </h2>
+                        <p className="text-slate-500">Gestisci il tuo team</p>
                     </div>
 
                     <div className="grid gap-4">
@@ -201,8 +192,8 @@ export default function EmployeeManagement() {
 
                                     <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${employee.role === 'owner'
-                                                ? 'bg-purple-100 text-purple-700'
-                                                : 'bg-blue-100 text-blue-700'
+                                            ? 'bg-purple-100 text-purple-700'
+                                            : 'bg-blue-100 text-blue-700'
                                             }`}>
                                             {employee.role === 'owner' ? 'Titolare' : 'Operaio'}
                                         </span>
@@ -260,8 +251,8 @@ export default function EmployeeManagement() {
                                             type="button"
                                             onClick={() => setFormData({ ...formData, role: 'worker' })}
                                             className={`p-4 rounded-xl border-2 font-bold transition-all ${formData.role === 'worker'
-                                                    ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                                    : 'border-slate-200 hover:border-slate-300'
+                                                ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                                : 'border-slate-200 hover:border-slate-300'
                                                 }`}
                                         >
                                             Operaio
@@ -270,8 +261,8 @@ export default function EmployeeManagement() {
                                             type="button"
                                             onClick={() => setFormData({ ...formData, role: 'owner' })}
                                             className={`p-4 rounded-xl border-2 font-bold transition-all ${formData.role === 'owner'
-                                                    ? 'border-purple-600 bg-purple-50 text-purple-700'
-                                                    : 'border-slate-200 hover:border-slate-300'
+                                                ? 'border-purple-600 bg-purple-50 text-purple-700'
+                                                : 'border-slate-200 hover:border-slate-300'
                                                 }`}
                                         >
                                             Titolare

@@ -39,25 +39,6 @@ const ProtectedRoute = ({ children, requireOwner = false }) => {
   return children;
 };
 
-// Root redirect based on role
-const RootRedirect = () => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return user.role === 'owner' ? (
-    <Navigate to="/owner" replace />
-  ) : (
-    <Navigate to="/worker" replace />
-  );
-};
-
 function AppRoutes() {
   return (
     <Routes>
