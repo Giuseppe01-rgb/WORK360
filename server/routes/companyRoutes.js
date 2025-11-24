@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, requireOwner } = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const upload = require('../middleware/memoryUploadMiddleware');
 const { getCompany, updateCompany } = require('../controllers/companyController');
 
 router.get('/', protect, requireOwner, getCompany);

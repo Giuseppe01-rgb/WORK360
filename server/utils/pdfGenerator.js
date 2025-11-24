@@ -15,11 +15,24 @@ const generateQuotePDFBuffer = (quote, company, user) => {
         let headerY = 45;
 
         // Logo (Left)
+        // Logo (Left)
         if (company.logo) {
             try {
-                const logoPath = path.join(__dirname, '..', 'public', company.logo);
-                if (fs.existsSync(logoPath)) {
-                    doc.image(logoPath, 50, headerY, { width: 80 });
+                if (company.logo.startsWith('data:image')) {
+                    const base64Data = company.logo.split(';base64,').pop();
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    doc.image(buffer, 50, headerY, { width: 80 });
+                } else {
+                    // Legacy support for file paths
+                    let logoPath = company.logo;
+                    if (logoPath.startsWith('/')) logoPath = logoPath.substring(1); // Remove leading slash
+
+                    // Check in uploads folder directly (since middleware saves to server/uploads)
+                    const absolutePath = path.join(__dirname, '..', logoPath);
+
+                    if (fs.existsSync(absolutePath)) {
+                        doc.image(absolutePath, 50, headerY, { width: 80 });
+                    }
                 }
             } catch (e) {
                 console.error('Error loading logo:', e);
