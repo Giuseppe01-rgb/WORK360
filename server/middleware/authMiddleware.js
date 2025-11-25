@@ -13,6 +13,11 @@ const protect = async (req, res, next) => {
             // Verify token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+            // Validate token structure
+            if (!decoded || !decoded.id) {
+                return res.status(401).json({ message: 'Non autorizzato, token non valido' });
+            }
+
             // Get user from token
             req.user = await User.findById(decoded.id).select('-password').populate('company');
 

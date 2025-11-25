@@ -1,4 +1,6 @@
 const Attendance = require('../models/Attendance');
+const ConstructionSite = require('../models/ConstructionSite');
+const User = require('../models/User');
 
 // @desc    Clock in
 // @route   POST /api/attendance/clock-in
@@ -8,9 +10,23 @@ const clockIn = async (req, res) => {
         console.log('ClockIn Body:', req.body);
         const { siteId, latitude, longitude, address } = req.body;
 
+        // Validate coordinates if provided
+        if ((latitude && isNaN(parseFloat(latitude))) || (longitude && isNaN(parseFloat(longitude)))) {
+            return res.status(400).json({ message: 'Coordinate GPS non valide' });
+        }
+
         // Validate Site ID
         if (!siteId) {
             return res.status(400).json({ message: 'Cantiere obbligatorio' });
+        }
+
+        // Verify site belongs to user's company
+        const site = await ConstructionSite.findById(siteId);
+        if (!site) {
+            return res.status(404).json({ message: 'Cantiere non trovato' });
+        }
+        if (site.company.toString() !== req.user.company._id.toString()) {
+            return res.status(403).json({ message: 'Non autorizzato a timbrare su questo cantiere' });
         }
 
         // Check if user already has an active attendance (not clocked out)
@@ -54,6 +70,11 @@ const clockOut = async (req, res) => {
     try {
         console.log('ClockOut Body:', req.body);
         const { attendanceId, latitude, longitude, address } = req.body;
+
+        // Validate coordinates if provided
+        if ((latitude && isNaN(parseFloat(latitude))) || (longitude && isNaN(parseFloat(longitude)))) {
+            return res.status(400).json({ message: 'Coordinate GPS non valide' });
+        }
 
         if (!attendanceId) {
             console.log('ClockOut Error: Missing attendanceId');
@@ -113,6 +134,11 @@ const getMyAttendance = async (req, res) => {
         const query = { user: req.user._id };
 
         if (siteId) {
+            // Verify site belongs to user's company
+            const site = await ConstructionSite.findById(siteId);
+            if (!site || site.company.toString() !== req.user.company._id.toString()) {
+                return res.status(403).json({ message: 'Cantiere non valido' });
+            }
             query.site = siteId;
         }
 
@@ -160,7 +186,6 @@ const getAllAttendance = async (req, res) => {
         const query = {};
 
         // Filter by company
-        const User = require('../models/User');
         const companyUsers = await User.find({ company: req.user.company._id }).select('_id');
         query.user = { $in: companyUsers.map(u => u._id) };
 
@@ -169,6 +194,11 @@ const getAllAttendance = async (req, res) => {
         }
 
         if (userId) {
+            // Ensure userId is within the company
+            const isUserInCompany = companyUsers.some(u => u._id.toString() === userId);
+            if (!isUserInCompany) {
+                return res.status(403).json({ message: 'Utente non trovato nella tua azienda' });
+            }
             query.user = userId;
         }
 

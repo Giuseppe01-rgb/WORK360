@@ -4,6 +4,12 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
 
+// Security: Validate critical environment variables
+if (!process.env.JWT_SECRET) {
+    console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables');
+    process.exit(1);
+}
+
 const helmet = require('helmet');
 
 // Initialize express

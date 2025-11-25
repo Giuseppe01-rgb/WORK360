@@ -1,7 +1,19 @@
 const ConstructionSite = require('../models/ConstructionSite');
+const User = require('../models/User');
 
 const createSite = async (req, res) => {
     try {
+        // Validate assignedWorkers belong to user's company
+        if (req.body.assignedWorkers && req.body.assignedWorkers.length > 0) {
+            const workers = await User.find({
+                _id: { $in: req.body.assignedWorkers },
+                company: req.user.company._id
+            });
+            if (workers.length !== req.body.assignedWorkers.length) {
+                return res.status(403).json({ message: 'Alcuni lavoratori non appartengono alla tua azienda' });
+            }
+        }
+
         const site = await ConstructionSite.create({
             ...req.body,
             company: req.user.company._id
@@ -28,8 +40,10 @@ const getSites = async (req, res) => {
 
 const getSite = async (req, res) => {
     try {
-        const site = await ConstructionSite.findById(req.params.id)
-            .populate('assignedWorkers', 'firstName lastName username');
+        const site = await ConstructionSite.findOne({
+            _id: req.params.id,
+            company: req.user.company._id
+        }).populate('assignedWorkers', 'firstName lastName username');
 
         if (!site) {
             return res.status(404).json({ message: 'Cantiere non trovato' });
@@ -43,9 +57,23 @@ const getSite = async (req, res) => {
 
 const updateSite = async (req, res) => {
     try {
-        const site = await ConstructionSite.findByIdAndUpdate(
-            req.params.id,
-            req.body,
+        // Prevent company field from being changed
+        const { company, ...updateData } = req.body;
+
+        // Validate assignedWorkers if provided
+        if (updateData.assignedWorkers && updateData.assignedWorkers.length > 0) {
+            const workers = await User.find({
+                _id: { $in: updateData.assignedWorkers },
+                company: req.user.company._id
+            });
+            if (workers.length !== updateData.assignedWorkers.length) {
+                return res.status(403).json({ message: 'Alcuni lavoratori non appartengono alla tua azienda' });
+            }
+        }
+
+        const site = await ConstructionSite.findOneAndUpdate(
+            { _id: req.params.id, company: req.user.company._id },
+            updateData,
             { new: true, runValidators: true }
         );
 
@@ -61,7 +89,10 @@ const updateSite = async (req, res) => {
 
 const deleteSite = async (req, res) => {
     try {
-        const site = await ConstructionSite.findByIdAndDelete(req.params.id);
+        const site = await ConstructionSite.findOneAndDelete({
+            _id: req.params.id,
+            company: req.user.company._id
+        });
 
         if (!site) {
             return res.status(404).json({ message: 'Cantiere non trovato' });
