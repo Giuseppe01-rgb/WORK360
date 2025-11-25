@@ -949,8 +949,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     required
                                                 >
                                                     <option value="">Seleziona un cantiere...</option>
-                                                    {sites.map(site => (
-                                                        <option key={site._id} value={site._id}>{site.name}</option>
+                                                    {Array.isArray(sites) && sites.filter(s => s).map(site => (
+                                                        <option key={site._id} value={site._id}>{site?.name || 'Cantiere senza nome'}</option>
                                                     ))}
                                                 </select>
                                             </div>
