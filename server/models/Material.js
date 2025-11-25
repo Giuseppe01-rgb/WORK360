@@ -11,6 +11,15 @@ const materialSchema = new mongoose.Schema({
         ref: 'ConstructionSite',
         required: true
     },
+    company: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Company',
+        required: true
+    },
+    materialMaster: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MaterialMaster'
+    },
     name: {
         type: String,
         required: true,
