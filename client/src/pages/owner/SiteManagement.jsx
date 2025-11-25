@@ -3,13 +3,22 @@ import Layout from '../../components/Layout';
 import { siteAPI, analyticsAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
-    Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search
+    Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search,
+    FileText, Camera
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack }) => {
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeSection, setActiveSection] = useState('data');
+
+    const sections = [
+        { id: 'data', label: 'Dati' },
+        { id: 'reports', label: 'Rapporti giornalieri' },
+        { id: 'notes', label: 'Note' },
+        { id: 'photos', label: 'Foto' }
+    ];
 
     useEffect(() => {
         const loadDetails = async () => {
@@ -55,72 +64,141 @@ const SiteDetails = ({ site, onBack }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-slate-50 p-6 rounded-2xl">
-                    <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
-                        <Clock className="w-4 h-4" /> Ore Totali
-                    </h3>
-                    <p className="text-3xl font-bold text-slate-900">
-                        {report?.totalHours?.toFixed(2) || '0.00'} <span className="text-lg font-normal text-slate-500">h</span>
-                    </p>
-                </div>
-                <div className="bg-slate-50 p-6 rounded-2xl">
-                    <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
-                        <Package className="w-4 h-4" /> Materiali
-                    </h3>
-                    <p className="text-3xl font-bold text-slate-900">
-                        {report?.materials?.length || 0} <span className="text-lg font-normal text-slate-500">tipi</span>
-                    </p>
-                </div>
-                <div className="bg-slate-50 p-6 rounded-2xl">
-                    <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
-                        <Users className="w-4 h-4" /> Dipendenti
-                    </h3>
-                    <p className="text-3xl font-bold text-slate-900">
-                        {employeeHours?.length || 0}
-                    </p>
-                </div>
+            {/* Desktop Tabs */}
+            <div className="hidden md:flex border-b border-slate-200 mb-6">
+                {sections.map(section => (
+                    <button
+                        key={section.id}
+                        onClick={() => setActiveSection(section.id)}
+                        className={`px-6 py-3 font-semibold transition-colors ${activeSection === section.id
+                                ? 'border-b-2 border-blue-600 text-blue-600'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                    >
+                        {section.label}
+                    </button>
+                ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <Users className="w-5 h-5 text-slate-400" />
-                        Ore per Dipendente
-                    </h3>
-                    {employeeHours.length > 0 ? (
-                        <div className="space-y-3">
-                            {employeeHours.map((emp) => (
-                                <div key={emp._id._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                    <span className="font-medium text-slate-700">{emp._id.firstName} {emp._id.lastName}</span>
-                                    <span className="font-bold text-slate-900">{emp.totalHours.toFixed(2)} h</span>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-slate-400 italic">Nessuna ora registrata.</p>
-                    )}
-                </div>
-
-                <div className="bg-white rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <Package className="w-5 h-5 text-slate-400" />
-                        Materiali Utilizzati
-                    </h3>
-                    {report?.materials?.length > 0 ? (
-                        <div className="space-y-3">
-                            {report.materials.map((mat) => (
-                                <div key={mat._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                    <span className="font-medium text-slate-700">{mat._id}</span>
-                                    <span className="font-bold text-slate-900">{mat.totalQuantity} {mat.unit}</span>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-slate-400 italic">Nessun materiale registrato.</p>
-                    )}
-                </div>
+            {/* Mobile Selector */}
+            <div className="md:hidden mb-6">
+                <select
+                    value={activeSection}
+                    onChange={(e) => setActiveSection(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                >
+                    {sections.map(section => (
+                        <option key={section.id} value={section.id}>
+                            {section.label}
+                        </option>
+                    ))}
+                </select>
             </div>
+
+            {/* Content - Dati Section */}
+            {activeSection === 'data' && (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-slate-50 p-6 rounded-2xl">
+                            <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
+                                <Clock className="w-4 h-4" /> Ore Totali
+                            </h3>
+                            <p className="text-3xl font-bold text-slate-900">
+                                {report?.totalHours?.toFixed(2) || '0.00'} <span className="text-lg font-normal text-slate-500">h</span>
+                            </p>
+                        </div>
+                        <div className="bg-slate-50 p-6 rounded-2xl">
+                            <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
+                                <Package className="w-4 h-4" /> Materiali
+                            </h3>
+                            <p className="text-3xl font-bold text-slate-900">
+                                {report?.materials?.length || 0} <span className="text-lg font-normal text-slate-500">tipi</span>
+                            </p>
+                        </div>
+                        <div className="bg-slate-50 p-6 rounded-2xl">
+                            <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
+                                <Users className="w-4 h-4" /> Dipendenti
+                            </h3>
+                            <p className="text-3xl font-bold text-slate-900">
+                                {employeeHours?.length || 0}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="bg-white rounded-2xl p-6 shadow-sm">
+                            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <Users className="w-5 h-5 text-slate-400" />
+                                Ore per Dipendente
+                            </h3>
+                            {employeeHours.length > 0 ? (
+                                <div className="space-y-3">
+                                    {employeeHours.map((emp) => (
+                                        <div key={emp._id._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                            <span className="font-medium text-slate-700">{emp._id.firstName} {emp._id.lastName}</span>
+                                            <span className="font-bold text-slate-900">{emp.totalHours.toFixed(2)} h</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-slate-400 italic">Nessuna ora registrata.</p>
+                            )}
+                        </div>
+
+                        <div className="bg-white rounded-2xl p-6 shadow-sm">
+                            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <Package className="w-5 h-5 text-slate-400" />
+                                Materiali Utilizzati
+                            </h3>
+                            {report?.materials?.length > 0 ? (
+                                <div className="space-y-3">
+                                    {report.materials.map((mat) => (
+                                        <div key={mat._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                            <span className="font-medium text-slate-700">{mat._id}</span>
+                                            <span className="font-bold text-slate-900">{mat.totalQuantity} {mat.unit}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-slate-400 italic">Nessun materiale registrato.</p>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* Content - Rapporti giornalieri */}
+            {activeSection === 'reports' && (
+                <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Calendar className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">Rapporti Giornalieri</h3>
+                    <p className="text-slate-500">Nessun rapporto giornaliero registrato per questo cantiere.</p>
+                </div>
+            )}
+
+            {/* Content - Note */}
+            {activeSection === 'notes' && (
+                <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FileText className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">Note</h3>
+                    <p className="text-slate-500">Nessuna nota disponibile per questo cantiere.</p>
+                </div>
+            )}
+
+            {/* Content - Foto */}
+            {activeSection === 'photos' && (
+                <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Camera className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">Foto</h3>
+                    <p className="text-slate-500">Nessuna foto caricata per questo cantiere.</p>
+                </div>
+            )}
         </div>
     );
 };
