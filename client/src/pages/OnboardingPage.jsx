@@ -84,30 +84,35 @@ export default function OnboardingPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 w-full max-w-2xl animate-in fade-in zoom-in duration-500">
+        <div className="min-h-screen flex items-center justify-center bg-accent p-4 font-sans">
+            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 w-full max-w-md animate-in fade-in zoom-in duration-500">
+
+                {/* Circular Logo */}
+                <div className="mb-6 relative w-20 h-20 mx-auto flex items-center justify-center">
+                    <img
+                        src="/assets/logo-new.png"
+                        alt="WORK360"
+                        className="w-full h-full object-contain rounded-full"
+                    />
+                </div>
+
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <img
-                        src="/assets/app-logo.png?v=2"
-                        alt="WORK360"
-                        className="w-20 h-20 mx-auto mb-4 object-contain"
-                    />
-                    <h1 className="text-3xl font-black text-slate-900 mb-2">
+                    <h1 className="text-2xl font-black text-accent mb-2">
                         Registra la tua azienda
                     </h1>
-                    <p className="text-slate-500">
+                    <p className="text-text-light-blue font-medium">
                         {step === 1 ? 'Informazioni azienda' : 'Crea il tuo account amministratore'}
                     </p>
                 </div>
 
                 {/* Progress indicator */}
-                <div className="flex items-center justify-center gap-3 mb-8">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
+                <div className="flex items-center justify-center gap-4 mb-8">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${step >= 1 ? 'bg-progress-blue text-white' : 'bg-input-bg text-slate-400'}`}>
                         1
                     </div>
-                    <div className={`h-1 w-16 ${step >= 2 ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
+                    <div className={`h-1 w-12 rounded-full transition-colors ${step >= 2 ? 'bg-progress-blue' : 'bg-input-bg'}`}></div>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${step >= 2 ? 'bg-progress-blue text-white' : 'bg-input-bg text-slate-400'}`}>
                         2
                     </div>
                 </div>
@@ -122,8 +127,7 @@ export default function OnboardingPage() {
                     {/* Step 1: Company Info */}
                     {step === 1 && (
                         <div className="animate-in fade-in slide-in-from-right duration-300">
-                            <label className="block text-sm font-bold text-slate-900 mb-2">
-                                <Building2 className="w-4 h-4 inline mr-2" />
+                            <label className="block text-sm font-bold text-accent mb-2">
                                 Nome Azienda *
                             </label>
                             <input
@@ -131,24 +135,23 @@ export default function OnboardingPage() {
                                 name="companyName"
                                 value={formData.companyName}
                                 onChange={handleChange}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                                placeholder="Es. Colora SRL"
+                                className="w-full px-4 py-3.5 bg-input-bg border-transparent rounded-xl text-accent font-medium placeholder-input-placeholder focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                                placeholder="Es. Nome SRL"
                                 required
                             />
 
                             <button
                                 type="button"
                                 onClick={handleNext}
-                                className="w-full mt-8 px-6 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg flex items-center justify-center gap-2"
+                                className="w-full mt-8 px-6 py-4 bg-accent text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2"
                             >
                                 Continua
-                                <ArrowRight className="w-5 h-5" />
                             </button>
 
                             <button
                                 type="button"
                                 onClick={() => navigate('/')}
-                                className="w-full mt-3 px-6 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-xl transition-all"
+                                className="w-full mt-3 px-6 py-4 bg-white text-accent font-bold rounded-xl hover:bg-slate-50 transition-all border-2 border-accent"
                             >
                                 Annulla
                             </button>
@@ -160,7 +163,7 @@ export default function OnboardingPage() {
                         <div className="animate-in fade-in slide-in-from-right duration-300 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-2">
+                                    <label className="block text-sm font-bold text-accent mb-2">
                                         Nome *
                                     </label>
                                     <input
@@ -168,13 +171,13 @@ export default function OnboardingPage() {
                                         name="firstName"
                                         value={formData.firstName}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-3.5 bg-input-bg border-transparent rounded-xl text-accent font-medium placeholder-input-placeholder focus:outline-none focus:ring-2 focus:ring-accent transition-all"
                                         placeholder="Mario"
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-2">
+                                    <label className="block text-sm font-bold text-accent mb-2">
                                         Cognome *
                                     </label>
                                     <input
@@ -182,7 +185,7 @@ export default function OnboardingPage() {
                                         name="lastName"
                                         value={formData.lastName}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-3.5 bg-input-bg border-transparent rounded-xl text-accent font-medium placeholder-input-placeholder focus:outline-none focus:ring-2 focus:ring-accent transition-all"
                                         placeholder="Rossi"
                                         required
                                     />
@@ -190,8 +193,7 @@ export default function OnboardingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-2">
-                                    <Mail className="w-4 h-4 inline mr-2" />
+                                <label className="block text-sm font-bold text-accent mb-2">
                                     Email *
                                 </label>
                                 <input
@@ -199,29 +201,29 @@ export default function OnboardingPage() {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="mario.rossi@azienda.it"
+                                    className="w-full px-4 py-3.5 bg-input-bg border-transparent rounded-xl text-accent font-medium placeholder-input-placeholder focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                                    placeholder="nome.cognome@nomeazienda.com"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-2">
-                                    Telefono
+                                <label className="block text-sm font-bold text-accent mb-2">
+                                    Telefono *
                                 </label>
                                 <input
                                     type="tel"
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="+39 123 456 7890"
+                                    className="w-full px-4 py-3.5 bg-input-bg border-transparent rounded-xl text-accent font-medium placeholder-input-placeholder focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                                    placeholder="+39 333 1234567"
+                                    required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-2">
-                                    <Lock className="w-4 h-4 inline mr-2" />
+                                <label className="block text-sm font-bold text-accent mb-2">
                                     Password *
                                 </label>
                                 <input
@@ -229,24 +231,24 @@ export default function OnboardingPage() {
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="••••••••"
+                                    className="w-full px-4 py-3.5 bg-input-bg border-transparent rounded-xl text-accent font-medium placeholder-input-placeholder focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                                    placeholder="Password"
                                     required
                                     minLength={6}
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-2">
-                                    Conferma Password *
+                                <label className="block text-sm font-bold text-accent mb-2">
+                                    Conferma password *
                                 </label>
                                 <input
                                     type="password"
                                     name="confirmPassword"
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="••••••••"
+                                    className="w-full px-4 py-3.5 bg-input-bg border-transparent rounded-xl text-accent font-medium placeholder-input-placeholder focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                                    placeholder="Password"
                                     required
                                 />
                             </div>
@@ -255,15 +257,14 @@ export default function OnboardingPage() {
                                 <button
                                     type="button"
                                     onClick={() => setStep(1)}
-                                    className="px-6 py-4 text-slate-600 font-bold hover:bg-slate-50 rounded-xl transition-all flex items-center gap-2"
+                                    className="px-6 py-4 text-accent font-bold hover:bg-slate-50 rounded-xl transition-all flex items-center gap-2 border-2 border-transparent hover:border-slate-200"
                                 >
                                     <ArrowLeft className="w-5 h-5" />
-                                    Indietro
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-1 px-6 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 px-6 py-4 bg-accent text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? 'Registrazione...' : 'Completa Registrazione'}
                                 </button>
