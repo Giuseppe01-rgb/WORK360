@@ -457,7 +457,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
     }
 
     return (
-        <Layout title="Preventivi & SAL">
+        <Layout title="Preventivi & SAL v1.2 (Fix Applied)">
 
             {/* Tab Navigation */}
             <div className="mb-6">
