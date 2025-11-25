@@ -31,7 +31,7 @@ const getAllowedOrigins = () => {
             : [];
     } else {
         // In development, allow localhost
-        return ['http://localhost:5173', 'http://localhost:3000'];
+        return ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174'];
     }
 };
 
@@ -42,6 +42,11 @@ const corsOptions = {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
+        // Allow all *.vercel.app domains (for Vercel deployments)
+        if (origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
@@ -51,7 +56,7 @@ const corsOptions = {
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false,
+    credentials: true,
     maxAge: 86400 // 24 hours
 };
 
