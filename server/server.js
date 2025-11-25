@@ -4,42 +4,58 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
 
+const helmet = require('helmet');
+
 // Initialize express
 const app = express();
 
 // Connect to database
 connectDB();
 
+// Security Headers
+app.use(helmet());
+
 // Middleware
 // CORS configuration
-const allowedOrigins = [
-    'http://localhost:5173',
-    'https://work-360.vercel.app',
-    'https://work360-production.up.railway.app',
-    'https://work360-production-d4f3.up.railway.app'
-];
+const getAllowedOrigins = () => {
+    if (process.env.NODE_ENV === 'production') {
+        // In production, use environment variable
+        return process.env.CORS_ALLOWED_ORIGINS
+            ? process.env.CORS_ALLOWED_ORIGINS.split(',')
+            : [];
+    } else {
+        // In development, allow localhost
+        return ['http://localhost:5173', 'http://localhost:3000'];
+    }
+};
 
-app.use(cors({
+const corsOptions = {
     origin: function (origin, callback) {
+        const allowedOrigins = getAllowedOrigins();
+
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
+
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            callback(null, true); // Allow all for now
+            console.warn(`BLOCKED BY CORS: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
         }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+    credentials: false,
     maxAge: 86400 // 24 hours
-}));
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Log all requests (for debugging)
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} [Origin: ${req.get('origin') || 'None'}]`);
     next();
 });
 

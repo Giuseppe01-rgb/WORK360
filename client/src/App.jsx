@@ -110,7 +110,7 @@ function AppRoutes() {
         path="/owner/quotes"
         element={
           <ProtectedRoute requireOwner>
-            <QuotesPage />
+            <QuotesManager />
           </ProtectedRoute>
         }
       />

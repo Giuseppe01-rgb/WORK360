@@ -38,7 +38,7 @@ class DebugErrorBoundary extends React.Component {
     }
 }
 
-export default function QuotesPage() {
+export default function QuotesManager() {
     const { user } = useAuth();
     const { showSuccess, showError, showWarning, showInfo } = useToast();
     const [quotes, setQuotes] = useState([]);
@@ -238,9 +238,14 @@ export default function QuotesPage() {
 
     const downloadSALPDF = async (salId) => {
         try {
-            const token = localStorage.getItem('token');
-            const url = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/sals/${salId}/pdf?token=${token}`;
-            window.open(url, '_blank');
+            const response = await salAPI.downloadPDF(salId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `sal-${salId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
         } catch (error) {
             console.error('Error downloading SAL PDF:', error);
             showError('Errore nel download del PDF');
@@ -509,9 +514,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
         );
     }
 
-    console.log('RENDER QUOTES PAGE', { activeTab, salFormData, showSALModal });
     return (
-        <Layout title="Preventivi & SAL v1.2 (Fix Applied)">
+        <Layout title="Preventivi & SAL">
 
             {/* Tab Navigation */}
             <div className="mb-6">
