@@ -9,7 +9,7 @@ export default function WelcomePage() {
             <div className="max-w-md w-full text-center flex flex-col items-center">
 
                 {/* Title */}
-                <h1 className="text-4xl font-black text-accent mb-8 tracking-tight">
+                <h1 className="text-4xl font-black text-[#0F172A] mb-8 tracking-tight">
                     Benvenuto in
                 </h1>
 
@@ -31,14 +31,14 @@ export default function WelcomePage() {
                 <div className="w-full space-y-4 px-4">
                     <button
                         onClick={() => navigate('/onboarding')}
-                        className="w-full py-4 bg-accent text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg text-base"
+                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg text-base"
                     >
                         Registra la tua azienda
                     </button>
 
                     <button
                         onClick={() => navigate('/login')}
-                        className="w-full py-4 bg-white text-accent font-bold rounded-xl hover:bg-slate-50 transition-all border-2 border-accent text-base"
+                        className="w-full py-4 bg-white text-[#0F172A] font-bold rounded-xl hover:bg-slate-50 transition-all border-2 border-[#0F172A] text-base"
                     >
                         Accedi
                     </button>

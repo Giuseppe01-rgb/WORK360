@@ -143,7 +143,7 @@ export default function OnboardingPage() {
                             <button
                                 type="button"
                                 onClick={handleNext}
-                                className="w-full mt-8 px-6 py-4 bg-accent text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2"
+                                className="w-full mt-8 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2"
                             >
                                 Continua
                             </button>
@@ -264,7 +264,7 @@ export default function OnboardingPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-1 px-6 py-4 bg-accent text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? 'Registrazione...' : 'Completa Registrazione'}
                                 </button>
