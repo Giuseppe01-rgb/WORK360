@@ -92,14 +92,18 @@ export default function QuotesPage() {
         legalNotes: ''
     });
 
-    // SAL Form Data
+    // SAL Form Data - FLATTENED TO PREVENT CRASHES
     const [salFormData, setSalFormData] = useState({
         site: '',
         number: '',
         date: new Date().toISOString().split('T')[0],
         periodStart: new Date().toISOString().split('T')[0],
         periodEnd: new Date().toISOString().split('T')[0],
-        client: { name: '', fiscalCode: '', address: '', vatNumber: '' },
+        // Client flattened
+        clientName: '',
+        clientFiscalCode: '',
+        clientAddress: '',
+        clientVatNumber: '',
         workDescription: '',
         contractValue: 0,
         previousAmount: 0,
@@ -107,7 +111,9 @@ export default function QuotesPage() {
         completionPercentage: 0,
         penalties: 0,
         vatRate: 22,
-        workSupervisor: { name: '', qualification: '' },
+        // Supervisor flattened
+        supervisorName: '',
+        supervisorQualification: '',
         cig: '',
         cup: '',
         notes: ''
@@ -159,7 +165,22 @@ export default function QuotesPage() {
     const handleSALSubmit = async (e) => {
         e.preventDefault();
         try {
-            await salAPI.create(salFormData);
+            // Reconstruct nested object for API
+            const apiData = {
+                ...salFormData,
+                client: {
+                    name: salFormData.clientName,
+                    fiscalCode: salFormData.clientFiscalCode,
+                    address: salFormData.clientAddress,
+                    vatNumber: salFormData.clientVatNumber
+                },
+                workSupervisor: {
+                    name: salFormData.supervisorName,
+                    qualification: salFormData.supervisorQualification
+                }
+            };
+
+            await salAPI.create(apiData);
             setShowSALModal(false);
             setSalFormData({
                 site: '',
@@ -167,7 +188,10 @@ export default function QuotesPage() {
                 date: new Date().toISOString().split('T')[0],
                 periodStart: new Date().toISOString().split('T')[0],
                 periodEnd: new Date().toISOString().split('T')[0],
-                client: { name: '', fiscalCode: '', address: '', vatNumber: '' },
+                clientName: '',
+                clientFiscalCode: '',
+                clientAddress: '',
+                clientVatNumber: '',
                 workDescription: '',
                 contractValue: 0,
                 previousAmount: 0,
@@ -175,7 +199,8 @@ export default function QuotesPage() {
                 completionPercentage: 0,
                 penalties: 0,
                 vatRate: 22,
-                workSupervisor: { name: '', qualification: '' },
+                supervisorName: '',
+                supervisorQualification: '',
                 cig: '',
                 cup: '',
                 notes: ''
@@ -1041,8 +1066,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="text"
                                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.client?.name || ''}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, client: { ...(prev.client || {}), name: e.target.value } }))}
+                                                        value={salFormData.clientName}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, clientName: e.target.value }))}
                                                         placeholder="Nome committente"
                                                         required
                                                     />
@@ -1053,8 +1078,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="text"
                                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.client?.vatNumber || ''}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, client: { ...(prev.client || {}), vatNumber: e.target.value } }))}
+                                                        value={salFormData.clientVatNumber}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, clientVatNumber: e.target.value }))}
                                                         placeholder="12345678901"
                                                     />
                                                 </div>
@@ -1064,8 +1089,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="text"
                                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.client?.fiscalCode || ''}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, client: { ...(prev.client || {}), fiscalCode: e.target.value } }))}
+                                                        value={salFormData.clientFiscalCode}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, clientFiscalCode: e.target.value }))}
                                                         placeholder="RSSMRA80A01H501Z"
                                                     />
                                                 </div>
@@ -1075,8 +1100,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="text"
                                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.client?.address || ''}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, client: { ...(prev.client || {}), address: e.target.value } }))}
+                                                        value={salFormData.clientAddress}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, clientAddress: e.target.value }))}
                                                         placeholder="Via Roma, 1 - 00100 Roma (RM)"
                                                     />
                                                 </div>
@@ -1227,8 +1252,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="text"
                                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.workSupervisor?.name || ''}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, workSupervisor: { ...(prev.workSupervisor || {}), name: e.target.value } }))}
+                                                        value={salFormData.supervisorName}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, supervisorName: e.target.value }))}
                                                         placeholder="Mario Rossi"
                                                     />
                                                 </div>
@@ -1238,8 +1263,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="text"
                                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.workSupervisor?.qualification || ''}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, workSupervisor: { ...(prev.workSupervisor || {}), qualification: e.target.value } }))}
+                                                        value={salFormData.supervisorQualification}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, supervisorQualification: e.target.value }))}
                                                         placeholder="Ingegnere, Architetto, Geometra..."
                                                     />
                                                 </div>
