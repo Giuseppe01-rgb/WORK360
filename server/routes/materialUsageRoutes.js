@@ -22,5 +22,9 @@ router.get('/most-used/:siteId', protect, getMostUsedBySite);
 router.post('/', recordUsage);
 
 // Get usage history
+router.get('/', getUsageHistory);
+
+// Delete usage
+router.delete('/:id', deleteUsage);
 
 module.exports = router;
