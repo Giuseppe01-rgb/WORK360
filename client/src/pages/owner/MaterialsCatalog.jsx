@@ -284,18 +284,18 @@ export default function MaterialsCatalog() {
                             {materials.length} materiali totali
                         </p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex gap-3 w-full md:w-auto">
                         <button
                             onClick={() => setShowExcelImportModal(true)}
-                            className="px-6 py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-all flex items-center gap-2"
+                            className="px-4 py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap"
                         >
                             <FileText className="w-5 h-5" />
-                            Importa da Excel
+                            Importa Excel
                         </button>
                         {materials.length > 0 && (
                             <button
                                 onClick={() => setShowDeleteAllConfirm(true)}
-                                className="px-6 py-2.5 bg-red-100 text-red-700 font-semibold rounded-lg hover:bg-red-200 transition-all flex items-center gap-2"
+                                className="px-4 py-2.5 bg-red-100 text-red-700 font-semibold rounded-lg hover:bg-red-200 transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap"
                             >
                                 <Trash2 className="w-5 h-5" />
                                 Elimina Tutto
@@ -303,17 +303,17 @@ export default function MaterialsCatalog() {
                         )}
                         <button
                             onClick={() => setShowInvoiceModal(true)}
-                            className="px-6 py-2.5 bg-white border-2 border-slate-900 text-slate-900 font-semibold rounded-lg hover:bg-slate-50 transition-all flex items-center gap-2"
+                            className="px-4 py-2.5 bg-white border-2 border-slate-900 text-slate-900 font-semibold rounded-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap"
                         >
                             <Upload className="w-5 h-5" />
-                            Aggiungi Fattura
+                            Carica Fattura
                         </button>
                         <button
                             onClick={() => setShowAddModal(true)}
-                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 shadow-lg shadow-purple-500/20"
+                            className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 text-sm whitespace-nowrap"
                         >
                             <Plus className="w-5 h-5" />
-                            Aggiungi Materiale
+                            Nuovo Materiale
                         </button>
                     </div>
                 </div>
