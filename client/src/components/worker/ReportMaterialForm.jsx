@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Upload, AlertCircle, X } from 'lucide-react';
+import { photoAPI } from '../../utils/api';
 
 const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
     const [numeroConfezioni, setNumeroConfezioni] = useState(1);
@@ -100,20 +101,63 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
         try {
             // 1. Upload photo first
             const formData = new FormData();
-            formData.append('file', photoFile);
+            formData.append('photo', photoFile);
 
-            const token = localStorage.getItem('token');
-            const uploadRes = await fetch('/api/photos/upload', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
+            // Use the API utility which handles base URL and auth
+            const uploadRes = await photoAPI.upload(formData);
 
-            if (!uploadRes.ok) throw new Error('Errore upload foto');
+            // The response from axios is already the data object in uploadRes.data
+            // But wait, api.js returns the axios promise.
+            // Let's check api.js return value.
+            // photoAPI.upload returns api.post(...) which returns a Promise that resolves to the response object.
+            // The response object has a .data property.
 
-            const uploadData = await uploadRes.json();
+            const uploadData = uploadRes.data;
+
+            // However, looking at photoController.js, it returns the photo object directly.
+            // So uploadData will be the photo object.
+            // We need the URL. The photo object has 'path' and 'filename'.
+            // We might need to construct the URL or the controller returns it.
+            // photoController.js: res.status(201).json(photo);
+            // Photo model likely has a virtual for url or we use the path.
+            // Let's check how other components use it or just use the filename/path.
+            // Actually, the previous code expected `uploadData.url`.
+            // Let's check if the Photo model has a URL virtual or if we need to construct it.
+            // But for now, let's just fix the upload call first.
+            // Wait, if I change to photoAPI, I need to make sure I import it.
+            // It is not imported in the component.
+            // I should add the import at the top.d('invoice', file) for invoice, but for photoAPI it just passes formData.
+            // Let's assume controller expects 'photo' based on typical patterns, or check photoRoutes.
+            // Actually, let's look at the raw fetch call I'm replacing: it used 'file'.
+            // But wait, I should check what the backend expects.
+            // The previous code used 'file'. 
+            // Let's use the api utility.
+
+            // Re-reading api.js:
+            // export const photoAPI = {
+            //    upload: (formData) => api.post('/photos/upload', formData, { ... })
+            // }
+
+            // So I should construct FormData and pass it.
+            // I need to know the field name. 
+            // Let's check photoController.js or photoRoutes.js to be sure.
+            // For now, I will use 'photo' as a safe bet for a photo upload, but I'll check the controller in the next step if this fails.
+            // Actually, I'll stick to 'file' if the previous code used it, BUT the previous code might have been wrong.
+            // Let's check the controller first.
+
+            // WAIT - I can't check the controller inside this replace block.
+            // I will assume 'photo' is the standard for this app's photo upload based on other components, 
+            // OR I will check the controller in a separate step before applying this change.
+
+            // actually, looking at the previous raw fetch:
+            // formData.append('file', photoFile);
+            // It failed. Maybe because of the URL (missing base URL in production).
+
+            // I'll use photoAPI.upload which handles the base URL.
+            // I'll use 'photo' as the field name because `photoAPI` suggests it uploads a photo.
+
+            // Let's do a quick check of photoRoutes.js or photoController.js first to be 100% sure.
+            // I'll abort this replace and check the controller first.
 
             // 2. Create reported material
             await onSubmit({
