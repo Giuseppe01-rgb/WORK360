@@ -65,8 +65,8 @@ const getSiteReport = async (req, res) => {
         const { siteId } = req.params;
         const siteObjectId = new mongoose.Types.ObjectId(siteId);
 
-        // Materials used
-        const materials = await Material.aggregate([
+        // 1. Manual Materials (from 'materials' collection)
+        const manualMaterials = await Material.aggregate([
             { $match: { site: siteObjectId } },
             {
                 $group: {
@@ -77,6 +77,70 @@ const getSiteReport = async (req, res) => {
                 }
             }
         ]);
+
+        // 2. Catalog Materials (from 'materialusages' collection)
+        const MaterialUsage = require('../models/MaterialUsage');
+        const catalogMaterials = await MaterialUsage.aggregate([
+            {
+                $match: {
+                    site: siteObjectId,
+                    material: { $ne: null } // Only linked materials
+                }
+            },
+            {
+                $lookup: {
+                    from: 'colouramaterials',
+                    localField: 'material',
+                    foreignField: '_id',
+                    as: 'materialDetails'
+                }
+            },
+            { $unwind: '$materialDetails' },
+            {
+                $group: {
+                    _id: '$materialDetails.nome_prodotto',
+                    totalQuantity: { $sum: '$numeroConfezioni' }, // Note: This is packs, not base unit. 
+                    // Ideally we should multiply by pack size if available, but for now we sum packs/units as recorded
+                    unit: { $first: '$materialDetails.unit' }, // Use unit from catalog
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // 3. Merge lists
+        // We use a map to combine if same name exists (unlikely but possible)
+        const materialMap = new Map();
+
+        // Add manual
+        manualMaterials.forEach(m => {
+            materialMap.set(m._id, {
+                _id: m._id,
+                totalQuantity: m.totalQuantity,
+                unit: m.unit,
+                count: m.count,
+                source: 'manual'
+            });
+        });
+
+        // Add/Merge catalog
+        catalogMaterials.forEach(m => {
+            if (materialMap.has(m._id)) {
+                const existing = materialMap.get(m._id);
+                existing.totalQuantity += m.totalQuantity;
+                existing.count += m.count;
+                // Keep existing unit
+            } else {
+                materialMap.set(m._id, {
+                    _id: m._id,
+                    totalQuantity: m.totalQuantity,
+                    unit: m.unit || 'pz',
+                    count: m.count,
+                    source: 'catalog'
+                });
+            }
+        });
+
+        const allMaterials = Array.from(materialMap.values());
 
         // Equipment used
         const equipment = await Equipment.aggregate([
@@ -102,11 +166,12 @@ const getSiteReport = async (req, res) => {
         ]);
 
         res.json({
-            materials,
+            materials: allMaterials,
             equipment,
             totalHours: hours[0]?.totalHours || 0
         });
     } catch (error) {
+        console.error('Site Report Error:', error);
         res.status(500).json({ message: 'Errore nel report del cantiere', error: error.message });
     }
 };
