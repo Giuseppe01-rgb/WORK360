@@ -33,10 +33,12 @@ export default function MaterialsCatalog() {
 
     // Form state
     const [formData, setFormData] = useState({
-        displayName: '',
-        supplier: '',
+        nome_prodotto: '',
+        marca: '',
+        fornitore: '',
+        quantityValue: '',
         unit: 'pz',
-        price: ''
+        prezzo: ''
     });
 
     useEffect(() => {
@@ -81,10 +83,12 @@ export default function MaterialsCatalog() {
 
     const resetForm = () => {
         setFormData({
-            displayName: '',
-            supplier: '',
+            nome_prodotto: '',
+            marca: '',
+            fornitore: '',
+            quantityValue: '',
             unit: 'pz',
-            price: ''
+            prezzo: ''
         });
         setShowAddModal(false);
         setShowEditModal(false);
@@ -95,8 +99,12 @@ export default function MaterialsCatalog() {
         e.preventDefault();
         try {
             const data = {
-                ...formData,
-                price: formData.price ? parseFloat(formData.price) : null
+                nome_prodotto: formData.nome_prodotto,
+                marca: formData.marca,
+                fornitore: formData.fornitore,
+                quantita: formData.quantityValue ? `${formData.quantityValue} ${formData.unit}` : '',
+                prezzo: formData.prezzo ? parseFloat(formData.prezzo) : null,
+                categoria: 'Altro'
             };
             await colouraMaterialAPI.create(data);
             resetForm();
@@ -109,11 +117,27 @@ export default function MaterialsCatalog() {
 
     const handleEdit = (material) => {
         setSelectedMaterial(material);
+
+        // Try to parse quantity and unit
+        let qty = '';
+        let unit = 'pz';
+        if (material.quantita) {
+            const parts = material.quantita.split(' ');
+            if (parts.length >= 2) {
+                qty = parts[0];
+                unit = parts[1];
+            } else {
+                qty = material.quantita;
+            }
+        }
+
         setFormData({
-            displayName: material.displayName,
-            supplier: material.supplier || '',
-            unit: material.unit,
-            price: material.price || ''
+            nome_prodotto: material.nome_prodotto,
+            marca: material.marca || '',
+            fornitore: material.fornitore || '',
+            quantityValue: qty,
+            unit: unit,
+            prezzo: material.prezzo || ''
         });
         setShowEditModal(true);
     };
@@ -122,8 +146,11 @@ export default function MaterialsCatalog() {
         e.preventDefault();
         try {
             const data = {
-                ...formData,
-                price: formData.price ? parseFloat(formData.price) : null
+                nome_prodotto: formData.nome_prodotto,
+                marca: formData.marca,
+                fornitore: formData.fornitore,
+                quantita: formData.quantityValue ? `${formData.quantityValue} ${formData.unit}` : '',
+                prezzo: formData.prezzo ? parseFloat(formData.prezzo) : null
             };
             await colouraMaterialAPI.update(selectedMaterial._id, data);
             resetForm();
@@ -514,8 +541,8 @@ export default function MaterialsCatalog() {
             {/* Add Material Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="p-6 border-b border-slate-100">
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-slate-900">Aggiungi Materiale</h2>
                                 <button
@@ -532,10 +559,21 @@ export default function MaterialsCatalog() {
                                 <input
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                    value={formData.displayName}
-                                    onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                                    value={formData.nome_prodotto}
+                                    onChange={(e) => setFormData({ ...formData, nome_prodotto: e.target.value })}
                                     required
                                     placeholder="es. Nastro adesivo 48mm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Marca *</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                    value={formData.marca}
+                                    onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
+                                    required
+                                    placeholder="es. 3M"
                                 />
                             </div>
                             <div>
@@ -543,27 +581,42 @@ export default function MaterialsCatalog() {
                                 <input
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                    value={formData.supplier}
-                                    onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+                                    value={formData.fornitore}
+                                    onChange={(e) => setFormData({ ...formData, fornitore: e.target.value })}
                                     placeholder="es. Ferramenta Rossi"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Unità di Misura *</label>
-                                <select
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                    value={formData.unit}
-                                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                                    required
-                                >
-                                    <option value="pz">Pezzi (pz)</option>
-                                    <option value="kg">Chilogrammi (kg)</option>
-                                    <option value="l">Litri (l)</option>
-                                    <option value="m">Metri (m)</option>
-                                    <option value="mq">Metri Quadri (mq)</option>
-                                    <option value="mc">Metri Cubi (mc)</option>
-                                    <option value="sacchi">Sacchi</option>
-                                </select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-900 mb-1.5">Quantità</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                        value={formData.quantityValue}
+                                        onChange={(e) => setFormData({ ...formData, quantityValue: e.target.value })}
+                                        placeholder="es. 10"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-900 mb-1.5">Unità</label>
+                                    <select
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                        value={formData.unit}
+                                        onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                                    >
+                                        <option value="pz">Pezzi (pz)</option>
+                                        <option value="kg">Kg</option>
+                                        <option value="l">Litri (l)</option>
+                                        <option value="m">Metri (m)</option>
+                                        <option value="mq">Mq</option>
+                                        <option value="mc">Mc</option>
+                                        <option value="sacchi">Sacchi</option>
+                                        <option value="rotoli">Rotoli</option>
+                                        <option value="conf">Conf.</option>
+                                    </select>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-slate-900 mb-1.5">Prezzo Unitario (€)</label>
@@ -572,12 +625,12 @@ export default function MaterialsCatalog() {
                                     step="0.01"
                                     min="0"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                    value={formData.price}
-                                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                    value={formData.prezzo}
+                                    onChange={(e) => setFormData({ ...formData, prezzo: e.target.value })}
                                     placeholder="es. 2.50"
                                 />
                             </div>
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex gap-3 pt-4 sticky bottom-0 bg-white pb-2">
                                 <button
                                     type="button"
                                     onClick={resetForm}
@@ -601,8 +654,8 @@ export default function MaterialsCatalog() {
             {/* Edit Material Modal */}
             {showEditModal && selectedMaterial && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="p-6 border-b border-slate-100">
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-slate-900">Modifica Materiale</h2>
                                 <button
@@ -619,8 +672,18 @@ export default function MaterialsCatalog() {
                                 <input
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                    value={formData.displayName}
-                                    onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                                    value={formData.nome_prodotto}
+                                    onChange={(e) => setFormData({ ...formData, nome_prodotto: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Marca *</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                    value={formData.marca}
+                                    onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
                                     required
                                 />
                             </div>
@@ -629,26 +692,40 @@ export default function MaterialsCatalog() {
                                 <input
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                    value={formData.supplier}
-                                    onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+                                    value={formData.fornitore}
+                                    onChange={(e) => setFormData({ ...formData, fornitore: e.target.value })}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Unità di Misura *</label>
-                                <select
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                    value={formData.unit}
-                                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                                    required
-                                >
-                                    <option value="pz">Pezzi (pz)</option>
-                                    <option value="kg">Chilogrammi (kg)</option>
-                                    <option value="l">Litri (l)</option>
-                                    <option value="m">Metri (m)</option>
-                                    <option value="mq">Metri Quadri (mq)</option>
-                                    <option value="mc">Metri Cubi (mc)</option>
-                                    <option value="sacchi">Sacchi</option>
-                                </select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-900 mb-1.5">Quantità</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                        value={formData.quantityValue}
+                                        onChange={(e) => setFormData({ ...formData, quantityValue: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-900 mb-1.5">Unità</label>
+                                    <select
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                        value={formData.unit}
+                                        onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                                    >
+                                        <option value="pz">Pezzi (pz)</option>
+                                        <option value="kg">Kg</option>
+                                        <option value="l">Litri (l)</option>
+                                        <option value="m">Metri (m)</option>
+                                        <option value="mq">Mq</option>
+                                        <option value="mc">Mc</option>
+                                        <option value="sacchi">Sacchi</option>
+                                        <option value="rotoli">Rotoli</option>
+                                        <option value="conf">Conf.</option>
+                                    </select>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-slate-900 mb-1.5">Prezzo Unitario (€)</label>
@@ -657,11 +734,11 @@ export default function MaterialsCatalog() {
                                     step="0.01"
                                     min="0"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                    value={formData.price}
-                                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                    value={formData.prezzo}
+                                    onChange={(e) => setFormData({ ...formData, prezzo: e.target.value })}
                                 />
                             </div>
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex gap-3 pt-4 sticky bottom-0 bg-white pb-2">
                                 <button
                                     type="button"
                                     onClick={resetForm}
