@@ -73,9 +73,10 @@ export const colouraMaterialAPI = {
     getAll: () => api.get('/coloura-materials'),
     update: (id, data) => api.put(`/coloura-materials/${id}`, data),
     delete: (id) => api.delete(`/coloura-materials/${id}`),
-    importFromExcel: (file) => {
+    importExcel: (file, preview = false) => {
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('preview', preview);
         return api.post('/coloura-materials/import-excel', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
