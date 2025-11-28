@@ -77,7 +77,7 @@ export const colouraMaterialAPI = {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('preview', preview);
-        return api.post('/coloura-materials/import-excel', formData, {
+        return api.post('/coloura-materials/import', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
     }
