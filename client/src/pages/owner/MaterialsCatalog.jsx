@@ -120,13 +120,42 @@ export default function MaterialsCatalog() {
 
         // Try to parse quantity and unit
         let qty = '';
-        let unit = 'pz';
+        let unit = 'pz'; // Default
+
         if (material.quantita) {
-            const parts = material.quantita.split(' ');
-            if (parts.length >= 2) {
-                qty = parts[0];
-                unit = parts[1];
+            // Regex to match number (integer or decimal) and unit, allowing optional space
+            // Matches: "10 kg", "10kg", "10.5 l", "10,5l"
+            const match = material.quantita.toString().match(/^([\d.,]+)\s*([a-zA-Z]+.*)?$/);
+
+            if (match) {
+                qty = match[1];
+                const rawUnit = match[2] ? match[2].toLowerCase().trim() : '';
+
+                // Map common variations to select values
+                const unitMap = {
+                    'lt': 'l',
+                    'litri': 'l',
+                    'l': 'l',
+                    'kg': 'kg',
+                    'kilo': 'kg',
+                    'm': 'm',
+                    'mt': 'm',
+                    'metri': 'm',
+                    'mq': 'mq',
+                    'mc': 'mc',
+                    'pz': 'pz',
+                    'pezzi': 'pz',
+                    'sacchi': 'sacchi',
+                    'sacco': 'sacchi',
+                    'rotoli': 'rotoli',
+                    'rotolo': 'rotoli',
+                    'conf': 'conf',
+                    'confezione': 'conf'
+                };
+
+                unit = unitMap[rawUnit] || 'pz'; // Default to pz if unit not recognized
             } else {
+                // Fallback if regex doesn't match (e.g. just a number)
                 qty = material.quantita;
             }
         }
