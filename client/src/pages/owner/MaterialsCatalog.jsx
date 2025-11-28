@@ -471,7 +471,7 @@ export default function MaterialsCatalog() {
                                         </span>
                                         <span className="text-xs text-slate-400">{material.categoria}</span>
                                     </div>
-                                    <h3 className="text-lg font-bold text-slate-900 mb-1">{material.nome}</h3>
+                                    <h3 className="text-lg font-bold text-slate-900 mb-1">{material.nome_prodotto}</h3>
                                     <p className="text-sm text-slate-600">
                                         {material.marca} {material.fornitore && <span className="text-slate-400">• {material.fornitore}</span>}
                                     </p>
@@ -495,14 +495,14 @@ export default function MaterialsCatalog() {
                                 <span className="text-sm text-slate-500">
                                     Quantità: <span className="font-semibold text-slate-900">{material.quantita || '-'}</span>
                                 </span>
-                                {!material.prezzoPerConfezione ? (
+                                {!material.prezzo ? (
                                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-700 text-sm font-medium rounded-md">
                                         <AlertCircle className="w-4 h-4" />
                                         Prezzo Mancante
                                     </span>
                                 ) : (
                                     <span className="text-lg font-bold text-slate-900">
-                                        {formatPrice(material.prezzoPerConfezione)}
+                                        {formatPrice(material.prezzo)}
                                     </span>
                                 )}
                             </div>
