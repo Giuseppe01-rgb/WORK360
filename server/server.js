@@ -77,6 +77,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/attendance', require('./routes/attendanceRoutes'));
 app.use('/api/materials', require('./routes/materialRoutes'));
+app.use('/api/material-master', require('./routes/materialMasterRoutes'));
 app.use('/api/equipment', require('./routes/equipmentRoutes'));
 app.use('/api/notes', require('./routes/noteRoutes'));
 app.use('/api/photos', require('./routes/photoRoutes'));
@@ -87,7 +88,13 @@ app.use('/api/sites', require('./routes/siteRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/suppliers', require('./routes/supplierRoutes'));
+app.use('/api/work-activities', require('./routes/workActivityRoutes'));
 app.use('/api/communication', require('./routes/communicationRoutes'));
+
+// Colora Material Tracking System
+app.use('/api/coloura-materials', require('./routes/colouraMaterialRoutes'));
+app.use('/api/material-usage', require('./routes/materialUsageRoutes'));
+app.use('/api/reported-materials', require('./routes/reportedMaterialRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {

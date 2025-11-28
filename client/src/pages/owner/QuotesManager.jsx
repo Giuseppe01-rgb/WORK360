@@ -81,7 +81,7 @@ export default function QuotesManager() {
         },
         number: '',
         date: new Date().toISOString().split('T')[0],
-        items: [{ description: '', quantity: 1, unitPrice: 0, total: 0 }],
+        items: [{ description: '', unit: '', quantity: 1, unitPrice: 0, total: 0 }],
         vatRate: 22,
         notes: '',
         // Contract Terms
@@ -255,7 +255,7 @@ export default function QuotesManager() {
     const handleAddItem = () => {
         setFormData({
             ...formData,
-            items: [...formData.items, { description: '', quantity: 1, unitPrice: 0, total: 0 }]
+            items: [...formData.items, { description: '', unit: '', quantity: 1, unitPrice: 0, total: 0 }]
         });
     };
 
@@ -266,10 +266,17 @@ export default function QuotesManager() {
 
     const handleItemChange = (index, field, value) => {
         const newItems = [...formData.items];
-        newItems[index][field] = value;
 
+        // Handle numeric fields specially to allow typing "0." or empty string
         if (field === 'quantity' || field === 'unitPrice') {
-            newItems[index].total = (newItems[index].quantity || 0) * (newItems[index].unitPrice || 0);
+            newItems[index][field] = value; // Store raw value for input
+
+            // Calculate total using parsed values
+            const qty = parseFloat(field === 'quantity' ? value : newItems[index].quantity) || 0;
+            const price = parseFloat(field === 'unitPrice' ? value : newItems[index].unitPrice) || 0;
+            newItems[index].total = qty * price;
+        } else {
+            newItems[index][field] = value;
         }
 
         setFormData({ ...formData, items: newItems });
@@ -407,7 +414,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             client: { name: '', address: '', email: '', phone: '' },
             number: '',
             date: new Date().toISOString().split('T')[0],
-            items: [{ description: '', quantity: 1, unitPrice: 0, total: 0 }],
+            items: [{ description: '', unit: '', quantity: 1, unitPrice: 0, total: 0 }],
             vatRate: 22,
             notes: '',
             validityDays: 30,
@@ -524,7 +531,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         <button
                             onClick={() => setActiveTab('quotes')}
                             className={`pb-4 px-2 font-semibold transition-all ${activeTab === 'quotes'
-                                ? 'text-slate-900 border-b-2 border-slate-900'
+                                ? 'text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-bold border-b-2 border-purple-600'
                                 : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
@@ -533,7 +540,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         <button
                             onClick={() => setActiveTab('sals')}
                             className={`pb-4 px-2 font-semibold transition-all ${activeTab === 'sals'
-                                ? 'text-slate-900 border-b-2 border-slate-900'
+                                ? 'text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-bold border-b-2 border-purple-600'
                                 : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
@@ -556,7 +563,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         </div>
                         <button
                             onClick={() => setShowModal(true)}
-                            className="px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
+                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                         >
                             <Plus className="w-5 h-5" />
                             Crea Preventivo
@@ -576,7 +583,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         </div>
                         <button
                             onClick={() => setShowSALModal(true)}
-                            className="px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
+                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                         >
                             <Plus className="w-5 h-5" />
                             Crea SAL
@@ -809,29 +816,57 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         </div>
 
                                         <div className="space-y-3">
-                                            <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">
-                                                <div className="col-span-6 md:col-span-5">Descrizione</div>
-                                                <div className="col-span-2 text-center">Q.tà</div>
-                                                <div className="col-span-2 text-center">Prezzo</div>
-                                                <div className="col-span-2 text-right">Totale</div>
+                                            <div className="grid grid-cols-12 gap-2 md:gap-4 text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">
+                                                <div className="col-span-12 md:col-span-5 mb-1 md:mb-0">Descrizione</div>
+                                                <div className="col-span-3 md:col-span-1 text-center">U.M.</div>
+                                                <div className="col-span-3 md:col-span-2 text-center">Q.tà</div>
+                                                <div className="col-span-3 md:col-span-2 text-center">Prezzo</div>
+                                                <div className="col-span-2 md:col-span-2 text-right">Totale</div>
                                                 <div className="col-span-1"></div>
                                             </div>
 
                                             {formData.items.map((item, index) => (
-                                                <div key={index} className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
-                                                    <div className="col-span-6 md:col-span-5">
-                                                        <input type="text" className="w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-slate-900 placeholder-slate-400" placeholder="Descrizione..." value={item.description} onChange={(e) => handleItemChange(index, 'description', e.target.value)} required />
+                                                <div key={index} className="grid grid-cols-12 gap-2 md:gap-4 items-start bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                                    <div className="col-span-12 md:col-span-5">
+                                                        <textarea
+                                                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-900 focus:outline-none resize-y min-h-[60px]"
+                                                            placeholder="Descrizione..."
+                                                            value={item.description}
+                                                            onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                                                            required
+                                                        />
                                                     </div>
-                                                    <div className="col-span-2">
-                                                        <input type="number" className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-center text-sm" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)} required />
+                                                    <div className="col-span-3 md:col-span-1">
+                                                        <textarea
+                                                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-900 focus:outline-none resize-y min-h-[60px] text-center"
+                                                            placeholder="U.M."
+                                                            value={item.unit || ''}
+                                                            onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
+                                                        />
                                                     </div>
-                                                    <div className="col-span-2">
-                                                        <input type="number" step="0.01" className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-center text-sm" value={item.unitPrice} onChange={(e) => handleItemChange(index, 'unitPrice', parseFloat(e.target.value) || 0)} required />
+                                                    <div className="col-span-3 md:col-span-2">
+                                                        <input
+                                                            type="number"
+                                                            className="w-full bg-white border border-slate-200 rounded px-2 py-2 text-center text-sm focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                            value={item.quantity}
+                                                            onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                                                            required
+                                                        />
                                                     </div>
-                                                    <div className="col-span-2 text-right font-bold text-slate-900 text-sm">
+                                                    <div className="col-span-3 md:col-span-2">
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            className="w-full bg-white border border-slate-200 rounded px-2 py-2 text-center text-sm focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                            value={item.unitPrice}
+                                                            onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-2 md:col-span-2 text-right font-bold text-slate-900 text-sm py-2">
                                                         €{item.total.toFixed(2)}
                                                     </div>
-                                                    <div className="col-span-1 text-right">
+                                                    <div className="col-span-1 text-right py-2">
                                                         <button type="button" onClick={() => handleRemoveItem(index)} className="text-red-400 hover:text-red-600 transition-colors">
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
@@ -915,10 +950,10 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         </div>
                                     </section>
                                     <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
-                                        <button type="button" onClick={resetForm} className="notranslate px-6 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg transition-colors">
+                                        <button type="button" onClick={resetForm} className="notranslate px-6 py-3 bg-white border-2 border-slate-900 text-slate-900 font-semibold hover:bg-slate-50 rounded-lg transition-colors">
                                             <span>Chiudi</span>
                                         </button>
-                                        <button type="submit" disabled={sending} className="notranslate px-8 py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all shadow-md flex items-center gap-2">
+                                        <button type="submit" disabled={sending} className="notranslate px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2">
                                             {sending ? (
                                                 <>
                                                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -966,7 +1001,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                 </button>
                                 <button
                                     onClick={() => setShowSendModal(false)}
-                                    className="w-full py-3 text-slate-400 font-medium hover:text-slate-600 transition-colors mt-4"
+                                    className="w-full py-3 bg-white border-2 border-slate-900 text-slate-900 font-semibold hover:bg-slate-50 rounded-xl transition-colors mt-4"
                                 >
                                     Chiudi
                                 </button>
@@ -1318,13 +1353,13 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             <button
                                                 type="button"
                                                 onClick={() => setShowModal(false)}
-                                                className="px-6 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
+                                                className="px-6 py-3 bg-white border-2 border-slate-900 text-slate-900 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
                                             >
                                                 Annulla
                                             </button>
                                             <button
                                                 type="submit"
-                                                className="px-8 py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all shadow-md flex items-center gap-2"
+                                                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                                             >
                                                 <CheckCircle className="w-5 h-5" />
                                                 Crea SAL
@@ -1353,7 +1388,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                 <button
                                     onClick={handleSendSALEmail}
                                     disabled={sending}
-                                    className="w-full py-3 bg-[#5D5FEF] text-white font-semibold rounded-xl hover:bg-[#4B4DDB] transition-colors flex items-center justify-center gap-2"
+                                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
                                 >
                                     {sending ? (
                                         <>
@@ -1362,7 +1397,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         </>
                                     ) : (
                                         <>
-                                            <Mail className="w-5 h-5" /> Conferma Invio
+                                            <Mail className="w-5 h-5" /> Invia via Email
                                         </>
                                     )}
                                 </button>
@@ -1371,7 +1406,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         setShowSALSendModal(false);
                                         setSelectedSALId(null);
                                     }}
-                                    className="w-full py-3 text-slate-400 font-medium hover:text-slate-600 transition-colors mt-4"
+                                    className="w-full py-3 bg-white border-2 border-slate-900 text-slate-900 font-semibold hover:bg-slate-50 rounded-xl transition-colors mt-4"
                                 >
                                     Annulla
                                 </button>

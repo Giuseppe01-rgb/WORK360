@@ -143,7 +143,7 @@ export default function SupplierManagement() {
                 <p className="text-slate-500">Gestisci i tuoi fornitori e visualizza raccomandazioni intelligenti.</p>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
+                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 shadow-lg shadow-purple-500/20"
                 >
                     {showForm ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                     {showForm ? 'Chiudi' : 'Nuovo Fornitore'}
@@ -293,13 +293,13 @@ export default function SupplierManagement() {
                             <button
                                 type="button"
                                 onClick={resetForm}
-                                className="px-6 py-2.5 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
+                                className="px-6 py-2.5 bg-white border-2 border-slate-900 text-slate-900 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
                             >
                                 Annulla
                             </button>
                             <button
                                 type="submit"
-                                className="px-8 py-2.5 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all shadow-md flex items-center gap-2"
+                                className="px-8 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                             >
                                 <CheckCircle className="w-5 h-5" />
                                 {editingSupplier ? 'Salva Modifiche' : 'Crea Fornitore'}
@@ -318,7 +318,7 @@ export default function SupplierManagement() {
                         <p className="text-slate-500 mb-6">Aggiungi il tuo primo fornitore per iniziare a tracciare i contatti.</p>
                         <button
                             onClick={() => setShowForm(true)}
-                            className="px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors inline-flex items-center gap-2"
+                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all inline-flex items-center gap-2 shadow-lg shadow-purple-500/20"
                         >
                             <Plus className="w-5 h-5" />
                             Nuovo Fornitore

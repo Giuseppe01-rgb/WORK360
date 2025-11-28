@@ -5,12 +5,13 @@ const { normalizeMaterialInput } = require('../utils/materialNormalization');
 
 const createMaterial = async (req, res) => {
     try {
-        const { name, unit, quantity, site, category, notes } = req.body;
+        const { name, unit, quantity, siteId, site, category, notes } = req.body;
+        const actualSiteId = siteId || site; // Support both siteId and site
 
         // Validate Site Ownership
         const constructionSite = await ConstructionSite.findOne({
-            _id: site,
-            company: req.user.company._id
+            _id: actualSiteId,
+            company: req.user.company._id || req.user.company
         });
 
         if (!constructionSite) {
@@ -40,8 +41,8 @@ const createMaterial = async (req, res) => {
         // 3. Create Material Usage
         const material = await Material.create({
             user: req.user._id,
-            company: req.user.company._id,
-            site,
+            company: req.user.company._id || req.user.company,
+            site: actualSiteId,
             materialMaster: materialMaster._id,
             name: materialMaster.displayName, // Keep for backward compatibility
             unit: materialMaster.unit,        // Keep for backward compatibility

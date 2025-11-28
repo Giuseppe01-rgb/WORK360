@@ -142,7 +142,7 @@ export default function EmployeeManagement() {
                     </p>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center gap-3 text-lg"
+                        className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-3 text-lg"
                     >
                         <Plus className="w-6 h-6" />
                         Crea Lista Operai
@@ -333,13 +333,13 @@ export default function EmployeeManagement() {
                                     <button
                                         type="button"
                                         onClick={resetForm}
-                                        className="px-6 py-3 text-slate-600 font-bold hover:bg-slate-50 rounded-xl transition-colors"
+                                        className="px-6 py-3 bg-white border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 rounded-xl transition-colors"
                                     >
                                         Annulla
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-8 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2"
+                                        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                                     >
                                         <CheckCircle className="w-5 h-5" />
                                         {editingEmployee ? 'Salva Modifiche' : 'Crea Utente'}
@@ -416,7 +416,7 @@ export default function EmployeeManagement() {
 
                             <button
                                 onClick={() => setGeneratedCredentials(null)}
-                                className="w-full mt-6 px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all"
+                                className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20"
                             >
                                 Ho salvato le credenziali
                             </button>
@@ -428,7 +428,7 @@ export default function EmployeeManagement() {
             {/* FAB - Always visible */}
             <button
                 onClick={() => setShowModal(true)}
-                className="fixed bottom-6 right-6 w-14 h-14 bg-slate-900 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-40"
+                className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-40"
             >
                 <Plus className="w-7 h-7" />
             </button>

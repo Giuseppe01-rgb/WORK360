@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// Production API URL (hardcoded for deployment)
-const API_URL = 'https://work360-production-d4f3.up.railway.app/api';
+// Determine API URL based on environment
+const API_URL = import.meta.env.MODE === 'production'
+    ? 'https://work360-production-d4f3.up.railway.app/api'
+    : 'http://localhost:5001/api';
 
 const api = axios.create({
     baseURL: API_URL,
@@ -46,6 +48,58 @@ export const materialAPI = {
     getAll: (params) => api.get('/materials', { params }),
 };
 
+// Material Master (Catalog)
+export const materialMasterAPI = {
+    getAll: () => api.get('/material-master'),
+    getByBarcode: (barcode) => api.get(`/material-master/barcode/${barcode}`),
+    create: (data) => api.post('/material-master', data),
+    update: (id, data) => api.put(`/material-master/${id}`, data),
+    delete: (id) => api.delete(`/material-master/${id}`),
+    uploadInvoice: (file) => {
+        const formData = new FormData();
+        formData.append('invoice', file);
+        return api.post('/material-master/upload-invoice', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    }
+};
+
+// Coloura Material (OCR-based catalog)
+export const colouraMaterialAPI = {
+    search: (query, params) => api.get(`/coloura-materials/search?q=${encodeURIComponent(query)}`, { params }),
+    create: (data) => api.post('/coloura-materials', data),
+    getAll: () => api.get('/coloura-materials'),
+    update: (id, data) => api.put(`/coloura-materials/${id}`, data),
+    delete: (id) => api.delete(`/coloura-materials/${id}`),
+    importFromExcel: (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return api.post('/coloura-materials/import-excel', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    }
+};
+
+// Material Usage (Worker tracking)
+export const materialUsageAPI = {
+    recordUsage: (data) => api.post('/material-usage', data),
+    getTodayUsage: (siteId) => api.get('/material-usage/today', { params: siteId ? { siteId } : {} }),
+    getMostUsedBySite: (siteId) => api.get(`/material-usage/most-used/${siteId}`),
+    getHistory: (params) => api.get('/material-usage', { params }),
+    delete: (id) => api.delete(`/material-usage/${id}`)
+};
+
+// Reported Materials (Segnalazioni)
+export const reportedMaterialAPI = {
+    report: (data) => api.post('/reported-materials', data),
+    getAll: (params) => api.get('/reported-materials', { params }),
+    approveAndCreateNew: (id, data) => api.patch(`/reported-materials/${id}/approve-new`, data),
+    approveAndAssociate: (id, data) => api.patch(`/reported-materials/${id}/approve-associate`, data),
+    reject: (id, data) => api.patch(`/reported-materials/${id}/reject`, data)
+};
+
 // Equipment
 export const equipmentAPI = {
     create: (data) => api.post('/equipment', data),
@@ -88,7 +142,17 @@ export const supplierAPI = {
     create: (data) => api.post('/suppliers', data),
     getAll: () => api.get('/suppliers'),
     update: (id, data) => api.put(`/suppliers/${id}`, data),
-    recommend: (data) => api.post('/suppliers/recommend', data),
+    delete: (id) => api.delete(`/suppliers/${id}`),
+    getRecommendations: () => api.get('/suppliers/recommendations'),
+};
+
+// Work Activities
+export const workActivityAPI = {
+    create: (data) => api.post('/work-activities', data),
+    getAll: (params) => api.get('/work-activities', { params }),
+    distributeTime: (data) => api.put('/work-activities/distribute-time', data),
+    getAnalytics: (params) => api.get('/work-activities/analytics', { params }),
+    delete: (id) => api.delete(`/work-activities/${id}`),
 };
 
 // Quotes

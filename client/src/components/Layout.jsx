@@ -55,6 +55,8 @@ export default function Layout({ children, title }) {
             ]
         },
         { path: '/owner/attendance', label: 'Presenze', icon: Users },
+        { path: '/owner/materials', label: 'Catalogo Materiali', icon: Package },
+        { path: '/owner/material-approval', label: 'Materiali da Approvare', icon: Package },
         { path: '/owner/suppliers', label: 'Magazzino', icon: Package },
         { path: '/owner/quotes', label: 'Preventivi e SAL', icon: FileText },
         { path: '/owner/signature', label: 'Firma Digitale', icon: PenTool },
@@ -104,7 +106,7 @@ export default function Layout({ children, title }) {
                                     <button
                                         onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
-                                            ? 'bg-slate-900 text-white'
+                                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20'
                                             : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
                                             }`}
                                     >
@@ -126,11 +128,11 @@ export default function Layout({ children, title }) {
                                                             key={sublink.path}
                                                             to={sublink.path}
                                                             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isSubActive
-                                                                ? 'text-slate-900 bg-slate-50 font-medium'
+                                                                ? 'text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-bold'
                                                                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-normal'
                                                                 }`}
                                                         >
-                                                            <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-slate-900' : 'bg-slate-300'}`}></span>
+                                                            <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-purple-600' : 'bg-slate-300'}`}></span>
                                                             {sublink.label}
                                                         </Link>
                                                     );
@@ -148,7 +150,7 @@ export default function Layout({ children, title }) {
                                 key={link.path}
                                 to={link.path}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group mb-1 nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
-                                    ? 'bg-slate-900 text-white font-medium'
+                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium shadow-lg shadow-purple-500/20'
                                     : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-normal'
                                     }`}
                             >
@@ -248,7 +250,7 @@ export default function Layout({ children, title }) {
                                                     <button
                                                         onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
                                                         className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${isActive
-                                                            ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'
+                                                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20'
                                                             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                                                             }`}
                                                     >
@@ -270,11 +272,11 @@ export default function Layout({ children, title }) {
                                                                         to={sublink.path}
                                                                         onClick={() => setIsMobileMenuOpen(false)}
                                                                         className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isSubActive
-                                                                            ? 'text-slate-900 bg-slate-50 font-bold'
+                                                                            ? 'text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-bold'
                                                                             : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                                                                             }`}
                                                                     >
-                                                                        <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-slate-900' : 'bg-slate-300'}`}></span>
+                                                                        <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-purple-600' : 'bg-slate-300'}`}></span>
                                                                         {sublink.label}
                                                                     </Link>
                                                                 );
@@ -292,7 +294,7 @@ export default function Layout({ children, title }) {
                                                 to={link.path}
                                                 onClick={() => setIsMobileMenuOpen(false)}
                                                 className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${isActive
-                                                    ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'
+                                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20'
                                                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                                                     }`}
                                             >

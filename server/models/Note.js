@@ -11,6 +11,16 @@ const noteSchema = new mongoose.Schema({
         ref: 'ConstructionSite',
         required: true
     },
+    company: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Company',
+        required: true
+    },
+    type: {
+        type: String,
+        enum: ['note', 'daily_report'],
+        default: 'note'
+    },
     content: {
         type: String,
         required: true

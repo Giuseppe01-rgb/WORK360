@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '../../components/Layout';
-import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI } from '../../utils/api';
+import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI, workActivityAPI, materialMasterAPI, materialUsageAPI, reportedMaterialAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus } from 'lucide-react';
+import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan } from 'lucide-react';
+import TimeDistributionModal from '../../components/worker/TimeDistributionModal';
+import BarcodeScanner from '../../components/common/BarcodeScanner';
+import MaterialsList from '../../components/worker/MaterialsList';
+import MaterialSearch from '../../components/worker/MaterialSearch';
+import MaterialUsageForm from '../../components/worker/MaterialUsageForm';
+import ReportMaterialForm from '../../components/worker/ReportMaterialForm';
 
 export default function WorkerDashboard() {
     const { user } = useAuth();
@@ -12,6 +18,7 @@ export default function WorkerDashboard() {
     const [searchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || 'attendance';
     const [activeAttendance, setActiveAttendance] = useState(null);
+    const [todayAttendance, setTodayAttendance] = useState(null);
     const [sites, setSites] = useState([]);
     const [selectedSite, setSelectedSite] = useState('');
     const [showGeoHelp, setShowGeoHelp] = useState(false);
@@ -23,27 +30,77 @@ export default function WorkerDashboard() {
     const [photoFile, setPhotoFile] = useState(null);
     const [photoCaption, setPhotoCaption] = useState('');
 
+    // Activity tracking states
+    const [todayActivities, setTodayActivities] = useState([]);
+    const [showTimeDistribution, setShowTimeDistribution] = useState(false);
+
+    // Barcode scanner states
+    const [showScanner, setShowScanner] = useState(false);
+    const [scannedMaterial, setScannedMaterial] = useState(null);
+    const [showNewMaterialForm, setShowNewMaterialForm] = useState(false);
+    const [scannedBarcode, setScannedBarcode] = useState('');
+
+    // Materials management states
+    const [todayMaterials, setTodayMaterials] = useState([]);
+    const [loadingMaterials, setLoadingMaterials] = useState(false);
+    const [showMaterialSearch, setShowMaterialSearch] = useState(false);
+    const [showMaterialUsageForm, setShowMaterialUsageForm] = useState(false);
+    const [showReportForm, setShowReportForm] = useState(false);
+    const [selectedMaterial, setSelectedMaterial] = useState(null);
+
     useEffect(() => {
         loadData();
     }, []);
 
     const loadData = async () => {
         try {
-            const [sitesData, attendanceData] = await Promise.all([
+            const [sitesData, attendanceData, myRecordsData] = await Promise.all([
                 siteAPI.getAll(),
-                attendanceAPI.getActive()
+                attendanceAPI.getActive(),
+                attendanceAPI.getMyRecords({
+                    startDate: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+                    endDate: new Date(new Date().setHours(23, 59, 59, 999)).toISOString()
+                })
             ]);
             setSites(sitesData.data);
+
+            // Set active attendance (open session)
             if (attendanceData.data && attendanceData.data._id) {
                 setActiveAttendance(attendanceData.data);
-                // Handle populated site object
                 const siteId = attendanceData.data.site?._id || attendanceData.data.site;
                 setSelectedSite(siteId);
             }
+
+            // Set today's attendance (latest one, could be closed)
+            if (myRecordsData.data && myRecordsData.data.length > 0) {
+                // Get the latest one
+                const latest = myRecordsData.data[myRecordsData.data.length - 1];
+                setTodayAttendance(latest);
+            } else if (attendanceData.data && attendanceData.data._id) {
+                // If no records found but active exists (e.g. first one today), use active
+                setTodayAttendance(attendanceData.data);
+            }
+
+            // Load today's activities
+            await loadTodayActivities();
         } catch (error) {
             console.error('Error loading data:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadTodayActivities = async () => {
+        try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const response = await workActivityAPI.getAll({
+                startDate: today.toISOString(),
+                endDate: new Date().toISOString()
+            });
+            setTodayActivities(response.data || []);
+        } catch (error) {
+            console.error('Error loading today activities:', error);
         }
     };
 
@@ -128,6 +185,20 @@ export default function WorkerDashboard() {
     };
 
     const handleClockOut = async () => {
+        // Check if there are activities without time distribution
+        if (todayActivities.length > 0) {
+            const hasUndistributed = todayActivities.some(a => !a.durationHours || a.durationHours === 0);
+            if (hasUndistributed) {
+                setShowTimeDistribution(true);
+                return;
+            }
+        }
+
+        // Proceed with clock out
+        await performClockOut();
+    };
+
+    const performClockOut = async () => {
         setLoading(true);
         try {
             const location = await getLocation();
@@ -137,6 +208,7 @@ export default function WorkerDashboard() {
             });
             setActiveAttendance(null);
             setSelectedSite('');
+            setTodayActivities([]);
             showSuccess('Uscita registrata con successo');
         } catch (error) {
             showError(error.message || 'Errore durante la timbratura');
@@ -152,14 +224,102 @@ export default function WorkerDashboard() {
             return;
         }
         try {
+            // Create Material record ONLY (for inventory/cost)
             await materialAPI.create({
                 siteId: selectedSite,
                 ...materialForm
             });
+
             showSuccess('Materiale registrato');
             setMaterialForm({ name: '', quantity: '', unit: '' });
         } catch (error) {
             showError('Errore salvataggio materiale');
+        }
+    };
+
+    const handleActivitySubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedSite) {
+            showError('Seleziona un cantiere');
+            return;
+        }
+        try {
+            // Create WorkActivity record ONLY (for time tracking/productivity)
+            const response = await workActivityAPI.create({
+                siteId: selectedSite,
+                activityType: materialForm.name,
+                quantity: parseFloat(materialForm.quantity),
+                unit: materialForm.unit || 'pz',
+                date: new Date()
+            });
+
+            // Add to today's activities
+            setTodayActivities(prev => [...prev, response.data]);
+
+            showSuccess('Attività registrata');
+            setMaterialForm({ name: '', quantity: '', unit: '' });
+        } catch (error) {
+            showError('Errore salvataggio attività');
+        }
+    };
+
+    // Barcode handlers
+    const handleBarcodeScanned = async (barcode) => {
+        setShowScanner(false);
+        setScannedBarcode(barcode);
+
+        try {
+            const response = await materialMasterAPI.getByBarcode(barcode);
+            if (response.data.found) {
+                // Material exists - show confirmation
+                setScannedMaterial(response.data.material);
+                setMaterialForm({
+                    name: response.data.material.displayName,
+                    quantity: '',
+                    unit: response.data.material.unit
+                });
+            } else {
+                // Material not found - show new material form
+                setShowNewMaterialForm(true);
+                setMaterialForm({ name: '', quantity: '', unit: '' });
+            }
+        } catch (error) {
+            if (error.response?.status === 404) {
+                // Material not found - show new material form
+                setShowNewMaterialForm(true);
+                setMaterialForm({ name: '', quantity: '', unit: '' });
+            } else {
+                showError('Errore nella ricerca del materiale');
+            }
+        }
+    };
+
+    const handleSaveNewMaterial = async (e) => {
+        e.preventDefault();
+        try {
+            const newMaterial = await materialMasterAPI.create({
+                displayName: materialForm.name,
+                unit: materialForm.unit || 'pz',
+                barcode: scannedBarcode,
+                supplier: '',
+                price: null
+            });
+
+            showSuccess('Materiale aggiunto al catalogo!');
+
+            // Ask if they want to add to daily report
+            if (window.confirm('Vuoi aggiungere questo materiale al report di oggi?')) {
+                setScannedMaterial(newMaterial.data);
+                setShowNewMaterialForm(false);
+                // Material form is already filled, just need quantity
+            } else {
+                // Reset
+                setShowNewMaterialForm(false);
+                setScannedBarcode('');
+                setMaterialForm({ name: '', quantity: '', unit: '' });
+            }
+        } catch (error) {
+            showError('Errore nel salvataggio del materiale');
         }
     };
 
@@ -183,23 +343,95 @@ export default function WorkerDashboard() {
 
     const handlePhotoSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedSite || !photoFile) {
-            showError('Seleziona cantiere e foto');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('photo', photoFile);
-        formData.append('siteId', selectedSite);
-        formData.append('caption', photoCaption);
+        if (!photoFile) return;
 
         try {
-            await photoAPI.upload(formData);
-            showSuccess('Foto caricata');
+            const formData = new FormData();
+            formData.append('siteId', selectedSite);
+            formData.append('photo', photoFile);
+            formData.append('caption', photoCaption);
+
+            await photoAPI.create(formData);
             setPhotoFile(null);
             setPhotoCaption('');
+            alert('Foto caricata con successo!');
         } catch (error) {
-            showError('Errore caricamento foto');
+            console.error('Photo upload error:', error);
+            alert('Errore nel caricamento della foto');
+        }
+    };
+
+    // Materials Management Functions
+    const loadTodayMaterials = async () => {
+        setLoadingMaterials(true);
+        try {
+            const response = await materialUsageAPI.getTodayUsage(selectedSite);
+            setTodayMaterials(response.data);
+        } catch (error) {
+            console.error('Load today materials error:', error);
+            showError('Errore nel caricamento dei materiali');
+        } finally {
+            setLoadingMaterials(false);
+        }
+    };
+
+    const handleMaterialSelect = (material) => {
+        setSelectedMaterial(material);
+        setShowMaterialSearch(false);
+        setShowMaterialUsageForm(true);
+    };
+
+    const handleMaterialUsageConfirm = async (usageData) => {
+        try {
+            await materialUsageAPI.recordUsage(usageData);
+            showSuccess('Materiale registrato con successo!');
+            setShowMaterialUsageForm(false);
+            setSelectedMaterial(null);
+            loadTodayMaterials();
+        } catch (error) {
+            console.error('Record usage error:', error);
+            showError('Errore nella registrazione del materiale');
+            throw error;
+        }
+    };
+
+    const handleReportMaterial = async (reportData) => {
+        try {
+            await reportedMaterialAPI.report(reportData);
+            showSuccess('Segnalazione inviata! L\'ufficio la approverà a breve.');
+            setShowReportForm(false);
+            loadTodayMaterials();
+        } catch (error) {
+            console.error('Report material error:', error);
+            showError('Errore nell\'invio della segnalazione');
+            throw error;
+        }
+    };
+
+    const resetMaterialFlow = () => {
+        setShowMaterialSearch(false);
+        setShowMaterialUsageForm(false);
+        setShowReportForm(false);
+        setSelectedMaterial(null);
+    };
+
+    // Load today's materials when tab becomes active
+    useEffect(() => {
+        if (activeTab === 'materials' && selectedSite) {
+            loadTodayMaterials();
+        }
+    }, [activeTab, selectedSite]);
+
+    const handleDeleteMaterial = async (usageId) => {
+        if (!window.confirm('Sei sicuro di voler eliminare questo materiale?')) return;
+
+        try {
+            await materialUsageAPI.delete(usageId);
+            // Refresh list
+            loadTodayMaterials();
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('Errore durante l\'eliminazione');
         }
     };
 
@@ -324,61 +556,71 @@ export default function WorkerDashboard() {
                 {/* MATERIALS TAB */}
                 {activeTab === 'materials' && (
                     <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-                        <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                            <Package className="w-6 h-6" />
-                            Materiali Utilizzati
-                        </h3>
-                        <form onSubmit={handleMaterialSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
-                                <CustomSelect
-                                    value={selectedSite}
-                                    onChange={(e) => setSelectedSite(e.target.value)}
-                                    options={sites}
-                                    placeholder="Seleziona..."
-                                />
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <Package className="w-6 h-6" />
+                                Materiali Utilizzati Oggi
+                            </h3>
+                        </div>
+
+                        {/* Site Selection */}
+                        {!selectedSite ? (
+                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                                <p className="text-amber-800">
+                                    ⚠️ Seleziona un cantiere per gestire i materiali
+                                </p>
                             </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Materiale</label>
-                                <input
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
-                                    placeholder="Es. Cemento, Mattoni..."
-                                    value={materialForm.name}
-                                    onChange={(e) => setMaterialForm({ ...materialForm, name: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità</label>
-                                    <input
-                                        type="number"
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
-                                        placeholder="0"
-                                        value={materialForm.quantity}
-                                        onChange={(e) => setMaterialForm({ ...materialForm, quantity: e.target.value })}
-                                        required
+                        ) : (
+                            <>
+                                {/* Today's Materials List */}
+                                <div className="mb-6">
+                                    <MaterialsList
+                                        materials={todayMaterials}
+                                        loading={loadingMaterials}
+                                        onDelete={handleDeleteMaterial}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Unità</label>
-                                    <input
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
-                                        placeholder="pz, kg, m..."
-                                        value={materialForm.unit}
-                                        onChange={(e) => setMaterialForm({ ...materialForm, unit: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <button
-                                type="submit"
-                                className="w-full py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <Plus className="w-5 h-5" />
-                                Aggiungi Materiale
-                            </button>
-                        </form>
+
+                                {/* Action Button */}
+                                <button
+                                    onClick={() => setShowMaterialSearch(true)}
+                                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
+                                >
+                                    <Plus className="w-6 h-6" />
+                                    Aggiungi Materiale
+                                </button>
+                            </>
+                        )}
                     </div>
+                )}
+
+                {/* Material Search Modal */}
+                {showMaterialSearch && (
+                    <MaterialSearch
+                        siteId={selectedSite}
+                        onSelect={handleMaterialSelect}
+                        onClose={resetMaterialFlow}
+                        onReportNew={() => setShowReportForm(true)}
+                    />
+                )}
+
+                {/* Material Usage Form */}
+                {showMaterialUsageForm && selectedMaterial && (
+                    <MaterialUsageForm
+                        material={selectedMaterial}
+                        siteId={selectedSite}
+                        onConfirm={handleMaterialUsageConfirm}
+                        onCancel={resetMaterialFlow}
+                    />
+                )}
+
+                {/* Report Material Form */}
+                {showReportForm && (
+                    <ReportMaterialForm
+                        siteId={selectedSite}
+                        onSubmit={handleReportMaterial}
+                        onCancel={resetMaterialFlow}
+                    />
                 )}
 
                 {/* NOTES TAB */}
@@ -410,7 +652,7 @@ export default function WorkerDashboard() {
                             </div>
                             <button
                                 type="submit"
-                                className="w-full py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+                                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
                             >
                                 <FileText className="w-5 h-5" />
                                 Salva Nota
@@ -465,7 +707,7 @@ export default function WorkerDashboard() {
                             </div>
                             <button
                                 type="submit"
-                                className="w-full py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+                                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
                             >
                                 <Upload className="w-5 h-5" />
                                 Carica Foto
@@ -476,19 +718,184 @@ export default function WorkerDashboard() {
 
                 {/* DAILY REPORT TAB */}
                 {activeTab === 'daily-report' && (
-                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-                        <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                            <FileText className="w-6 h-6 text-slate-900" />
-                            Rapporto Giornaliero
-                        </h3>
-                        <div className="flex flex-col items-center justify-center py-16 text-center">
-                            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                                <FileText className="w-10 h-10 text-slate-400" />
+                    <div className="space-y-6">
+                        {/* Activity List & Entry in Report Tab */}
+                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                    <Package className="w-6 h-6 text-slate-900" />
+                                    Attività Svolte
+                                </h3>
+                                <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                                    {todayActivities.length} registrate
+                                </span>
                             </div>
-                            <h4 className="text-lg font-bold text-slate-900 mb-2">Funzione in arrivo</h4>
-                            <p className="text-slate-500 max-w-md">
-                                La funzionalità per compilare il rapporto giornaliero sarà disponibile a breve.
-                            </p>
+
+                            {/* Warning if no activities */}
+                            {todayActivities.length === 0 && (
+                                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex gap-3">
+                                    <div className="p-2 bg-amber-100 rounded-lg h-fit">
+                                        <Clock className="w-5 h-5 text-amber-600" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-amber-900 text-sm">Nessuna attività registrata</h4>
+                                        <p className="text-sm text-amber-700 mt-1">
+                                            Per calcolare correttamente le ore lavorate, devi aggiungere le attività specifiche (es. "Rasatura 20mq") usando il modulo qui sotto.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Activity Entry Form (Same as Materials Tab) */}
+                            <form onSubmit={handleActivitySubmit} className="space-y-4 mb-8 border-b border-slate-100 pb-8">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
+                                    <CustomSelect
+                                        value={selectedSite}
+                                        onChange={(e) => setSelectedSite(e.target.value)}
+                                        options={sites}
+                                        placeholder="Seleziona..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Attività / Materiale</label>
+                                    <input
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                        placeholder="Es. Rasatura, Posa Pavimento..."
+                                        value={materialForm.name}
+                                        onChange={(e) => setMaterialForm({ ...materialForm, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità</label>
+                                        <input
+                                            type="number"
+                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                            placeholder="0"
+                                            value={materialForm.quantity}
+                                            onChange={(e) => setMaterialForm({ ...materialForm, quantity: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Unità</label>
+                                        <input
+                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                            placeholder="mq, ml, pz..."
+                                            value={materialForm.unit}
+                                            onChange={(e) => setMaterialForm({ ...materialForm, unit: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="w-full py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Plus className="w-5 h-5" />
+                                    Aggiungi Attività
+                                </button>
+                            </form>
+
+                            {/* List of Today's Activities */}
+                            {todayActivities.length > 0 && (
+                                <div className="space-y-3 mb-6">
+                                    <h4 className="font-semibold text-slate-900 text-sm uppercase tracking-wider">Attività di Oggi</h4>
+                                    {todayActivities.map((activity, idx) => (
+                                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                            <div>
+                                                <p className="font-medium text-slate-900">{activity.activityType}</p>
+                                                <p className="text-xs text-slate-500">{activity.quantity} {activity.unit}</p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {activity.percentageTime > 0 && (
+                                                    <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded">
+                                                        {activity.percentageTime}% ({Math.round(activity.durationHours * 60)} min)
+                                                    </span>
+                                                )}
+                                                <button
+                                                    onClick={async () => {
+                                                        if (window.confirm('Eliminare questa attività?')) {
+                                                            try {
+                                                                await workActivityAPI.delete(activity._id);
+                                                                showSuccess('Attività eliminata');
+                                                                loadTodayActivities();
+                                                            } catch (error) {
+                                                                showError('Errore eliminazione attività');
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Time Distribution Button */}
+                            {todayActivities.length > 0 && (
+                                <button
+                                    onClick={() => setShowTimeDistribution(true)}
+                                    disabled={!todayAttendance || !todayAttendance.totalHours}
+                                    className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <Clock className="w-5 h-5" />
+                                    Distribuisci Tempo
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Report Text Area */}
+                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <FileText className="w-6 h-6 text-slate-900" />
+                                Note Aggiuntive Report
+                            </h3>
+                            <form onSubmit={(e) => {
+                                e.preventDefault();
+                                const submitReport = async () => {
+                                    if (!selectedSite) {
+                                        showError('Seleziona un cantiere');
+                                        return;
+                                    }
+                                    try {
+                                        await noteAPI.create({
+                                            siteId: selectedSite,
+                                            content: noteText,
+                                            type: 'daily_report'
+                                        });
+                                        showSuccess('Report testuale salvato');
+                                        setNoteText('');
+                                    } catch (error) {
+                                        showError('Errore salvataggio report');
+                                    }
+                                };
+                                submitReport();
+                            }} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Note / Problemi / Dettagli</label>
+                                    <textarea
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none min-h-[120px]"
+                                        placeholder="Descrivi eventuali problemi o dettagli extra..."
+                                        value={noteText}
+                                        onChange={(e) => setNoteText(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
+                                >
+                                    <FileText className="w-5 h-5" />
+                                    Salva Note Report
+                                </button>
+                            </form>
                         </div>
                     </div>
                 )}
@@ -512,6 +919,162 @@ export default function WorkerDashboard() {
                     </div>
                 )}
             </div>
+
+            {/* Time Distribution Modal */}
+            {showTimeDistribution && todayActivities.length > 0 && todayAttendance?.totalHours && (
+                <TimeDistributionModal
+                    activities={todayActivities}
+                    totalHours={todayAttendance.totalHours}
+                    onClose={() => setShowTimeDistribution(false)}
+                    onSuccess={async () => {
+                        setShowTimeDistribution(false);
+                        await loadTodayActivities(); // Reload to get updated durationHours
+                        // Now proceed with clock out
+                        if (activeAttendance) {
+                            performClockOut();
+                        }
+                    }}
+                />
+            )}
+
+            {/* Barcode Scanner Modal */}
+            {showScanner && (
+                <BarcodeScanner
+                    onScan={handleBarcodeScanned}
+                    onClose={() => setShowScanner(false)}
+                />
+            )}
+
+            {/* New Material Form Modal */}
+            {showNewMaterialForm && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                        <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <Scan className="w-6 h-6 text-blue-600" />
+                            Nuovo Materiale da Barcode
+                        </h3>
+                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                            <p className="text-sm text-blue-900 font-medium">
+                                Codice: <span className="font-mono">{scannedBarcode}</span>
+                            </p>
+                            <p className="text-xs text-blue-700 mt-1">
+                                Materiale non trovato nel catalogo. Crea una nuova voce.
+                            </p>
+                        </div>
+                        <form onSubmit={handleSaveNewMaterial} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Nome Materiale *</label>
+                                <input
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                                    placeholder="Es. Cemento Portland"
+                                    value={materialForm.name}
+                                    onChange={(e) => setMaterialForm({ ...materialForm, name: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Unità di Misura *</label>
+                                <input
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                                    placeholder="kg, L, pz, mq..."
+                                    value={materialForm.unit}
+                                    onChange={(e) => setMaterialForm({ ...materialForm, unit: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowNewMaterialForm(false);
+                                        setScannedBarcode('');
+                                        setMaterialForm({ name: '', quantity: '', unit: '' });
+                                    }}
+                                    className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                                >
+                                    Annulla
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors"
+                                >
+                                    Salva
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Material Confirmation Modal (Existing Material) */}
+            {scannedMaterial && !showNewMaterialForm && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                        <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <Package className="w-6 h-6 text-green-600" />
+                            Materiale Trovato
+                        </h3>
+                        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                            <p className="font-bold text-green-900 text-lg">{scannedMaterial.displayName}</p>
+                            <div className="mt-2 space-y-1 text-sm text-green-800">
+                                <p><span className="font-semibold">Categoria:</span> {scannedMaterial.family}</p>
+                                {scannedMaterial.spec && (
+                                    <p><span className="font-semibold">Spec:</span> {scannedMaterial.spec}</p>
+                                )}
+                                {scannedMaterial.supplier && (
+                                    <p><span className="font-semibold">Fornitore:</span> {scannedMaterial.supplier}</p>
+                                )}
+                                <p><span className="font-semibold">Unità:</span> {scannedMaterial.unit}</p>
+                            </div>
+                        </div>
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            await handleActivitySubmit(e);
+                            setScannedMaterial(null);
+                        }} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere *</label>
+                                <CustomSelect
+                                    value={selectedSite}
+                                    onChange={(e) => setSelectedSite(e.target.value)}
+                                    options={sites}
+                                    placeholder="Seleziona..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità Utilizzata *</label>
+                                <input
+                                    type="number"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                                    placeholder="0"
+                                    value={materialForm.quantity}
+                                    onChange={(e) => setMaterialForm({ ...materialForm, quantity: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setScannedMaterial(null);
+                                        setMaterialForm({ name: '', quantity: '', unit: '' });
+                                    }}
+                                    className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                                >
+                                    Annulla
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors"
+                                >
+                                    Aggiungi al Report
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </Layout>
     );
 }
+

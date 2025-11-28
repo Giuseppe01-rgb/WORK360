@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { analyticsAPI, siteAPI } from '../../utils/api';
-import { BarChart3, Users, Clock, Building2, Package, Calendar, Filter } from 'lucide-react';
+import { BarChart3, Users, Clock, Building2, Package, Calendar, Filter, Activity } from 'lucide-react';
+import ActivityProductivityAnalytics from '../../components/owner/ActivityProductivityAnalytics';
 
 export default function AnalyticsDashboard() {
     const [analytics, setAnalytics] = useState(null);
@@ -218,6 +219,15 @@ export default function AnalyticsDashboard() {
                         ))}
                     </div>
                 )}
+            </div>
+
+            {/* Activity Productivity Analytics */}
+            <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-slate-400" />
+                    Produttività Attività
+                </h3>
+                <ActivityProductivityAnalytics />
             </div>
 
             {/* Material Summary */}

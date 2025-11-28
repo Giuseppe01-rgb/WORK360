@@ -71,8 +71,8 @@ const SiteDetails = ({ site, onBack }) => {
                         key={section.id}
                         onClick={() => setActiveSection(section.id)}
                         className={`px-6 py-3 font-semibold transition-colors ${activeSection === section.id
-                                ? 'border-b-2 border-blue-600 text-blue-600'
-                                : 'text-slate-600 hover:text-slate-900'
+                            ? 'border-b-2 border-purple-600 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-bold'
+                            : 'text-slate-600 hover:text-slate-900'
                             }`}
                     >
                         {section.label}
@@ -335,7 +335,7 @@ export default function SiteManagement() {
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
+                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                 >
                     <Plus className="w-5 h-5" />
                     Nuovo Cantiere
@@ -506,13 +506,13 @@ export default function SiteManagement() {
                                     <button
                                         type="button"
                                         onClick={resetForm}
-                                        className="px-6 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
+                                        className="px-6 py-3 bg-white border-2 border-slate-900 text-slate-900 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
                                     >
                                         Annulla
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-8 py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all shadow-md flex items-center gap-2"
+                                        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                                     >
                                         <CheckCircle className="w-5 h-5" />
                                         {editingSite ? 'Salva Modifiche' : 'Crea Cantiere'}

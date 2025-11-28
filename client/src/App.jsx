@@ -16,6 +16,8 @@ import SALPage from './pages/owner/SALPage';
 import SignaturePage from './pages/owner/SignaturePage';
 import CompanySettings from './pages/owner/CompanySettings';
 import EmployeeManagement from './pages/owner/EmployeeManagement';
+import MaterialsCatalog from './pages/owner/MaterialsCatalog';
+import MaterialApproval from './pages/owner/MaterialApproval';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
@@ -95,6 +97,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute requireOwner>
             <AnalyticsDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/owner/materials"
+        element={
+          <ProtectedRoute requireOwner>
+            <MaterialsCatalog />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/owner/material-approval"
+        element={
+          <ProtectedRoute requireOwner>
+            <MaterialApproval />
           </ProtectedRoute>
         }
       />

@@ -1,26 +1,39 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
-import { siteAPI, analyticsAPI } from '../../utils/api';
+import { siteAPI, analyticsAPI, noteAPI, photoAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
-    Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight
+    Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight,
+    FileText, Camera, Image
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack }) => {
+    const [activeTab, setActiveTab] = useState('dati');
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
+    const [notes, setNotes] = useState([]);
+    const [dailyReports, setDailyReports] = useState([]);
+    const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedNote, setSelectedNote] = useState(null);
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
 
     useEffect(() => {
         const loadDetails = async () => {
             try {
-                const [rep, hours] = await Promise.all([
+                const [rep, hours, notesData, reportsData, photosData] = await Promise.all([
                     analyticsAPI.getSiteReport(site._id),
-                    analyticsAPI.getHoursPerEmployee({ siteId: site._id })
+                    analyticsAPI.getHoursPerEmployee({ siteId: site._id }),
+                    noteAPI.getAll({ siteId: site._id, type: 'note' }),
+                    noteAPI.getAll({ siteId: site._id, type: 'daily_report' }),
+                    photoAPI.getAll({ siteId: site._id })
                 ]);
                 setReport(rep.data);
                 setEmployeeHours(hours.data);
+                setNotes(notesData.data || []);
+                setDailyReports(reportsData.data || []);
+                setPhotos(photosData.data || []);
             } catch (err) {
                 console.error("Error loading site details:", err);
             } finally {
@@ -56,72 +69,281 @@ const SiteDetails = ({ site, onBack }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
-                        <Clock className="w-4 h-4" /> Ore Totali
-                    </h3>
-                    <p className="text-3xl font-bold text-slate-900">
-                        {report?.totalHours?.toFixed(2) || '0.00'} <span className="text-lg font-normal text-slate-500">h</span>
-                    </p>
-                </div>
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
-                        <Package className="w-4 h-4" /> Materiali
-                    </h3>
-                    <p className="text-3xl font-bold text-slate-900">
-                        {report?.materials?.length || 0} <span className="text-lg font-normal text-slate-500">tipi</span>
-                    </p>
-                </div>
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
-                        <Users className="w-4 h-4" /> Dipendenti
-                    </h3>
-                    <p className="text-3xl font-bold text-slate-900">
-                        {employeeHours?.length || 0}
-                    </p>
+            {/* TAB SWITCHER */}
+            <div className="bg-white rounded-2xl p-2 shadow-sm">
+                <div className="flex gap-2 overflow-x-auto">
+                    {[
+                        { id: 'dati', label: 'Dati', icon: Clock },
+                        { id: 'report', label: 'Report Giornaliero', icon: FileText },
+                        { id: 'note', label: 'Note', icon: FileText },
+                        { id: 'foto', label: 'Foto', icon: Camera },
+                    ].map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all whitespace-nowrap ${isActive
+                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20'
+                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                    }`}
+                            >
+                                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                                {tab.label}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <Users className="w-5 h-5 text-slate-400" />
-                        Ore per Dipendente
-                    </h3>
-                    {employeeHours.length > 0 ? (
-                        <div className="space-y-3">
-                            {employeeHours.map((emp) => (
-                                <div key={emp._id._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                    <span className="font-medium text-slate-700">{emp._id.firstName} {emp._id.lastName}</span>
-                                    <span className="font-bold text-slate-900">{emp.totalHours.toFixed(2)} h</span>
+            {/* DATI TAB */}
+            {activeTab === 'dati' && (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                            <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
+                                <Clock className="w-4 h-4" /> Ore Totali
+                            </h3>
+                            <p className="text-3xl font-bold text-slate-900">
+                                {report?.totalHours?.toFixed(2) || '0.00'} <span className="text-lg font-normal text-slate-500">h</span>
+                            </p>
+                        </div>
+                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                            <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
+                                <Package className="w-4 h-4" /> Materiali
+                            </h3>
+                            <p className="text-3xl font-bold text-slate-900">
+                                {report?.materials?.length || 0} <span className="text-lg font-normal text-slate-500">tipi</span>
+                            </p>
+                        </div>
+                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                            <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
+                                <Users className="w-4 h-4" /> Dipendenti
+                            </h3>
+                            <p className="text-3xl font-bold text-slate-900">
+                                {employeeHours?.length || 0}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <Users className="w-5 h-5 text-slate-400" />
+                                Ore per Dipendente
+                            </h3>
+                            {employeeHours.length > 0 ? (
+                                <div className="space-y-3">
+                                    {employeeHours.map((emp) => (
+                                        <div key={emp._id._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                            <span className="font-medium text-slate-700">{emp._id.firstName} {emp._id.lastName}</span>
+                                            <span className="font-bold text-slate-900">{emp.totalHours.toFixed(2)} h</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-slate-400 italic">Nessuna ora registrata.</p>
+                            )}
+                        </div>
+
+                        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <Package className="w-5 h-5 text-slate-400" />
+                                Materiali Utilizzati
+                            </h3>
+                            {report?.materials?.length > 0 ? (
+                                <div className="space-y-3">
+                                    {report.materials.map((mat) => (
+                                        <div key={mat._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                            <span className="font-medium text-slate-700">{mat._id}</span>
+                                            <span className="font-bold text-slate-900">{mat.totalQuantity} {mat.unit}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-slate-400 italic">Nessun materiale registrato.</p>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* REPORT GIORNALIERO TAB */}
+            {activeTab === 'report' && (
+                <div className="space-y-4">
+                    {dailyReports.length > 0 ? (
+                        dailyReports.map((note) => (
+                            <div
+                                key={note._id}
+                                onClick={() => setSelectedNote(note)}
+                                className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-all cursor-pointer"
+                            >
+                                <div className="flex items-start justify-between mb-3">
+                                    <div>
+                                        <h4 className="font-bold text-slate-900">
+                                            {note.user?.firstName} {note.user?.lastName}
+                                        </h4>
+                                        <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                                            <span>{new Date(note.createdAt).toLocaleDateString('it-IT')}</span>
+                                            <span>•</span>
+                                            <span>{new Date(note.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p className="text-slate-600 line-clamp-2">{note.content}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+                            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                            <p className="text-slate-400 font-medium">Nessun report giornaliero disponibile</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* NOTE TAB */}
+            {activeTab === 'note' && (
+                <div className="space-y-4">
+                    {notes.length > 0 ? (
+                        notes.map((note) => (
+                            <div
+                                key={note._id}
+                                onClick={() => setSelectedNote(note)}
+                                className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-all cursor-pointer"
+                            >
+                                <div className="flex items-start justify-between mb-3">
+                                    <div>
+                                        <h4 className="font-bold text-slate-900">
+                                            {note.user?.firstName} {note.user?.lastName}
+                                        </h4>
+                                        <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                                            <span>{new Date(note.createdAt).toLocaleDateString('it-IT')}</span>
+                                            <span>•</span>
+                                            <span>{new Date(note.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p className="text-slate-600 line-clamp-2">{note.content}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+                            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                            <p className="text-slate-400 font-medium">Nessuna nota disponibile</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* FOTO TAB */}
+            {activeTab === 'foto' && (
+                <div>
+                    {photos.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {photos.map((photo) => (
+                                <div
+                                    key={photo._id}
+                                    onClick={() => setSelectedPhoto(photo)}
+                                    className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-md transition-all cursor-pointer"
+                                >
+                                    <div className="aspect-video bg-slate-100 relative">
+                                        <img
+                                            src={photo.photoUrl}
+                                            alt={photo.caption || 'Foto cantiere'}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="p-4">
+                                        <h4 className="font-bold text-slate-900 text-sm mb-1">
+                                            {photo.user?.firstName} {photo.user?.lastName}
+                                        </h4>
+                                        <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                                            <span>{new Date(photo.createdAt).toLocaleDateString('it-IT')}</span>
+                                            <span>•</span>
+                                            <span>{new Date(photo.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                        {photo.caption && (
+                                            <p className="text-slate-600 text-sm line-clamp-2">{photo.caption}</p>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-slate-400 italic">Nessuna ora registrata.</p>
-                    )}
-                </div>
-
-                <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <Package className="w-5 h-5 text-slate-400" />
-                        Materiali Utilizzati
-                    </h3>
-                    {report?.materials?.length > 0 ? (
-                        <div className="space-y-3">
-                            {report.materials.map((mat) => (
-                                <div key={mat._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                    <span className="font-medium text-slate-700">{mat._id}</span>
-                                    <span className="font-bold text-slate-900">{mat.totalQuantity} {mat.unit}</span>
-                                </div>
-                            ))}
+                        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+                            <Camera className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                            <p className="text-slate-400 font-medium">Nessuna foto disponibile</p>
                         </div>
-                    ) : (
-                        <p className="text-slate-400 italic">Nessun materiale registrato.</p>
                     )}
                 </div>
-            </div>
+            )}
+
+            {/* Note Detail Modal */}
+            {selectedNote && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedNote(null)}>
+                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900">
+                                    {selectedNote.user?.firstName} {selectedNote.user?.lastName}
+                                </h3>
+                                <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                                    <span>{new Date(selectedNote.createdAt).toLocaleDateString('it-IT')}</span>
+                                    <span>•</span>
+                                    <span>{new Date(selectedNote.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedNote(null)}
+                                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                            >
+                                <X className="w-6 h-6 text-slate-500" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-slate-700 whitespace-pre-wrap">{selectedNote.content}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Photo Detail Modal */}
+            {selectedPhoto && (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedPhoto(null)}>
+                    <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900">
+                                    {selectedPhoto.user?.firstName} {selectedPhoto.user?.lastName}
+                                </h3>
+                                <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                                    <span>{new Date(selectedPhoto.createdAt).toLocaleDateString('it-IT')}</span>
+                                    <span>•</span>
+                                    <span>{new Date(selectedPhoto.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedPhoto(null)}
+                                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                            >
+                                <X className="w-6 h-6 text-slate-500" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <img
+                                src={selectedPhoto.photoUrl}
+                                alt={selectedPhoto.caption || 'Foto cantiere'}
+                                className="w-full rounded-xl mb-4"
+                            />
+                            {selectedPhoto.caption && (
+                                <p className="text-slate-700">{selectedPhoto.caption}</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -261,7 +483,7 @@ export default function OwnerDashboard() {
                     </p>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-900/20 flex items-center gap-3 text-lg transform hover:-translate-y-1"
+                        className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-3 text-lg transform hover:-translate-y-1"
                     >
                         <Plus className="w-6 h-6" />
                         CREA NUOVO CANTIERE
@@ -283,7 +505,7 @@ export default function OwnerDashboard() {
                         </div>
                         <button
                             onClick={() => setShowModal(true)}
-                            className="w-full md:w-auto px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 shadow-sm"
+                            className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20"
                         >
                             <Plus className="w-5 h-5" />
                             Nuovo Cantiere
@@ -433,13 +655,13 @@ export default function OwnerDashboard() {
                                     <button
                                         type="button"
                                         onClick={resetForm}
-                                        className="px-6 py-3 text-slate-600 font-bold hover:bg-slate-50 rounded-xl transition-colors"
+                                        className="px-6 py-3 bg-white border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 rounded-xl transition-colors"
                                     >
                                         Annulla
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-8 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-900/20 flex items-center gap-2"
+                                        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                                     >
                                         <CheckCircle className="w-5 h-5" />
                                         {editingSite ? 'Salva Modifiche' : 'Crea Cantiere'}

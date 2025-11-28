@@ -13,7 +13,8 @@ const getHoursPerEmployee = async (req, res) => {
         console.log('DEBUG: getHoursPerEmployee called with:', { startDate, endDate, siteId });
 
         // Get all company employees
-        const employees = await User.find({ company: req.user.company._id });
+        const companyId = req.user.company._id || req.user.company;
+        const employees = await User.find({ company: companyId });
         const employeeIds = employees.map(e => e._id);
 
         const matchQuery = {
@@ -141,13 +142,14 @@ const getEmployeeMaterials = async (req, res) => {
 // @access  Private (Owner)
 const getDashboard = async (req, res) => {
     try {
-        const companyUsers = await User.find({ company: req.user.company._id });
+        const companyId = req.user.company._id || req.user.company;
+        const companyUsers = await User.find({ company: companyId });
         const userIds = companyUsers.map(u => u._id);
 
         // Total active sites
         const ConstructionSite = require('../models/ConstructionSite');
         const activeSites = await ConstructionSite.countDocuments({
-            company: req.user.company._id,
+            company: companyId,
             status: { $in: ['active', 'planned'] }
         });
 

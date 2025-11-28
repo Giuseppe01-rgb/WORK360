@@ -30,10 +30,38 @@ const materialMasterSchema = new mongoose.Schema({
     normalizedKey: {
         type: String, // e.g., "nastro|48mm|pz"
         required: true
+    },
+    supplier: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    barcode: {
+        type: String,
+        trim: true,
+        default: '',
+        index: true // For fast lookups
+    },
+    price: {
+        type: Number,
+        default: null
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
 }, {
     timestamps: true
 });
+
+// Virtual field for missingPrice
+materialMasterSchema.virtual('missingPrice').get(function () {
+    return this.price === null || this.price === undefined || this.price === 0;
+});
+
+// Ensure virtuals are included in JSON
+materialMasterSchema.set('toJSON', { virtuals: true });
+materialMasterSchema.set('toObject', { virtuals: true });
 
 // Ensure unique materials per company
 materialMasterSchema.index({ company: 1, normalizedKey: 1 }, { unique: true });

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { salAPI, siteAPI } from '../../utils/api';
-import { Plus, FileText, Download, Percent, Euro, X, CheckCircle, AlertCircle, Search, Building2 } from 'lucide-react';
+import { Plus, FileText, Download, Percent, Euro, X, CheckCircle, AlertCircle, Search, Building2, Mail } from 'lucide-react';
 
 export default function SALPage() {
     const [sals, setSals] = useState([]);
@@ -143,7 +143,7 @@ export default function SALPage() {
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
+                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                 >
                     <Plus className="w-5 h-5" />
                     Nuovo SAL
@@ -198,7 +198,7 @@ export default function SALPage() {
                         <div className="pt-4 border-t border-slate-100">
                             <button
                                 onClick={() => downloadPDF(sal._id)}
-                                className="w-full py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium text-sm flex items-center justify-center gap-2 transition-colors"
+                                className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-500/10"
                             >
                                 <Download className="w-4 h-4" /> Scarica PDF
                             </button>
@@ -546,13 +546,13 @@ export default function SALPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShowModal(false)}
-                                        className="px-6 py-3 text-slate-600 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
+                                        className="px-6 py-3 bg-white border-2 border-slate-900 text-slate-900 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
                                     >
                                         Annulla
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-8 py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all shadow-md flex items-center gap-2"
+                                        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
                                     >
                                         <CheckCircle className="w-5 h-5" />
                                         Crea SAL
