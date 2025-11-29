@@ -99,17 +99,17 @@ const getSiteReport = async (req, res) => {
             {
                 $group: {
                     _id: '$materialDetails.nome_prodotto',
-                    totalQuantity: { $sum: '$numeroConfezioni' }, // Note: This is packs, not base unit. 
-                    // Ideally we should multiply by pack size if available, but for now we sum packs/units as recorded
-                    unit: { $first: '$materialDetails.unit' }, // Use unit from catalog
+                    totalQuantity: { $sum: '$numeroConfezioni' },
+                    unit: { $first: '$materialDetails.unit' },
+                    totalCost: { $sum: { $multiply: ['$numeroConfezioni', { $ifNull: ['$materialDetails.prezzo', 0] }] } },
                     count: { $sum: 1 }
                 }
             }
         ]);
 
         // 3. Merge lists
-        // We use a map to combine if same name exists (unlikely but possible)
         const materialMap = new Map();
+        let totalMaterialCost = 0;
 
         // Add manual
         manualMaterials.forEach(m => {
@@ -118,24 +118,27 @@ const getSiteReport = async (req, res) => {
                 totalQuantity: m.totalQuantity,
                 unit: m.unit,
                 count: m.count,
-                source: 'manual'
+                source: 'manual',
+                totalCost: 0 // Manual materials have 0 cost for now
             });
         });
 
         // Add/Merge catalog
         catalogMaterials.forEach(m => {
+            totalMaterialCost += m.totalCost || 0;
             if (materialMap.has(m._id)) {
                 const existing = materialMap.get(m._id);
                 existing.totalQuantity += m.totalQuantity;
                 existing.count += m.count;
-                // Keep existing unit
+                existing.totalCost = (existing.totalCost || 0) + (m.totalCost || 0);
             } else {
                 materialMap.set(m._id, {
                     _id: m._id,
                     totalQuantity: m.totalQuantity,
                     unit: m.unit || 'pz',
                     count: m.count,
-                    source: 'catalog'
+                    source: 'catalog',
+                    totalCost: m.totalCost || 0
                 });
             }
         });
@@ -154,21 +157,40 @@ const getSiteReport = async (req, res) => {
             }
         ]);
 
-        // Total hours on site
-        const hours = await Attendance.aggregate([
+        // Total hours and Labor Cost
+        const laborData = await Attendance.aggregate([
             { $match: { site: siteObjectId, clockOut: { $exists: true } } },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'userDetails'
+                }
+            },
+            { $unwind: '$userDetails' },
             {
                 $group: {
                     _id: null,
-                    totalHours: { $sum: '$totalHours' }
+                    totalHours: { $sum: '$totalHours' },
+                    totalLaborCost: { $sum: { $multiply: ['$totalHours', { $ifNull: ['$userDetails.hourlyCost', 0] }] } }
                 }
             }
         ]);
 
+        const totalHours = laborData[0]?.totalHours || 0;
+        const totalLaborCost = laborData[0]?.totalLaborCost || 0;
+        const totalSiteCost = totalMaterialCost + totalLaborCost;
+
         res.json({
             materials: allMaterials,
             equipment,
-            totalHours: hours[0]?.totalHours || 0
+            totalHours,
+            costs: {
+                materials: totalMaterialCost,
+                labor: totalLaborCost,
+                total: totalSiteCost
+            }
         });
     } catch (error) {
         console.error('Site Report Error:', error);

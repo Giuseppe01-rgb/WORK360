@@ -98,7 +98,7 @@ const SiteDetails = ({ site, onBack }) => {
             {/* Content - Dati Section */}
             {activeSection === 'data' && (
                 <>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                         <div className="bg-slate-50 p-4 md:p-6 rounded-2xl">
                             <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
                                 <Clock className="w-4 h-4" /> Ore Totali
@@ -122,6 +122,19 @@ const SiteDetails = ({ site, onBack }) => {
                             <p className="text-2xl md:text-3xl font-bold text-slate-900">
                                 {employeeHours?.length || 0}
                             </p>
+                        </div>
+                        <div className="bg-slate-50 p-4 md:p-6 rounded-2xl">
+                            <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
+                                <span className="text-green-600 font-bold">€</span> Costo Cantiere
+                            </h3>
+                            <p className="text-2xl md:text-3xl font-bold text-slate-900">
+                                € {report?.costs?.total?.toFixed(2) || '0.00'}
+                            </p>
+                            <div className="flex gap-3 mt-1 text-xs text-slate-500">
+                                <span>Mat: €{report?.costs?.materials?.toFixed(0) || '0'}</span>
+                                <span>•</span>
+                                <span>Op: €{report?.costs?.labor?.toFixed(0) || '0'}</span>
+                            </div>
                         </div>
                     </div>
 
