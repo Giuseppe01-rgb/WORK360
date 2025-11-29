@@ -69,7 +69,8 @@ const createUser = async (req, res) => {
             lastName,
             email,
             phone,
-            birthDate
+            birthDate,
+            hourlyCost: req.body.hourlyCost || 0
         });
 
         // Return user without password but include generated password for one-time display
@@ -104,6 +105,7 @@ const updateUser = async (req, res) => {
         if (email !== undefined) user.email = email;
         if (phone !== undefined) user.phone = phone;
         if (birthDate !== undefined) user.birthDate = birthDate;
+        if (req.body.hourlyCost !== undefined) user.hourlyCost = req.body.hourlyCost;
 
         await user.save();
 

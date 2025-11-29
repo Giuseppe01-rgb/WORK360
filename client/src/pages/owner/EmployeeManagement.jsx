@@ -23,7 +23,8 @@ export default function EmployeeManagement() {
         lastName: '',
         email: '',
         phone: '',
-        birthDate: ''
+        birthDate: '',
+        hourlyCost: ''
     });
 
     useEffect(() => {
@@ -77,7 +78,8 @@ export default function EmployeeManagement() {
             lastName: employee.lastName,
             email: employee.email || '',
             phone: employee.phone || '',
-            birthDate: employee.birthDate ? new Date(employee.birthDate).toISOString().split('T')[0] : ''
+            birthDate: employee.birthDate ? new Date(employee.birthDate).toISOString().split('T')[0] : '',
+            hourlyCost: employee.hourlyCost || ''
         });
         setShowModal(true);
     };
@@ -95,7 +97,7 @@ export default function EmployeeManagement() {
     };
 
     const resetForm = () => {
-        setFormData({ role: 'worker', firstName: '', lastName: '', email: '', phone: '', birthDate: '' });
+        setFormData({ role: 'worker', firstName: '', lastName: '', email: '', phone: '', birthDate: '', hourlyCost: '' });
         setEditingEmployee(null);
         setShowModal(false);
     };
@@ -316,6 +318,19 @@ export default function EmployeeManagement() {
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900"
                                         placeholder="+39 123 456 7890"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-900 mb-2">Costo Orario (€)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.hourlyCost}
+                                        onChange={(e) => setFormData({ ...formData, hourlyCost: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                        placeholder="0.00"
                                     />
                                 </div>
 
