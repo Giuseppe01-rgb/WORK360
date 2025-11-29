@@ -57,14 +57,19 @@ export default function MaterialsCatalog() {
         }
     };
 
+    const [sortOrder, setSortOrder] = useState('default'); // 'default', 'price-asc', 'price-desc'
+
     // Computed: Filtered materials
     const filteredMaterials = useMemo(() => {
         let filtered = materials;
 
-        // Filter by active status
-        if (activeFilter !== 'all') {
-            filtered = filtered.filter(m => m.attivo === (activeFilter === 'active'));
+        // Filter logic
+        if (activeFilter === 'missing-price') {
+            filtered = filtered.filter(m => !m.prezzo || m.prezzo === 0);
+        } else if (activeFilter === 'active') {
+            filtered = filtered.filter(m => m.attivo === true);
         }
+        // 'all' does no filtering
 
         // Filter by search term
         if (searchTerm) {
@@ -78,8 +83,15 @@ export default function MaterialsCatalog() {
             );
         }
 
+        // Sorting logic
+        if (sortOrder === 'price-asc') {
+            filtered = [...filtered].sort((a, b) => (a.prezzo || 0) - (b.prezzo || 0));
+        } else if (sortOrder === 'price-desc') {
+            filtered = [...filtered].sort((a, b) => (b.prezzo || 0) - (a.prezzo || 0));
+        }
+
         return filtered;
-    }, [materials, activeFilter, searchTerm]);
+    }, [materials, activeFilter, searchTerm, sortOrder]);
 
     const resetForm = () => {
         setFormData({
@@ -395,6 +407,32 @@ export default function MaterialsCatalog() {
                                 }`}
                         >
                             Prezzo Mancante
+                        </button>
+                    </div>
+
+                    {/* Sort Buttons */}
+                    <div className="flex gap-2 bg-slate-100 p-1 rounded-lg">
+                        <button
+                            onClick={() => setSortOrder(prev => prev === 'price-asc' ? 'default' : 'price-asc')}
+                            className={`px-3 py-2 rounded-md font-medium text-sm transition-all flex items-center gap-1 ${sortOrder === 'price-asc'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            title="Prezzo Crescente"
+                        >
+                            <span className="text-xs">€</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-up"><path d="m5 12 7-7 7 7" /><path d="M12 19V5" /></svg>
+                        </button>
+                        <button
+                            onClick={() => setSortOrder(prev => prev === 'price-desc' ? 'default' : 'price-desc')}
+                            className={`px-3 py-2 rounded-md font-medium text-sm transition-all flex items-center gap-1 ${sortOrder === 'price-desc'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            title="Prezzo Decrescente"
+                        >
+                            <span className="text-xs">€</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-down"><path d="M12 5v14" /><path d="m19 12-7 7-7-7" /></svg>
                         </button>
                     </div>
 
