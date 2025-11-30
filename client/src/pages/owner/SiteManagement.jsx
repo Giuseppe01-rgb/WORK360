@@ -123,19 +123,7 @@ const SiteDetails = ({ site, onBack }) => {
                                 {employeeHours?.length || 0}
                             </p>
                         </div>
-                        <div className="bg-slate-50 p-4 md:p-6 rounded-2xl">
-                            <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
-                                <span className="text-green-600 font-bold">€</span> Costo Cantiere
-                            </h3>
-                            <p className="text-2xl md:text-3xl font-bold text-slate-900">
-                                € {report?.costs?.total?.toFixed(2) || '0.00'}
-                            </p>
-                            <div className="flex gap-3 mt-1 text-xs text-slate-500">
-                                <span>Mat: €{report?.costs?.materials?.toFixed(0) || '0'}</span>
-                                <span>•</span>
-                                <span>Op: €{report?.costs?.labor?.toFixed(0) || '0'}</span>
-                            </div>
-                        </div>
+
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
@@ -175,6 +163,15 @@ const SiteDetails = ({ site, onBack }) => {
                             ) : (
                                 <p className="text-slate-400 italic">Nessun materiale registrato.</p>
                             )}
+                        </div>
+                    </div>
+
+                    <div className="mt-6">
+                        <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm inline-block min-w-[250px]">
+                            <h3 className="text-lg font-bold text-slate-900 mb-2">Costo Cantiere</h3>
+                            <p className="text-3xl md:text-4xl font-bold text-slate-900 mb-1">
+                                {report?.siteCost?.total?.toFixed(2) || '0,00'}€
+                            </p>
                         </div>
                     </div>
                 </>

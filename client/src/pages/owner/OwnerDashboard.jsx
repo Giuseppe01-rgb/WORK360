@@ -18,6 +18,8 @@ const SiteDetails = ({ site, onBack }) => {
     const [loading, setLoading] = useState(true);
     const [selectedNote, setSelectedNote] = useState(null);
     const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [showMaterialsModal, setShowMaterialsModal] = useState(false);
+    const [showEmployeesModal, setShowEmployeesModal] = useState(false);
 
     useEffect(() => {
         const loadDetails = async () => {
@@ -100,7 +102,37 @@ const SiteDetails = ({ site, onBack }) => {
             {/* DATI TAB */}
             {activeTab === 'dati' && (
                 <>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* COSTO CANTIERE - TOP CARD */}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full -mr-10 -mt-10 opacity-50"></div>
+                        <div className="relative z-10">
+                            <h3 className="text-lg font-bold text-slate-500 mb-2 flex items-center gap-2">
+                                <span className="p-2 bg-green-100 rounded-lg text-green-600">
+                                    <Clock className="w-5 h-5" />
+                                </span>
+                                Costo Totale Cantiere
+                            </h3>
+                            <div className="flex items-baseline gap-2">
+                                <p className="text-4xl md:text-5xl font-black text-slate-900">
+                                    {report?.siteCost?.total?.toFixed(2) || '0,00'}€
+                                </p>
+                                <span className="text-sm text-slate-500 font-medium">aggiornato in tempo reale</span>
+                            </div>
+                            <div className="flex gap-6 mt-4 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                    <span className="text-slate-600">Manodopera: <strong>{report?.siteCost?.labor?.toFixed(2) || '0,00'}€</strong></span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                                    <span className="text-slate-600">Materiali: <strong>{report?.siteCost?.materials?.toFixed(2) || '0,00'}€</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* SUMMARY GRID */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                             <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
                                 <Clock className="w-4 h-4" /> Ore Totali
@@ -127,39 +159,88 @@ const SiteDetails = ({ site, onBack }) => {
                         </div>
                     </div>
 
+                    {/* INTERACTIVE CARDS GRID */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                <Users className="w-5 h-5 text-slate-400" />
-                                Ore per Dipendente
-                            </h3>
+                        {/* EMPLOYEES CARD */}
+                        <div
+                            onClick={() => setShowEmployeesModal(true)}
+                            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-all cursor-pointer group"
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                    <Users className="w-5 h-5 text-slate-400" />
+                                    Dettaglio Dipendenti
+                                </h3>
+                                <span className="text-blue-600 text-sm font-bold group-hover:underline flex items-center gap-1">
+                                    Vedi tutti <ChevronRight className="w-4 h-4" />
+                                </span>
+                            </div>
                             {employeeHours.length > 0 ? (
                                 <div className="space-y-3">
-                                    {employeeHours.map((emp) => (
-                                        <div key={emp._id._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                            <span className="font-medium text-slate-700">{emp._id.firstName} {emp._id.lastName}</span>
-                                            <span className="font-bold text-slate-900">{emp.totalHours.toFixed(2)} h</span>
+                                    {employeeHours.slice(0, 3).map((emp) => (
+                                        <div key={emp._id._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg group-hover:bg-blue-50 transition-colors">
+                                            <div>
+                                                <span className="font-bold text-slate-700 block">{emp._id.firstName} {emp._id.lastName}</span>
+                                                <span className="text-xs text-slate-500">
+                                                    {emp._id.hourlyCost ? `€${emp._id.hourlyCost.toFixed(2)}/h` : 'Costo orario non impostato'}
+                                                </span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="font-bold text-slate-900 block">{emp.totalHours.toFixed(2)} h</span>
+                                                <span className="text-xs font-bold text-green-600">
+                                                    €{((emp.totalHours || 0) * (emp._id.hourlyCost || 0)).toFixed(2)}
+                                                </span>
+                                            </div>
                                         </div>
                                     ))}
+                                    {employeeHours.length > 3 && (
+                                        <p className="text-center text-sm text-slate-400 pt-2">
+                                            +{employeeHours.length - 3} altri dipendenti...
+                                        </p>
+                                    )}
                                 </div>
                             ) : (
                                 <p className="text-slate-400 italic">Nessuna ora registrata.</p>
                             )}
                         </div>
 
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                <Package className="w-5 h-5 text-slate-400" />
-                                Materiali Utilizzati
-                            </h3>
+                        {/* MATERIALS CARD */}
+                        <div
+                            onClick={() => setShowMaterialsModal(true)}
+                            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-all cursor-pointer group"
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                    <Package className="w-5 h-5 text-slate-400" />
+                                    Dettaglio Materiali
+                                </h3>
+                                <span className="text-purple-600 text-sm font-bold group-hover:underline flex items-center gap-1">
+                                    Vedi tutti <ChevronRight className="w-4 h-4" />
+                                </span>
+                            </div>
                             {report?.materials?.length > 0 ? (
                                 <div className="space-y-3">
-                                    {report.materials.map((mat) => (
-                                        <div key={mat._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                            <span className="font-medium text-slate-700">{mat._id}</span>
-                                            <span className="font-bold text-slate-900">{mat.totalQuantity} {mat.unit}</span>
+                                    {report.materials.slice(0, 3).map((mat) => (
+                                        <div key={mat._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg group-hover:bg-purple-50 transition-colors">
+                                            <div>
+                                                <span className="font-bold text-slate-700 block">{mat._id}</span>
+                                                <span className="text-xs text-slate-500">
+                                                    {mat.unitPrice ? `€${mat.unitPrice.toFixed(2)}/${mat.unit}` : 'Prezzo non disp.'}
+                                                </span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="font-bold text-slate-900 block">{mat.totalQuantity} {mat.unit}</span>
+                                                <span className="text-xs font-bold text-green-600">
+                                                    €{(mat.totalCost || 0).toFixed(2)}
+                                                </span>
+                                            </div>
                                         </div>
                                     ))}
+                                    {report.materials.length > 3 && (
+                                        <p className="text-center text-sm text-slate-400 pt-2">
+                                            +{report.materials.length - 3} altri materiali...
+                                        </p>
+                                    )}
                                 </div>
                             ) : (
                                 <p className="text-slate-400 italic">Nessun materiale registrato.</p>
@@ -340,6 +421,131 @@ const SiteDetails = ({ site, onBack }) => {
                             {selectedPhoto.caption && (
                                 <p className="text-slate-700">{selectedPhoto.caption}</p>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Employees Detail Modal */}
+            {showEmployeesModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowEmployeesModal(false)}>
+                    <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between z-10">
+                            <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                                <Users className="w-6 h-6 text-blue-600" />
+                                Dettaglio Costi Dipendenti
+                            </h3>
+                            <button
+                                onClick={() => setShowEmployeesModal(false)}
+                                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                            >
+                                <X className="w-6 h-6 text-slate-500" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-200">
+                                            <th className="text-left px-4 py-3 font-bold text-slate-700">Dipendente</th>
+                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Ore Totali</th>
+                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Orario</th>
+                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Totale</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {employeeHours.map((emp) => (
+                                            <tr key={emp._id._id} className="border-b border-slate-100 hover:bg-slate-50">
+                                                <td className="px-4 py-3">
+                                                    <div className="font-bold text-slate-900">{emp._id.firstName} {emp._id.lastName}</div>
+                                                    <div className="text-xs text-slate-500">{emp._id.username}</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-slate-700">
+                                                    {emp.totalHours.toFixed(2)} h
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-slate-700">
+                                                    {emp._id.hourlyCost ? `€ ${emp._id.hourlyCost.toFixed(2)}` : '-'}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
+                                                    € {((emp.totalHours || 0) * (emp._id.hourlyCost || 0)).toFixed(2)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot className="bg-slate-50 font-bold">
+                                        <tr>
+                                            <td className="px-4 py-3 text-slate-900">TOTALE</td>
+                                            <td className="px-4 py-3 text-right text-slate-900">
+                                                {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(2)} h
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-slate-900">-</td>
+                                            <td className="px-4 py-3 text-right text-green-600">
+                                                € {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr._id.hourlyCost || 0)), 0).toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Materials Detail Modal */}
+            {showMaterialsModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowMaterialsModal(false)}>
+                    <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between z-10">
+                            <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                                <Package className="w-6 h-6 text-purple-600" />
+                                Dettaglio Costi Materiali
+                            </h3>
+                            <button
+                                onClick={() => setShowMaterialsModal(false)}
+                                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                            >
+                                <X className="w-6 h-6 text-slate-500" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-200">
+                                            <th className="text-left px-4 py-3 font-bold text-slate-700">Materiale</th>
+                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Quantità</th>
+                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Prezzo Unit.</th>
+                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Totale</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {report?.materials?.map((mat) => (
+                                            <tr key={mat._id} className="border-b border-slate-100 hover:bg-slate-50">
+                                                <td className="px-4 py-3 font-bold text-slate-900">
+                                                    {mat._id}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-slate-700">
+                                                    {mat.totalQuantity} {mat.unit}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-slate-700">
+                                                    {mat.unitPrice ? `€ ${mat.unitPrice.toFixed(2)}` : '-'}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
+                                                    € {(mat.totalCost || 0).toFixed(2)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot className="bg-slate-50 font-bold">
+                                        <tr>
+                                            <td className="px-4 py-3 text-slate-900" colSpan="3">TOTALE</td>
+                                            <td className="px-4 py-3 text-right text-green-600">
+                                                € {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

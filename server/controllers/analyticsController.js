@@ -49,11 +49,13 @@ const getHoursPerEmployee = async (req, res) => {
         console.log('DEBUG: matchQuery used:', JSON.stringify(matchQuery));
 
         // Populate user info
-        const result = await User.populate(hoursData, { path: '_id', select: 'firstName lastName username' });
+        const result = await User.populate(hoursData, { path: '_id', select: 'firstName lastName username hourlyCost' });
 
         res.json(result);
     } catch (error) {
-        res.status(500).json({ message: 'Errore nell\'analisi delle ore', error: error.message });
+        console.error('ERROR in getHoursPerEmployee:', error);
+        console.error('Stack:', error.stack);
+        res.status(500).json({ message: 'Error loading employee hours', error: error.message });
     }
 };
 
@@ -102,6 +104,7 @@ const getSiteReport = async (req, res) => {
                     totalQuantity: { $sum: '$numeroConfezioni' },
                     unit: { $first: '$materialDetails.unit' },
                     totalCost: { $sum: { $multiply: ['$numeroConfezioni', { $ifNull: ['$materialDetails.prezzo', 0] }] } },
+                    unitPrice: { $first: '$materialDetails.prezzo' },
                     count: { $sum: 1 }
                 }
             }
@@ -157,41 +160,85 @@ const getSiteReport = async (req, res) => {
             }
         ]);
 
-        // Total hours and Labor Cost
-        const laborData = await Attendance.aggregate([
+        // Total hours
+        const totalHours = await Attendance.aggregate([
             { $match: { site: siteObjectId, clockOut: { $exists: true } } },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'user',
-                    foreignField: '_id',
-                    as: 'userDetails'
-                }
-            },
-            { $unwind: '$userDetails' },
             {
                 $group: {
                     _id: null,
-                    totalHours: { $sum: '$totalHours' },
-                    totalLaborCost: { $sum: { $multiply: ['$totalHours', { $ifNull: ['$userDetails.hourlyCost', 0] }] } }
+                    totalHours: { $sum: '$totalHours' }
                 }
             }
         ]);
 
-        const totalHours = laborData[0]?.totalHours || 0;
-        const totalLaborCost = laborData[0]?.totalLaborCost || 0;
-        const totalSiteCost = totalMaterialCost + totalLaborCost;
+        // Hours per employee
+        const employeeHours = await Attendance.aggregate([
+            { $match: { site: siteObjectId, clockOut: { $exists: true } } },
+            {
+                $group: {
+                    _id: '$user',
+                    totalHours: { $sum: '$totalHours' }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'userInfo'
+                }
+            },
+            { $unwind: '$userInfo' },
+            {
+                $project: {
+                    _id: { _id: '$userInfo._id', firstName: '$userInfo.firstName', lastName: '$userInfo.lastName' },
+                    totalHours: 1
+                }
+            }
+        ]);
 
-        res.json({
-            materials: allMaterials,
-            equipment,
-            totalHours,
-            costs: {
-                materials: totalMaterialCost,
-                labor: totalLaborCost,
-                total: totalSiteCost
+        // === SITE COST CALCULATION ===
+        // Fetch all attendance records with user information for labor cost
+        const attendanceWithUsers = await Attendance.find({
+            site: siteObjectId,
+            clockOut: { $exists: true }
+        }).populate('user', 'hourlyCost'); // Only fetch hourlyCost field
+
+        // Calculate labor cost
+        let laborCost = 0;
+        attendanceWithUsers.forEach(attendance => {
+            if (attendance.totalHours && attendance.user && attendance.user.hourlyCost) {
+                laborCost += attendance.totalHours * attendance.user.hourlyCost;
             }
         });
+
+        // Material cost is already calculated in totalMaterialCost
+        const materialCost = totalMaterialCost;
+
+        // Total site cost
+        const siteCost = materialCost + laborCost;
+
+        console.log('✅ Site Costs:', {
+            siteId,
+            materialCost: materialCost.toFixed(2),
+            laborCost: laborCost.toFixed(2),
+            total: siteCost.toFixed(2)
+        });
+
+        const responseData = {
+            materials: allMaterials,
+            equipment,
+            totalHours: totalHours[0]?.totalHours || 0,
+            employeeHours,
+            siteCost: {
+                materials: Math.round(materialCost * 100) / 100,
+                labor: Math.round(laborCost * 100) / 100,
+                total: Math.round(siteCost * 100) / 100
+            }
+        };
+
+        console.log('✅ Sending response for site report');
+        res.json(responseData);
     } catch (error) {
         console.error('Site Report Error:', error);
         res.status(500).json({ message: 'Errore nel report del cantiere', error: error.message });
