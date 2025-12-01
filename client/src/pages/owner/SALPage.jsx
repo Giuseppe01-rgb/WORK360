@@ -233,7 +233,7 @@ export default function SALPage() {
                         </button>
 
                         <div className="p-6 md:p-8">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Nuovo SAL <span className="text-xs text-slate-400 font-normal">(v1.1)</span></h2>
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Nuovo SAL <span className="text-xs text-red-500 font-bold">(v1.2 - AGGIORNATO)</span></h2>
                             <p className="text-slate-500 mb-8">Compila i dati per generare lo Stato Avanzamento Lavori</p>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
