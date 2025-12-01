@@ -233,7 +233,7 @@ export default function SALPage() {
                         </button>
 
                         <div className="p-6 md:p-8">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Nuovo SAL <span className="text-xs text-red-500 font-bold">(v1.2 - AGGIORNATO)</span></h2>
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">Nuovo SAL</h2>
                             <p className="text-slate-500 mb-8">Compila i dati per generare lo Stato Avanzamento Lavori</p>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
@@ -270,44 +270,38 @@ export default function SALPage() {
 
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione *</label>
-                                            <div className="w-full overflow-hidden">
-                                                <input
-                                                    type="date"
-                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                    style={{ maxWidth: '100%', boxSizing: 'border-box' }}
-                                                    value={formData.date}
-                                                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                                    required
-                                                />
-                                            </div>
+                                            <input
+                                                type="date"
+                                                className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                style={{ width: '100%' }}
+                                                value={formData.date}
+                                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                                required
+                                            />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio *</label>
-                                            <div className="w-full overflow-hidden">
-                                                <input
-                                                    type="date"
-                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                    style={{ maxWidth: '100%', boxSizing: 'border-box' }}
-                                                    value={formData.periodStart}
-                                                    onChange={(e) => setFormData({ ...formData, periodStart: e.target.value })}
-                                                    required
-                                                />
-                                            </div>
+                                            <input
+                                                type="date"
+                                                className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                style={{ width: '100%' }}
+                                                value={formData.periodStart}
+                                                onChange={(e) => setFormData({ ...formData, periodStart: e.target.value })}
+                                                required
+                                            />
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine *</label>
-                                            <div className="w-full overflow-hidden">
-                                                <input
-                                                    type="date"
-                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                    style={{ maxWidth: '100%', boxSizing: 'border-box' }}
-                                                    value={formData.periodEnd}
-                                                    onChange={(e) => setFormData({ ...formData, periodEnd: e.target.value })}
-                                                    required
-                                                />
-                                            </div>
+                                            <input
+                                                type="date"
+                                                className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                style={{ width: '100%' }}
+                                                value={formData.periodEnd}
+                                                onChange={(e) => setFormData({ ...formData, periodEnd: e.target.value })}
+                                                required
+                                            />
                                         </div>
                                     </div>
                                 </section>
