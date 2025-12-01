@@ -240,15 +240,17 @@ export default function QuotesManager() {
 
     const downloadSALPDF = async (salId) => {
         try {
-            // SAL functionality temporarily removed
-            showError('Funzionalità SAL temporaneamente non disponibile');
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `sal-${salId}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            // TODO: Implement SAL PDF generation in backend
+            showError('Generazione PDF SAL in fase di implementazione');
+            // When ready:
+            // const response = await salAPI.downloadPDF(salId);
+            // const url = window.URL.createObjectURL(new Blob([response.data]));
+            // const link = document.createElement('a');
+            // link.href = url;
+            // link.setAttribute('download', `sal-${salId}.pdf`);
+            // document.body.appendChild(link);
+            // link.click();
+            // link.remove();
         } catch (error) {
             console.error('Error downloading SAL PDF:', error);
             showError('Errore nel download del PDF');
@@ -461,8 +463,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                 loadQuotes();
                 showSuccess('Preventivo eliminato con successo');
             } else if (deleteConfirm.type === 'sal') {
-                // SAL functionality temporarily removed
-                showSuccess('Funzionalità SAL temporaneamente non disponibile');
+                await salAPI.delete(deleteConfirm.id);
                 loadSALData();
                 showSuccess('SAL eliminato con successo');
             }
