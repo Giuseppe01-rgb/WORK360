@@ -24,6 +24,6 @@ router.put('/distribute-time', distributeTime);
 // Get analytics data
 router.get('/analytics', getAnalytics);
 
-router.route('/:id').delete(protect, deleteActivity);
+router.delete('/:id', deleteActivity);
 
 module.exports = router;

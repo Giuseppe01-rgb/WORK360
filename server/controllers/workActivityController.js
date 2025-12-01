@@ -134,11 +134,22 @@ exports.deleteActivity = async (req, res) => {
         const activity = await WorkActivity.findById(req.params.id);
 
         if (!activity) {
+            console.warn(`Activity not found for delete: ${req.params.id}`);
             return res.status(404).json({ message: 'Attività non trovata' });
         }
 
-        // Check ownership (unless owner)
-        if (req.user.role !== 'owner' && activity.user.toString() !== req.user._id.toString()) {
+        // Robust ownership check
+        const userCompanyId = req.user.company?._id || req.user.company;
+        const activityCompanyId = activity.company;
+        const userId = req.user._id;
+        const activityUserId = activity.user;
+
+        const isCompanyMatch = userCompanyId && activityCompanyId && userCompanyId.toString() === activityCompanyId.toString();
+        const isCreatorMatch = userId && activityUserId && userId.toString() === activityUserId.toString();
+        const isOwner = req.user.role === 'owner';
+
+        if (!isOwner && !isCompanyMatch && !isCreatorMatch) {
+            console.warn(`Unauthorized activity delete attempt. User: ${userId}, Activity: ${activity._id}`);
             return res.status(401).json({ message: 'Non autorizzato' });
         }
 
@@ -146,7 +157,7 @@ exports.deleteActivity = async (req, res) => {
         res.json({ message: 'Attività eliminata' });
     } catch (error) {
         console.error('Error deleting activity:', error);
-        res.status(500).json({ message: 'Errore server' });
+        res.status(500).json({ message: 'Errore server', error: error.message });
     }
 };
 

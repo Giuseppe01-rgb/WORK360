@@ -45,4 +45,34 @@ const getNotes = async (req, res) => {
     }
 };
 
-module.exports = { createNote, getNotes };
+const deleteNote = async (req, res) => {
+    try {
+        const note = await Note.findById(req.params.id);
+
+        if (!note) {
+            return res.status(404).json({ message: 'Nota non trovata' });
+        }
+
+        // Robust ownership check
+        const userCompanyId = req.user.company?._id || req.user.company;
+        const noteCompanyId = note.company;
+        const userId = req.user._id;
+        const noteUserId = note.user;
+
+        const isCompanyMatch = userCompanyId && noteCompanyId && userCompanyId.toString() === noteCompanyId.toString();
+        const isCreatorMatch = userId && noteUserId && userId.toString() === noteUserId.toString();
+
+        if (!isCompanyMatch && !isCreatorMatch) {
+            console.warn(`Unauthorized delete attempt. User: ${userId}, Note: ${note._id}`);
+            return res.status(403).json({ message: 'Non autorizzato' });
+        }
+
+        await note.deleteOne();
+        res.json({ message: 'Nota eliminata con successo' });
+    } catch (error) {
+        console.error('Delete Note Error:', error);
+        res.status(500).json({ message: 'Errore nell\'eliminazione della nota', error: error.message });
+    }
+};
+
+module.exports = { createNote, getNotes, deleteNote };
