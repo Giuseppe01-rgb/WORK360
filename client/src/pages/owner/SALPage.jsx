@@ -55,6 +55,16 @@ export default function SALPage() {
         loadData();
     }, []);
 
+    // Auto-calculate completion percentage
+    useEffect(() => {
+        if (formData.contractValue > 0) {
+            const totalSpent = formData.previousAmount + formData.currentAmount;
+            const remaining = formData.contractValue - totalSpent;
+            const percentage = Math.min(100, Math.max(0, (totalSpent / formData.contractValue) * 100));
+            setFormData(prev => ({ ...prev, completionPercentage: Math.round(percentage * 100) / 100 }));
+        }
+    }, [formData.contractValue, formData.previousAmount, formData.currentAmount]);
+
     const showNotification = (type, message) => {
         setNotification({ type, message });
         setTimeout(() => setNotification(null), 5000);
@@ -258,7 +268,7 @@ export default function SALPage() {
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione *</label>
                                             <input
                                                 type="date"
-                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                className="w-full max-w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                                 value={formData.date}
                                                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                                 required
@@ -269,7 +279,7 @@ export default function SALPage() {
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio *</label>
                                             <input
                                                 type="date"
-                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                className="w-full max-w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                                 value={formData.periodStart}
                                                 onChange={(e) => setFormData({ ...formData, periodStart: e.target.value })}
                                                 required
@@ -280,7 +290,7 @@ export default function SALPage() {
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine *</label>
                                             <input
                                                 type="date"
-                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                className="w-full max-w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                                 value={formData.periodEnd}
                                                 onChange={(e) => setFormData({ ...formData, periodEnd: e.target.value })}
                                                 required
@@ -362,8 +372,9 @@ export default function SALPage() {
                                                 type="number"
                                                 step="0.01"
                                                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                value={formData.contractValue}
-                                                onChange={(e) => setFormData({ ...formData, contractValue: parseFloat(e.target.value) || 0 })}
+                                                value={formData.contractValue === 0 ? '' : formData.contractValue}
+                                                onChange={(e) => setFormData({ ...formData, contractValue: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                                                placeholder="0.00"
                                                 required
                                             />
                                         </div>
@@ -374,8 +385,9 @@ export default function SALPage() {
                                                 type="number"
                                                 step="0.01"
                                                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                value={formData.previousAmount}
-                                                onChange={(e) => setFormData({ ...formData, previousAmount: parseFloat(e.target.value) || 0 })}
+                                                value={formData.previousAmount === 0 ? '' : formData.previousAmount}
+                                                onChange={(e) => setFormData({ ...formData, previousAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                                                placeholder="0.00"
                                             />
                                         </div>
 
@@ -385,26 +397,26 @@ export default function SALPage() {
                                                 type="number"
                                                 step="0.01"
                                                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                value={formData.currentAmount}
-                                                onChange={(e) => setFormData({ ...formData, currentAmount: parseFloat(e.target.value) || 0 })}
+                                                value={formData.currentAmount === 0 ? '' : formData.currentAmount}
+                                                onChange={(e) => setFormData({ ...formData, currentAmount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                                                placeholder="0.00"
                                                 required
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Completamento (%) *</label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Completamento (%)</label>
                                             <div className="relative">
                                                 <input
                                                     type="number"
-                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 pr-10"
+                                                    className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-900 focus:outline-none pr-10 cursor-not-allowed"
                                                     value={formData.completionPercentage}
-                                                    onChange={(e) => setFormData({ ...formData, completionPercentage: parseFloat(e.target.value) || 0 })}
-                                                    min="0"
-                                                    max="100"
-                                                    required
+                                                    readOnly
+                                                    disabled
                                                 />
                                                 <Percent className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                                             </div>
+                                            <p className="text-xs text-slate-500 mt-1">Calcolato automaticamente</p>
                                         </div>
 
                                         <div>
@@ -413,8 +425,9 @@ export default function SALPage() {
                                                 type="number"
                                                 step="0.01"
                                                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                value={formData.penalties}
-                                                onChange={(e) => setFormData({ ...formData, penalties: parseFloat(e.target.value) || 0 })}
+                                                value={formData.penalties === 0 ? '' : formData.penalties}
+                                                onChange={(e) => setFormData({ ...formData, penalties: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                                                placeholder="0.00"
                                             />
                                         </div>
 
