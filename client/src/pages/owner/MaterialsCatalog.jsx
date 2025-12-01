@@ -606,8 +606,8 @@ export default function MaterialsCatalog() {
             </div>
 
             {/* Add Material Modal */}
-            {addModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setAddModalOpen(false)}>
+            {showAddModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowAddModal(false)}>
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
@@ -719,8 +719,8 @@ export default function MaterialsCatalog() {
             )}
 
             {/* Edit Material Modal */}
-            {editModalOpen && selectedMaterial && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setEditModalOpen(false)}>
+            {showEditModal && selectedMaterial && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowEditModal(false)}>
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
