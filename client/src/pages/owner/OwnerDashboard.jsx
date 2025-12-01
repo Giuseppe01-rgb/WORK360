@@ -54,7 +54,7 @@ const SiteDetails = ({ site, onBack }) => {
     }
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 w-full max-w-full overflow-hidden">
             <div className="flex items-center gap-4 mb-6">
                 <button
                     onClick={onBack}

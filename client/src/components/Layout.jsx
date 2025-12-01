@@ -330,7 +330,7 @@ export default function Layout({ children, title }) {
                 )}
 
                 {/* Main Content Area */}
-                <main className="flex-1 p-4 sm:p-8 lg:p-10 overflow-x-hidden bg-site-bg">
+                <main className="flex-1 p-4 sm:p-8 lg:p-10 w-full max-w-[100vw] overflow-x-hidden bg-site-bg">
                     {/* Top Bar (Desktop only - Contextual) */}
                     <div className="hidden md:flex items-center justify-between mb-10">
                         <div>
