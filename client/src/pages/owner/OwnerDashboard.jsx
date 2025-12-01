@@ -103,36 +103,36 @@ const SiteDetails = ({ site, onBack }) => {
             {activeTab === 'dati' && (
                 <>
                     {/* COSTO CANTIERE - TOP CARD */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
+                    <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden max-w-full">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full -mr-10 -mt-10 opacity-50"></div>
                         <div className="relative z-10">
-                            <h3 className="text-lg font-bold text-slate-500 mb-2 flex items-center gap-2">
+                            <h3 className="text-base md:text-lg font-bold text-slate-500 mb-2 flex items-center gap-2">
                                 <span className="p-2 bg-green-100 rounded-lg text-green-600">
-                                    <Clock className="w-5 h-5" />
+                                    <Clock className="w-4 h-4 md:w-5 md:h-5" />
                                 </span>
                                 Costo Totale Cantiere
                             </h3>
-                            <div className="flex items-baseline gap-2">
-                                <p className="text-4xl md:text-5xl font-black text-slate-900">
+                            <div className="flex flex-wrap items-baseline gap-2">
+                                <p className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900">
                                     {report?.siteCost?.total?.toFixed(2) || '0,00'}€
                                 </p>
-                                <span className="text-sm text-slate-500 font-medium">aggiornato in tempo reale</span>
+                                <span className="text-xs md:text-sm text-slate-500 font-medium">aggiornato in tempo reale</span>
                             </div>
-                            <div className="flex gap-6 mt-4 text-sm">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 mt-4 text-xs md:text-sm">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                    <span className="text-slate-600">Manodopera: <strong>{report?.siteCost?.labor?.toFixed(2) || '0,00'}€</strong></span>
+                                    <div className="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></div>
+                                    <span className="text-slate-600 break-words">Manodopera: <strong>{report?.siteCost?.labor?.toFixed(2) || '0,00'}€</strong></span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                                    <span className="text-slate-600">Materiali: <strong>{report?.siteCost?.materials?.toFixed(2) || '0,00'}€</strong></span>
+                                    <div className="w-3 h-3 rounded-full bg-purple-500 flex-shrink-0"></div>
+                                    <span className="text-slate-600 break-words">Materiali: <strong>{report?.siteCost?.materials?.toFixed(2) || '0,00'}€</strong></span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* SUMMARY GRID */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6">
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                             <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
                                 <Clock className="w-4 h-4" /> Ore Totali
@@ -160,13 +160,13 @@ const SiteDetails = ({ site, onBack }) => {
                     </div>
 
                     {/* INTERACTIVE CARDS GRID */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
                         {/* EMPLOYEES CARD */}
                         <div
                             onClick={() => setShowEmployeesModal(true)}
-                            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-all cursor-pointer group"
+                            className="bg-white rounded-2xl border border-slate-200 p-4 md:p-6 hover:shadow-lg transition-all cursor-pointer group max-w-full"
                         >
-                            <div className="flex justify-between items-center mb-4">
+                            <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
                                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                                     <Users className="w-5 h-5 text-slate-400" />
                                     Dettaglio Dipendenti
@@ -178,7 +178,7 @@ const SiteDetails = ({ site, onBack }) => {
                             {employeeHours.length > 0 ? (
                                 <div className="space-y-3">
                                     {employeeHours.slice(0, 3).map((emp) => (
-                                        <div key={emp._id._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg group-hover:bg-blue-50 transition-colors">
+                                        <div key={emp._id._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-3 bg-slate-50 rounded-lg group-hover:bg-blue-50 transition-colors">
                                             <div>
                                                 <span className="font-bold text-slate-700 block">{emp._id.firstName} {emp._id.lastName}</span>
                                                 <span className="text-xs text-slate-500">
@@ -207,7 +207,7 @@ const SiteDetails = ({ site, onBack }) => {
                         {/* MATERIALS CARD */}
                         <div
                             onClick={() => setShowMaterialsModal(true)}
-                            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg transition-all cursor-pointer group"
+                            className="bg-white rounded-2xl border border-slate-200 p-4 md:p-6 hover:shadow-lg transition-all cursor-pointer group max-w-full"
                         >
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -221,7 +221,7 @@ const SiteDetails = ({ site, onBack }) => {
                             {report?.materials?.length > 0 ? (
                                 <div className="space-y-3">
                                     {report.materials.slice(0, 3).map((mat) => (
-                                        <div key={mat._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg group-hover:bg-purple-50 transition-colors">
+                                        <div key={mat._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-3 bg-slate-50 rounded-lg group-hover:bg-purple-50 transition-colors">
                                             <div>
                                                 <span className="font-bold text-slate-700 block">{mat._id}</span>
                                                 <span className="text-xs text-slate-500">
