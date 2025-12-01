@@ -67,6 +67,37 @@ export default function AnalyticsDashboard() {
                 </div>
             </div>
 
+            {/* Company-Wide Cost Card */}
+            {analytics?.companyCosts && (
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full -mr-10 -mt-10 opacity-50"></div>
+                    <div className="relative z-10">
+                        <h3 className="text-lg font-bold text-slate-500 mb-2 flex items-center gap-2">
+                            <span className="p-2 bg-green-100 rounded-lg text-green-600">
+                                <BarChart3 className="w-5 h-5" />
+                            </span>
+                            Costo Totale Azienda
+                        </h3>
+                        <div className="flex items-baseline gap-2">
+                            <p className="text-4xl md:text-5xl font-black text-slate-900">
+                                {analytics.companyCosts.total.toFixed(2)}€
+                            </p>
+                            <span className="text-sm text-slate-500 font-medium">tutti i cantieri</span>
+                        </div>
+                        <div className="flex gap-6 mt-4 text-sm">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                <span className="text-slate-600">Manodopera: <strong>{analytics.companyCosts.labor.toFixed(2)}€</strong></span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                                <span className="text-slate-600">Materiali: <strong>{analytics.companyCosts.materials.toFixed(2)}€</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Main Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-2xl shadow-sm">

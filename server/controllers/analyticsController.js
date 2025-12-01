@@ -308,10 +308,68 @@ const getDashboard = async (req, res) => {
             }
         ]);
 
+        // === COMPANY-WIDE COST CALCULATION ===
+        // Get all company sites
+        const companySites = await ConstructionSite.find({ company: companyId });
+        const siteIds = companySites.map(s => s._id);
+
+        // Calculate total labor cost across all sites
+        const allAttendances = await Attendance.find({
+            site: { $in: siteIds },
+            clockOut: { $exists: true }
+        }).populate('user', 'hourlyCost');
+
+        let totalLaborCost = 0;
+        allAttendances.forEach(attendance => {
+            if (attendance.totalHours && attendance.user && attendance.user.hourlyCost) {
+                totalLaborCost += attendance.totalHours * attendance.user.hourlyCost;
+            }
+        });
+
+        // Calculate total material cost across all sites
+        const MaterialUsage = require('../models/MaterialUsage');
+        const allMaterialUsages = await MaterialUsage.aggregate([
+            {
+                $match: {
+                    site: { $in: siteIds },
+                    material: { $ne: null }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'colouramaterials',
+                    localField: 'material',
+                    foreignField: '_id',
+                    as: 'materialDetails'
+                }
+            },
+            { $unwind: '$materialDetails' },
+            {
+                $group: {
+                    _id: null,
+                    totalCost: { $sum: { $multiply: ['$numeroConfezioni', { $ifNull: ['$materialDetails.prezzo', 0] }] } }
+                }
+            }
+        ]);
+
+        const totalMaterialCost = allMaterialUsages[0]?.totalCost || 0;
+        const totalCompanyCost = totalLaborCost + totalMaterialCost;
+
+        console.log('✅ Company Total Costs:', {
+            labor: totalLaborCost.toFixed(2),
+            materials: totalMaterialCost.toFixed(2),
+            total: totalCompanyCost.toFixed(2)
+        });
+
         res.json({
             activeSites,
             totalEmployees,
-            monthlyHours: monthHours[0]?.totalHours || 0
+            monthlyHours: monthHours[0]?.totalHours || 0,
+            companyCosts: {
+                total: Math.round(totalCompanyCost * 100) / 100,
+                labor: Math.round(totalLaborCost * 100) / 100,
+                materials: Math.round(totalMaterialCost * 100) / 100
+            }
         });
     } catch (error) {
         res.status(500).json({ message: 'Errore nel caricamento della dashboard', error: error.message });
