@@ -1145,13 +1145,14 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">P.IVA / Codice Fiscale</label>
+                                                    <label className="block text-sm font-medium text-slate-700 mb-1">P.IVA / Codice Fiscale *</label>
                                                     <input
                                                         type="text"
                                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                                         value={salFormData.clientVatNumber}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, clientVatNumber: e.target.value }))}
                                                         placeholder="12345678901"
+                                                        required
                                                     />
                                                 </div>
 
@@ -1167,13 +1168,14 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
+                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo *</label>
                                                     <input
                                                         type="text"
                                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                                         value={salFormData.clientAddress}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, clientAddress: e.target.value }))}
                                                         placeholder="Via Roma, 1 - 00100 Roma (RM)"
+                                                        required
                                                     />
                                                 </div>
                                             </div>
