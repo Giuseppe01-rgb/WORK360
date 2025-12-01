@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import { quoteAPI, communicationAPI, salAPI, siteAPI } from '../../utils/api';
+import { quoteAPI, communicationAPI, siteAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -148,15 +148,13 @@ export default function QuotesManager() {
 
     const loadSALData = async () => {
         try {
-            const [salsResp, sitesResp] = await Promise.all([
-                salAPI.getAll(),
-                siteAPI.getAll()
-            ]);
-            setSals(Array.isArray(salsResp.data) ? salsResp.data : []);
+            // SAL functionality temporarily removed
+            const sitesResp = await siteAPI.getAll();
+            setSals([]);
             setSites(Array.isArray(sitesResp.data) ? sitesResp.data : []);
         } catch (error) {
             console.error('Error loading SAL data:', error);
-            showError('Errore nel caricamento dei SAL');
+            showError('Errore nel caricamento dei dati');
         } finally {
             setLoading(false);
         }
@@ -180,7 +178,8 @@ export default function QuotesManager() {
                 }
             };
 
-            await salAPI.create(apiData);
+            // SAL functionality temporarily removed
+            showError('Funzionalità SAL temporaneamente non disponibile');
             setShowSALModal(false);
             setSalFormData({
                 site: '',
@@ -238,7 +237,8 @@ export default function QuotesManager() {
 
     const downloadSALPDF = async (salId) => {
         try {
-            const response = await salAPI.downloadPDF(salId);
+            // SAL functionality temporarily removed
+            showError('Funzionalità SAL temporaneamente non disponibile');
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -458,7 +458,8 @@ ${user?.company?.name || 'Il team WORK360'}`;
                 loadQuotes();
                 showSuccess('Preventivo eliminato con successo');
             } else if (deleteConfirm.type === 'sal') {
-                await salAPI.delete(deleteConfirm.id);
+                // SAL functionality temporarily removed
+                showSuccess('Funzionalità SAL temporaneamente non disponibile');
                 loadSALData();
                 showSuccess('SAL eliminato con successo');
             }
