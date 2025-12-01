@@ -59,11 +59,15 @@ export default function SALPage() {
     useEffect(() => {
         if (formData.contractValue > 0) {
             const totalSpent = formData.previousAmount + formData.currentAmount;
-            const remaining = formData.contractValue - totalSpent;
             const percentage = Math.min(100, Math.max(0, (totalSpent / formData.contractValue) * 100));
-            setFormData(prev => ({ ...prev, completionPercentage: Math.round(percentage * 100) / 100 }));
+            const roundedPercentage = Math.round(percentage * 100) / 100;
+
+            // Only update if different to avoid infinite loop
+            if (formData.completionPercentage !== roundedPercentage) {
+                setFormData(prev => ({ ...prev, completionPercentage: roundedPercentage }));
+            }
         }
-    }, [formData.contractValue, formData.previousAmount, formData.currentAmount]);
+    }, [formData.contractValue, formData.previousAmount, formData.currentAmount, formData.completionPercentage]);
 
     const showNotification = (type, message) => {
         setNotification({ type, message });
@@ -268,7 +272,8 @@ export default function SALPage() {
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione *</label>
                                             <input
                                                 type="date"
-                                                className="w-full max-w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                style={{ maxWidth: '100%', boxSizing: 'border-box' }}
                                                 value={formData.date}
                                                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                                 required
@@ -279,7 +284,8 @@ export default function SALPage() {
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio *</label>
                                             <input
                                                 type="date"
-                                                className="w-full max-w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                style={{ maxWidth: '100%', boxSizing: 'border-box' }}
                                                 value={formData.periodStart}
                                                 onChange={(e) => setFormData({ ...formData, periodStart: e.target.value })}
                                                 required
@@ -290,7 +296,8 @@ export default function SALPage() {
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine *</label>
                                             <input
                                                 type="date"
-                                                className="w-full max-w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                style={{ maxWidth: '100%', boxSizing: 'border-box' }}
                                                 value={formData.periodEnd}
                                                 onChange={(e) => setFormData({ ...formData, periodEnd: e.target.value })}
                                                 required
