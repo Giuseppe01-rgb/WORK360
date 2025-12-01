@@ -168,26 +168,45 @@ exports.deleteSAL = async (req, res) => {
 // Download SAL PDF
 exports.downloadSALPDF = async (req, res) => {
     try {
+        console.log('DOWNLOAD SAL PDF - Request for ID:', req.params.id);
+        console.log('DOWNLOAD SAL PDF - User:', req.user._id);
+        console.log('DOWNLOAD SAL PDF - User Company ID:', req.user.company);
+
         const sal = await SAL.findOne({
             _id: req.params.id,
             owner: req.user._id
         }).populate('site');
 
         if (!sal) {
+            console.error('DOWNLOAD SAL PDF - SAL not found');
             return res.status(404).json({ message: 'SAL non trovato' });
         }
+        console.log('DOWNLOAD SAL PDF - SAL found:', sal.number);
 
-        // Get company details
-        const company = await Company.findOne({ owner: req.user._id });
-
-        if (!company) {
-            return res.status(404).json({ message: 'Dati azienda non trovati. Configura prima la tua azienda.' });
+        // Get company details using the ID from the user object
+        // The user object should have the company ID populated or available
+        if (!req.user.company) {
+            console.error('DOWNLOAD SAL PDF - User has no company assigned');
+            return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
         }
 
+        const company = await Company.findById(req.user.company);
+
+        if (!company) {
+            console.error('DOWNLOAD SAL PDF - Company not found for ID:', req.user.company);
+            return res.status(404).json({ message: 'Dati azienda non trovati. Configura prima la tua azienda.' });
+        }
+        console.log('DOWNLOAD SAL PDF - Company found:', company.name);
+
         // Generate PDF
+        console.log('DOWNLOAD SAL PDF - Generating PDF...');
         await generateSALPDF(sal, company, sal.site, res);
+        console.log('DOWNLOAD SAL PDF - PDF sent successfully');
     } catch (error) {
         console.error('Error downloading SAL PDF:', error);
-        res.status(500).json({ message: 'Errore nel download del PDF', error: error.message });
+        console.error('Error stack:', error.stack);
+        if (!res.headersSent) {
+            res.status(500).json({ message: 'Errore nel download del PDF', error: error.message });
+        }
     }
 };
