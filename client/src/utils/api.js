@@ -165,6 +165,15 @@ export const quoteAPI = {
     update: (id, data) => api.put(`/quotes/${id}`, data),
     delete: (id) => api.delete(`/quotes/${id}`),
     downloadPDF: (id) => api.get(`/quotes/${id}/pdf`, { responseType: 'blob' }),
+}
+
+// SALs
+export const salAPI = {
+    create: (data) => api.post('/sals', data),
+    getAll: () => api.get('/sals'),
+    getOne: (id) => api.get(`/sals/${id}`),
+    update: (id, data) => api.put(`/sals/${id}`, data),
+    delete: (id) => api.delete(`/sals/${id}`),
 };
 
 // User

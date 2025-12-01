@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import { quoteAPI, communicationAPI, siteAPI } from '../../utils/api';
+import { quoteAPI, communicationAPI, salAPI, siteAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -58,6 +58,8 @@ export default function QuotesManager() {
     const [showSALModal, setShowSALModal] = useState(false);
     const [showSALSendModal, setShowSALSendModal] = useState(false);
     const [selectedSALId, setSelectedSALId] = useState(null);
+    const [editingSALId, setEditingSALId] = useState(null);
+
 
 
     // Company data from user
@@ -126,8 +128,21 @@ export default function QuotesManager() {
         }
     }, [activeTab]);
 
-    // Force re-render when items change to update total display
+    // Force update function for real-time item total recalculation
     const [, forceUpdate] = useState({});
+
+    // Auto-calculate SAL completion percentage
+    useEffect(() => {
+        if (salFormData.contractValue > 0) {
+            const totalSpent = salFormData.previousAmount + salFormData.currentAmount;
+            const percentage = Math.min(100, Math.max(0, (totalSpent / salFormData.contractValue) * 100));
+            const roundedPercentage = Math.round(percentage * 100) / 100;
+
+            if (salFormData.completionPercentage !== roundedPercentage) {
+                setSalFormData(prev => ({ ...prev, completionPercentage: roundedPercentage }));
+            }
+        }
+    }, [salFormData.contractValue, salFormData.previousAmount, salFormData.currentAmount, salFormData.completionPercentage]);
     useEffect(() => {
         forceUpdate({});
     }, [formData.items]);
@@ -148,13 +163,15 @@ export default function QuotesManager() {
 
     const loadSALData = async () => {
         try {
-            // SAL functionality temporarily removed
-            const sitesResp = await siteAPI.getAll();
-            setSals([]);
+            const [salsResp, sitesResp] = await Promise.all([
+                salAPI.getAll(),
+                siteAPI.getAll()
+            ]);
+            setSals(Array.isArray(salsResp.data) ? salsResp.data : []);
             setSites(Array.isArray(sitesResp.data) ? sitesResp.data : []);
         } catch (error) {
             console.error('Error loading SAL data:', error);
-            showError('Errore nel caricamento dei dati');
+            showError('Errore nel caricamento dei SAL');
         } finally {
             setLoading(false);
         }
@@ -163,52 +180,38 @@ export default function QuotesManager() {
     const handleSALSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Reconstruct nested object for API
+            // Create/update SAL
             const apiData = {
-                ...salFormData,
+                site: salFormData.site,
+                date: salFormData.date,
+                periodStart: salFormData.periodStart,
+                periodEnd: salFormData.periodEnd,
                 client: {
                     name: salFormData.clientName,
-                    fiscalCode: salFormData.clientFiscalCode,
-                    address: salFormData.clientAddress,
-                    vatNumber: salFormData.clientVatNumber
+                    vatNumber: salFormData.clientVatNumber,
+                    address: salFormData.clientAddress
                 },
-                workSupervisor: {
-                    name: salFormData.supervisorName,
-                    qualification: salFormData.supervisorQualification
-                }
+                contractValue: salFormData.contractValue,
+                previousAmount: salFormData.previousAmount,
+                currentAmount: salFormData.currentAmount,
+                penalties: salFormData.penalties,
+                notes: salFormData.notes || ''
             };
 
-            // SAL functionality temporarily removed
-            showError('Funzionalità SAL temporaneamente non disponibile');
+            if (editingSALId) {
+                await salAPI.update(editingSALId, apiData);
+                showSuccess('SAL aggiornato con successo');
+            } else {
+                await salAPI.create(apiData);
+                showSuccess('SAL creato con successo');
+            }
+
             setShowSALModal(false);
-            setSalFormData({
-                site: '',
-                number: '',
-                date: new Date().toISOString().split('T')[0],
-                periodStart: new Date().toISOString().split('T')[0],
-                periodEnd: new Date().toISOString().split('T')[0],
-                clientName: '',
-                clientFiscalCode: '',
-                clientAddress: '',
-                clientVatNumber: '',
-                workDescription: '',
-                contractValue: 0,
-                previousAmount: 0,
-                currentAmount: 0,
-                completionPercentage: 0,
-                penalties: 0,
-                vatRate: 22,
-                supervisorName: '',
-                supervisorQualification: '',
-                cig: '',
-                cup: '',
-                notes: ''
-            });
-            loadSALData(); // Reload list
-            showSuccess('SAL creato con successo');
+            setEditingSALId(null);
+            loadSALData();
         } catch (error) {
-            console.error('Error creating SAL:', error);
-            showError('Errore nella creazione del SAL');
+            console.error('Error submitting SAL:', error);
+            showError(error.response?.data?.message || 'Errore nel salvataggio del SAL');
         }
     };
 
@@ -549,6 +552,15 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                 }`}
                         >
                             Preventivi
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('sals')}
+                            className={`pb-4 px-2 font-semibold transition-all ${activeTab === 'sals'
+                                ? 'text-slate-900 border-b-2 border-slate-900'
+                                : 'text-slate-400 hover:text-slate-600'
+                                }`}
+                        >
+                            SAL
                         </button>
                     </div>
                 </div>
@@ -1088,9 +1100,11 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.contractValue}
+                                                        className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        style={{ width: '100%', boxSizing: 'border-box' }}
+                                                        value={salFormData.contractValue === 0 ? '' : salFormData.contractValue}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, contractValue: parseFloat(e.target.value) || 0 }))}
+                                                        placeholder="0.00"
                                                         required
                                                     />
                                                 </div>
@@ -1100,9 +1114,11 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.previousAmount}
+                                                        className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        style={{ width: '100%', boxSizing: 'border-box' }}
+                                                        value={salFormData.previousAmount === 0 ? '' : salFormData.previousAmount}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, previousAmount: parseFloat(e.target.value) || 0 }))}
+                                                        placeholder="0.00"
                                                     />
                                                 </div>
 
@@ -1111,9 +1127,11 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.currentAmount}
+                                                        className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        style={{ width: '100%', boxSizing: 'border-box' }}
+                                                        value={salFormData.currentAmount === 0 ? '' : salFormData.currentAmount}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, currentAmount: parseFloat(e.target.value) || 0 }))}
+                                                        placeholder="0.00"
                                                         required
                                                     />
                                                 </div>
@@ -1139,9 +1157,11 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                                        value={salFormData.penalties}
+                                                        className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        style={{ width: '100%', boxSizing: 'border-box' }}
+                                                        value={salFormData.penalties === 0 ? '' : salFormData.penalties}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, penalties: parseFloat(e.target.value) || 0 }))}
+                                                        placeholder="0.00"
                                                     />
                                                 </div>
 

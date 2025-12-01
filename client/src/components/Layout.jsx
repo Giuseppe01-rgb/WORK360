@@ -58,7 +58,7 @@ export default function Layout({ children, title }) {
         { path: '/owner/materials', label: 'Catalogo Materiali', icon: Package },
         { path: '/owner/material-approval', label: 'Materiali da Approvare', icon: Package },
         { path: '/owner/suppliers', label: 'Magazzino', icon: Package },
-        { path: '/owner/quotes', label: 'Preventivi', icon: FileText },
+        { path: '/owner/quotes', label: 'Preventivi & SAL', icon: FileText },
         { path: '/owner/signature', label: 'Firma Digitale', icon: PenTool },
         { path: '/owner/analytics', label: 'Analytics', icon: BarChart3 },
         { path: '/owner/settings', label: 'Dati Azienda', icon: Settings },
