@@ -111,6 +111,7 @@ export const equipmentAPI = {
 export const noteAPI = {
     create: (data) => api.post('/notes', data),
     getAll: (params) => api.get('/notes', { params }),
+    delete: (id) => api.delete(`/notes/${id}`),
 };
 
 // Photos
@@ -164,13 +165,6 @@ export const quoteAPI = {
     update: (id, data) => api.put(`/quotes/${id}`, data),
     delete: (id) => api.delete(`/quotes/${id}`),
     downloadPDF: (id) => api.get(`/quotes/${id}/pdf`, { responseType: 'blob' }),
-};
-
-// SALs
-export const salAPI = {
-    create: (data) => api.post('/sals', data),
-    getAll: (params) => api.get('/sals', { params }),
-    downloadPDF: (id) => api.get(`/sals/${id}/pdf`, { responseType: 'blob' }),
 };
 
 // User

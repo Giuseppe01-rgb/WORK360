@@ -47,7 +47,7 @@ export default function QuotesManager() {
     const [showModal, setShowModal] = useState(false);
     const [showSendModal, setShowSendModal] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, quoteId: null });
+    const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: null, type: null });
 
     // Tab State
     const [activeTab, setActiveTab] = useState('quotes'); // 'quotes' or 'sals'
@@ -442,17 +442,29 @@ ${user?.company?.name || 'Il team WORK360'}`;
     const handleDelete = async (e, quoteId) => {
         e.preventDefault();
         e.stopPropagation();
-        setDeleteConfirm({ isOpen: true, quoteId });
+        setDeleteConfirm({ isOpen: true, id: quoteId, type: 'quote' });
+    };
+
+    const handleDeleteSAL = async (e, salId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDeleteConfirm({ isOpen: true, id: salId, type: 'sal' });
     };
 
     const confirmDelete = async () => {
         try {
-            await quoteAPI.delete(deleteConfirm.quoteId);
-            loadQuotes();
-            showSuccess('Preventivo eliminato con successo');
+            if (deleteConfirm.type === 'quote') {
+                await quoteAPI.delete(deleteConfirm.id);
+                loadQuotes();
+                showSuccess('Preventivo eliminato con successo');
+            } else if (deleteConfirm.type === 'sal') {
+                await salAPI.delete(deleteConfirm.id);
+                loadSALData();
+                showSuccess('SAL eliminato con successo');
+            }
         } catch (error) {
-            console.error('Error deleting quote:', error);
-            showError('Errore nell\'eliminazione del preventivo');
+            console.error('Error deleting item:', error);
+            showError('Errore nell\'eliminazione');
         }
     };
 
@@ -710,6 +722,13 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     title="Invia Email"
                                 >
                                     <Mail className="w-4 h-4" /> Invia
+                                </button>
+                                <button
+                                    onClick={(e) => handleDeleteSAL(e, sal._id)}
+                                    className="py-2 px-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                                    title="Elimina"
+                                >
+                                    <Trash2 className="w-4 h-4" />
                                 </button>
                             </div>
                         </div>

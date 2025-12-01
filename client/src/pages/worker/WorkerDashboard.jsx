@@ -245,21 +245,22 @@ export default function WorkerDashboard() {
         }
         try {
             // Create WorkActivity record ONLY (for time tracking/productivity)
+            // For daily reports, we set default quantity/unit as they are now description-based
             const response = await workActivityAPI.create({
                 siteId: selectedSite,
                 activityType: materialForm.name,
-                quantity: parseFloat(materialForm.quantity),
-                unit: materialForm.unit || 'pz',
+                quantity: 1, // Default quantity
+                unit: 'report', // Default unit
                 date: new Date()
             });
 
             // Add to today's activities
             setTodayActivities(prev => [...prev, response.data]);
 
-            showSuccess('Attività registrata');
+            showSuccess('Rapporto salvato');
             setMaterialForm({ name: '', quantity: '', unit: '' });
         } catch (error) {
-            showError('Errore salvataggio attività');
+            showError('Errore salvataggio rapporto');
         }
     };
 
@@ -747,6 +748,7 @@ export default function WorkerDashboard() {
                             )}
 
                             {/* Activity Entry Form (Same as Materials Tab) */}
+                            {/* Activity Entry Form (Same as Materials Tab) */}
                             <form onSubmit={handleActivitySubmit} className="space-y-4 mb-8 border-b border-slate-100 pb-8">
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
@@ -758,43 +760,27 @@ export default function WorkerDashboard() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Attività / Materiale</label>
-                                    <input
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
-                                        placeholder="Es. Rasatura, Posa Pavimento..."
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Descrizione Attività</label>
+                                    <textarea
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none min-h-[120px]"
+                                        placeholder="Descrivi il lavoro svolto..."
                                         value={materialForm.name}
                                         onChange={(e) => setMaterialForm({ ...materialForm, name: e.target.value })}
                                         required
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità</label>
-                                        <input
-                                            type="number"
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
-                                            placeholder="0"
-                                            value={materialForm.quantity}
-                                            onChange={(e) => setMaterialForm({ ...materialForm, quantity: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Unità</label>
-                                        <input
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
-                                            placeholder="mq, ml, pz..."
-                                            value={materialForm.unit}
-                                            onChange={(e) => setMaterialForm({ ...materialForm, unit: e.target.value })}
-                                        />
-                                    </div>
+                                {/* Hidden fields for backend compatibility */}
+                                <div className="hidden">
+                                    <input type="number" value="1" readOnly />
+                                    <input type="text" value="report" readOnly />
                                 </div>
+
                                 <button
                                     type="submit"
                                     className="w-full py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
                                 >
-                                    <Plus className="w-5 h-5" />
-                                    Aggiungi Attività
+                                    <FileText className="w-5 h-5" />
+                                    Salva il rapporto
                                 </button>
                             </form>
 

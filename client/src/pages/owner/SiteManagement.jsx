@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import { siteAPI, analyticsAPI } from '../../utils/api';
+import { siteAPI, analyticsAPI, workActivityAPI, noteAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search,
@@ -10,8 +10,10 @@ import {
 const SiteDetails = ({ site, onBack }) => {
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
+    const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState('data');
+    const [selectedReport, setSelectedReport] = useState(null);
 
     const sections = [
         { id: 'data', label: 'Dati' },
@@ -20,15 +22,30 @@ const SiteDetails = ({ site, onBack }) => {
         { id: 'photos', label: 'Foto' }
     ];
 
+    const handleDeleteNote = async (noteId) => {
+        if (!window.confirm('Sei sicuro di voler eliminare questa nota?')) return;
+        try {
+            await noteAPI.delete(noteId);
+            // Refresh notes
+            const notesData = await noteAPI.getAll({ siteId: site._id });
+            setNotes(notesData.data);
+        } catch (error) {
+            console.error('Error deleting note:', error);
+            alert('Errore nell\'eliminazione');
+        }
+    };
+
     useEffect(() => {
         const loadDetails = async () => {
             try {
-                const [rep, hours] = await Promise.all([
+                const [rep, hours, notesData] = await Promise.all([
                     analyticsAPI.getSiteReport(site._id),
-                    analyticsAPI.getHoursPerEmployee({ siteId: site._id })
+                    analyticsAPI.getHoursPerEmployee({ siteId: site._id }),
+                    noteAPI.getAll({ siteId: site._id })
                 ]);
                 setReport(rep.data);
                 setEmployeeHours(hours.data);
+                setNotes(notesData.data);
             } catch (err) {
                 console.error("Error loading site details:", err);
             } finally {
@@ -179,23 +196,113 @@ const SiteDetails = ({ site, onBack }) => {
 
             {/* Content - Rapporti giornalieri */}
             {activeSection === 'reports' && (
-                <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
-                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Calendar className="w-8 h-8 text-slate-400" />
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">Rapporti Giornalieri</h3>
-                    <p className="text-slate-500">Nessun rapporto giornaliero registrato per questo cantiere.</p>
+                <div className="space-y-4">
+                    {report?.dailyReports?.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {report.dailyReports.map((dailyReport) => (
+                                <div
+                                    key={dailyReport._id}
+                                    onClick={() => setSelectedReport(dailyReport)}
+                                    className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer border border-slate-100 group"
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
+                                                {dailyReport.user?.firstName?.charAt(0)}{dailyReport.user?.lastName?.charAt(0)}
+                                            </div>
+                                            <span className="font-semibold text-slate-900 text-sm">
+                                                {dailyReport.user?.firstName} {dailyReport.user?.lastName}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs text-slate-500 font-medium">
+                                            {new Date(dailyReport.date).toLocaleString('it-IT', {
+                                                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-slate-600 text-sm line-clamp-2 leading-relaxed">
+                                        {dailyReport.activityType}
+                                    </p>
+
+                                    <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
+                                        <button
+                                            onClick={(e) => handleDeleteReport(e, dailyReport._id)}
+                                            className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
+                                            title="Elimina"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                        <span className="text-xs font-bold text-blue-600 group-hover:underline">Leggi tutto</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Calendar className="w-8 h-8 text-slate-400" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 mb-2">Rapporti Giornalieri</h3>
+                            <p className="text-slate-500">Nessun rapporto giornaliero registrato per questo cantiere.</p>
+                        </div>
+                    )}
                 </div>
             )}
 
             {/* Content - Note */}
             {activeSection === 'notes' && (
-                <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
-                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <FileText className="w-8 h-8 text-slate-400" />
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">Note</h3>
-                    <p className="text-slate-500">Nessuna nota disponibile per questo cantiere.</p>
+                <div className="space-y-4">
+                    {notes.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {notes.map((note) => (
+                                <div key={note._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xs">
+                                                {note.user?.firstName?.charAt(0)}{note.user?.lastName?.charAt(0)}
+                                            </div>
+                                            <span className="font-semibold text-slate-900 text-sm">
+                                                {note.user?.firstName} {note.user?.lastName}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs text-slate-500 font-medium">
+                                            {new Date(note.date).toLocaleString('it-IT', {
+                                                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+                                    <p className="text-slate-600 text-sm whitespace-pre-wrap">{note.content}</p>
+                                    <div className="mt-4 pt-3 border-t border-slate-50 flex justify-end">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                // We need to pass the function from parent or define it here?
+                                                // SiteDetails is defined inside SiteManagement file but it's a separate component.
+                                                // The handleDeleteNote is defined in SiteManagement (parent of SiteDetails? No, SiteManagement renders SiteDetails).
+                                                // Wait, SiteDetails is defined IN the same file.
+                                                // I need to move handleDeleteNote inside SiteDetails or pass it down.
+                                                // Let's move it inside SiteDetails since it has the state.
+                                                handleDeleteNote(note._id);
+                                            }}
+                                            className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
+                                            title="Elimina"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <FileText className="w-8 h-8 text-slate-400" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 mb-2">Note</h3>
+                            <p className="text-slate-500">Nessuna nota disponibile per questo cantiere.</p>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -209,6 +316,48 @@ const SiteDetails = ({ site, onBack }) => {
                     <p className="text-slate-500">Nessuna foto caricata per questo cantiere.</p>
                 </div>
             )}
+            {/* Report Modal */}
+            {selectedReport && (
+                <ReportModal report={selectedReport} onClose={() => setSelectedReport(null)} />
+            )}
+        </div>
+    );
+};
+
+const ReportModal = ({ report, onClose }) => {
+    if (!report) return null;
+    return (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={onClose}>
+            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl relative animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+                            {report.user?.firstName?.charAt(0)}{report.user?.lastName?.charAt(0)}
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-slate-900">{report.user?.firstName} {report.user?.lastName}</h3>
+                            <p className="text-xs text-slate-500">
+                                {new Date(report.date).toLocaleDateString('it-IT', {
+                                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                })}
+                            </p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                        <X className="w-5 h-5 text-slate-400" />
+                    </button>
+                </div>
+                <div className="p-6 max-h-[60vh] overflow-y-auto">
+                    <p className="text-slate-700 whitespace-pre-wrap leading-relaxed text-lg">
+                        {report.activityType}
+                    </p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-b-2xl flex justify-end">
+                    <button onClick={onClose} className="px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-colors">
+                        Chiudi
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
@@ -300,6 +449,26 @@ export default function SiteManagement() {
         setEditingSite(null);
         setShowModal(false);
     };
+
+    const handleDeleteReport = async (e, reportId) => {
+        e.stopPropagation();
+        if (!window.confirm('Sei sicuro di voler eliminare questo rapporto?')) return;
+
+        try {
+            await workActivityAPI.delete(reportId);
+            // Refresh reports
+            const [rep] = await Promise.all([
+                analyticsAPI.getSiteReport(selectedSite._id)
+            ]);
+            setReport(rep.data);
+            showNotification('success', 'Rapporto eliminato');
+        } catch (error) {
+            console.error('Error deleting report:', error);
+            showNotification('error', 'Errore nell\'eliminazione');
+        }
+    };
+
+
 
     // Calculate stats
     const totalSites = sites.length;

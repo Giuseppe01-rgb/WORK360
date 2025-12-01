@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
-import { siteAPI, analyticsAPI, noteAPI, photoAPI } from '../../utils/api';
+import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight,
@@ -21,6 +21,34 @@ const SiteDetails = ({ site, onBack }) => {
     const [showMaterialsModal, setShowMaterialsModal] = useState(false);
     const [showEmployeesModal, setShowEmployeesModal] = useState(false);
 
+    const handleDeleteNote = async (e, noteId) => {
+        e.stopPropagation();
+        if (!window.confirm('Sei sicuro di voler eliminare questa nota?')) return;
+        try {
+            await noteAPI.delete(noteId);
+            const notesData = await noteAPI.getAll({ siteId: site._id, type: 'note' });
+            setNotes(notesData.data || []);
+        } catch (error) {
+            console.error('Error deleting note:', error);
+            console.error('Note ID:', noteId);
+            alert(`Errore nell'eliminazione della nota: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
+    const handleDeleteReport = async (e, reportId) => {
+        e.stopPropagation();
+        if (!window.confirm('Sei sicuro di voler eliminare questo rapporto?')) return;
+        try {
+            await workActivityAPI.delete(reportId);
+            const rep = await analyticsAPI.getSiteReport(site._id);
+            setReport(rep.data);
+        } catch (error) {
+            console.error('Error deleting report:', error);
+            console.error('Report ID:', reportId);
+            alert(`Errore nell'eliminazione del report: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
     useEffect(() => {
         const loadDetails = async () => {
             try {
@@ -34,7 +62,7 @@ const SiteDetails = ({ site, onBack }) => {
                 setReport(rep.data);
                 setEmployeeHours(hours.data);
                 setNotes(notesData.data || []);
-                setDailyReports(reportsData.data || []);
+                // setDailyReports(reportsData.data || []); // We use report.dailyReports from analyticsAPI
                 setPhotos(photosData.data || []);
             } catch (err) {
                 console.error("Error loading site details:", err);
@@ -253,26 +281,33 @@ const SiteDetails = ({ site, onBack }) => {
             {/* REPORT GIORNALIERO TAB */}
             {activeTab === 'report' && (
                 <div className="space-y-4">
-                    {dailyReports.length > 0 ? (
-                        dailyReports.map((note) => (
+                    {report?.dailyReports?.length > 0 ? (
+                        report.dailyReports.map((dailyReport) => (
                             <div
-                                key={note._id}
-                                onClick={() => setSelectedNote(note)}
-                                className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-all cursor-pointer"
+                                key={dailyReport._id}
+                                onClick={() => setSelectedNote({ ...dailyReport, content: dailyReport.activityType })} // Adapter for modal
+                                className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-all cursor-pointer group"
                             >
                                 <div className="flex items-start justify-between mb-3">
                                     <div>
                                         <h4 className="font-bold text-slate-900">
-                                            {note.user?.firstName} {note.user?.lastName}
+                                            {dailyReport.user?.firstName} {dailyReport.user?.lastName}
                                         </h4>
                                         <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                                            <span>{new Date(note.createdAt).toLocaleDateString('it-IT')}</span>
+                                            <span>{new Date(dailyReport.date).toLocaleDateString('it-IT')}</span>
                                             <span>•</span>
-                                            <span>{new Date(note.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            <span>{new Date(dailyReport.date).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={(e) => handleDeleteReport(e, dailyReport._id)}
+                                        className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-100 md:opacity-0 group-hover:opacity-100"
+                                        title="Elimina"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
-                                <p className="text-slate-600 line-clamp-2">{note.content}</p>
+                                <p className="text-slate-600 line-clamp-2">{dailyReport.activityType}</p>
                             </div>
                         ))
                     ) : (
@@ -300,11 +335,18 @@ const SiteDetails = ({ site, onBack }) => {
                                             {note.user?.firstName} {note.user?.lastName}
                                         </h4>
                                         <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                                            <span>{new Date(note.createdAt).toLocaleDateString('it-IT')}</span>
+                                            <span>{new Date(note.date).toLocaleDateString('it-IT')}</span>
                                             <span>•</span>
-                                            <span>{new Date(note.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            <span>{new Date(note.date).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                     </div>
+                                    <button
+                                        onClick={(e) => handleDeleteNote(e, note._id)}
+                                        className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-100 md:opacity-0 group-hover:opacity-100"
+                                        title="Elimina"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
                                 <p className="text-slate-600 line-clamp-2">{note.content}</p>
                             </div>

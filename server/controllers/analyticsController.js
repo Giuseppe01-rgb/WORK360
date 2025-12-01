@@ -225,11 +225,21 @@ const getSiteReport = async (req, res) => {
             total: siteCost.toFixed(2)
         });
 
+        // 4. Daily Reports (WorkActivity)
+        const WorkActivity = require('../models/WorkActivity');
+        const dailyReports = await WorkActivity.find({
+            site: siteObjectId
+            // Removed unit: 'report' filter to show all activities/reports
+        })
+            .populate('user', 'firstName lastName username')
+            .sort({ date: -1 });
+
         const responseData = {
             materials: allMaterials,
             equipment,
             totalHours: totalHours[0]?.totalHours || 0,
             employeeHours,
+            dailyReports, // Added daily reports
             siteCost: {
                 materials: Math.round(materialCost * 100) / 100,
                 labor: Math.round(laborCost * 100) / 100,

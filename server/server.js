@@ -83,7 +83,6 @@ app.use('/api/notes', require('./routes/noteRoutes'));
 app.use('/api/photos', require('./routes/photoRoutes'));
 app.use('/api/company', require('./routes/companyRoutes'));
 app.use('/api/quotes', require('./routes/quoteRoutes'));
-app.use('/api/sals', require('./routes/salRoutes'));
 app.use('/api/sites', require('./routes/siteRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));

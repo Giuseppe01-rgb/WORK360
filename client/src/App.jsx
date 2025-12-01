@@ -12,7 +12,6 @@ import AttendanceList from './pages/owner/AttendanceList';
 import AnalyticsDashboard from './pages/owner/AnalyticsDashboard';
 import SupplierManagement from './pages/owner/SupplierManagement';
 import QuotesManager from './pages/owner/QuotesManager';
-import SALPage from './pages/owner/SALPage';
 import SignaturePage from './pages/owner/SignaturePage';
 import CompanySettings from './pages/owner/CompanySettings';
 import EmployeeManagement from './pages/owner/EmployeeManagement';
@@ -129,14 +128,6 @@ function AppRoutes() {
         element={
           <ProtectedRoute requireOwner>
             <QuotesManager />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/owner/sals"
-        element={
-          <ProtectedRoute requireOwner>
-            <SALPage />
           </ProtectedRoute>
         }
       />
