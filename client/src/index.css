@@ -57,6 +57,17 @@
     color: #0f172a;
     /* slate-900 */
   }
+
+  /* Prevent horizontal overflow globally */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Ensure stable touch interactions */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 /* Loading Spinner */

@@ -606,9 +606,9 @@ export default function MaterialsCatalog() {
             </div>
 
             {/* Add Material Modal */}
-            {showAddModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+            {addModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setAddModalOpen(false)}>
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-slate-900">Aggiungi Materiale</h2>
@@ -719,9 +719,9 @@ export default function MaterialsCatalog() {
             )}
 
             {/* Edit Material Modal */}
-            {showEditModal && selectedMaterial && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+            {editModalOpen && selectedMaterial && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setEditModalOpen(false)}>
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-slate-900">Modifica Materiale</h2>
@@ -880,7 +880,7 @@ export default function MaterialsCatalog() {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="p-6">
+                                <div className="p-4 md:p-6 overflow-y-auto flex-1">
                                     {/* File Upload Area */}
                                     <div className="mb-6">
                                         <label className="block text-sm font-bold text-slate-900 mb-3">Seleziona file fattura *</label>

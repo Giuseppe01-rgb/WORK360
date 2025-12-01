@@ -230,8 +230,8 @@ export default function EmployeeManagement() {
 
             {/* Create/Edit Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowModal(false)}>
+                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
                         <button
                             onClick={resetForm}
                             className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors"
@@ -239,7 +239,7 @@ export default function EmployeeManagement() {
                             <X className="w-6 h-6 text-slate-500" />
                         </button>
 
-                        <div className="p-6 md:p-8">
+                        <div className="p-4 md:p-6 lg:p-8 overflow-y-auto flex-1">
                             <h2 className="text-2xl font-bold text-slate-900 mb-2">
                                 {editingEmployee ? 'Modifica Utente' : 'Nuovo Utente'}
                             </h2>

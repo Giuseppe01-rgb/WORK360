@@ -363,8 +363,8 @@ const SiteDetails = ({ site, onBack }) => {
 
             {/* Note Detail Modal */}
             {selectedNote && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedNote(null)}>
-                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedNote(null)}>
+                    <div className="bg-white rounded-2xl w-full max-w-2xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
                             <div>
                                 <h3 className="text-xl font-bold text-slate-900">
@@ -392,8 +392,8 @@ const SiteDetails = ({ site, onBack }) => {
 
             {/* Photo Detail Modal */}
             {selectedPhoto && (
-                <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedPhoto(null)}>
-                    <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedPhoto(null)}>
+                    <div className="bg-white rounded-2xl w-full max-w-4xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
                             <div>
                                 <h3 className="text-xl font-bold text-slate-900">
@@ -428,7 +428,7 @@ const SiteDetails = ({ site, onBack }) => {
 
             {/* Employees Detail Modal */}
             {showEmployeesModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowEmployeesModal(false)}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowEmployeesModal(false)}>
                     <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between z-10">
                             <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -493,7 +493,7 @@ const SiteDetails = ({ site, onBack }) => {
 
             {/* Materials Detail Modal */}
             {showMaterialsModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowMaterialsModal(false)}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowMaterialsModal(false)}>
                     <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between z-10">
                             <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -784,8 +784,8 @@ export default function OwnerDashboard() {
 
             {/* Create/Edit Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 animate-in fade-in duration-200 overflow-y-auto">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl my-auto shadow-2xl relative animate-in zoom-in-95 duration-200 max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
                         <button
                             onClick={resetForm}
                             className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors"
@@ -793,7 +793,7 @@ export default function OwnerDashboard() {
                             <X className="w-6 h-6 text-slate-500" />
                         </button>
 
-                        <div className="p-6 md:p-8">
+                        <div className="p-4 md:p-6 lg:p-8 overflow-y-auto flex-1">
                             <h2 className="text-2xl font-bold text-slate-900 mb-2">
                                 {editingSite ? 'Modifica Cantiere' : 'Nuovo Cantiere'}
                             </h2>
