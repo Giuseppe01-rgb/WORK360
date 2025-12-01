@@ -142,7 +142,7 @@ export default function AttendanceList() {
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Data Inizio</label>
                         <input
                             type="date"
-                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            className="w-full max-w-full min-w-0 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                             value={filters.startDate}
                             onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
                         />
@@ -152,7 +152,7 @@ export default function AttendanceList() {
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Data Fine</label>
                         <input
                             type="date"
-                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            className="w-full max-w-full min-w-0 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                             value={filters.endDate}
                             onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                         />

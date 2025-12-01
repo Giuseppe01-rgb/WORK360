@@ -827,7 +827,7 @@ export default function OwnerDashboard() {
                                         <label className="block text-sm font-bold text-slate-900 mb-1.5">Data Inizio *</label>
                                         <input
                                             type="date"
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+                                            className="w-full max-w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all appearance-none"
                                             value={formData.startDate}
                                             onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                                             required

@@ -483,7 +483,7 @@ export default function SiteManagement() {
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Data Inizio *</label>
                                         <input
                                             type="date"
-                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                            className="w-full max-w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                             value={formData.startDate}
                                             onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                                             required
