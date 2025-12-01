@@ -1050,7 +1050,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl relative">
                             <button
-                                onClick={() => setShowModal(false)}
+                                onClick={() => setShowSALModal(false)}
                                 className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors"
                             >
                                 <X className="w-6 h-6 text-slate-500" />
@@ -1241,12 +1241,12 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <div className="relative">
                                                         <input
                                                             type="number"
-                                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 pr-10"
+                                                            step="0.01"
+                                                            className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-900 pr-10 cursor-not-allowed"
                                                             value={salFormData.completionPercentage}
-                                                            onChange={(e) => setSalFormData(prev => ({ ...prev, completionPercentage: parseFloat(e.target.value) || 0 }))}
+                                                            readOnly
                                                             min="0"
                                                             max="100"
-                                                            required
                                                         />
                                                         <Percent className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                                                     </div>
@@ -1392,7 +1392,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
                                             <button
                                                 type="button"
-                                                onClick={() => setShowModal(false)}
+                                                onClick={() => setShowSALModal(false)}
                                                 className="px-6 py-3 bg-white border-2 border-slate-900 text-slate-900 font-semibold hover:bg-slate-50 rounded-lg transition-colors"
                                             >
                                                 Annulla
