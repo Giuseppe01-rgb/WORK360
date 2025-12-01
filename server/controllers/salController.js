@@ -1,5 +1,4 @@
 const SAL = require('../models/SAL');
-const Site = require('../models/Site');
 
 // Create new SAL
 exports.createSAL = async (req, res) => {
