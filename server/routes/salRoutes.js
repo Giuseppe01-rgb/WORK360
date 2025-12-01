@@ -13,5 +13,6 @@ router.get('/', salController.getAllSALs);
 router.get('/:id', salController.getSALById);
 router.put('/:id', salController.updateSAL);
 router.delete('/:id', salController.deleteSAL);
+router.get('/:id/pdf', salController.downloadSALPDF);
 
 module.exports = router;

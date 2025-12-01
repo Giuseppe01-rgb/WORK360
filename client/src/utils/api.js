@@ -174,6 +174,7 @@ export const salAPI = {
     getOne: (id) => api.get(`/sals/${id}`),
     update: (id, data) => api.put(`/sals/${id}`, data),
     delete: (id) => api.delete(`/sals/${id}`),
+    downloadPDF: (id) => api.get(`/sals/${id}/pdf`, { responseType: 'blob' }),
 };
 
 // User

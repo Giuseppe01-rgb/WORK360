@@ -4,11 +4,7 @@ import { quoteAPI, communicationAPI, salAPI, siteAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
-import {
-    Plus, Trash2, Eye, Mail, FileText,
-    Edit, Download, X, CheckCircle, AlertCircle, Search,
-    Percent, Euro, Building2
-} from 'lucide-react';
+import { Plus, Search, FileText, Calendar, DollarSign, User, MapPin, Edit, Trash2, X, CheckCircle, AlertTriangle, Send, Loader, ChevronDown, ChevronUp, Building2, Percent, Euro, Download } from 'lucide-react';
 import React from 'react';
 
 class DebugErrorBoundary extends React.Component {
@@ -240,17 +236,14 @@ export default function QuotesManager() {
 
     const downloadSALPDF = async (salId) => {
         try {
-            // TODO: Implement SAL PDF generation in backend
-            showError('Generazione PDF SAL in fase di implementazione');
-            // When ready:
-            // const response = await salAPI.downloadPDF(salId);
-            // const url = window.URL.createObjectURL(new Blob([response.data]));
-            // const link = document.createElement('a');
-            // link.href = url;
-            // link.setAttribute('download', `sal-${salId}.pdf`);
-            // document.body.appendChild(link);
-            // link.click();
-            // link.remove();
+            const response = await salAPI.downloadPDF(salId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `sal-${salId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
         } catch (error) {
             console.error('Error downloading SAL PDF:', error);
             showError('Errore nel download del PDF');
@@ -736,6 +729,13 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     title="Modifica"
                                 >
                                     <Edit className="w-4 h-4" /> Modifica
+                                </button>
+                                <button
+                                    onClick={() => downloadSALPDF(sal._id)}
+                                    className="py-2 px-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                                    title="Scarica PDF"
+                                >
+                                    <Download className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => setDeleteConfirm({ isOpen: true, id: sal._id, type: 'sal' })}

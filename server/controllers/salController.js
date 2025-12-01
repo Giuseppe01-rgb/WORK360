@@ -1,4 +1,7 @@
 const SAL = require('../models/SAL');
+const Company = require('../models/Company');
+const { generateSALPDF } = require('../utils/pdfGenerator');
+
 
 // Create new SAL
 exports.createSAL = async (req, res) => {
@@ -159,5 +162,32 @@ exports.deleteSAL = async (req, res) => {
     } catch (error) {
         console.error('Error deleting SAL:', error);
         res.status(500).json({ message: 'Errore nell\'eliminazione del SAL', error: error.message });
+    }
+};
+
+// Download SAL PDF
+exports.downloadSALPDF = async (req, res) => {
+    try {
+        const sal = await SAL.findOne({
+            _id: req.params.id,
+            owner: req.user._id
+        }).populate('site');
+
+        if (!sal) {
+            return res.status(404).json({ message: 'SAL non trovato' });
+        }
+
+        // Get company details
+        const company = await Company.findOne({ owner: req.user._id });
+
+        if (!company) {
+            return res.status(404).json({ message: 'Dati azienda non trovati. Configura prima la tua azienda.' });
+        }
+
+        // Generate PDF
+        await generateSALPDF(sal, company, sal.site, res);
+    } catch (error) {
+        console.error('Error downloading SAL PDF:', error);
+        res.status(500).json({ message: 'Errore nel download del PDF', error: error.message });
     }
 };
