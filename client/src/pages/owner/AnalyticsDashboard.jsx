@@ -19,11 +19,19 @@ export default function AnalyticsDashboard() {
             const params = selectedSite ? { siteId: selectedSite } : {};
             const [analyticsResp, sitesResp] = await Promise.all([
                 analyticsAPI.getDashboard(params),
-                analyticsAPI.getSiteStats()
+                siteAPI.getAll()
             ]);
 
             setAnalytics(analyticsResp.data);
-            setSiteStats(sitesResp.data);
+            // Transform sites data to match expected structure
+            const siteStatsData = sitesResp.data.map(site => ({
+                site: site,
+                totalAttendances: 0,
+                totalHours: 0,
+                uniqueWorkers: 0,
+                materials: []
+            }));
+            setSiteStats(siteStatsData);
         } catch (error) {
             console.error('Error loading analytics:', error);
         } finally {
