@@ -102,6 +102,7 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
             // 1. Upload photo first
             const formData = new FormData();
             formData.append('photo', photoFile);
+            formData.append('siteId', siteId); // Required by backend
 
             // Use the API utility which handles base URL and auth
             const uploadRes = await photoAPI.upload(formData);
