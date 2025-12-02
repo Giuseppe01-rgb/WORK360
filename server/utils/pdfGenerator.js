@@ -326,18 +326,17 @@ const generateSALPDFBuffer = (sal, company, site) => {
         doc.font('Helvetica').fontSize(10).fillColor('#334155');
         doc.text(`Nome: ${site.name}`, 50, doc.y);
         doc.text(`Indirizzo: ${site.address || 'N/D'}`, 50, doc.y + 15);
-        if (sal.cig) doc.text(`CIG: ${sal.cig}`, 50, doc.y + 30);
-        if (sal.cup) doc.text(`CUP: ${sal.cup}`, 50, doc.y + 45);
 
         doc.moveDown(3);
 
-        // --- DESCRIZIONE LAVORI ---
-        doc.font('Helvetica-Bold').fontSize(12).fillColor('#1E293B').text('Descrizione Lavori Eseguiti', 50, doc.y);
-        doc.moveDown(0.5);
-        doc.font('Helvetica').fontSize(10).fillColor('#334155');
-        doc.text(sal.workDescription, 50, doc.y, { width: 495, align: 'justify' });
-
-        doc.moveDown(2);
+        // --- DESCRIZIONE LAVORI (using notes field) ---
+        if (sal.notes) {
+            doc.font('Helvetica-Bold').fontSize(12).fillColor('#1E293B').text('Note', 50, doc.y);
+            doc.moveDown(0.5);
+            doc.font('Helvetica').fontSize(10).fillColor('#334155');
+            doc.text(sal.notes, 50, doc.y, { width: 495, align: 'justify' });
+            doc.moveDown(2);
+        }
 
         // --- FINANCIAL BREAKDOWN ---
         const financeY = doc.y;
@@ -360,44 +359,34 @@ const generateSALPDFBuffer = (sal, company, site) => {
             currentY += rowHeight;
         };
 
+        // Calculate financial values
+        const retentionRate = 0.10; // 10% retention
+        const retentionAmount = sal.currentAmount * retentionRate;
+        const penaltiesAmount = sal.penalties || 0;
+        const netAmount = sal.currentAmount - retentionAmount - penaltiesAmount;
+        const vatRate = 22; // Default VAT 22%
+        const vatAmount = netAmount * (vatRate / 100);
+        const totalAmount = netAmount + vatAmount;
+
         addFinanceLine('Valore Contratto', sal.contractValue);
         addFinanceLine('Importo Lavori SAL Precedenti', sal.previousAmount);
         doc.strokeColor('#E2E8F0').lineWidth(0.5).moveTo(50, currentY - 5).lineTo(545, currentY - 5).stroke();
         addFinanceLine('Importo Lavori Questo SAL', sal.currentAmount, true);
-        addFinanceLine('Ritenuta di Garanzia (10%)', sal.retentionAmount);
-        if (sal.penalties > 0) {
-            addFinanceLine('Penali', sal.penalties);
+        addFinanceLine('Ritenuta di Garanzia (10%)', retentionAmount);
+        if (penaltiesAmount > 0) {
+            addFinanceLine('Penali', penaltiesAmount);
         }
         doc.strokeColor('#E2E8F0').lineWidth(0.5).moveTo(50, currentY - 5).lineTo(545, currentY - 5).stroke();
-        addFinanceLine('Imponibile', sal.netAmount, true);
-        addFinanceLine(`IVA (${sal.vatRate}%)`, sal.vatAmount);
+        addFinanceLine('Imponibile', netAmount, true);
+        addFinanceLine(`IVA (${vatRate}%)`, vatAmount);
 
         // Grand Total
         doc.rect(50, currentY - 5, 495, 30).fill('#F1F5F9');
         doc.fillColor('#0F172A').font('Helvetica-Bold').fontSize(14);
         doc.text('TOTALE DOVUTO', 60, currentY + 3);
-        doc.text(`€ ${sal.totalAmount.toFixed(2)}`, 400, currentY + 3, { align: 'right', width: 135 });
+        doc.text(`€ ${totalAmount.toFixed(2)}`, 400, currentY + 3, { align: 'right', width: 135 });
 
         currentY += 40;
-
-        // --- WORK SUPERVISOR (if present) ---
-        if (sal.workSupervisor && sal.workSupervisor.name) {
-            doc.moveDown(2);
-            doc.font('Helvetica-Bold').fontSize(11).fillColor('#1E293B').text('Direttore Lavori', 50, doc.y);
-            doc.font('Helvetica').fontSize(10).fillColor('#334155');
-            doc.text(sal.workSupervisor.name, 50, doc.y + 15);
-            if (sal.workSupervisor.qualification) {
-                doc.text(sal.workSupervisor.qualification, 50, doc.y + 28);
-            }
-        }
-
-        // --- NOTES (if present) ---
-        if (sal.notes) {
-            doc.moveDown(2);
-            doc.font('Helvetica-Bold').fontSize(11).fillColor('#1E293B').text('Note', 50, doc.y);
-            doc.font('Helvetica').fontSize(9).fillColor('#334155');
-            doc.text(sal.notes, 50, doc.y + 15, { width: 495 });
-        }
 
         // --- FOOTER & SIGNATURES ---
         const footerY = 700;
@@ -415,16 +404,10 @@ const generateSALPDFBuffer = (sal, company, site) => {
         doc.text('L\'Appaltatore', 50, sigY);
         doc.text('_______________________', 50, sigY + 40);
 
-        // Center: Work Supervisor
-        if (sal.workSupervisor && sal.workSupervisor.name) {
-            doc.text('Il Direttore Lavori', 230, sigY);
-            doc.text('_______________________', 230, sigY + 40);
-        }
-
         // Right: Client Approval
-        doc.text('Il Committente', 410, sigY);
-        doc.fontSize(7).font('Helvetica').text('(per accettazione)', 410, sigY + 12);
-        doc.text('_______________________', 410, sigY + 40);
+        doc.text('Il Committente', 350, sigY);
+        doc.fontSize(7).font('Helvetica').text('(per accettazione)', 350, sigY + 12);
+        doc.text('_______________________', 350, sigY + 40);
 
         doc.end();
     });
