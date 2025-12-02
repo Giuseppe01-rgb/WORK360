@@ -48,7 +48,19 @@ const uploadPhoto = async (req, res) => {
             caption
         });
 
-        res.status(201).json(photo);
+        // Construct URL
+        const protocol = req.protocol;
+        const host = req.get('host');
+        // Ensure forward slashes for URL
+        const relativePath = req.file.path.replace(/\\/g, '/');
+        const url = `${protocol}://${host}/${relativePath}`;
+
+        // Return photo object with url
+        res.status(201).json({
+            ...photo.toObject(),
+            url,
+            photoUrl: url // For consistency
+        });
     } catch (error) {
         res.status(500).json({ message: 'Errore nel caricamento della foto', error: error.message });
     }

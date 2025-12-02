@@ -162,7 +162,7 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
             // 2. Create reported material
             await onSubmit({
                 siteId,
-                fotoUrl: uploadData.url,
+                fotoUrl: uploadData.url || uploadData.photoUrl,
                 numeroConfezioni,
                 note
             });
