@@ -772,7 +772,7 @@ export default function OwnerDashboard() {
 
     if (loading) {
         return (
-            <Layout title="Cantieri">
+            <Layout title="Cantieri" hideHeader={true}>
                 <div className="flex items-center justify-center min-h-[400px]">
                     <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
                 </div>
@@ -782,14 +782,14 @@ export default function OwnerDashboard() {
 
     if (selectedSite) {
         return (
-            <Layout title="Dettagli Cantiere">
+            <Layout title="Dettagli Cantiere" hideHeader={true}>
                 <SiteDetails site={selectedSite} onBack={() => setSelectedSite(null)} />
             </Layout>
         );
     }
 
     return (
-        <Layout title={`Benvenuto, ${user?.firstName}`}>
+        <Layout title={`Benvenuto, ${user?.firstName}`} hideHeader={true}>
             {notification && (
                 <div className={`fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg z-50 font-semibold flex items-center gap-2 ${notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
                     }`}>
@@ -826,7 +826,7 @@ export default function OwnerDashboard() {
                 {/* NEW SITE BUTTON - UPDATED */}
                 <button
                     onClick={() => setShowModal(true)}
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 mb-8 transition-transform active:scale-95"
+                    className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-4 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/40 flex items-center justify-center gap-2 mb-8 transition-all active:scale-95 hover:shadow-2xl hover:shadow-blue-500/50"
                 >
                     <Plus className="w-6 h-6" />
                     Nuovo Cantiere

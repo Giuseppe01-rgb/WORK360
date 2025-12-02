@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import Tutorial from './Tutorial';
 
-export default function Layout({ children, title }) {
+export default function Layout({ children, title, hideHeader = false }) {
     const { user, logout } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
@@ -332,37 +332,41 @@ export default function Layout({ children, title }) {
                 {/* Main Content Area */}
                 <main className="flex-1 p-4 sm:p-8 lg:p-10 w-full max-w-[100vw] overflow-x-hidden bg-site-bg">
                     {/* Top Bar (Desktop only - Contextual) */}
-                    <div className="hidden md:flex items-center justify-between mb-10">
-                        <div>
-                            <h1 className="text-3xl font-black text-slate-900 tracking-tight">{title}</h1>
-                            <p className="text-sm text-slate-500 mt-1 font-medium">Benvenuto in WORK360</p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Cerca..."
-                                    className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 w-64 transition-all"
-                                />
-                                <svg className="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    {!hideHeader && (
+                        <div className="hidden md:flex items-center justify-between mb-10">
+                            <div>
+                                <h1 className="text-3xl font-black text-slate-900 tracking-tight">{title}</h1>
+                                <p className="text-sm text-slate-500 mt-1 font-medium">Benvenuto in WORK360</p>
                             </div>
-                            <button className="p-2.5 text-slate-400 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-full transition-all relative shadow-sm">
-                                <Bell className="w-5 h-5" />
-                                <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                            </button>
-                            <button className="p-2.5 text-slate-400 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-full transition-all shadow-sm">
-                                <Settings className="w-5 h-5" />
-                            </button>
+                            <div className="flex items-center gap-4">
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Cerca..."
+                                        className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 w-64 transition-all"
+                                    />
+                                    <svg className="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                </div>
+                                <button className="p-2.5 text-slate-400 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-full transition-all relative shadow-sm">
+                                    <Bell className="w-5 h-5" />
+                                    <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                                </button>
+                                <button className="p-2.5 text-slate-400 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-full transition-all shadow-sm">
+                                    <Settings className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Mobile Title */}
-                    <div className="md:hidden mb-6 flex items-center justify-between">
-                        <h1 className="text-2xl font-black text-slate-900">{title}</h1>
-                        <button className="p-2 text-slate-400 hover:text-slate-900 bg-white rounded-full shadow-sm border border-slate-100">
-                            <Bell className="w-5 h-5" />
-                        </button>
-                    </div>
+                    {!hideHeader && (
+                        <div className="md:hidden mb-6 flex items-center justify-between">
+                            <h1 className="text-2xl font-black text-slate-900">{title}</h1>
+                            <button className="p-2 text-slate-400 hover:text-slate-900 bg-white rounded-full shadow-sm border border-slate-100">
+                                <Bell className="w-5 h-5" />
+                            </button>
+                        </div>
+                    )}
 
                     {/* Content */}
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
