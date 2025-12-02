@@ -85,6 +85,13 @@ const approveAndCreateNew = async (req, res) => {
         const { id } = req.params;
         const { materialeData, noteApprovazione } = req.body;
 
+        console.log(`Approving new material for report ${id} by user ${req.user._id}`);
+
+        if (!req.user.company) {
+            console.error('User has no company associated');
+            return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
+        }
+
         // Find reported material
         const reported = await ReportedMaterial.findOne({
             _id: id,
@@ -92,6 +99,7 @@ const approveAndCreateNew = async (req, res) => {
         });
 
         if (!reported) {
+            console.warn(`Report ${id} not found for company ${req.user.company._id}`);
             return res.status(404).json({ message: 'Segnalazione non trovata' });
         }
 
@@ -129,13 +137,9 @@ const approveAndCreateNew = async (req, res) => {
         reported.approvatoDa = req.user._id;
         await reported.save();
 
-        res.json({
-            message: 'Materiale approvato e aggiunto al catalogo',
-            material: newMaterial,
-            reported
-        });
+        res.json({ message: 'Materiale creato e approvato', newMaterial });
     } catch (error) {
-        console.error('Approve and Create New Error:', error);
+        console.error('Approve New Material Error:', error);
         res.status(500).json({ message: 'Errore nell\'approvazione del materiale', error: error.message });
     }
 };
@@ -145,6 +149,12 @@ const approveAndAssociate = async (req, res) => {
     try {
         const { id } = req.params;
         const { materialId, noteApprovazione } = req.body;
+
+        console.log(`Associating report ${id} to material ${materialId} by user ${req.user._id}`);
+
+        if (!req.user.company) {
+            return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
+        }
 
         const reported = await ReportedMaterial.findOne({
             _id: id,
@@ -186,14 +196,10 @@ const approveAndAssociate = async (req, res) => {
         reported.approvatoDa = req.user._id;
         await reported.save();
 
-        res.json({
-            message: 'Segnalazione collegata al materiale esistente',
-            material,
-            reported
-        });
+        res.json({ message: 'Segnalazione approvata e collegata', material });
     } catch (error) {
-        console.error('Approve and Associate Error:', error);
-        res.status(500).json({ message: 'Errore nel collegamento', error: error.message });
+        console.error('Approve Associate Error:', error);
+        res.status(500).json({ message: 'Errore nel collegamento del materiale', error: error.message });
     }
 };
 
@@ -202,6 +208,12 @@ const rejectMaterial = async (req, res) => {
     try {
         const { id } = req.params;
         const { noteApprovazione } = req.body;
+
+        console.log(`Rejecting report ${id} by user ${req.user._id}`);
+
+        if (!req.user.company) {
+            return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
+        }
 
         const reported = await ReportedMaterial.findOne({
             _id: id,
