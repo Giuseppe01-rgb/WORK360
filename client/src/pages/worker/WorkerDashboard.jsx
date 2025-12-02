@@ -888,10 +888,10 @@ export default function WorkerDashboard() {
             </div>
 
             {/* Time Distribution Modal */}
-            {showTimeDistribution && todayActivities.length > 0 && Boolean(todayAttendance?.totalHours) && (
+            {showTimeDistribution && todayActivities.length > 0 && (
                 <TimeDistributionModal
                     activities={todayActivities}
-                    totalHours={todayAttendance.totalHours}
+                    totalHours={todayAttendance?.totalHours || (activeAttendance ? (new Date() - new Date(activeAttendance.checkIn)) / (1000 * 60 * 60) : 0)}
                     onClose={() => setShowTimeDistribution(false)}
                     onSuccess={async () => {
                         setShowTimeDistribution(false);
