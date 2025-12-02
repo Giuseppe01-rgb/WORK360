@@ -49,7 +49,6 @@ export default function Layout({ children, title }) {
                 { path: '/owner/worker-functions?tab=attendance', label: 'Timbratura', icon: Clock },
                 { path: '/owner/worker-functions?tab=materials', label: 'Materiali', icon: Package },
                 { path: '/owner/worker-functions?tab=daily-report', label: 'Rapporto Giornaliero', icon: FileCheck },
-                { path: '/owner/worker-functions?tab=economies', label: 'Economie', icon: Zap },
                 { path: '/owner/worker-functions?tab=notes', label: 'Note', icon: StickyNote },
                 { path: '/owner/worker-functions?tab=photos', label: 'Foto', icon: Camera },
             ]
