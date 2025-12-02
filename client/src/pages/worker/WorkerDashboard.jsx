@@ -888,7 +888,7 @@ export default function WorkerDashboard() {
             </div>
 
             {/* Time Distribution Modal */}
-            {showTimeDistribution && todayActivities.length > 0 && todayAttendance?.totalHours && (
+            {showTimeDistribution && todayActivities.length > 0 && Boolean(todayAttendance?.totalHours) && (
                 <TimeDistributionModal
                     activities={todayActivities}
                     totalHours={todayAttendance.totalHours}
