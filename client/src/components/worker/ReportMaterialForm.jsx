@@ -3,6 +3,7 @@ import { Camera, Upload, AlertCircle, X } from 'lucide-react';
 import { photoAPI } from '../../utils/api';
 
 const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
+    const [nomeDigitato, setNomeDigitato] = useState('');
     const [numeroConfezioni, setNumeroConfezioni] = useState(1);
     const [note, setNote] = useState('');
     const [photoFile, setPhotoFile] = useState(null);
@@ -95,6 +96,11 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
             return;
         }
 
+        if (!nomeDigitato || nomeDigitato.trim() === '') {
+            setError('Il nome del materiale è obbligatorio');
+            return;
+        }
+
         setUploading(true);
         setError('');
 
@@ -164,6 +170,7 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
             await onSubmit({
                 siteId,
                 fotoUrl: uploadData.url || uploadData.photoUrl,
+                nomeDigitato,
                 numeroConfezioni,
                 note
             });
@@ -258,6 +265,24 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
                                 </label>
                             </div>
                         )}
+                    </div>
+
+                    {/* Material Name */}
+                    <div>
+                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                            Nome del materiale <span className="text-red-600">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={nomeDigitato}
+                            onChange={(e) => setNomeDigitato(e.target.value)}
+                            placeholder="Es. Pittura bianca, Rasante fine, Primer..."
+                            disabled={uploading}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none disabled:opacity-50"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">
+                            Scrivi il nome che leggi sull'etichetta
+                        </p>
                     </div>
 
                     {/* Quantity */}
