@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Determine API URL based on environment
 const API_URL = import.meta.env.MODE === 'production'
-    ? 'https://work360-production-d4f3.up.railway.app/api'
+    ? 'https://work360-production-f18c.up.railway.app/api'
     : 'http://localhost:5001/api';
 
 const api = axios.create({
