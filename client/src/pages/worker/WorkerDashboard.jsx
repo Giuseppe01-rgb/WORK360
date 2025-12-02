@@ -185,16 +185,7 @@ export default function WorkerDashboard() {
     };
 
     const handleClockOut = async () => {
-        // Check if there are activities without time distribution
-        if (todayActivities.length > 0) {
-            const hasUndistributed = todayActivities.some(a => !a.durationHours || a.durationHours === 0);
-            if (hasUndistributed) {
-                setShowTimeDistribution(true);
-                return;
-            }
-        }
-
-        // Proceed with clock out
+        // Proceed directly with clock out
         await performClockOut();
     };
 
@@ -887,22 +878,7 @@ export default function WorkerDashboard() {
                 )}
             </div>
 
-            {/* Time Distribution Modal */}
-            {showTimeDistribution && todayActivities.length > 0 && (
-                <TimeDistributionModal
-                    activities={todayActivities}
-                    totalHours={todayAttendance?.totalHours || (activeAttendance ? (new Date() - new Date(activeAttendance.checkIn)) / (1000 * 60 * 60) : 0)}
-                    onClose={() => setShowTimeDistribution(false)}
-                    onSuccess={async () => {
-                        setShowTimeDistribution(false);
-                        await loadTodayActivities(); // Reload to get updated durationHours
-                        // Now proceed with clock out
-                        if (activeAttendance) {
-                            performClockOut();
-                        }
-                    }}
-                />
-            )}
+
 
             {/* Barcode Scanner Modal */}
             {showScanner && (
