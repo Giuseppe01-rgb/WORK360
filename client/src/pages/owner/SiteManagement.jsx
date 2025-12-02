@@ -129,9 +129,57 @@ const SiteDetails = ({ site, onBack }) => {
                 </select>
             </div>
 
-            {/* Content - Dati Section */}
+            {/* Content - Dati */}
             {activeSection === 'data' && (
-                <>
+                <div className="space-y-6 md:space-y-8">
+                    {/* Cost Summary Card */}
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-6 md:p-8">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <Users className="w-6 h-6 text-green-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900">Costo Totale Cantiere</h3>
+                        </div>
+
+                        {(() => {
+                            // Calculate costs
+                            const totalHours = employeeHours.reduce((sum, emp) => sum + emp.totalHours, 0);
+                            const laborCost = totalHours * 30; // 30€/hour for labor
+
+                            const totalMaterialCost = report?.materials?.reduce((sum, mat) => {
+                                return sum + (mat.totalCost || 0);
+                            }, 0) || 0;
+
+                            const economieHours = economie.reduce((sum, e) => sum + e.hours, 0);
+                            const economieCost = economieHours * 30; // 30€/hour for economie
+
+                            const totalCost = laborCost + totalMaterialCost + economieCost;
+
+                            return (
+                                <>
+                                    <div className="text-5xl md:text-6xl font-black text-green-600 mb-4">
+                                        {totalCost.toFixed(2)}€
+                                    </div>
+                                    <p className="text-sm text-green-700 mb-4">aggiornato in tempo reale</p>
+
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                            <span className="text-sm font-medium text-slate-700">Manodopera: {laborCost.toFixed(2)}€</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                            <span className="text-sm font-medium text-slate-700">Materiali: {totalMaterialCost.toFixed(2)}€</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                                            <span className="text-sm font-medium text-slate-700">Economie: {economieCost.toFixed(2)}€</span>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        })()}
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                         <div className="bg-slate-50 p-4 md:p-6 rounded-2xl">
                             <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
@@ -208,7 +256,7 @@ const SiteDetails = ({ site, onBack }) => {
                             </p>
                         </div>
                     </div>
-                </>
+                </div>
             )}
 
             {/* Content - Rapporti giornalieri */}
