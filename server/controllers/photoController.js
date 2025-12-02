@@ -2,10 +2,17 @@ const multer = require('multer');
 const path = require('path');
 const Photo = require('../models/Photo');
 
+const fs = require('fs');
+
 // Configure multer for file upload
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, process.env.UPLOAD_PATH || './uploads');
+        const uploadPath = process.env.UPLOAD_PATH || './uploads';
+        // Ensure directory exists
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
