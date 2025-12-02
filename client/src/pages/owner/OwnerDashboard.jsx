@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
-import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI } from '../../utils/api';
+import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight,
-    FileText, Camera, Image
+    FileText, Camera, Image, Zap
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack }) => {
@@ -15,6 +15,7 @@ const SiteDetails = ({ site, onBack }) => {
     const [notes, setNotes] = useState([]);
     const [dailyReports, setDailyReports] = useState([]);
     const [photos, setPhotos] = useState([]);
+    const [economie, setEconomie] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedNote, setSelectedNote] = useState(null);
     const [selectedPhoto, setSelectedPhoto] = useState(null);
@@ -49,21 +50,37 @@ const SiteDetails = ({ site, onBack }) => {
         }
     };
 
+    const handleDeleteEconomia = async (e, economiaId) => {
+        e.stopPropagation();
+        if (!window.confirm('Sei sicuro di voler eliminare questa economia?')) return;
+        try {
+            await economiaAPI.delete(economiaId);
+            // Refresh economie
+            const economieData = await economiaAPI.getBySite(site._id);
+            setEconomie(economieData.data);
+        } catch (error) {
+            console.error('Error deleting economia:', error);
+            alert('Errore nell\'eliminazione');
+        }
+    };
+
     useEffect(() => {
         const loadDetails = async () => {
             try {
-                const [rep, hours, notesData, reportsData, photosData] = await Promise.all([
+                const [rep, hours, notesData, reportsData, photosData, economieData] = await Promise.all([
                     analyticsAPI.getSiteReport(site._id),
                     analyticsAPI.getHoursPerEmployee({ siteId: site._id }),
                     noteAPI.getAll({ siteId: site._id, type: 'note' }),
                     noteAPI.getAll({ siteId: site._id, type: 'daily_report' }),
-                    photoAPI.getAll({ siteId: site._id })
+                    photoAPI.getAll({ siteId: site._id }),
+                    economiaAPI.getBySite(site._id)
                 ]);
                 setReport(rep.data);
                 setEmployeeHours(hours.data);
                 setNotes(notesData.data || []);
                 // setDailyReports(reportsData.data || []); // We use report.dailyReports from analyticsAPI
                 setPhotos(photosData.data || []);
+                setEconomie(economieData.data || []);
             } catch (err) {
                 console.error("Error loading site details:", err);
             } finally {
@@ -105,6 +122,7 @@ const SiteDetails = ({ site, onBack }) => {
                     {[
                         { id: 'dati', label: 'Dati', icon: Clock },
                         { id: 'report', label: 'Report Giornaliero', icon: FileText },
+                        { id: 'economie', label: 'Economie', icon: Zap },
                         { id: 'note', label: 'Note', icon: FileText },
                         { id: 'foto', label: 'Foto', icon: Camera },
                     ].map((tab) => {
@@ -142,7 +160,7 @@ const SiteDetails = ({ site, onBack }) => {
                             </h3>
                             <div className="flex flex-wrap items-baseline gap-2">
                                 <p className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900">
-                                    {report?.siteCost?.total?.toFixed(2) || '0,00'}€
+                                    {((report?.siteCost?.total || 0) + (economie.reduce((sum, e) => sum + e.hours, 0) * 30)).toFixed(2)}€
                                 </p>
                                 <span className="text-xs md:text-sm text-slate-500 font-medium">aggiornato in tempo reale</span>
                             </div>
@@ -154,6 +172,10 @@ const SiteDetails = ({ site, onBack }) => {
                                 <div className="flex items-center gap-2">
                                     <div className="w-3 h-3 rounded-full bg-purple-500 flex-shrink-0"></div>
                                     <span className="text-slate-600 break-words">Materiali: <strong>{report?.siteCost?.materials?.toFixed(2) || '0,00'}€</strong></span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-amber-500 flex-shrink-0"></div>
+                                    <span className="text-slate-600 break-words">Economie: <strong>{(economie.reduce((sum, e) => sum + e.hours, 0) * 30).toFixed(2)}€</strong></span>
                                 </div>
                             </div>
                         </div>
@@ -314,6 +336,59 @@ const SiteDetails = ({ site, onBack }) => {
                         <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
                             <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                             <p className="text-slate-400 font-medium">Nessun report giornaliero disponibile</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ECONOMIE TAB */}
+            {activeTab === 'economie' && (
+                <div className="space-y-4">
+                    {economie.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {economie.map((economia) => (
+                                <div key={economia._id} className="bg-white p-6 rounded-2xl shadow-sm border border-amber-100 relative group">
+                                    <button
+                                        onClick={(e) => handleDeleteEconomia(e, economia._id)}
+                                        className="absolute top-4 right-4 p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                                        title="Elimina"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 font-bold">
+                                            {economia.worker?.name?.charAt(0)}{economia.worker?.surname?.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-900">{economia.worker?.name} {economia.worker?.surname}</h4>
+                                            <p className="text-xs text-slate-500">Operaio</p>
+                                        </div>
+                                    </div>
+                                    <div className="mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-4 h-4 text-amber-600" />
+                                            <span className="text-2xl font-bold text-amber-600">{economia.hours}</span>
+                                            <span className="text-sm text-slate-500">{economia.hours === 1 ? 'ora' : 'ore'}</span>
+                                        </div>
+                                    </div>
+                                    <p className="text-slate-600 text-sm whitespace-pre-wrap mb-3">{economia.description}</p>
+                                    <div className="pt-3 border-t border-slate-50">
+                                        <span className="text-xs text-slate-500 font-medium">
+                                            {new Date(economia.date).toLocaleString('it-IT', {
+                                                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Zap className="w-8 h-8 text-amber-400" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 mb-2">Economie</h3>
+                            <p className="text-slate-500">Nessuna economia disponibile per questo cantiere.</p>
                         </div>
                     )}
                 </div>
