@@ -37,139 +37,199 @@ export default function Layout({ children, title, hideHeader = false }) {
         navigate('/login');
     };
 
-    // Owner menu with collapsible submenu
+    // Owner menu with categories
     const ownerLinks = [
-        { path: '/owner', label: 'Cantieri', icon: Building2 },
-        { path: '/owner/employees', label: 'Lista Operai', icon: Users },
         {
-            path: '/owner/worker-functions',
-            label: 'Funzioni Operaio',
-            icon: HardHat,
-            submenu: [
-                { path: '/owner/worker-functions?tab=attendance', label: 'Timbratura', icon: Clock },
-                { path: '/owner/worker-functions?tab=materials', label: 'Materiali', icon: Package },
-                { path: '/owner/worker-functions?tab=daily-report', label: 'Rapporto Giornaliero', icon: FileCheck },
-                { path: '/worker/economies', label: 'Economie', icon: Zap },
-                { path: '/owner/worker-functions?tab=notes', label: 'Note', icon: StickyNote },
-                { path: '/owner/worker-functions?tab=photos', label: 'Foto', icon: Camera },
+            category: 'GESTIONE CANTIERI',
+            items: [
+                { path: '/owner', label: 'Cantieri', icon: Building2, subtitle: '3 attivi' },
+                { path: '/owner/employees', label: 'Lista Operai', icon: Users },
+                {
+                    path: '/owner/worker-functions',
+                    label: 'Funzioni Operaio',
+                    icon: HardHat,
+                    submenu: [
+                        { path: '/owner/worker-functions?tab=attendance', label: 'Timbratura', icon: Clock },
+                        { path: '/owner/worker-functions?tab=materials', label: 'Materiali', icon: Package },
+                        { path: '/owner/worker-functions?tab=daily-report', label: 'Rapporto Giornaliero', icon: FileCheck },
+                        { path: '/worker/economies', label: 'Economie', icon: Zap },
+                        { path: '/owner/worker-functions?tab=notes', label: 'Note', icon: StickyNote },
+                        { path: '/owner/worker-functions?tab=photos', label: 'Foto', icon: Camera },
+                    ]
+                },
+                { path: '/owner/attendance', label: 'Presenze', icon: Users },
             ]
         },
-        { path: '/owner/attendance', label: 'Presenze', icon: Users },
-        { path: '/owner/materials', label: 'Catalogo Materiali', icon: Package },
-        { path: '/owner/material-approval', label: 'Materiali da Approvare', icon: Package },
-        { path: '/owner/suppliers', label: 'Magazzino', icon: Package },
-        { path: '/owner/quotes', label: 'Preventivi & SAL', icon: FileText },
-        { path: '/owner/signature', label: 'Firma Digitale', icon: PenTool },
-        { path: '/owner/analytics', label: 'Analytics', icon: BarChart3 },
-        { path: '/owner/settings', label: 'Dati Azienda', icon: Settings },
+        {
+            category: 'LOGISTICA & MATERIALI',
+            items: [
+                { path: '/owner/materials', label: 'Catalogo Materiali', icon: Package },
+                { path: '/owner/material-approval', label: 'Materiali da Approvare', icon: Package, badge: 5 },
+                { path: '/owner/suppliers', label: 'Magazzino', icon: Package },
+            ]
+        },
+        {
+            category: 'AMMINISTRAZIONE',
+            items: [
+                { path: '/owner/quotes', label: 'Preventivi & SAL', icon: FileText },
+                { path: '/owner/signature', label: 'Firma Digitale', icon: PenTool },
+                { path: '/owner/analytics', label: 'Analytics', icon: BarChart3 },
+                { path: '/owner/settings', label: 'Dati Azienda', icon: Settings },
+            ]
+        }
     ];
 
-    // Worker menu with all tabs as individual items
+    // Worker menu (kept simple for now, but wrapped in structure for consistency)
     const workerLinks = [
-        { path: '/worker?tab=attendance', label: 'Timbratura', icon: Clock },
-        { path: '/worker?tab=materials', label: 'Materiali', icon: Package },
-        { path: '/worker?tab=daily-report', label: 'Rapporto Giornaliero', icon: FileCheck },
-        { path: '/worker/economies', label: 'Economie', icon: Zap },
-        { path: '/worker?tab=notes', label: 'Note', icon: StickyNote },
-        { path: '/worker?tab=photos', label: 'Foto', icon: Camera },
+        {
+            category: 'MENU OPERAIO',
+            items: [
+                { path: '/worker?tab=attendance', label: 'Timbratura', icon: Clock },
+                { path: '/worker?tab=materials', label: 'Materiali', icon: Package },
+                { path: '/worker?tab=daily-report', label: 'Rapporto Giornaliero', icon: FileCheck },
+                { path: '/worker/economies', label: 'Economie', icon: Zap },
+                { path: '/worker?tab=notes', label: 'Note', icon: StickyNote },
+                { path: '/worker?tab=photos', label: 'Foto', icon: Camera },
+            ]
+        }
     ];
 
-    const links = user?.role === 'owner' ? ownerLinks : workerLinks;
+    const menuGroups = user?.role === 'owner' ? ownerLinks : workerLinks;
+
+    // Helper to render a single nav item
+    const NavItem = ({ link, isMobile = false }) => {
+        const Icon = link.icon;
+        const isActive = location.pathname === link.path ||
+            (link.submenu && link.submenu.some(sub => location.pathname + location.search === sub.path));
+
+        if (link.submenu) {
+            return (
+                <div className="mb-2">
+                    <button
+                        onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 group ${isActive
+                            ? 'bg-[#8B5CF6] text-white shadow-lg shadow-purple-500/30'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                            }`}
+                    >
+                        <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                        <span className={`flex-1 text-left ${isActive ? 'font-bold' : 'font-medium'}`}>{link.label}</span>
+                        {isWorkerFunctionsOpen ?
+                            <ChevronUp className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} /> :
+                            <ChevronDown className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} />
+                        }
+                    </button>
+                    {isWorkerFunctionsOpen && (
+                        <div className="ml-4 mt-1 pl-4 border-l border-slate-100 space-y-1">
+                            {link.submenu.map((sublink) => {
+                                const isSubActive = location.pathname + location.search === sublink.path;
+                                return (
+                                    <Link
+                                        key={sublink.path}
+                                        to={sublink.path}
+                                        onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isSubActive
+                                            ? 'text-[#8B5CF6] font-bold bg-purple-50'
+                                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'
+                                            }`}
+                                    >
+                                        <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-[#8B5CF6]' : 'bg-slate-300'}`}></span>
+                                        {sublink.label}
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        return (
+            <Link
+                to={link.path}
+                onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 group mb-1 ${isActive
+                    ? 'bg-[#8B5CF6] text-white shadow-lg shadow-purple-500/30'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+            >
+                <div className={`p-1 rounded-lg ${isActive ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-slate-200'}`}>
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                </div>
+                <div className="flex-1">
+                    <div className={`flex items-center justify-between ${isActive ? 'font-bold' : 'font-medium'}`}>
+                        {link.label}
+                        {link.badge && (
+                            <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                                {link.badge}
+                            </span>
+                        )}
+                    </div>
+                    {link.subtitle && (
+                        <p className={`text-xs ${isActive ? 'text-purple-100' : 'text-slate-400'}`}>
+                            {link.subtitle}
+                        </p>
+                    )}
+                </div>
+                {isActive && <div className="w-1.5 h-1.5 bg-white rounded-full shadow-sm"></div>}
+            </Link>
+        );
+    };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex font-sans">
+        <div className="min-h-screen bg-[#F8FAFC] flex font-sans">
             {/* Sidebar (Desktop) */}
-            <aside className="hidden md:flex flex-col w-72 bg-white border-r border-slate-100 fixed h-full z-30 transition-all duration-300">
+            <aside className="hidden md:flex flex-col w-[280px] bg-white fixed h-full z-30 transition-all duration-300 shadow-xl shadow-slate-200/50 rounded-r-3xl my-4 ml-4 h-[calc(100vh-32px)]">
                 {/* Brand */}
-                <div className="h-20 flex items-center px-6">
-                    <div className="flex items-center gap-3">
-                        <img
-                            src="/assets/logo-new.png"
-                            alt="WORK360"
-                            className="w-10 h-10 object-contain rounded-lg"
-                        />
-                        <span className="text-xl font-black tracking-tight text-slate-900">WORK360</span>
+                <div className="h-24 flex items-center px-8">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-[#0F172A] rounded-2xl flex items-center justify-center shadow-lg shadow-slate-900/20">
+                            <span className="text-white font-black text-xs leading-tight text-center">WORK<br />360</span>
+                        </div>
+                        <div>
+                            <span className="block text-xl font-black tracking-tight text-slate-900">WORK360</span>
+                            <span className="block text-xs font-bold text-slate-400 tracking-widest uppercase">DASHBOARD</span>
+                        </div>
                     </div>
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-                    {links.map((link) => {
-                        const Icon = link.icon;
-                        const isActive = location.pathname === link.path ||
-                            (link.submenu && link.submenu.some(sub => location.pathname + location.search === sub.path));
-
-                        // If it has submenu (Funzioni Operaio)
-                        if (link.submenu) {
-                            return (
-                                <div key={link.path} className="mb-2">
-                                    <button
-                                        onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
-                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
-                                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20'
-                                            : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
-                                            }`}
-                                    >
-                                        <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'}`} />
-                                        <span className={`flex-1 text-left ${isActive ? 'font-medium' : 'font-normal'}`}>{link.label}</span>
-                                        {isWorkerFunctionsOpen ?
-                                            <ChevronUp className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} /> :
-                                            <ChevronDown className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} />
-                                        }
-                                    </button>
-                                    {
-                                        isWorkerFunctionsOpen && (
-                                            <div className="ml-4 mt-1 pl-4 border-l border-slate-100 space-y-1">
-                                                {link.submenu.map((sublink) => {
-                                                    const SubIcon = sublink.icon;
-                                                    const isSubActive = location.pathname + location.search === sublink.path;
-                                                    return (
-                                                        <Link
-                                                            key={sublink.path}
-                                                            to={sublink.path}
-                                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isSubActive
-                                                                ? 'text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-bold'
-                                                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-normal'
-                                                                }`}
-                                                        >
-                                                            <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-purple-600' : 'bg-slate-300'}`}></span>
-                                                            {sublink.label}
-                                                        </Link>
-                                                    );
-                                                })}
-                                            </div>
-                                        )
-                                    }
-                                </div>
-                            );
-                        }
-
-                        // Regular menu item
-                        return (
-                            <Link
-                                key={link.path}
-                                to={link.path}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group mb-1 nav-item-${link.path.replace(/^\//, '').replace(/\//g, '-').replace(/\?/g, '-').replace(/=/g, '-')} ${isActive
-                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium shadow-lg shadow-purple-500/20'
-                                    : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-normal'
-                                    }`}
-                            >
-                                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-700'}`} />
-                                {link.label}
-                                {isActive && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>}
-                            </Link>
-                        );
-                    })}
+                <nav className="flex-1 overflow-y-auto px-4 pb-20 scrollbar-hide">
+                    {menuGroups.map((group, index) => (
+                        <div key={index} className="mb-8">
+                            {group.category && (
+                                <h3 className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 mt-2">
+                                    {group.category}
+                                </h3>
+                            )}
+                            <div className="space-y-1">
+                                {group.items.map((link) => (
+                                    <NavItem key={link.path} link={link} />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </nav>
 
+                {/* Scroll Indicator */}
+                <div className="absolute bottom-[88px] left-0 right-0 h-24 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none flex items-end justify-center pb-4 z-10">
+                    <div className="flex flex-col items-center gap-1 animate-bounce">
+                        <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase bg-white/50 px-3 py-1 rounded-full backdrop-blur-sm border border-slate-100">
+                            SCORRI PER ALTRO
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-slate-300" />
+                    </div>
+                </div>
+
                 {/* User Profile (Bottom Sidebar) */}
-                <div className="p-4 border-t border-slate-100">
-                    <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
-                        <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-700 font-bold border-2 border-white shadow-sm">
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-white rounded-b-3xl z-20">
+                    <div className="bg-[#F8FAFC] p-4 rounded-2xl flex items-center gap-3 border border-slate-100 hover:border-purple-100 transition-colors group cursor-pointer">
+                        <div className="w-10 h-10 bg-[#F3E8FF] rounded-full flex items-center justify-center text-[#8B5CF6] font-bold text-sm border-2 border-white shadow-sm">
                             {user?.firstName?.charAt(0) || 'U'}
+                            {user?.lastName?.charAt(0) || 'D'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-slate-900 truncate">
+                            <p className="text-sm font-bold text-slate-900 truncate group-hover:text-[#8B5CF6] transition-colors">
                                 {user?.firstName} {user?.lastName}
                             </p>
                             <p className="text-xs text-slate-500 truncate capitalize">
@@ -178,7 +238,7 @@ export default function Layout({ children, title, hideHeader = false }) {
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="p-2 text-slate-400 hover:text-red-600 transition-colors"
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                             title="Disconnetti"
                         >
                             <LogOut className="w-4 h-4" />
@@ -188,16 +248,14 @@ export default function Layout({ children, title, hideHeader = false }) {
             </aside>
 
             {/* Main Content Wrapper */}
-            <div className="flex-1 flex flex-col md:pl-72 min-h-screen transition-all duration-300">
+            <div className="flex-1 flex flex-col md:pl-[312px] min-h-screen transition-all duration-300">
                 <Tutorial />
                 {/* Mobile Header */}
                 <header className="md:hidden bg-white border-b border-slate-200 sticky top-0 z-40 px-4 h-16 flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
-                        <img
-                            src="/assets/app-logo.png?v=2"
-                            alt="WORK360"
-                            className="w-8 h-8 object-contain"
-                        />
+                        <div className="w-8 h-8 bg-[#0F172A] rounded-lg flex items-center justify-center">
+                            <span className="text-white font-black text-[8px] leading-tight text-center">WORK<br />360</span>
+                        </div>
                         <span className="text-lg font-bold text-slate-900">WORK360</span>
                     </div>
                     <button
@@ -222,11 +280,9 @@ export default function Layout({ children, title, hideHeader = false }) {
                             <div className="p-6 flex flex-col h-full">
                                 <div className="flex justify-between items-center mb-8">
                                     <div className="flex items-center gap-3">
-                                        <img
-                                            src="/assets/logo-new.png"
-                                            alt="WORK360"
-                                            className="w-10 h-10 object-contain rounded-lg"
-                                        />
+                                        <div className="w-10 h-10 bg-[#0F172A] rounded-xl flex items-center justify-center shadow-lg shadow-slate-900/20">
+                                            <span className="text-white font-black text-[10px] leading-tight text-center">WORK<br />360</span>
+                                        </div>
                                         <span className="text-xl font-black text-slate-900">WORK360</span>
                                     </div>
                                     <button
@@ -237,78 +293,26 @@ export default function Layout({ children, title, hideHeader = false }) {
                                     </button>
                                 </div>
 
-                                <nav className="flex-1 space-y-2 overflow-y-auto pr-2">
-                                    {links.map((link) => {
-                                        const Icon = link.icon;
-                                        const isActive = location.pathname === link.path ||
-                                            (link.submenu && link.submenu.some(sub => location.pathname + location.search === sub.path));
-
-                                        // If it has submenu (Funzioni Operaio)
-                                        if (link.submenu) {
-                                            return (
-                                                <div key={link.path}>
-                                                    <button
-                                                        onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
-                                                        className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${isActive
-                                                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20'
-                                                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                                                            }`}
-                                                    >
-                                                        <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                                                        <span className="flex-1 text-left">{link.label}</span>
-                                                        {isWorkerFunctionsOpen ?
-                                                            <ChevronUp className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} /> :
-                                                            <ChevronDown className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} />
-                                                        }
-                                                    </button>
-                                                    {isWorkerFunctionsOpen && (
-                                                        <div className="ml-4 mt-2 pl-4 border-l border-slate-100 space-y-1">
-                                                            {link.submenu.map((sublink) => {
-                                                                const SubIcon = sublink.icon;
-                                                                const isSubActive = location.pathname + location.search === sublink.path;
-                                                                return (
-                                                                    <Link
-                                                                        key={sublink.path}
-                                                                        to={sublink.path}
-                                                                        onClick={() => setIsMobileMenuOpen(false)}
-                                                                        className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isSubActive
-                                                                            ? 'text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-bold'
-                                                                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                                                                            }`}
-                                                                    >
-                                                                        <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-purple-600' : 'bg-slate-300'}`}></span>
-                                                                        {sublink.label}
-                                                                    </Link>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        }
-
-                                        // Regular menu item
-                                        return (
-                                            <Link
-                                                key={link.path}
-                                                to={link.path}
-                                                onClick={() => setIsMobileMenuOpen(false)}
-                                                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold transition-all ${isActive
-                                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/20'
-                                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                                                    }`}
-                                            >
-                                                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                                                {link.label}
-                                                {isActive && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>}
-                                            </Link>
-                                        );
-                                    })}
+                                <nav className="flex-1 space-y-6 overflow-y-auto pr-2 pb-20">
+                                    {menuGroups.map((group, index) => (
+                                        <div key={index}>
+                                            {group.category && (
+                                                <h3 className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                                                    {group.category}
+                                                </h3>
+                                            )}
+                                            <div className="space-y-1">
+                                                {group.items.map((link) => (
+                                                    <NavItem key={link.path} link={link} isMobile={true} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </nav>
 
                                 <div className="mt-auto pt-6 border-t border-slate-100">
                                     <div className="flex items-center gap-3 mb-6 px-2">
-                                        <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-700 font-bold border-2 border-white shadow-sm">
+                                        <div className="w-10 h-10 bg-[#F3E8FF] rounded-full flex items-center justify-center text-[#8B5CF6] font-bold border-2 border-white shadow-sm">
                                             {user?.firstName?.charAt(0) || 'U'}
                                         </div>
                                         <div className="flex-1 min-w-0">
@@ -330,7 +334,7 @@ export default function Layout({ children, title, hideHeader = false }) {
                 )}
 
                 {/* Main Content Area */}
-                <main className="flex-1 p-4 sm:p-8 lg:p-10 w-full max-w-[100vw] overflow-x-hidden bg-site-bg">
+                <main className="flex-1 p-4 sm:p-8 lg:p-10 w-full max-w-[100vw] overflow-x-hidden bg-[#F8FAFC]">
                     {/* Top Bar (Desktop only - Contextual) */}
                     {!hideHeader && (
                         <div className="hidden md:flex items-center justify-between mb-10">
@@ -343,15 +347,15 @@ export default function Layout({ children, title, hideHeader = false }) {
                                     <input
                                         type="text"
                                         placeholder="Cerca..."
-                                        className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 w-64 transition-all"
+                                        className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/20 focus:border-[#8B5CF6] w-64 transition-all shadow-sm"
                                     />
                                     <svg className="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                 </div>
-                                <button className="p-2.5 text-slate-400 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-full transition-all relative shadow-sm">
+                                <button className="p-2.5 text-slate-400 hover:text-[#8B5CF6] hover:bg-white border border-transparent hover:border-slate-100 rounded-full transition-all relative shadow-sm bg-white">
                                     <Bell className="w-5 h-5" />
                                     <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                                 </button>
-                                <button className="p-2.5 text-slate-400 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 rounded-full transition-all shadow-sm">
+                                <button className="p-2.5 text-slate-400 hover:text-[#8B5CF6] hover:bg-white border border-transparent hover:border-slate-100 rounded-full transition-all shadow-sm bg-white">
                                     <Settings className="w-5 h-5" />
                                 </button>
                             </div>
