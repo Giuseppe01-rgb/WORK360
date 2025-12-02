@@ -197,6 +197,13 @@ export const communicationAPI = {
     sendWhatsAppSAL: (salId, data) => api.post(`/communication/send-whatsapp/sal/${salId}`, data),
 };
 
+// Economia (Overtime Hours)
+export const economiaAPI = {
+    create: (data) => api.post('/economia', data),
+    getBySite: (siteId) => api.get(`/economia/site/${siteId}`),
+    delete: (id) => api.delete(`/economia/${id}`),
+};
+
 // Company
 export const companyAPI = {
     get: () => api.get('/company'),

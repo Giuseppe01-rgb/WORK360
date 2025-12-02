@@ -69,7 +69,7 @@ export default function Layout({ children, title }) {
         { path: '/worker?tab=attendance', label: 'Timbratura', icon: Clock },
         { path: '/worker?tab=materials', label: 'Materiali', icon: Package },
         { path: '/worker?tab=daily-report', label: 'Rapporto Giornaliero', icon: FileCheck },
-        { path: '/worker?tab=economies', label: 'Economie', icon: Zap },
+        { path: '/worker/economies', label: 'Economie', icon: Zap },
         { path: '/worker?tab=notes', label: 'Note', icon: StickyNote },
         { path: '/worker?tab=photos', label: 'Foto', icon: Camera },
     ];

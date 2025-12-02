@@ -17,6 +17,7 @@ import CompanySettings from './pages/owner/CompanySettings';
 import EmployeeManagement from './pages/owner/EmployeeManagement';
 import MaterialsCatalog from './pages/owner/MaterialsCatalog';
 import MaterialApproval from './pages/owner/MaterialApproval';
+import EconomiaForm from './pages/worker/EconomiaForm';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
@@ -54,6 +55,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <WorkerDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/worker/economies"
+        element={
+          <ProtectedRoute>
+            <EconomiaForm />
           </ProtectedRoute>
         }
       />

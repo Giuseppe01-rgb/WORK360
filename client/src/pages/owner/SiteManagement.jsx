@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import { siteAPI, analyticsAPI, workActivityAPI, noteAPI } from '../../utils/api';
+import { siteAPI, analyticsAPI, workActivityAPI, noteAPI, economiaAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search,
-    FileText, Camera
+    FileText, Camera, Zap
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack }) => {
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
     const [notes, setNotes] = useState([]);
+    const [economie, setEconomie] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState('data');
     const [selectedReport, setSelectedReport] = useState(null);
@@ -18,6 +19,7 @@ const SiteDetails = ({ site, onBack }) => {
     const sections = [
         { id: 'data', label: 'Dati' },
         { id: 'reports', label: 'Rapporti giornalieri' },
+        { id: 'economie', label: 'Economie' },
         { id: 'notes', label: 'Note' },
         { id: 'photos', label: 'Foto' }
     ];
@@ -35,17 +37,32 @@ const SiteDetails = ({ site, onBack }) => {
         }
     };
 
+    const handleDeleteEconomia = async (economiaId) => {
+        if (!window.confirm('Sei sicuro di voler eliminare questa economia?')) return;
+        try {
+            await economiaAPI.delete(economiaId);
+            // Refresh economie
+            const economieData = await economiaAPI.getBySite(site._id);
+            setEconomie(economieData.data);
+        } catch (error) {
+            console.error('Error deleting economia:', error);
+            alert('Errore nell\'eliminazione');
+        }
+    };
+
     useEffect(() => {
         const loadDetails = async () => {
             try {
-                const [rep, hours, notesData] = await Promise.all([
+                const [rep, hours, notesData, economieData] = await Promise.all([
                     analyticsAPI.getSiteReport(site._id),
                     analyticsAPI.getHoursPerEmployee({ siteId: site._id }),
-                    noteAPI.getAll({ siteId: site._id })
+                    noteAPI.getAll({ siteId: site._id }),
+                    economiaAPI.getBySite(site._id)
                 ]);
                 setReport(rep.data);
                 setEmployeeHours(hours.data);
                 setNotes(notesData.data);
+                setEconomie(economieData.data);
             } catch (err) {
                 console.error("Error loading site details:", err);
             } finally {
@@ -301,6 +318,63 @@ const SiteDetails = ({ site, onBack }) => {
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 mb-2">Note</h3>
                             <p className="text-slate-500">Nessuna nota disponibile per questo cantiere.</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Content - Economie */}
+            {activeSection === 'economie' && (
+                <div className="space-y-4">
+                    {economie.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {economie.map((economia) => (
+                                <div key={economia._id} className="bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                                                <Zap className="w-4 h-4 text-amber-600" />
+                                            </div>
+                                            <span className="font-semibold text-slate-900 text-sm">
+                                                {economia.worker?.name} {economia.worker?.surname}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteEconomia(economia._id);
+                                            }}
+                                            className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
+                                            title="Elimina"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <div className="mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-4 h-4 text-amber-600" />
+                                            <span className="text-2xl font-bold text-amber-600">{economia.hours}</span>
+                                            <span className="text-sm text-slate-500">{economia.hours === 1 ? 'ora' : 'ore'}</span>
+                                        </div>
+                                    </div>
+                                    <p className="text-slate-600 text-sm whitespace-pre-wrap mb-3">{economia.description}</p>
+                                    <div className="pt-3 border-t border-slate-50">
+                                        <span className="text-xs text-slate-500 font-medium">
+                                            {new Date(economia.date).toLocaleString('it-IT', {
+                                                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Zap className="w-8 h-8 text-amber-400" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 mb-2">Economie</h3>
+                            <p className="text-slate-500">Nessuna economia disponibile per questo cantiere.</p>
                         </div>
                     )}
                 </div>

@@ -90,6 +90,7 @@ app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/suppliers', require('./routes/supplierRoutes'));
 app.use('/api/work-activities', require('./routes/workActivityRoutes'));
 app.use('/api/communication', require('./routes/communicationRoutes'));
+app.use('/api/economia', require('./routes/economiaRoutes'));
 
 // Colora Material Tracking System
 app.use('/api/coloura-materials', require('./routes/colouraMaterialRoutes'));
