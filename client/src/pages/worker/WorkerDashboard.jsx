@@ -885,25 +885,6 @@ export default function WorkerDashboard() {
                         </div>
                     </div>
                 )}
-
-                {/* ECONOMIES TAB */}
-                {activeTab === 'economies' && (
-                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
-                        <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                            <FileText className="w-6 h-6 text-slate-900" />
-                            Economie
-                        </h3>
-                        <div className="flex flex-col items-center justify-center py-16 text-center">
-                            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                                <FileText className="w-10 h-10 text-slate-400" />
-                            </div>
-                            <h4 className="text-lg font-bold text-slate-900 mb-2">Funzione in arrivo</h4>
-                            <p className="text-slate-500 max-w-md">
-                                La funzionalità per registrare le economie sarà disponibile a breve.
-                            </p>
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Time Distribution Modal */}
