@@ -5,10 +5,14 @@ const MaterialUsage = require('../models/MaterialUsage');
 // Report new material - worker submits photo + quantity (segnalazione flow)
 const reportNewMaterial = async (req, res) => {
     try {
-        const { siteId, fotoUrl, numeroConfezioni, note } = req.body;
+        const { siteId, fotoUrl, numeroConfezioni, note, nomeDigitato } = req.body;
 
         if (!siteId || !fotoUrl || !numeroConfezioni) {
             return res.status(400).json({ message: 'Cantiere, foto e quantità sono obbligatori' });
+        }
+
+        if (!nomeDigitato || nomeDigitato.trim() === '') {
+            return res.status(400).json({ message: 'Il nome del materiale è obbligatorio' });
         }
 
         // 1. Create ReportedMaterial
@@ -19,7 +23,7 @@ const reportNewMaterial = async (req, res) => {
             fotoUrl,
             numeroConfezioni,
             codiceLetto: '',
-            nomeDigitato: '',
+            nomeDigitato: nomeDigitato.trim(),
             categoriaDigitata: 'Altro',
             stato: 'da_approvare'
         });
