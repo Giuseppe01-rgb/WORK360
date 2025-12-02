@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack }) => {
+    // v1.2.1 - Economie integration
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
     const [notes, setNotes] = useState([]);
