@@ -858,7 +858,12 @@ export default function WorkerDashboard() {
                                                     </span>
                                                 )}
                                                 <button
-                                                    onClick={() => handleEditActivity(activity)}
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        handleEditActivity(activity);
+                                                    }}
                                                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                     title="Modifica attività"
                                                 >
@@ -867,7 +872,10 @@ export default function WorkerDashboard() {
                                                     </svg>
                                                 </button>
                                                 <button
-                                                    onClick={async () => {
+                                                    type="button"
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
                                                         if (window.confirm('Eliminare questa attività?')) {
                                                             try {
                                                                 await workActivityAPI.delete(activity._id);
