@@ -26,6 +26,48 @@ exports.create = async (req, res) => {
     }
 };
 
+// Update an existing work activity
+exports.update = async (req, res) => {
+    try {
+        const { activityType, quantity, unit, notes, date } = req.body;
+        const activityId = req.params.id;
+
+        // Find the activity
+        const activity = await WorkActivity.findById(activityId);
+
+        if (!activity) {
+            return res.status(404).json({ message: 'Attività non trovata' });
+        }
+
+        // Authorization check: only creator or owner can update
+        const userCompanyId = req.user.company?._id || req.user.company;
+        const activityCompanyId = activity.company;
+        const userId = req.user._id;
+        const activityUserId = activity.user;
+
+        const isCompanyMatch = userCompanyId && activityCompanyId && userCompanyId.toString() === activityCompanyId.toString();
+        const isCreatorMatch = userId && activityUserId && userId.toString() === activityUserId.toString();
+        const isOwner = req.user.role === 'owner';
+
+        if (!isOwner && (!isCompanyMatch || !isCreatorMatch)) {
+            return res.status(403).json({ message: 'Non autorizzato a modificare questa attività' });
+        }
+
+        // Update fields
+        if (activityType !== undefined) activity.activityType = activityType;
+        if (quantity !== undefined) activity.quantity = quantity;
+        if (unit !== undefined) activity.unit = unit;
+        if (notes !== undefined) activity.notes = notes;
+        if (date !== undefined) activity.date = date;
+
+        await activity.save();
+        res.json(activity);
+    } catch (error) {
+        console.error('Error updating work activity:', error);
+        res.status(500).json({ message: 'Errore nell\'aggiornamento dell\'attività' });
+    }
+};
+
 // Get work activities with filters
 exports.getAll = async (req, res) => {
     try {

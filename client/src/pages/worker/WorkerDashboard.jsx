@@ -33,6 +33,7 @@ export default function WorkerDashboard() {
     // Activity tracking states
     const [todayActivities, setTodayActivities] = useState([]);
     const [showTimeDistribution, setShowTimeDistribution] = useState(false);
+    const [editingActivity, setEditingActivity] = useState(null);
 
     // Barcode scanner states
     const [showScanner, setShowScanner] = useState(false);
@@ -235,24 +236,58 @@ export default function WorkerDashboard() {
             return;
         }
         try {
-            // Create WorkActivity record ONLY (for time tracking/productivity)
-            // For daily reports, we set default quantity/unit as they are now description-based
-            const response = await workActivityAPI.create({
-                siteId: selectedSite,
-                activityType: materialForm.name,
-                quantity: 1, // Default quantity
-                unit: 'report', // Default unit
-                date: new Date()
-            });
+            if (editingActivity) {
+                // Update existing activity
+                const response = await workActivityAPI.update(editingActivity._id, {
+                    activityType: materialForm.name,
+                    quantity: 1,
+                    unit: 'report',
+                    date: new Date()
+                });
 
-            // Add to today's activities
-            setTodayActivities(prev => [...prev, response.data]);
+                // Update in local state
+                setTodayActivities(prev => prev.map(act =>
+                    act._id === editingActivity._id ? response.data : act
+                ));
 
-            showSuccess('Rapporto salvato');
+                showSuccess('Rapporto aggiornato');
+                setEditingActivity(null);
+            } else {
+                // Create WorkActivity record ONLY (for time tracking/productivity)
+                // For daily reports, we set default quantity/unit as they are now description-based
+                const response = await workActivityAPI.create({
+                    siteId: selectedSite,
+                    activityType: materialForm.name,
+                    quantity: 1, // Default quantity
+                    unit: 'report', // Default unit
+                    date: new Date()
+                });
+
+                // Add to today's activities
+                setTodayActivities(prev => [...prev, response.data]);
+
+                showSuccess('Rapporto salvato');
+            }
             setMaterialForm({ name: '', quantity: '', unit: '' });
         } catch (error) {
-            showError('Errore salvataggio rapporto');
+            showError(editingActivity ? 'Errore aggiornamento rapporto' : 'Errore salvataggio rapporto');
         }
+    };
+
+    const handleEditActivity = (activity) => {
+        setEditingActivity(activity);
+        setMaterialForm({
+            name: activity.activityType,
+            quantity: '',
+            unit: ''
+        });
+        // Scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingActivity(null);
+        setMaterialForm({ name: '', quantity: '', unit: '' });
     };
 
     // Barcode handlers
@@ -738,8 +773,27 @@ export default function WorkerDashboard() {
                                 </div>
                             )}
 
-                            {/* Activity Entry Form (Same as Materials Tab) */}
-                            {/* Activity Entry Form (Same as Materials Tab) */}
+                            {/* Activity Entry Form */}
+                            {editingActivity && (
+                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 bg-blue-100 rounded-lg">
+                                            <FileText className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-blue-900 text-sm">Modifica in corso</h4>
+                                            <p className="text-sm text-blue-700">Stai modificando un'attività esistente</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleCancelEdit}
+                                        className="px-3 py-1.5 bg-blue-100 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-200 transition-colors"
+                                    >
+                                        Annulla
+                                    </button>
+                                </div>
+                            )}
+
                             <form onSubmit={handleActivitySubmit} className="space-y-4 mb-8 border-b border-slate-100 pb-8">
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
@@ -748,6 +802,7 @@ export default function WorkerDashboard() {
                                         onChange={(e) => setSelectedSite(e.target.value)}
                                         options={sites}
                                         placeholder="Seleziona..."
+                                        disabled={editingActivity !== null}
                                     />
                                 </div>
                                 <div>
@@ -766,13 +821,24 @@ export default function WorkerDashboard() {
                                     <input type="text" value="report" readOnly />
                                 </div>
 
-                                <button
-                                    type="submit"
-                                    className="w-full py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
-                                >
-                                    <FileText className="w-5 h-5" />
-                                    Salva il rapporto
-                                </button>
+                                <div className="flex gap-3">
+                                    {editingActivity && (
+                                        <button
+                                            type="button"
+                                            onClick={handleCancelEdit}
+                                            className="flex-1 py-3 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-all"
+                                        >
+                                            Annulla
+                                        </button>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        className={`py-3 font-semibold rounded-lg transition-all flex items-center justify-center gap-2 ${editingActivity ? 'flex-1 bg-blue-600 text-white hover:bg-blue-700' : 'w-full bg-slate-900 text-white hover:bg-slate-800'}`}
+                                    >
+                                        <FileText className="w-5 h-5" />
+                                        {editingActivity ? 'Aggiorna Attività' : 'Salva il rapporto'}
+                                    </button>
+                                </div>
                             </form>
 
                             {/* List of Today's Activities */}
@@ -780,7 +846,7 @@ export default function WorkerDashboard() {
                                 <div className="space-y-3 mb-6">
                                     <h4 className="font-semibold text-slate-900 text-sm uppercase tracking-wider">Attività di Oggi</h4>
                                     {todayActivities.map((activity, idx) => (
-                                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                        <div key={idx} className={`flex justify-between items-center p-3 rounded-lg border transition-all ${editingActivity?._id === activity._id ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-100'}`}>
                                             <div>
                                                 <p className="font-medium text-slate-900">{activity.activityType}</p>
                                                 <p className="text-xs text-slate-500">{activity.quantity} {activity.unit}</p>
@@ -792,11 +858,24 @@ export default function WorkerDashboard() {
                                                     </span>
                                                 )}
                                                 <button
+                                                    onClick={() => handleEditActivity(activity)}
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Modifica attività"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </button>
+                                                <button
                                                     onClick={async () => {
                                                         if (window.confirm('Eliminare questa attività?')) {
                                                             try {
                                                                 await workActivityAPI.delete(activity._id);
                                                                 showSuccess('Attività eliminata');
+                                                                if (editingActivity?._id === activity._id) {
+                                                                    setEditingActivity(null);
+                                                                    setMaterialForm({ name: '', quantity: '', unit: '' });
+                                                                }
                                                                 loadTodayActivities();
                                                             } catch (error) {
                                                                 showError('Errore eliminazione attività');
@@ -804,6 +883,7 @@ export default function WorkerDashboard() {
                                                         }
                                                     }}
                                                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Elimina attività"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

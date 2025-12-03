@@ -152,6 +152,7 @@ export const supplierAPI = {
 export const workActivityAPI = {
     create: (data) => api.post('/work-activities', data),
     getAll: (params) => api.get('/work-activities', { params }),
+    update: (id, data) => api.put(`/work-activities/${id}`, data),
     distributeTime: (data) => api.put('/work-activities/distribute-time', data),
     getAnalytics: (params) => api.get('/work-activities/analytics', { params }),
     delete: (id) => api.delete(`/work-activities/${id}`),

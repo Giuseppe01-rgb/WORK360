@@ -3,6 +3,7 @@ const router = express.Router();
 const {
     create: createActivity, // Renaming 'create' to 'createActivity' for clarity if needed, or just keep 'create'
     getAll: getActivities, // Renaming 'getAll' to 'getActivities'
+    update: updateActivity,
     distributeTime,
     getAnalytics,
     deleteActivity
@@ -17,6 +18,9 @@ router.post('/', createActivity);
 
 // Get work activities with filters
 router.get('/', getActivities);
+
+// Update a work activity
+router.put('/:id', updateActivity);
 
 // Distribute time percentages and calculate duration hours
 router.put('/distribute-time', distributeTime);
