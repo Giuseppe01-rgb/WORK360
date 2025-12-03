@@ -218,8 +218,8 @@ export default function AttendanceList() {
             </div>
 
             {/* Attendance List */}
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-slate-900">Lista Presenze</h3>
                     <button
                         onClick={handleCreateAttendance}
@@ -231,11 +231,15 @@ export default function AttendanceList() {
                 </div>
 
                 {attendances.length === 0 ? (
-                    <div className="p-8 text-center text-slate-500">
-                        Nessuna presenza trovata con i filtri selezionati.
+                    <div className="bg-white rounded-2xl p-12 text-center shadow-sm">
+                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Clock className="w-8 h-8 text-slate-400" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">Nessuna presenza</h3>
+                        <p className="text-slate-500">Non ci sono presenze che corrispondono ai filtri selezionati.</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-slate-100">
+                    <div className="grid gap-4">
                         {attendances.map(attendance => {
                             // Safe data extraction
                             const userName = attendance?.user?.firstName ||
@@ -249,14 +253,14 @@ export default function AttendanceList() {
                             const clockOutCoords = attendance?.clockOut?.location?.coordinates;
 
                             return (
-                                <div key={attendance._id} className="p-6 hover:bg-slate-50 transition-colors">
-                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                                <User className="w-5 h-5 text-slate-600" />
+                                <div key={attendance._id} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
+                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0 text-slate-600">
+                                                <User className="w-6 h-6" />
                                             </div>
                                             <div>
-                                                <div className="font-bold text-slate-900 text-lg">
+                                                <div className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">
                                                     {userName}
                                                 </div>
                                                 <div className="text-slate-500 flex items-center gap-1 text-sm">
@@ -272,12 +276,14 @@ export default function AttendanceList() {
                                         </span>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-14">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-0 md:pl-16 mb-6">
                                         <div>
                                             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Entrata</div>
                                             <div className="font-semibold text-slate-900 flex items-center gap-2">
                                                 <Calendar className="w-4 h-4 text-slate-400" />
-                                                {clockInTime ? new Date(clockInTime).toLocaleString('it-IT') : 'N/A'}
+                                                {clockInTime ? new Date(clockInTime).toLocaleString('it-IT', {
+                                                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                }) : 'N/A'}
                                             </div>
                                             {clockInCoords && clockInCoords.length === 2 && (
                                                 <button
@@ -296,7 +302,9 @@ export default function AttendanceList() {
                                                 <>
                                                     <div className="font-semibold text-slate-900 flex items-center gap-2">
                                                         <Calendar className="w-4 h-4 text-slate-400" />
-                                                        {clockOutTime ? new Date(clockOutTime).toLocaleString('it-IT') : 'N/A'}
+                                                        {clockOutTime ? new Date(clockOutTime).toLocaleString('it-IT', {
+                                                            day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                        }) : 'N/A'}
                                                     </div>
                                                     {clockOutCoords && clockOutCoords.length === 2 && (
                                                         <button
@@ -314,9 +322,9 @@ export default function AttendanceList() {
                                         </div>
                                     </div>
 
-                                    <div className="mt-4 pl-14 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                                    <div className="pl-0 md:pl-16 pt-4 border-t border-slate-50 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm text-slate-500">Durata totale:</span>
+                                            <span className="text-sm text-slate-500">Durata:</span>
                                             <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-sm">
                                                 {calculateDuration(attendance.clockIn, attendance.clockOut)}
                                             </span>
