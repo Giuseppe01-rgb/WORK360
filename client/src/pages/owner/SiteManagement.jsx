@@ -101,10 +101,10 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
                 </div>
                 <button
                     onClick={onDelete}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium"
+                    className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium"
                 >
                     <Trash2 className="w-4 h-4" />
-                    Elimina Cantiere
+                    <span className="hidden sm:inline">Elimina Cantiere</span>
                 </button>
             </div>
 
@@ -828,6 +828,20 @@ export default function SiteManagement() {
                                     >
                                         Annulla
                                     </button>
+                                    {editingSite && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                if (window.confirm('Eliminare questo cantiere?')) {
+                                                    handleDelete(e, editingSite._id);
+                                                    resetForm();
+                                                }
+                                            }}
+                                            className="px-6 py-3 bg-red-50 text-red-600 font-semibold hover:bg-red-100 rounded-lg transition-colors mr-auto"
+                                        >
+                                            Elimina
+                                        </button>
+                                    )}
                                     <button
                                         type="submit"
                                         className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
