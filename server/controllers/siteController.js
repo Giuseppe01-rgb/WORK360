@@ -1,5 +1,11 @@
 const ConstructionSite = require('../models/ConstructionSite');
 const User = require('../models/User');
+const Attendance = require('../models/Attendance');
+const WorkActivity = require('../models/WorkActivity');
+const MaterialUsage = require('../models/MaterialUsage');
+const Note = require('../models/Note');
+const Economia = require('../models/Economia');
+const ReportedMaterial = require('../models/ReportedMaterial');
 
 const createSite = async (req, res) => {
     try {
@@ -89,17 +95,35 @@ const updateSite = async (req, res) => {
 
 const deleteSite = async (req, res) => {
     try {
-        const site = await ConstructionSite.findOneAndDelete({
-            _id: req.params.id,
-            company: req.user.company._id
+        const siteId = req.params.id;
+        const companyId = req.user.company._id;
+
+        // Check if site exists and belongs to company
+        const site = await ConstructionSite.findOne({
+            _id: siteId,
+            company: companyId
         });
 
         if (!site) {
             return res.status(404).json({ message: 'Cantiere non trovato' });
         }
 
-        res.json({ message: 'Cantiere eliminato' });
+        // Delete related data in parallel
+        await Promise.all([
+            Attendance.deleteMany({ site: siteId }),
+            WorkActivity.deleteMany({ site: siteId }),
+            MaterialUsage.deleteMany({ site: siteId }),
+            Note.deleteMany({ site: siteId }),
+            Economia.deleteMany({ site: siteId }),
+            ReportedMaterial.deleteMany({ site: siteId })
+        ]);
+
+        // Delete the site
+        await site.deleteOne();
+
+        res.json({ message: 'Cantiere e dati correlati eliminati con successo' });
     } catch (error) {
+        console.error('Error deleting site:', error);
         res.status(500).json({ message: 'Errore nell\'eliminazione del cantiere', error: error.message });
     }
 };

@@ -7,7 +7,7 @@ import {
     FileText, Camera, Zap
 } from 'lucide-react';
 
-const SiteDetails = ({ site, onBack }) => {
+const SiteDetails = ({ site, onBack, onDelete }) => {
     // v1.2.1 - Economie integration
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
@@ -83,20 +83,29 @@ const SiteDetails = ({ site, onBack }) => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center gap-4 mb-6">
-                <button
-                    onClick={onBack}
-                    className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-slate-900"
-                >
-                    <ArrowLeft className="w-6 h-6" />
-                </button>
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900">{site.name}</h2>
-                    <div className="flex items-center gap-2 text-slate-500">
-                        <MapPin className="w-4 h-4" />
-                        <span>{site.address}</span>
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={onBack}
+                        className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-slate-900"
+                    >
+                        <ArrowLeft className="w-6 h-6" />
+                    </button>
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900">{site.name}</h2>
+                        <div className="flex items-center gap-2 text-slate-500">
+                            <MapPin className="w-4 h-4" />
+                            <span>{site.address}</span>
+                        </div>
                     </div>
                 </div>
+                <button
+                    onClick={onDelete}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium"
+                >
+                    <Trash2 className="w-4 h-4" />
+                    Elimina Cantiere
+                </button>
             </div>
 
             {/* Desktop Tabs */}
@@ -601,7 +610,14 @@ export default function SiteManagement() {
     if (selectedSite) {
         return (
             <Layout title="Dettagli Cantiere">
-                <SiteDetails site={selectedSite} onBack={() => setSelectedSite(null)} />
+                <SiteDetails
+                    site={selectedSite}
+                    onBack={() => setSelectedSite(null)}
+                    onDelete={(e) => {
+                        handleDelete(e, selectedSite._id);
+                        setSelectedSite(null);
+                    }}
+                />
             </Layout>
         );
     }
