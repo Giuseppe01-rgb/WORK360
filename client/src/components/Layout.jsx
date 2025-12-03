@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { siteAPI, reportedMaterialAPI } from '../utils/api';
 import {
     Users,
     Building2,
@@ -32,6 +33,37 @@ export default function Layout({ children, title, hideHeader = false }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isWorkerFunctionsOpen, setIsWorkerFunctionsOpen] = useState(false);
 
+    // Dynamic counters state
+    const [activeSitesCount, setActiveSitesCount] = useState(0);
+    const [pendingMaterialsCount, setPendingMaterialsCount] = useState(0);
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            if (user?.role === 'owner') {
+                try {
+                    // Fetch sites count
+                    const sitesRes = await siteAPI.getAll();
+                    const active = sitesRes.data.filter(s => s.status === 'active').length;
+                    setActiveSitesCount(active);
+
+                    // Fetch pending materials count
+                    const materialsRes = await reportedMaterialAPI.getAll({ status: 'pending' });
+                    // Assuming the API returns an array or an object with data array
+                    const pending = Array.isArray(materialsRes.data) ? materialsRes.data.length : 0;
+                    setPendingMaterialsCount(pending);
+                } catch (error) {
+                    console.error('Error fetching sidebar counts:', error);
+                }
+            }
+        };
+
+        fetchCounts();
+
+        // Optional: Set up an interval to refresh counts periodically
+        const interval = setInterval(fetchCounts, 60000); // Refresh every minute
+        return () => clearInterval(interval);
+    }, [user]);
+
     const handleLogout = () => {
         logout();
         navigate('/login');
@@ -42,7 +74,12 @@ export default function Layout({ children, title, hideHeader = false }) {
         {
             category: 'GESTIONE CANTIERI',
             items: [
-                { path: '/owner', label: 'Cantieri', icon: Building2, subtitle: '3 attivi' },
+                {
+                    path: '/owner',
+                    label: 'Cantieri',
+                    icon: Building2,
+                    subtitle: activeSitesCount > 0 ? `${activeSitesCount} attivi` : 'Nessun cantiere attivo'
+                },
                 { path: '/owner/employees', label: 'Lista Operai', icon: Users },
                 {
                     path: '/owner/worker-functions',
@@ -64,7 +101,12 @@ export default function Layout({ children, title, hideHeader = false }) {
             category: 'LOGISTICA & MATERIALI',
             items: [
                 { path: '/owner/materials', label: 'Catalogo Materiali', icon: Package },
-                { path: '/owner/material-approval', label: 'Materiali da Approvare', icon: Package, badge: 5 },
+                {
+                    path: '/owner/material-approval',
+                    label: 'Materiali da Approvare',
+                    icon: Package,
+                    badge: pendingMaterialsCount > 0 ? pendingMaterialsCount : null
+                },
                 { path: '/owner/suppliers', label: 'Magazzino', icon: Package },
             ]
         },
