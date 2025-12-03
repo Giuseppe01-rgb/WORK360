@@ -49,7 +49,8 @@ exports.update = async (req, res) => {
         const isCreatorMatch = userId && activityUserId && userId.toString() === activityUserId.toString();
         const isOwner = req.user.role === 'owner';
 
-        if (!isOwner && (!isCompanyMatch || !isCreatorMatch)) {
+        // Owner can update any activity from their company, worker can only update their own
+        if (!isCompanyMatch || (!isOwner && !isCreatorMatch)) {
             return res.status(403).json({ message: 'Non autorizzato a modificare questa attività' });
         }
 
@@ -190,7 +191,8 @@ exports.deleteActivity = async (req, res) => {
         const isCreatorMatch = userId && activityUserId && userId.toString() === activityUserId.toString();
         const isOwner = req.user.role === 'owner';
 
-        if (!isOwner && !isCompanyMatch && !isCreatorMatch) {
+        // Owner can delete any activity from their company, worker can only delete their own
+        if (!isCompanyMatch || (!isOwner && !isCreatorMatch)) {
             console.warn(`Unauthorized activity delete attempt. User: ${userId}, Activity: ${activity._id}`);
             return res.status(401).json({ message: 'Non autorizzato' });
         }
