@@ -354,7 +354,6 @@ export default function AttendanceList() {
                     </div>
                 )}
             </div>
-        </Layout>
 
             {/* Attendance Modal */}
             {showModal && (
@@ -367,7 +366,6 @@ export default function AttendanceList() {
                     onSuccess={handleModalSuccess}
                 />
             )}
-
+        </Layout>
     );
 }
-
