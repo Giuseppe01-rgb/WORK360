@@ -40,6 +40,9 @@ export const attendanceAPI = {
     getMyRecords: (params) => api.get('/attendance/my-records', { params }),
     getActive: () => api.get('/attendance/active'),
     getAll: (params) => api.get('/attendance/all', { params }),
+    createManual: (data) => api.post('/attendance/manual', data),
+    update: (id, data) => api.put(`/attendance/${id}`, data),
+    delete: (id) => api.delete(`/attendance/${id}`),
 };
 
 // Materials

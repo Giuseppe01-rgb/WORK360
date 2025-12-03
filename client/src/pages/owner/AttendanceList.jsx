@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI } from '../../utils/api';
-import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle } from 'lucide-react';
+import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2 } from 'lucide-react';
+import AttendanceModal from '../../components/owner/AttendanceModal';
+import { useToast } from '../../context/ToastContext';
 
 export default function AttendanceList() {
+    const { showSuccess, showError } = useToast();
     const [attendances, setAttendances] = useState([]);
     const [sites, setSites] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [editingAttendance, setEditingAttendance] = useState(null);
     const [filters, setFilters] = useState({
         siteId: '',
         startDate: '',
@@ -80,6 +85,34 @@ export default function AttendanceList() {
                 return total + diffHrs;
             }, 0)
             .toFixed(1);
+    };
+
+    const handleCreateAttendance = () => {
+        setEditingAttendance(null);
+        setShowModal(true);
+    };
+
+    const handleEditAttendance = (attendance) => {
+        setEditingAttendance(attendance);
+        setShowModal(true);
+    };
+
+    const handleDeleteAttendance = async (attendanceId) => {
+        if (!window.confirm('Sei sicuro di voler eliminare questa presenza?')) {
+            return;
+        }
+
+        try {
+            await attendanceAPI.delete(attendanceId);
+            showSuccess('Presenza eliminata con successo');
+            loadAttendances();
+        } catch (error) {
+            showError(error.response?.data?.message || 'Errore durante l\'eliminazione');
+        }
+    };
+
+    const handleModalSuccess = () => {
+        loadAttendances();
     };
 
     if (loading) {
@@ -186,8 +219,15 @@ export default function AttendanceList() {
 
             {/* Attendance List */}
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-slate-100">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                     <h3 className="text-lg font-bold text-slate-900">Lista Presenze</h3>
+                    <button
+                        onClick={handleCreateAttendance}
+                        className="px-4 py-2 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Aggiungi Presenza
+                    </button>
                 </div>
 
                 {attendances.length === 0 ? (
@@ -274,11 +314,39 @@ export default function AttendanceList() {
                                         </div>
                                     </div>
 
-                                    <div className="mt-4 pl-14 pt-4 border-t border-slate-100 flex items-center gap-2">
-                                        <span className="text-sm text-slate-500">Durata totale:</span>
-                                        <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-sm">
-                                            {calculateDuration(attendance.clockIn, attendance.clockOut)}
-                                        </span>
+                                    <div className="mt-4 pl-14 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-slate-500">Durata totale:</span>
+                                            <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-sm">
+                                                {calculateDuration(attendance.clockIn, attendance.clockOut)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    e.preventDefault();
+                                                    handleEditAttendance(attendance);
+                                                }}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Modifica presenza"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    e.preventDefault();
+                                                    handleDeleteAttendance(attendance._id);
+                                                }}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Elimina presenza"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             );
@@ -287,5 +355,19 @@ export default function AttendanceList() {
                 )}
             </div>
         </Layout>
+
+            {/* Attendance Modal */}
+            {showModal && (
+                <AttendanceModal
+                    attendance={editingAttendance}
+                    onClose={() => {
+                        setShowModal(false);
+                        setEditingAttendance(null);
+                    }}
+                    onSuccess={handleModalSuccess}
+                />
+            )}
+
     );
 }
+

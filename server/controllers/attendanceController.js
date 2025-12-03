@@ -220,10 +220,185 @@ const getAllAttendance = async (req, res) => {
     }
 };
 
+// @desc    Create manual attendance (Owner only)
+// @route   POST /api/attendance/manual
+// @access  Private (Owner)
+const createManualAttendance = async (req, res) => {
+    try {
+        const { userId, siteId, clockInTime, clockOutTime, notes } = req.body;
+
+        // Validation
+        if (!userId || !siteId || !clockInTime) {
+            return res.status(400).json({ message: 'Operaio, cantiere e ora entrata sono obbligatori' });
+        }
+
+        // Verify user belongs to owner's company
+        const user = await User.findById(userId);
+        if (!user || user.company.toString() !== req.user.company._id.toString()) {
+            return res.status(403).json({ message: 'Operaio non trovato nella tua azienda' });
+        }
+
+        // Verify site belongs to owner's company
+        const site = await ConstructionSite.findById(siteId);
+        if (!site || site.company.toString() !== req.user.company._id.toString()) {
+            return res.status(403).json({ message: 'Cantiere non trovato nella tua azienda' });
+        }
+
+        // Validate times if clockOut is provided
+        const clockInDate = new Date(clockInTime);
+        let totalHours = 0;
+
+        if (clockOutTime) {
+            const clockOutDate = new Date(clockOutTime);
+            if (clockOutDate <= clockInDate) {
+                return res.status(400).json({ message: 'L\'ora di uscita deve essere dopo l\'ora di entrata' });
+            }
+            totalHours = (clockOutDate - clockInDate) / (1000 * 60 * 60);
+        }
+
+        // Create attendance
+        const attendanceData = {
+            user: userId,
+            site: siteId,
+            clockIn: {
+                time: clockInDate,
+                location: {
+                    type: 'Point',
+                    coordinates: [0, 0], // Manual attendance doesn't have GPS
+                    address: 'Manuale'
+                }
+            },
+            notes
+        };
+
+        if (clockOutTime) {
+            attendanceData.clockOut = {
+                time: new Date(clockOutTime),
+                location: {
+                    type: 'Point',
+                    coordinates: [0, 0],
+                    address: 'Manuale'
+                }
+            };
+            attendanceData.totalHours = totalHours;
+        }
+
+        const attendance = await Attendance.create(attendanceData);
+
+        const populatedAttendance = await Attendance.findById(attendance._id)
+            .populate('user', 'firstName lastName username')
+            .populate('site', 'name address');
+
+        res.status(201).json(populatedAttendance);
+    } catch (error) {
+        console.error('Create manual attendance error:', error);
+        res.status(500).json({ message: 'Errore nella creazione della presenza', error: error.message });
+    }
+};
+
+// @desc    Update attendance (Owner only)
+// @route   PUT /api/attendance/:id
+// @access  Private (Owner)
+const updateAttendance = async (req, res) => {
+    try {
+        const { clockInTime, clockOutTime, siteId, notes } = req.body;
+
+        const attendance = await Attendance.findById(req.params.id);
+
+        if (!attendance) {
+            return res.status(404).json({ message: 'Presenza non trovata' });
+        }
+
+        // Verify attendance belongs to owner's company
+        const user = await User.findById(attendance.user);
+        if (!user || user.company.toString() !== req.user.company._id.toString()) {
+            return res.status(403).json({ message: 'Non autorizzato' });
+        }
+
+        // Update site if provided
+        if (siteId) {
+            const site = await ConstructionSite.findById(siteId);
+            if (!site || site.company.toString() !== req.user.company._id.toString()) {
+                return res.status(403).json({ message: 'Cantiere non valido' });
+            }
+            attendance.site = siteId;
+        }
+
+        // Update clockIn time if provided
+        if (clockInTime) {
+            attendance.clockIn.time = new Date(clockInTime);
+        }
+
+        // Update clockOut time if provided
+        if (clockOutTime) {
+            attendance.clockOut = attendance.clockOut || {};
+            attendance.clockOut.time = new Date(clockOutTime);
+            attendance.clockOut.location = attendance.clockOut.location || {
+                type: 'Point',
+                coordinates: [0, 0],
+                address: 'Manuale'
+            };
+        }
+
+        // Recalculate totalHours if both times exist
+        if (attendance.clockIn.time && attendance.clockOut && attendance.clockOut.time) {
+            if (attendance.clockOut.time <= attendance.clockIn.time) {
+                return res.status(400).json({ message: 'L\'ora di uscita deve essere dopo l\'ora di entrata' });
+            }
+            attendance.totalHours = (attendance.clockOut.time - attendance.clockIn.time) / (1000 * 60 * 60);
+        }
+
+        // Update notes if provided
+        if (notes !== undefined) {
+            attendance.notes = notes;
+        }
+
+        await attendance.save();
+
+        const populatedAttendance = await Attendance.findById(attendance._id)
+            .populate('user', 'firstName lastName username')
+            .populate('site', 'name address');
+
+        res.json(populatedAttendance);
+    } catch (error) {
+        console.error('Update attendance error:', error);
+        res.status(500).json({ message: 'Errore nell\'aggiornamento della presenza', error: error.message });
+    }
+};
+
+// @desc    Delete attendance (Owner only)
+// @route   DELETE /api/attendance/:id
+// @access  Private (Owner)
+const deleteAttendance = async (req, res) => {
+    try {
+        const attendance = await Attendance.findById(req.params.id);
+
+        if (!attendance) {
+            return res.status(404).json({ message: 'Presenza non trovata' });
+        }
+
+        // Verify attendance belongs to owner's company
+        const user = await User.findById(attendance.user);
+        if (!user || user.company.toString() !== req.user.company._id.toString()) {
+            return res.status(403).json({ message: 'Non autorizzato' });
+        }
+
+        await attendance.deleteOne();
+
+        res.json({ message: 'Presenza eliminata con successo' });
+    } catch (error) {
+        console.error('Delete attendance error:', error);
+        res.status(500).json({ message: 'Errore nell\'eliminazione della presenza', error: error.message });
+    }
+};
+
 module.exports = {
     clockIn,
     clockOut,
     getMyAttendance,
     getActiveAttendance,
-    getAllAttendance
+    getAllAttendance,
+    createManualAttendance,
+    updateAttendance,
+    deleteAttendance
 };
