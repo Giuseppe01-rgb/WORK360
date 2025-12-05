@@ -596,16 +596,6 @@ export default function WorkerDashboard() {
 
 
 
-                {/* CANTIERI BUTTON */}
-                <div className="mb-6">
-                    <button
-                        onClick={() => navigate('/worker/sites')}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3"
-                    >
-                        <Building2 className="w-6 h-6" />
-                        <span className="text-lg">Visualizza Cantieri</span>
-                    </button>
-                </div>
 
                 {/* ATTENDANCE TAB */}
                 {activeTab === 'attendance' && (

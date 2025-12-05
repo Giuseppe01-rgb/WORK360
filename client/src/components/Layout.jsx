@@ -126,6 +126,7 @@ export default function Layout({ children, title, hideHeader = false }) {
         {
             category: 'MENU OPERAIO',
             items: [
+                { path: '/worker/sites', label: 'Cantieri', icon: Building2 },
                 { path: '/worker?tab=attendance', label: 'Timbratura', icon: Clock },
                 { path: '/worker?tab=materials', label: 'Materiali', icon: Package },
                 { path: '/worker?tab=daily-report', label: 'Rapporto Giornaliero', icon: FileCheck },
