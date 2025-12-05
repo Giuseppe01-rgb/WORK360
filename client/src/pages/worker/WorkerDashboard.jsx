@@ -4,7 +4,7 @@ import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI, workActivityAPI, materialMasterAPI, materialUsageAPI, reportedMaterialAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan } from 'lucide-react';
+import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2 } from 'lucide-react';
 import TimeDistributionModal from '../../components/worker/TimeDistributionModal';
 import BarcodeScanner from '../../components/common/BarcodeScanner';
 import MaterialsList from '../../components/worker/MaterialsList';
@@ -15,7 +15,7 @@ import MaterialCart from '../../components/worker/MaterialCart';
 
 export default function WorkerDashboard() {
     const { user } = useAuth();
-    const { showSuccess, showError } = useToast();
+    const { showSuccess, showError, showInfo } = useToast();
     const [searchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || 'attendance';
     const [activeAttendance, setActiveAttendance] = useState(null);
@@ -54,6 +54,13 @@ export default function WorkerDashboard() {
     const [materialCart, setMaterialCart] = useState([]);
     const [editingCartItem, setEditingCartItem] = useState(null);
     const [submittingCart, setSubmittingCart] = useState(false);
+
+    // Specific loading states for optimistic UI
+    const [clockingIn, setClockingIn] = useState(false);
+    const [clockingOut, setClockingOut] = useState(false);
+    const [submittingNote, setSubmittingNote] = useState(false);
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const [submittingActivity, setSubmittingActivity] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -175,29 +182,32 @@ export default function WorkerDashboard() {
             return;
         }
 
-        setLoading(true);
+        setClockingIn(true);
+        showInfo('⏳ Sto registrando l\'entrata...');
+
         try {
             const location = await getLocation();
             const response = await attendanceAPI.clockIn({
                 siteId: selectedSite,
-                ...location // Spread location to send latitude/longitude at top level
+                ...location
             });
             setActiveAttendance(response.data);
-            showSuccess('Entrata registrata con successo');
+            showSuccess('✅ Entrata registrata con successo');
         } catch (error) {
             showError(error.message || 'Errore durante la timbratura');
         } finally {
-            setLoading(false);
+            setClockingIn(false);
         }
     };
 
     const handleClockOut = async () => {
-        // Proceed directly with clock out
         await performClockOut();
     };
 
     const performClockOut = async () => {
-        setLoading(true);
+        setClockingOut(true);
+        showInfo('⏳ Sto registrando l\'uscita...');
+
         try {
             const location = await getLocation();
             await attendanceAPI.clockOut({
@@ -207,11 +217,11 @@ export default function WorkerDashboard() {
             setActiveAttendance(null);
             setSelectedSite('');
             setTodayActivities([]);
-            showSuccess('Uscita registrata con successo');
+            showSuccess('✅ Uscita registrata con successo');
         } catch (error) {
             showError(error.message || 'Errore durante la timbratura');
         } finally {
-            setLoading(false);
+            setClockingOut(false);
         }
     };
 
@@ -241,42 +251,39 @@ export default function WorkerDashboard() {
             showError('Seleziona un cantiere');
             return;
         }
+
+        setSubmittingActivity(true);
+        showInfo('⏳ Sto salvando l\'attività...');
+
         try {
             if (editingActivity) {
-                // Update existing activity
                 const response = await workActivityAPI.update(editingActivity._id, {
                     activityType: materialForm.name,
                     quantity: 1,
                     unit: 'report',
                     date: new Date()
                 });
-
-                // Update in local state
                 setTodayActivities(prev => prev.map(act =>
                     act._id === editingActivity._id ? response.data : act
                 ));
-
-                showSuccess('Rapporto aggiornato');
+                showSuccess('✅ Rapporto aggiornato con successo');
                 setEditingActivity(null);
             } else {
-                // Create WorkActivity record ONLY (for time tracking/productivity)
-                // For daily reports, we set default quantity/unit as they are now description-based
                 const response = await workActivityAPI.create({
                     siteId: selectedSite,
                     activityType: materialForm.name,
-                    quantity: 1, // Default quantity
-                    unit: 'report', // Default unit
+                    quantity: 1,
+                    unit: 'report',
                     date: new Date()
                 });
-
-                // Add to today's activities
                 setTodayActivities(prev => [...prev, response.data]);
-
-                showSuccess('Rapporto salvato');
+                showSuccess('✅ Attività registrata con successo');
             }
             setMaterialForm({ name: '', quantity: '', unit: '' });
         } catch (error) {
-            showError(editingActivity ? 'Errore aggiornamento rapporto' : 'Errore salvataggio rapporto');
+            showError(editingActivity ? 'Errore nell\'aggiornamento' : 'Errore nel salvataggio');
+        } finally {
+            setSubmittingActivity(false);
         }
     };
 
@@ -362,21 +369,30 @@ export default function WorkerDashboard() {
             showError('Seleziona un cantiere');
             return;
         }
+
+        setSubmittingNote(true);
+        showInfo('⏳ Sto salvando la nota...');
+
         try {
             await noteAPI.create({
                 siteId: selectedSite,
                 content: noteText
             });
-            showSuccess('Nota salvata');
+            showSuccess('✅ Nota salvata con successo');
             setNoteText('');
         } catch (error) {
-            showError('Errore salvataggio nota');
+            showError('Errore nel salvataggio della nota');
+        } finally {
+            setSubmittingNote(false);
         }
     };
 
     const handlePhotoSubmit = async (e) => {
         e.preventDefault();
         if (!photoFile) return;
+
+        setUploadingPhoto(true);
+        showInfo('📸 Sto caricando la foto...');
 
         try {
             const formData = new FormData();
@@ -387,10 +403,12 @@ export default function WorkerDashboard() {
             await photoAPI.create(formData);
             setPhotoFile(null);
             setPhotoCaption('');
-            alert('Foto caricata con successo!');
+            showSuccess('✅ Foto caricata con successo!');
         } catch (error) {
             console.error('Photo upload error:', error);
-            alert('Errore nel caricamento della foto');
+            showError('Errore nel caricamento della foto');
+        } finally {
+            setUploadingPhoto(false);
         }
     };
 
@@ -482,8 +500,9 @@ export default function WorkerDashboard() {
         if (materialCart.length === 0) return;
 
         setSubmittingCart(true);
+        showInfo(`⏳ Sto inviando ${materialCart.length} ${materialCart.length === 1 ? 'materiale' : 'materiali'}...`);
+
         try {
-            // Submit all materials in parallel
             const promises = materialCart.map(item =>
                 materialUsageAPI.recordUsage({
                     materialId: item.materialId,
@@ -495,9 +514,9 @@ export default function WorkerDashboard() {
 
             await Promise.all(promises);
 
-            showSuccess(`${materialCart.length} ${materialCart.length === 1 ? 'materiale inviato' : 'materiali inviati'} con successo!`);
-            setMaterialCart([]); // Clear cart
-            loadTodayMaterials(); // Reload submitted materials
+            showSuccess(`✅ ${materialCart.length} ${materialCart.length === 1 ? 'materiale inviato' : 'materiali inviati'} con successo!`);
+            setMaterialCart([]);
+            loadTodayMaterials();
         } catch (error) {
             console.error('Cart submission error:', error);
             showError('Errore nell\'invio di alcuni materiali. Riprova.');
@@ -605,33 +624,41 @@ export default function WorkerDashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <button
                                     onClick={handleClockIn}
-                                    disabled={loading || activeAttendance}
-                                    className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all ${loading || activeAttendance
+                                    disabled={clockingIn || activeAttendance}
+                                    className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all ${clockingIn || activeAttendance
                                         ? 'bg-slate-50 border-slate-100 text-slate-400 cursor-not-allowed'
                                         : 'bg-green-50 border-green-100 text-green-700 hover:border-green-200 hover:bg-green-100'
                                         }`}
                                 >
-                                    <div className={`p-3 rounded-full mb-3 ${loading || activeAttendance ? 'bg-slate-100' : 'bg-green-200'
+                                    <div className={`p-3 rounded-full mb-3 ${clockingIn || activeAttendance ? 'bg-slate-100' : 'bg-green-200'
                                         }`}>
-                                        <LogIn className="w-6 h-6" />
+                                        {clockingIn ? (
+                                            <Loader2 className="w-6 h-6 animate-spin" />
+                                        ) : (
+                                            <LogIn className="w-6 h-6" />
+                                        )}
                                     </div>
-                                    <span className="font-bold text-lg">Entrata</span>
+                                    <span className="font-bold text-lg">{clockingIn ? 'Registrando...' : 'Entrata'}</span>
                                     <span className="text-sm opacity-75">Inizia turno</span>
                                 </button>
 
                                 <button
                                     onClick={handleClockOut}
-                                    disabled={loading || !activeAttendance}
-                                    className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all ${loading || !activeAttendance
+                                    disabled={clockingOut || !activeAttendance}
+                                    className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all ${clockingOut || !activeAttendance
                                         ? 'bg-slate-50 border-slate-100 text-slate-400 cursor-not-allowed'
                                         : 'bg-red-50 border-red-100 text-red-700 hover:border-red-200 hover:bg-red-100'
                                         }`}
                                 >
-                                    <div className={`p-3 rounded-full mb-3 ${loading || !activeAttendance ? 'bg-slate-100' : 'bg-red-200'
+                                    <div className={`p-3 rounded-full mb-3 ${clockingOut || !activeAttendance ? 'bg-slate-100' : 'bg-red-200'
                                         }`}>
-                                        <LogOut className="w-6 h-6" />
+                                        {clockingOut ? (
+                                            <Loader2 className="w-6 h-6 animate-spin" />
+                                        ) : (
+                                            <LogOut className="w-6 h-6" />
+                                        )}
                                     </div>
-                                    <span className="font-bold text-lg">Uscita</span>
+                                    <span className="font-bold text-lg">{clockingOut ? 'Registrando...' : 'Uscita'}</span>
                                     <span className="text-sm opacity-75">Termina turno</span>
                                 </button>
                             </div>
@@ -760,10 +787,20 @@ export default function WorkerDashboard() {
                             </div>
                             <button
                                 type="submit"
-                                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
+                                disabled={submittingNote}
+                                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <FileText className="w-5 h-5" />
-                                Salva Nota
+                                {submittingNote ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Salvando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FileText className="w-5 h-5" />
+                                        Salva Nota
+                                    </>
+                                )}
                             </button>
                         </form>
                     </div>
@@ -815,10 +852,20 @@ export default function WorkerDashboard() {
                             </div>
                             <button
                                 type="submit"
-                                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
+                                disabled={uploadingPhoto}
+                                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <Upload className="w-5 h-5" />
-                                Carica Foto
+                                {uploadingPhoto ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Caricando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload className="w-5 h-5" />
+                                        Carica Foto
+                                    </>
+                                )}
                             </button>
                         </form>
                     </div>

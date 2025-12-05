@@ -1,4 +1,4 @@
-import { X, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
+import { X, CheckCircle, XCircle, AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 
 const Toast = ({ type = 'info', message, onClose, duration = 5000 }) => {
@@ -10,6 +10,9 @@ const Toast = ({ type = 'info', message, onClose, duration = 5000 }) => {
             return () => clearTimeout(timer);
         }
     }, [duration, onClose]);
+
+    // Check if this is a loading/progress toast
+    const isLoading = type === 'info' && (message.includes('Sto ') || message.includes('⏳'));
 
     const typeConfig = {
         success: {
@@ -37,7 +40,7 @@ const Toast = ({ type = 'info', message, onClose, duration = 5000 }) => {
             bgColor: 'bg-blue-50',
             borderColor: 'border-blue-200',
             textColor: 'text-blue-800',
-            icon: Info,
+            icon: isLoading ? Loader2 : Info,
             iconColor: 'text-blue-600'
         }
     };
@@ -47,7 +50,7 @@ const Toast = ({ type = 'info', message, onClose, duration = 5000 }) => {
 
     return (
         <div className={`${config.bgColor} ${config.borderColor} ${config.textColor} border-2 rounded-2xl shadow-lg p-4 flex items-start gap-3 min-w-[320px] max-w-md animate-in slide-in-from-top-5 fade-in duration-300`}>
-            <Icon className={`w-5 h-5 ${config.iconColor} flex-shrink-0 mt-0.5`} />
+            <Icon className={`w-5 h-5 ${config.iconColor} flex-shrink-0 mt-0.5 ${isLoading ? 'animate-spin' : ''}`} />
             <p className="flex-1 text-sm font-medium leading-relaxed">{message}</p>
             <button
                 onClick={onClose}
