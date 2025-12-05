@@ -244,6 +244,16 @@ const getSiteReport = async (req, res) => {
             costVsRevenuePercent = (siteCost / contractValue) * 100;
         }
 
+        // === COST INCIDENCE CALCULATION ===
+        // Calculate materials vs labor incidence on total cost
+        let materialsIncidencePercent = null;
+        let laborIncidencePercent = null;
+
+        if (siteCost && siteCost > 0) {
+            materialsIncidencePercent = (materialCost / siteCost) * 100;
+            laborIncidencePercent = (laborCost / siteCost) * 100;
+        }
+
         // 4. Daily Reports (WorkActivity)
         const WorkActivity = require('../models/WorkActivity');
         const dailyReports = await WorkActivity.find({
@@ -270,6 +280,10 @@ const getSiteReport = async (req, res) => {
                 marginCurrentValue: marginCurrentValue !== null ? Math.round(marginCurrentValue * 100) / 100 : null,
                 marginCurrentPercent: marginCurrentPercent !== null ? Math.round(marginCurrentPercent * 100) / 100 : null,
                 costVsRevenuePercent: costVsRevenuePercent !== null ? Math.round(costVsRevenuePercent * 100) / 100 : null
+            },
+            costIncidence: {
+                materialsIncidencePercent: materialsIncidencePercent !== null ? Math.round(materialsIncidencePercent * 10) / 10 : null,
+                laborIncidencePercent: laborIncidencePercent !== null ? Math.round(laborIncidencePercent * 10) / 10 : null
             }
         };
 
@@ -420,6 +434,16 @@ const getDashboard = async (req, res) => {
             companyCostVsRevenuePercent = (totalCompanyCost / totalContractValue) * 100;
         }
 
+        // === COMPANY COST INCIDENCE CALCULATION ===
+        // Calculate materials vs labor incidence on total company cost
+        let companyMaterialsIncidencePercent = null;
+        let companyLaborIncidencePercent = null;
+
+        if (totalCompanyCost > 0) {
+            companyMaterialsIncidencePercent = (totalMaterialCost / totalCompanyCost) * 100;
+            companyLaborIncidencePercent = (totalLaborCost / totalCompanyCost) * 100;
+        }
+
         res.json({
             activeSites,
             totalEmployees,
@@ -436,6 +460,10 @@ const getDashboard = async (req, res) => {
                 marginValue: companyMarginValue !== null ? Math.round(companyMarginValue * 100) / 100 : null,
                 marginPercent: companyMarginPercent !== null ? Math.round(companyMarginPercent * 100) / 100 : null,
                 costVsRevenuePercent: companyCostVsRevenuePercent !== null ? Math.round(companyCostVsRevenuePercent * 100) / 100 : null
+            },
+            companyCostIncidence: {
+                materialsIncidencePercent: companyMaterialsIncidencePercent !== null ? Math.round(companyMaterialsIncidencePercent * 10) / 10 : null,
+                laborIncidencePercent: companyLaborIncidencePercent !== null ? Math.round(companyLaborIncidencePercent * 10) / 10 : null
             }
         });
     } catch (error) {
