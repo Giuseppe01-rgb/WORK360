@@ -7,6 +7,7 @@ const {
     getActiveAttendance,
     getAllAttendance,
     createManualAttendance,
+    bulkCreateAttendances,
     updateAttendance,
     deleteAttendance
 } = require('../controllers/attendanceController');
@@ -20,6 +21,7 @@ router.get('/all', protect, requireOwner, getAllAttendance);
 
 // Manual attendance management (Owner only)
 router.post('/manual', protect, requireOwner, createManualAttendance);
+router.post('/bulk', protect, requireOwner, bulkCreateAttendances);
 router.put('/:id', protect, requireOwner, updateAttendance);
 router.delete('/:id', protect, requireOwner, deleteAttendance);
 

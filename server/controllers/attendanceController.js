@@ -296,6 +296,154 @@ const createManualAttendance = async (req, res) => {
     }
 };
 
+// @desc    Bulk create attendances (Owner only)
+// @route   POST /api/attendance/bulk
+// @access  Private (Owner)
+const bulkCreateAttendances = async (req, res) => {
+    try {
+        const { workers, siteId, dates } = req.body;
+
+        // Validation
+        if (!workers || !Array.isArray(workers) || workers.length === 0) {
+            return res.status(400).json({ message: 'Seleziona almeno un operaio' });
+        }
+        if (!siteId) {
+            return res.status(400).json({ message: 'Cantiere obbligatorio' });
+        }
+        if (!dates || !Array.isArray(dates) || dates.length === 0) {
+            return res.status(400).json({ message: 'Seleziona almeno una data' });
+        }
+
+        // Verify site belongs to owner's company
+        const site = await ConstructionSite.findById(siteId);
+        if (!site || site.company.toString() !== req.user.company._id.toString()) {
+            return res.status(403).json({ message: 'Cantiere non trovato nella tua azienda' });
+        }
+
+        // Verify all workers belong to owner's company
+        for (const workerId of workers) {
+            const user = await User.findById(workerId);
+            if (!user || user.company.toString() !== req.user.company._id.toString()) {
+                return res.status(403).json({ message: `Operaio ${workerId} non trovato nella tua azienda` });
+            }
+        }
+
+        // Prepare attendances to create
+        const attendancesToCreate = [];
+        const errors = [];
+
+        for (const workerId of workers) {
+            for (const dateEntry of dates) {
+                const { date, clockIn, clockOut } = dateEntry;
+
+                // Validate time format
+                if (!date || !clockIn) {
+                    errors.push(`Data o ora entrata mancante per operaio ${workerId}`);
+                    continue;
+                }
+
+                // Build datetime strings
+                const clockInDateTime = new Date(`${date}T${clockIn}`);
+
+                if (isNaN(clockInDateTime.getTime())) {
+                    errors.push(`Data/ora entrata non valida: ${date} ${clockIn}`);
+                    continue;
+                }
+
+                let clockOutDateTime = null;
+                let totalHours = 0;
+
+                if (clockOut) {
+                    clockOutDateTime = new Date(`${date}T${clockOut}`);
+
+                    if (isNaN(clockOutDateTime.getTime())) {
+                        errors.push(`Ora uscita non valida: ${clockOut}`);
+                        continue;
+                    }
+
+                    if (clockOutDateTime <= clockInDateTime) {
+                        errors.push(`Ora uscita deve essere dopo ora entrata per ${date}`);
+                        continue;
+                    }
+
+                    totalHours = (clockOutDateTime - clockInDateTime) / (1000 * 60 * 60);
+                }
+
+                // Check for duplicate (same worker, same date, same site)
+                const startOfDay = new Date(date);
+                startOfDay.setHours(0, 0, 0, 0);
+                const endOfDay = new Date(date);
+                endOfDay.setHours(23, 59, 59, 999);
+
+                const existingAttendance = await Attendance.findOne({
+                    user: workerId,
+                    site: siteId,
+                    'clockIn.time': { $gte: startOfDay, $lte: endOfDay }
+                });
+
+                if (existingAttendance) {
+                    errors.push(`Presenza già esistente per operaio ${workerId} il ${date}`);
+                    continue;
+                }
+
+                // Build attendance data
+                const attendanceData = {
+                    user: workerId,
+                    site: siteId,
+                    clockIn: {
+                        time: clockInDateTime,
+                        location: {
+                            type: 'Point',
+                            coordinates: [0, 0],
+                            address: 'Aggiunta Rapida'
+                        }
+                    }
+                };
+
+                if (clockOutDateTime) {
+                    attendanceData.clockOut = {
+                        time: clockOutDateTime,
+                        location: {
+                            type: 'Point',
+                            coordinates: [0, 0],
+                            address: 'Aggiunta Rapida'
+                        }
+                    };
+                    attendanceData.totalHours = totalHours;
+                }
+
+                attendancesToCreate.push(attendanceData);
+            }
+        }
+
+        // Create all attendances
+        if (attendancesToCreate.length === 0) {
+            return res.status(400).json({
+                message: 'Nessuna presenza da creare',
+                errors
+            });
+        }
+
+        const createdAttendances = await Attendance.insertMany(attendancesToCreate);
+
+        // Populate created attendances
+        const populatedAttendances = await Attendance.find({
+            _id: { $in: createdAttendances.map(a => a._id) }
+        })
+            .populate('user', 'firstName lastName username')
+            .populate('site', 'name address');
+
+        res.status(201).json({
+            created: createdAttendances.length,
+            attendances: populatedAttendances,
+            errors: errors.length > 0 ? errors : undefined
+        });
+    } catch (error) {
+        console.error('Bulk create attendance error:', error);
+        res.status(500).json({ message: 'Errore nella creazione bulk delle presenze', error: error.message });
+    }
+};
+
 // @desc    Update attendance (Owner only)
 // @route   PUT /api/attendance/:id
 // @access  Private (Owner)
@@ -399,6 +547,7 @@ module.exports = {
     getActiveAttendance,
     getAllAttendance,
     createManualAttendance,
+    bulkCreateAttendances,
     updateAttendance,
     deleteAttendance
 };

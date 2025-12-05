@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI } from '../../utils/api';
-import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2, Zap } from 'lucide-react';
 import AttendanceModal from '../../components/owner/AttendanceModal';
+import BulkAttendanceModal from '../../components/owner/BulkAttendanceModal';
 import { useToast } from '../../context/ToastContext';
 
 export default function AttendanceList() {
@@ -11,6 +12,7 @@ export default function AttendanceList() {
     const [sites, setSites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [showBulkModal, setShowBulkModal] = useState(false);
     const [editingAttendance, setEditingAttendance] = useState(null);
     const [filters, setFilters] = useState({
         siteId: '',
@@ -219,15 +221,24 @@ export default function AttendanceList() {
 
             {/* Attendance List */}
             <div className="space-y-4">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
                     <h3 className="text-lg font-bold text-slate-900">Lista Presenze</h3>
-                    <button
-                        onClick={handleCreateAttendance}
-                        className="px-4 py-2 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Aggiungi Presenza
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowBulkModal(true)}
+                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/30"
+                        >
+                            <Zap className="w-4 h-4" />
+                            Aggiunta Rapida
+                        </button>
+                        <button
+                            onClick={handleCreateAttendance}
+                            className="px-4 py-2 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Aggiungi Presenza
+                        </button>
+                    </div>
                 </div>
 
                 {attendances.length === 0 ? (
@@ -371,6 +382,14 @@ export default function AttendanceList() {
                         setShowModal(false);
                         setEditingAttendance(null);
                     }}
+                    onSuccess={handleModalSuccess}
+                />
+            )}
+
+            {/* Bulk Attendance Modal */}
+            {showBulkModal && (
+                <BulkAttendanceModal
+                    onClose={() => setShowBulkModal(false)}
                     onSuccess={handleModalSuccess}
                 />
             )}

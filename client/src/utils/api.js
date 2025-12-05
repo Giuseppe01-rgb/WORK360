@@ -41,6 +41,7 @@ export const attendanceAPI = {
     getActive: () => api.get('/attendance/active'),
     getAll: (params) => api.get('/attendance/all', { params }),
     createManual: (data) => api.post('/attendance/manual', data),
+    bulkCreate: (data) => api.post('/attendance/bulk', data),
     update: (id, data) => api.put(`/attendance/${id}`, data),
     delete: (id) => api.delete(`/attendance/${id}`),
 };
