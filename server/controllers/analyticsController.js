@@ -225,6 +225,25 @@ const getSiteReport = async (req, res) => {
             total: siteCost.toFixed(2)
         });
 
+        // === MARGIN CALCULATION ===
+        // Get site details for contractValue and status
+        const ConstructionSite = require('../models/ConstructionSite');
+        const site = await ConstructionSite.findById(siteObjectId);
+
+        const contractValue = site?.contractValue || null;
+        const siteStatus = site?.status || 'planned';
+
+        // Calculate margin values
+        let marginCurrentValue = null;
+        let marginCurrentPercent = null;
+        let costVsRevenuePercent = null;
+
+        if (contractValue && contractValue > 0) {
+            marginCurrentValue = contractValue - siteCost;
+            marginCurrentPercent = (marginCurrentValue / contractValue) * 100;
+            costVsRevenuePercent = (siteCost / contractValue) * 100;
+        }
+
         // 4. Daily Reports (WorkActivity)
         const WorkActivity = require('../models/WorkActivity');
         const dailyReports = await WorkActivity.find({
@@ -244,6 +263,13 @@ const getSiteReport = async (req, res) => {
                 materials: Math.round(materialCost * 100) / 100,
                 labor: Math.round(laborCost * 100) / 100,
                 total: Math.round(siteCost * 100) / 100
+            },
+            contractValue,
+            status: siteStatus,
+            margin: {
+                marginCurrentValue: marginCurrentValue !== null ? Math.round(marginCurrentValue * 100) / 100 : null,
+                marginCurrentPercent: marginCurrentPercent !== null ? Math.round(marginCurrentPercent * 100) / 100 : null,
+                costVsRevenuePercent: costVsRevenuePercent !== null ? Math.round(costVsRevenuePercent * 100) / 100 : null
             }
         };
 

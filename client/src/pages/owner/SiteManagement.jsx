@@ -190,6 +190,103 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
                             );
                         })()}
                     </div>
+
+                    {/* Margin Card */}
+                    {report?.contractValue ? (
+                        <div className={`border rounded-2xl p-6 md:p-8 ${report.margin?.marginCurrentValue >= 0
+                            ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'
+                            : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-100'
+                            }`}>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${report.margin?.marginCurrentValue >= 0
+                                        ? 'bg-green-100'
+                                        : 'bg-red-100'
+                                        }`}>
+                                        <FileText className={`w-6 h-6 ${report.margin?.marginCurrentValue >= 0
+                                            ? 'text-green-600'
+                                            : 'text-red-600'
+                                            }`} />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-900">
+                                        {report.status === 'completed' ? 'Margine finale' : 'Margine cantiere'}
+                                    </h3>
+                                </div>
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${report.status === 'completed'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-amber-100 text-amber-700'
+                                    }`}>
+                                    {report.status === 'completed' ? 'A CONSUNTIVO' : 'PROVVISORIO'}
+                                </span>
+                            </div>
+
+                            <div className={`text-5xl md:text-6xl font-black mb-4 ${report.margin?.marginCurrentValue >= 0
+                                ? 'text-green-600'
+                                : 'text-red-600'
+                                }`}>
+                                {report.margin?.marginCurrentValue?.toFixed(2) || '0.00'}€
+                            </div>
+
+                            <div className="space-y-2 mb-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <span className="text-sm font-medium text-slate-700">
+                                        {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}: {report.contractValue?.toFixed(2)}€
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                    <span className="text-sm font-medium text-slate-700">
+                                        {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}: {report.siteCost?.total?.toFixed(2)}€
+                                    </span>
+                                </div>
+                                {report.status !== 'completed' && (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                                        <span className="text-sm font-medium text-slate-700">
+                                            Costo su ricavo: {report.margin?.costVsRevenuePercent?.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                )}
+                                {report.status === 'completed' && (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                                        <span className="text-sm font-medium text-slate-700">
+                                            Margine %: {report.margin?.marginCurrentPercent?.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {report.status !== 'completed' && (
+                                <p className="text-xs text-slate-500 italic">
+                                    Valore provvisorio basato sui costi registrati finora.
+                                </p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-6 md:p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center">
+                                    <FileText className="w-6 h-6 text-slate-500" />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900">Margine cantiere</h3>
+                            </div>
+                            <p className="text-slate-600 mb-4">
+                                Inserisci il prezzo pattuito per vedere il margine di questo cantiere.
+                            </p>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    // handleEdit(e, site); // Assuming handleEdit is defined elsewhere or passed as prop
+                                }}
+                                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                            >
+                                Modifica cantiere →
+                            </button>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                         <div className="bg-slate-50 p-4 md:p-6 rounded-2xl">
                             <h3 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
