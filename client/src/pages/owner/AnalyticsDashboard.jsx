@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { analyticsAPI, siteAPI } from '../../utils/api';
-import { BarChart3, Users, Clock, Building2, Package, Calendar, Filter, Activity, FileText } from 'lucide-react';
-import ActivityProductivityAnalytics from '../../components/owner/ActivityProductivityAnalytics';
+import { BarChart3, Users, Clock, Building2, Package, Calendar, Filter, FileText } from 'lucide-react';
 
 export default function AnalyticsDashboard() {
     const [analytics, setAnalytics] = useState(null);
@@ -23,14 +22,31 @@ export default function AnalyticsDashboard() {
             ]);
 
             setAnalytics(analyticsResp.data);
-            // Transform sites data to match expected structure
-            const siteStatsData = sitesResp.data.map(site => ({
-                site: site,
-                totalAttendances: 0,
-                totalHours: 0,
-                uniqueWorkers: 0,
-                materials: []
-            }));
+
+            // Load real stats for each site
+            const siteStatsPromises = sitesResp.data.map(async (site) => {
+                try {
+                    const siteReport = await analyticsAPI.getSiteReport(site._id);
+                    return {
+                        site: site,
+                        totalAttendances: siteReport.data.employeeHours?.length || 0,
+                        totalHours: siteReport.data.totalHours || 0,
+                        uniqueWorkers: siteReport.data.employeeHours?.length || 0,
+                        materials: siteReport.data.materials?.slice(0, 5) || []
+                    };
+                } catch (err) {
+                    console.error(`Error loading stats for site ${site._id}:`, err);
+                    return {
+                        site: site,
+                        totalAttendances: 0,
+                        totalHours: 0,
+                        uniqueWorkers: 0,
+                        materials: []
+                    };
+                }
+            });
+
+            const siteStatsData = await Promise.all(siteStatsPromises);
             setSiteStats(siteStatsData);
         } catch (error) {
             console.error('Error loading analytics:', error);
@@ -347,14 +363,7 @@ export default function AnalyticsDashboard() {
                 )}
             </div>
 
-            {/* Activity Productivity Analytics */}
-            <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-slate-400" />
-                    Produttività Attività
-                </h3>
-                <ActivityProductivityAnalytics />
-            </div>
+
 
             {/* Material Summary */}
             {analytics?.materialSummary && analytics.materialSummary.length > 0 && (
