@@ -691,7 +691,8 @@ export default function OwnerDashboard() {
         description: '',
         startDate: '',
         endDate: '',
-        status: 'planned'
+        status: 'planned',
+        contractValue: ''
     });
 
     useEffect(() => {
@@ -740,7 +741,8 @@ export default function OwnerDashboard() {
             description: site.description || '',
             startDate: site.startDate ? new Date(site.startDate).toISOString().split('T')[0] : '',
             endDate: site.endDate ? new Date(site.endDate).toISOString().split('T')[0] : '',
-            status: site.status
+            status: site.status,
+            contractValue: site.contractValue || ''
         });
         setShowModal(true);
     };
@@ -760,7 +762,7 @@ export default function OwnerDashboard() {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', address: '', description: '', startDate: '', endDate: '', status: 'planned' });
+        setFormData({ name: '', address: '', description: '', startDate: '', endDate: '', status: 'planned', contractValue: '' });
         setEditingSite(null);
         setShowModal(false);
     };
@@ -977,6 +979,19 @@ export default function OwnerDashboard() {
                                     <option value="completed">Completato</option>
                                     <option value="suspended">Sospeso</option>
                                 </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Prezzo pattuito (€ IVA esclusa)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={formData.contractValue}
+                                    onChange={(e) => setFormData({ ...formData, contractValue: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all"
+                                    placeholder="0.00"
+                                />
                             </div>
 
                             <button
