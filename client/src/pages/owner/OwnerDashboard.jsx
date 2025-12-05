@@ -227,6 +227,105 @@ const SiteDetails = ({ site, onBack }) => {
                         </div>
                     </div>
 
+                    {/* MARGIN CARD */}
+                    {report?.contractValue ? (
+                        <div className={`p-6 rounded-3xl shadow-sm border mb-6 relative overflow-hidden ${report.margin?.marginCurrentValue >= 0
+                            ? 'bg-white border-green-100'
+                            : 'bg-white border-red-100'
+                            }`}>
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${report.margin?.marginCurrentValue >= 0
+                                        ? 'bg-green-100 text-green-600'
+                                        : 'bg-red-100 text-red-600'
+                                        }`}>
+                                        <FileText className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-slate-500 font-bold text-sm leading-tight">
+                                            {report.status === 'completed' ? 'Margine finale' : 'Margine'}<br />cantiere
+                                        </h3>
+                                    </div>
+                                </div>
+                                <span className={`text-[10px] font-bold px-3 py-1 rounded-full tracking-wide ${report.status === 'completed'
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'bg-amber-50 text-amber-600'
+                                    }`}>
+                                    {report.status === 'completed' ? 'A CONSUNTIVO' : 'PROVVISORIO'}
+                                </span>
+                            </div>
+
+                            <div className="mb-6">
+                                <p className={`text-5xl font-black tracking-tight ${report.margin?.marginCurrentValue >= 0
+                                    ? 'text-green-600'
+                                    : 'text-red-600'
+                                    }`}>
+                                    {(report.margin?.marginCurrentValue || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    <span className="text-3xl text-slate-400 font-medium ml-1">€</span>
+                                </p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                        {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
+                                    </span>
+                                    <span className="font-black text-slate-900">{(report.contractValue || 0).toFixed(2)}€</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                                        {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}
+                                    </span>
+                                    <span className="font-black text-slate-900">{totalCost.toFixed(2)}€</span>
+                                </div>
+                                {report.status !== 'completed' && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                            Costo su ricavo
+                                        </span>
+                                        <span className="font-black text-slate-900">{(report.margin?.costVsRevenuePercent || 0).toFixed(1)}%</span>
+                                    </div>
+                                )}
+                                {report.status === 'completed' && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                            Margine %
+                                        </span>
+                                        <span className="font-black text-slate-900">{(report.margin?.marginCurrentPercent || 0).toFixed(1)}%</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {report.status !== 'completed' && (
+                                <p className="text-xs text-slate-500 italic mt-4">
+                                    Valore provvisorio basato sui costi registrati finora.
+                                </p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
+                                    <FileText className="w-5 h-5 text-slate-500" />
+                                </div>
+                                <h3 className="text-slate-700 font-bold text-sm">Margine cantiere</h3>
+                            </div>
+                            <p className="text-slate-600 text-sm mb-4">
+                                Inserisci il prezzo pattuito per vedere il margine di questo cantiere.
+                            </p>
+                            <button
+                                onClick={onBack}
+                                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                            >
+                                Modifica cantiere →
+                            </button>
+                        </div>
+                    )}
+
                     {/* SUMMARY GRID - NEW DESIGN */}
                     <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">

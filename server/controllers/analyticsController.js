@@ -397,6 +397,29 @@ const getDashboard = async (req, res) => {
             total: totalCompanyCost.toFixed(2)
         });
 
+        // === COMPANY-WIDE MARGIN CALCULATION ===
+        // Calculate total contract value from all sites
+        let totalContractValue = 0;
+        let sitesWithContractValue = 0;
+
+        companySites.forEach(site => {
+            if (site.contractValue && site.contractValue > 0) {
+                totalContractValue += site.contractValue;
+                sitesWithContractValue++;
+            }
+        });
+
+        // Calculate margin
+        let companyMarginValue = null;
+        let companyMarginPercent = null;
+        let companyCostVsRevenuePercent = null;
+
+        if (totalContractValue > 0) {
+            companyMarginValue = totalContractValue - totalCompanyCost;
+            companyMarginPercent = (companyMarginValue / totalContractValue) * 100;
+            companyCostVsRevenuePercent = (totalCompanyCost / totalContractValue) * 100;
+        }
+
         res.json({
             activeSites,
             totalEmployees,
@@ -405,6 +428,14 @@ const getDashboard = async (req, res) => {
                 total: Math.round(totalCompanyCost * 100) / 100,
                 labor: Math.round(totalLaborCost * 100) / 100,
                 materials: Math.round(totalMaterialCost * 100) / 100
+            },
+            companyMargin: {
+                totalContractValue: totalContractValue > 0 ? Math.round(totalContractValue * 100) / 100 : null,
+                sitesWithContractValue,
+                totalSites: companySites.length,
+                marginValue: companyMarginValue !== null ? Math.round(companyMarginValue * 100) / 100 : null,
+                marginPercent: companyMarginPercent !== null ? Math.round(companyMarginPercent * 100) / 100 : null,
+                costVsRevenuePercent: companyCostVsRevenuePercent !== null ? Math.round(companyCostVsRevenuePercent * 100) / 100 : null
             }
         });
     } catch (error) {

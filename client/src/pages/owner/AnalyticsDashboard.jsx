@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { analyticsAPI, siteAPI } from '../../utils/api';
-import { BarChart3, Users, Clock, Building2, Package, Calendar, Filter, Activity } from 'lucide-react';
+import { BarChart3, Users, Clock, Building2, Package, Calendar, Filter, Activity, FileText } from 'lucide-react';
 import ActivityProductivityAnalytics from '../../components/owner/ActivityProductivityAnalytics';
 
 export default function AnalyticsDashboard() {
@@ -103,6 +103,93 @@ export default function AnalyticsDashboard() {
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Company-Wide Margin Card */}
+            {analytics?.companyMargin?.totalContractValue ? (
+                <div className={`p-6 rounded-3xl shadow-sm border mb-6 relative overflow-hidden ${analytics.companyMargin.marginValue >= 0
+                    ? 'bg-white border-green-100'
+                    : 'bg-white border-red-100'
+                    }`}>
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${analytics.companyMargin.marginValue >= 0
+                                ? 'bg-green-100 text-green-600'
+                                : 'bg-red-100 text-red-600'
+                                }`}>
+                                <FileText className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-slate-500 font-bold text-sm leading-tight">
+                                    Margine<br />aziendale
+                                </h3>
+                            </div>
+                        </div>
+                        <span className="bg-amber-50 text-amber-600 text-[10px] font-bold px-3 py-1 rounded-full tracking-wide">
+                            PROVVISORIO
+                        </span>
+                    </div>
+
+                    <div className="mb-6">
+                        <p className={`text-5xl font-black tracking-tight ${analytics.companyMargin.marginValue >= 0
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                            }`}>
+                            {(analytics.companyMargin.marginValue || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            <span className="text-3xl text-slate-400 font-medium ml-1">€</span>
+                        </p>
+                        <p className="text-sm text-slate-500 mt-2">
+                            {analytics.companyMargin.sitesWithContractValue} cantieri su {analytics.companyMargin.totalSites} con prezzo pattuito
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                Fatturato previsto
+                            </span>
+                            <span className="font-black text-slate-900">{(analytics.companyMargin.totalContractValue || 0).toFixed(2)}€</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                                Costi totali
+                            </span>
+                            <span className="font-black text-slate-900">{analytics.companyCosts.total.toFixed(2)}€</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                Costo su ricavo
+                            </span>
+                            <span className="font-black text-slate-900">{(analytics.companyMargin.costVsRevenuePercent || 0).toFixed(1)}%</span>
+                        </div>
+                    </div>
+
+                    <p className="text-xs text-slate-500 italic mt-4">
+                        Margine complessivo calcolato sommando i prezzi pattuiti di tutti i cantieri.
+                    </p>
+                </div>
+            ) : (
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-slate-500" />
+                        </div>
+                        <h3 className="text-slate-700 font-bold text-sm">Margine aziendale</h3>
+                    </div>
+                    <p className="text-slate-600 text-sm mb-4">
+                        {analytics?.companyMargin?.totalSites > 0
+                            ? 'Inserisci il prezzo pattuito per i cantieri per vedere il margine aziendale.'
+                            : 'Crea dei cantieri per vedere il margine aziendale.'}
+                    </p>
+                    {analytics?.companyMargin?.totalSites > 0 && (
+                        <p className="text-xs text-slate-500">
+                            0 cantieri su {analytics.companyMargin.totalSites} hanno un prezzo pattuito.
+                        </p>
+                    )}
                 </div>
             )}
 
