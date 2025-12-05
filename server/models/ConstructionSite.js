@@ -38,7 +38,12 @@ const constructionSiteSchema = new mongoose.Schema({
         ref: 'User'
     }],
     description: String,
-    notes: String
+    notes: String,
+    contractValue: {
+        type: Number,
+        min: 0,
+        default: null
+    }
 }, {
     timestamps: true
 });
