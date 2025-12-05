@@ -26,7 +26,7 @@ const SiteDetails = ({ site, onBack }) => {
             try {
                 setLoading(true);
                 const [reportsData, notesData, photosData] = await Promise.all([
-                    workActivityAPI.getActivities(site._id),
+                    workActivityAPI.getAll({ siteId: site._id }),
                     noteAPI.getAll({ siteId: site._id }),
                     photoAPI.getAll({ siteId: site._id })
                 ]);
