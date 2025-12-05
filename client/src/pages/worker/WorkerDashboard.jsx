@@ -11,6 +11,7 @@ import MaterialsList from '../../components/worker/MaterialsList';
 import MaterialSearch from '../../components/worker/MaterialSearch';
 import MaterialUsageForm from '../../components/worker/MaterialUsageForm';
 import ReportMaterialForm from '../../components/worker/ReportMaterialForm';
+import MaterialCart from '../../components/worker/MaterialCart';
 
 export default function WorkerDashboard() {
     const { user } = useAuth();
@@ -48,6 +49,11 @@ export default function WorkerDashboard() {
     const [showMaterialUsageForm, setShowMaterialUsageForm] = useState(false);
     const [showReportForm, setShowReportForm] = useState(false);
     const [selectedMaterial, setSelectedMaterial] = useState(null);
+
+    // Cart system states
+    const [materialCart, setMaterialCart] = useState([]);
+    const [editingCartItem, setEditingCartItem] = useState(null);
+    const [submittingCart, setSubmittingCart] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -409,17 +415,34 @@ export default function WorkerDashboard() {
     };
 
     const handleMaterialUsageConfirm = async (usageData) => {
-        try {
-            await materialUsageAPI.recordUsage(usageData);
-            showSuccess('Materiale registrato con successo!');
-            setShowMaterialUsageForm(false);
-            setSelectedMaterial(null);
-            loadTodayMaterials();
-        } catch (error) {
-            console.error('Record usage error:', error);
-            showError('Errore nella registrazione del materiale');
-            throw error;
+        // Add to cart instead of immediate submission
+        if (usageData.isEdit) {
+            // Update existing cart item
+            setMaterialCart(prev => prev.map(item =>
+                item.tempId === usageData.tempId
+                    ? { ...item, quantity: usageData.numeroConfezioni, notes: usageData.note }
+                    : item
+            ));
+            showSuccess('Materiale aggiornato nel carrello!');
+            setEditingCartItem(null);
+        } else {
+            // Add new cart item
+            const cartItem = {
+                tempId: Date.now() + Math.random(), // Unique temporary ID
+                materialId: usageData.materialId,
+                material: selectedMaterial,
+                materialName: selectedMaterial.nome_prodotto,
+                quantity: usageData.numeroConfezioni,
+                unit: selectedMaterial.quantita || 'pz',
+                notes: usageData.note,
+                siteId: usageData.siteId
+            };
+            setMaterialCart(prev => [...prev, cartItem]);
+            showSuccess('Materiale aggiunto al carrello!');
         }
+
+        setShowMaterialUsageForm(false);
+        setSelectedMaterial(null);
     };
 
     const handleReportMaterial = async (reportData) => {
@@ -440,6 +463,47 @@ export default function WorkerDashboard() {
         setShowMaterialUsageForm(false);
         setShowReportForm(false);
         setSelectedMaterial(null);
+        setEditingCartItem(null);
+    };
+
+    // Cart manipulation functions
+    const handleEditCartItem = (item) => {
+        setEditingCartItem(item);
+        setSelectedMaterial(item.material);
+        setShowMaterialUsageForm(true);
+    };
+
+    const handleDeleteCartItem = (tempId) => {
+        setMaterialCart(prev => prev.filter(item => item.tempId !== tempId));
+        showSuccess('Materiale rimosso dal carrello');
+    };
+
+    const handleSubmitCart = async () => {
+        if (materialCart.length === 0) return;
+
+        setSubmittingCart(true);
+        try {
+            // Submit all materials in parallel
+            const promises = materialCart.map(item =>
+                materialUsageAPI.recordUsage({
+                    materialId: item.materialId,
+                    siteId: item.siteId,
+                    numeroConfezioni: item.quantity,
+                    note: item.notes
+                })
+            );
+
+            await Promise.all(promises);
+
+            showSuccess(`${materialCart.length} ${materialCart.length === 1 ? 'materiale inviato' : 'materiali inviati'} con successo!`);
+            setMaterialCart([]); // Clear cart
+            loadTodayMaterials(); // Reload submitted materials
+        } catch (error) {
+            console.error('Cart submission error:', error);
+            showError('Errore nell\'invio di alcuni materiali. Riprova.');
+        } finally {
+            setSubmittingCart(false);
+        }
     };
 
     // Load today's materials when tab becomes active
@@ -599,23 +663,38 @@ export default function WorkerDashboard() {
                             </div>
                         ) : (
                             <>
-                                {/* Today's Materials List */}
-                                <div className="mb-6">
-                                    <MaterialsList
-                                        materials={todayMaterials}
-                                        loading={loadingMaterials}
-                                        onDelete={handleDeleteMaterial}
-                                    />
-                                </div>
+                                {/* Material Cart */}
+                                <MaterialCart
+                                    cartItems={materialCart}
+                                    onEdit={handleEditCartItem}
+                                    onDelete={handleDeleteCartItem}
+                                    onAddMore={() => setShowMaterialSearch(true)}
+                                    onSubmitAll={handleSubmitCart}
+                                    loading={submittingCart}
+                                />
 
-                                {/* Action Button */}
-                                <button
-                                    onClick={() => setShowMaterialSearch(true)}
-                                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
-                                >
-                                    <Plus className="w-6 h-6" />
-                                    Aggiungi Materiale
-                                </button>
+                                {/* Today's Materials List */}
+                                {todayMaterials.length > 0 && (
+                                    <div className="mb-6">
+                                        <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Materiali Già Inviati</h4>
+                                        <MaterialsList
+                                            materials={todayMaterials}
+                                            loading={loadingMaterials}
+                                            onDelete={handleDeleteMaterial}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Action Button - Only show if cart is empty */}
+                                {materialCart.length === 0 && (
+                                    <button
+                                        onClick={() => setShowMaterialSearch(true)}
+                                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95"
+                                    >
+                                        <Plus className="w-6 h-6" />
+                                        Aggiungi Materiale
+                                    </button>
+                                )}
                             </>
                         )}
                     </div>
@@ -638,6 +717,8 @@ export default function WorkerDashboard() {
                         siteId={selectedSite}
                         onConfirm={handleMaterialUsageConfirm}
                         onCancel={resetMaterialFlow}
+                        editMode={editingCartItem !== null}
+                        initialData={editingCartItem}
                     />
                 )}
 
