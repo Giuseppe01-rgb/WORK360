@@ -22,7 +22,8 @@ import {
     Zap,
     StickyNote,
     Camera,
-    FileCheck
+    FileCheck,
+    User
 } from 'lucide-react';
 import Tutorial from './Tutorial';
 
@@ -118,6 +119,12 @@ export default function Layout({ children, title, hideHeader = false }) {
                 { path: '/owner/analytics', label: 'Analytics', icon: BarChart3 },
                 { path: '/owner/settings', label: 'Dati Azienda', icon: Settings },
             ]
+        },
+        {
+            category: 'ACCOUNT',
+            items: [
+                { path: '/profile', label: 'Profilo', icon: User },
+            ]
         }
     ];
 
@@ -133,6 +140,12 @@ export default function Layout({ children, title, hideHeader = false }) {
                 { path: '/worker/economies', label: 'Economie', icon: Zap },
                 { path: '/worker?tab=notes', label: 'Note', icon: StickyNote },
                 { path: '/worker?tab=photos', label: 'Foto', icon: Camera },
+            ]
+        },
+        {
+            category: 'ACCOUNT',
+            items: [
+                { path: '/profile', label: 'Profilo', icon: User },
             ]
         }
     ];

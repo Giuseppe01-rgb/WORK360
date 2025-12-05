@@ -269,6 +269,45 @@ const testEmailConfig = async (req, res) => {
     }
 };
 
+// @desc    Change user password
+// @route   POST /api/users/change-password
+// @access  Private (Any authenticated user)
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        // Validation
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Tutti i campi sono obbligatori' });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'La nuova password deve essere lunga almeno 6 caratteri' });
+        }
+
+        // Get user with password field
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: 'Utente non trovato' });
+        }
+
+        // Verify current password
+        const isMatch = await user.matchPassword(currentPassword);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Password attuale non corretta' });
+        }
+
+        // Update password (will be auto-hashed by pre-save hook)
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ message: 'Password aggiornata con successo' });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ message: 'Errore durante l\'aggiornamento della password', error: error.message });
+    }
+};
+
 module.exports = {
     uploadSignature,
     upload,
@@ -277,5 +316,6 @@ module.exports = {
     updateUser,
     deleteUser,
     updateEmailConfig,
-    testEmailConfig
+    testEmailConfig,
+    changePassword
 };

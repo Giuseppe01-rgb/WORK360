@@ -19,6 +19,7 @@ import EmployeeManagement from './pages/owner/EmployeeManagement';
 import MaterialsCatalog from './pages/owner/MaterialsCatalog';
 import MaterialApproval from './pages/owner/MaterialApproval';
 import EconomiaForm from './pages/worker/EconomiaForm';
+import UserProfile from './pages/UserProfile';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
@@ -49,6 +50,16 @@ function AppRoutes() {
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+      {/* Shared Routes (Both Worker and Owner) */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <UserProfile />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Worker Routes */}
       <Route

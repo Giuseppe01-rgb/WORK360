@@ -7,7 +7,8 @@ const {
     updateUser,
     deleteUser,
     updateEmailConfig,
-    testEmailConfig
+    testEmailConfig,
+    changePassword
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -17,6 +18,9 @@ router.post('/signature', protect, uploadSignature);
 // Email configuration (must be before /:id routes)
 router.put('/email-config', protect, updateEmailConfig);
 router.post('/email-config/test', protect, testEmailConfig);
+
+// Password change (any authenticated user)
+router.post('/change-password', protect, changePassword);
 
 // User management (owner only) - parameterized routes come last
 router.get('/', protect, getAllUsers);
