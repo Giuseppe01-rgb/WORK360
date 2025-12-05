@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI, workActivityAPI, materialMasterAPI, materialUsageAPI, reportedMaterialAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2 } from 'lucide-react';
+import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2, Building2 } from 'lucide-react';
 import TimeDistributionModal from '../../components/worker/TimeDistributionModal';
 import BarcodeScanner from '../../components/common/BarcodeScanner';
 import MaterialsList from '../../components/worker/MaterialsList';
@@ -17,6 +17,7 @@ export default function WorkerDashboard() {
     const { user } = useAuth();
     const { showSuccess, showError, showInfo } = useToast();
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const activeTab = searchParams.get('tab') || 'attendance';
     const [activeAttendance, setActiveAttendance] = useState(null);
     const [todayAttendance, setTodayAttendance] = useState(null);
@@ -595,7 +596,16 @@ export default function WorkerDashboard() {
 
 
 
-
+                {/* CANTIERI BUTTON */}
+                <div className="mb-6">
+                    <button
+                        onClick={() => navigate('/worker/sites')}
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3"
+                    >
+                        <Building2 className="w-6 h-6" />
+                        <span className="text-lg">Visualizza Cantieri</span>
+                    </button>
+                </div>
 
                 {/* ATTENDANCE TAB */}
                 {activeTab === 'attendance' && (

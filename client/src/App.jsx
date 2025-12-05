@@ -6,6 +6,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import WorkerDashboard from './pages/worker/WorkerDashboard';
+import WorkerSites from './pages/worker/WorkerSites';
 import OwnerDashboard from './pages/owner/OwnerDashboard';
 import SiteManagement from './pages/owner/SiteManagement';
 import AttendanceList from './pages/owner/AttendanceList';
@@ -63,6 +64,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <EconomiaForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/worker/sites"
+        element={
+          <ProtectedRoute>
+            <WorkerSites />
           </ProtectedRoute>
         }
       />
