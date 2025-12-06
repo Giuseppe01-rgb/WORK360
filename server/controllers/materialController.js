@@ -2,21 +2,23 @@ const Material = require('../models/Material');
 const ConstructionSite = require('../models/ConstructionSite');
 const MaterialMaster = require('../models/MaterialMaster');
 const { normalizeMaterialInput } = require('../utils/materialNormalization');
+const { assertSiteBelongsToCompany } = require('../utils/security');
 
-const createMaterial = async (req, res) => {
+/**
+ * SECURITY INVARIANTS:
+ * - All site-related operations verify site belongs to req.user.company
+ * - Cross-company access attempts return 404
+ * - Never expose internal error details to client
+ */
+
+const createMaterial = async (req, res, next) => {
     try {
         const { name, unit, quantity, siteId, site, category, notes } = req.body;
         const actualSiteId = siteId || site; // Support both siteId and site
+        const companyId = req.user.company._id || req.user.company;
 
-        // Validate Site Ownership
-        const constructionSite = await ConstructionSite.findOne({
-            _id: actualSiteId,
-            company: req.user.company._id || req.user.company
-        });
-
-        if (!constructionSite) {
-            return res.status(403).json({ message: 'Cantiere non valido o non autorizzato' });
-        }
+        // SECURITY: Verify site exists and belongs to user's company
+        await assertSiteBelongsToCompany(actualSiteId, companyId);
 
         // 1. Normalize Input
         const normalized = normalizeMaterialInput(name, unit);
@@ -27,13 +29,13 @@ const createMaterial = async (req, res) => {
 
         // 2. Find or Create MaterialMaster
         let materialMaster = await MaterialMaster.findOne({
-            company: req.user.company._id,
+            company: companyId,
             normalizedKey: normalized.normalizedKey
         });
 
         if (!materialMaster) {
             materialMaster = await MaterialMaster.create({
-                company: req.user.company._id,
+                company: companyId,
                 ...normalized
             });
         }
@@ -41,7 +43,7 @@ const createMaterial = async (req, res) => {
         // 3. Create Material Usage
         const material = await Material.create({
             user: req.user._id,
-            company: req.user.company._id || req.user.company,
+            company: companyId,
             site: actualSiteId,
             materialMaster: materialMaster._id,
             name: materialMaster.displayName, // Keep for backward compatibility
@@ -53,17 +55,19 @@ const createMaterial = async (req, res) => {
 
         res.status(201).json(material);
     } catch (error) {
-        console.error('Create Material Error:', error);
-        res.status(500).json({ message: 'Errore nella creazione del materiale', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 
-const getMaterials = async (req, res) => {
+const getMaterials = async (req, res, next) => {
     try {
         const { siteId } = req.query;
-        const query = { company: req.user.company._id };
+        const companyId = req.user.company._id || req.user.company;
+        const query = { company: companyId };
 
         if (siteId) {
+            // SECURITY: Verify site belongs to company before filtering
+            await assertSiteBelongsToCompany(siteId, companyId);
             query.site = siteId;
         }
 
@@ -75,7 +79,7 @@ const getMaterials = async (req, res) => {
 
         res.json(materials);
     } catch (error) {
-        res.status(500).json({ message: 'Errore nel recupero dei materiali', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 

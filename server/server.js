@@ -24,33 +24,56 @@ app.use(helmet());
 // Middleware
 // CORS configuration
 const getAllowedOrigins = () => {
-    if (process.env.NODE_ENV === 'production') {
-        // In production, use environment variable
-        return process.env.CORS_ALLOWED_ORIGINS
-            ? process.env.CORS_ALLOWED_ORIGINS.split(',')
-            : [];
-    } else {
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+
+    if (isDevelopment) {
         // In development, allow localhost
-        return ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174'];
+        return [
+            'http://localhost:5173',
+            'http://localhost:3000',
+            'http://localhost:5174',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:3000'
+        ];
+    } else {
+        // PRODUCTION: Require explicit whitelist
+        const origins = process.env.CORS_ALLOWED_ORIGINS;
+
+        if (!origins) {
+            console.error('=====================================================');
+            console.error('FATAL: CORS_ALLOWED_ORIGINS not set in production!');
+            console.error('Please set CORS_ALLOWED_ORIGINS in environment variables.');
+            console.error('Example: CORS_ALLOWED_ORIGINS="https://work360.vercel.app,https://work360-production.vercel.app"');
+            console.error('=====================================================');
+            // Return empty array - will block all CORS requests
+            return [];
+        }
+
+        return origins.split(',').map(origin => origin.trim());
     }
 };
 
 const corsOptions = {
     origin: function (origin, callback) {
         const allowedOrigins = getAllowedOrigins();
+        const isDevelopment = process.env.NODE_ENV !== 'production';
 
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-
-        // Allow all *.vercel.app domains (for Vercel deployments)
-        if (origin.endsWith('.vercel.app')) {
+        // In development, allow requests with no origin (Postman, curl, etc.)
+        if (isDevelopment && !origin) {
             return callback(null, true);
         }
 
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        // In production, verify against whitelist
+        if (allowedOrigins.length === 0 && !isDevelopment) {
+            console.error('CORS: No allowed origins configured');
+            return callback(new Error('CORS not configured'));
+        }
+
+        if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             console.warn(`BLOCKED BY CORS: ${origin}`);
+            console.warn(`Allowed origins: ${allowedOrigins.join(', ')}`);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -107,12 +130,48 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'WORK360 API is running' });
 });
 
-// Error handling middleware
+// Global error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
-        message: 'Qualcosa è andato storto!',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    const { logError, logSecurity } = require('./utils/logger');
+
+    const statusCode = err.statusCode || 500;
+
+    const meta = {
+        ip: req.ip,
+        path: req.originalUrl,
+        method: req.method,
+        userId: req.user?._id || null,
+        companyId: req.user?.company || null,
+        userAgent: req.get('user-agent'),
+        statusCode
+    };
+
+    // Log based on error type
+    if (statusCode >= 500) {
+        // Server errors - full logging with stack trace
+        logError(err.message || 'Internal server error', {
+            ...meta,
+            errorName: err.name,
+            stack: err.stack
+        });
+    } else if (statusCode === 401 || statusCode === 403) {
+        // Security-relevant errors (unauthorized/forbidden)
+        logSecurity(`${statusCode} ${err.name || 'Authentication error'}: ${err.message}`, meta);
+    } else {
+        // Client errors (400, 404, etc.)
+        logError(`${statusCode} ${err.name || 'Client error'}: ${err.message}`, meta);
+    }
+
+    // Generic message for 500 errors, specific for others
+    const message = statusCode >= 500
+        ? 'Si è verificato un errore interno. Riprova più tardi.'
+        : err.message || 'Si è verificato un errore.';
+
+    // NEVER send stack trace to client
+    res.status(statusCode).json({
+        message,
+        // Only include error name in development (not stack)
+        ...(process.env.NODE_ENV !== 'production' && { error: err.name })
     });
 });
 

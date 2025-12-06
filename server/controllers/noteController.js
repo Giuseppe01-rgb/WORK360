@@ -1,13 +1,25 @@
 const Note = require('../models/Note');
+const { assertSiteBelongsToCompany } = require('../utils/security');
 
-const createNote = async (req, res) => {
+/**
+ * SECURITY INVARIANTS:
+ * - All site-related operations verify site belongs to req.user.company
+ * - Cross-company access attempts return 404
+ * - Never expose internal error details to client
+ */
+
+const createNote = async (req, res, next) => {
     try {
         const { siteId, site, content, type } = req.body;
         const actualSiteId = siteId || site; // Support both siteId and site
+        const companyId = req.user.company._id || req.user.company;
+
+        // SECURITY: Verify site belongs to user's company
+        await assertSiteBelongsToCompany(actualSiteId, companyId);
 
         const note = await Note.create({
             user: req.user._id,
-            company: req.user.company._id || req.user.company,
+            company: companyId,
             site: actualSiteId,
             type: type || 'note',
             content
@@ -15,17 +27,19 @@ const createNote = async (req, res) => {
 
         res.status(201).json(note);
     } catch (error) {
-        console.error('Create Note Error:', error);
-        res.status(500).json({ message: 'Errore nella creazione della nota', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 
-const getNotes = async (req, res) => {
+const getNotes = async (req, res, next) => {
     try {
         const { siteId, type } = req.query;
-        const query = { company: req.user.company._id || req.user.company };
+        const companyId = req.user.company._id || req.user.company;
+        const query = { company: companyId };
 
         if (siteId) {
+            // SECURITY: Verify site belongs to company
+            await assertSiteBelongsToCompany(siteId, companyId);
             query.site = siteId;
         }
 
@@ -40,38 +54,26 @@ const getNotes = async (req, res) => {
 
         res.json(notes);
     } catch (error) {
-        console.error('Get Notes Error:', error);
-        res.status(500).json({ message: 'Errore nel recupero delle note', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 
-const deleteNote = async (req, res) => {
+const deleteNote = async (req, res, next) => {
     try {
-        const note = await Note.findById(req.params.id);
+        const companyId = req.user.company._id || req.user.company;
+        const note = await Note.findOne({
+            _id: req.params.id,
+            company: companyId
+        });
 
         if (!note) {
             return res.status(404).json({ message: 'Nota non trovata' });
         }
 
-        // Robust ownership check
-        const userCompanyId = req.user.company?._id || req.user.company;
-        const noteCompanyId = note.company;
-        const userId = req.user._id;
-        const noteUserId = note.user;
-
-        const isCompanyMatch = userCompanyId && noteCompanyId && userCompanyId.toString() === noteCompanyId.toString();
-        const isCreatorMatch = userId && noteUserId && userId.toString() === noteUserId.toString();
-
-        if (!isCompanyMatch && !isCreatorMatch) {
-            console.warn(`Unauthorized delete attempt. User: ${userId}, Note: ${note._id}`);
-            return res.status(403).json({ message: 'Non autorizzato' });
-        }
-
         await note.deleteOne();
         res.json({ message: 'Nota eliminata con successo' });
     } catch (error) {
-        console.error('Delete Note Error:', error);
-        res.status(500).json({ message: 'Errore nell\'eliminazione della nota', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 

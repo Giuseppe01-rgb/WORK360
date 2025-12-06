@@ -1,10 +1,19 @@
 const multer = require('multer');
 const path = require('path');
 const Photo = require('../models/Photo');
+const ConstructionSite = require('../models/ConstructionSite');
+const { assertSiteBelongsToCompany } = require('../utils/security');
 
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+/**
+ * SECURITY INVARIANTS:
+ * - All site-related operations verify site belongs to req.user.company
+ * - Cross-company access attempts return 404
+ * - Never expose internal error details to client
+ */
 
 // Configure Cloudinary (only if credentials are provided)
 const useCloudinary = !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
@@ -63,13 +72,17 @@ const upload = multer({
     limits: { fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5242880 } // 5MB default
 });
 
-const uploadPhoto = async (req, res) => {
+const uploadPhoto = async (req, res, next) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'Nessun file caricato' });
         }
 
         const { siteId, type, caption } = req.body;
+        const companyId = req.user.company._id || req.user.company;
+
+        // SECURITY: Verify site exists and belongs to user's company
+        await assertSiteBelongsToCompany(siteId, companyId);
 
         // Determine the URL based on storage type
         let url;
@@ -107,24 +120,40 @@ const uploadPhoto = async (req, res) => {
             photoUrl: url // For consistency
         });
     } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({ message: 'Errore nel caricamento della foto', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 
-const getPhotos = async (req, res) => {
+const getPhotos = async (req, res, next) => {
     try {
         const { siteId } = req.query;
-        const query = siteId ? { site: siteId } : {};
+        const companyId = req.user.company._id || req.user.company;
 
-        const photos = await Photo.find(query)
+        if (siteId) {
+            // SECURITY: Verify site belongs to user's company
+            await assertSiteBelongsToCompany(siteId, companyId);
+
+            // Fetch photos for this specific site
+            const photos = await Photo.find({ site: siteId })
+                .populate('user', 'firstName lastName')
+                .populate('site', 'name')
+                .sort({ date: -1 });
+
+            return res.json(photos);
+        }
+
+        // No siteId specified: get all photos from user's company sites
+        const sites = await ConstructionSite.find({ company: companyId }).select('_id');
+        const siteIds = sites.map(s => s._id);
+
+        const photos = await Photo.find({ site: { $in: siteIds } })
             .populate('user', 'firstName lastName')
             .populate('site', 'name')
             .sort({ date: -1 });
 
         res.json(photos);
     } catch (error) {
-        res.status(500).json({ message: 'Errore nel recupero delle foto', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 

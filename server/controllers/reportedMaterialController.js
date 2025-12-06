@@ -1,11 +1,20 @@
 const ReportedMaterial = require('../models/ReportedMaterial');
 const ColouraMaterial = require('../models/ColouraMaterial');
 const MaterialUsage = require('../models/MaterialUsage');
+const { assertSiteBelongsToCompany } = require('../utils/security');
+
+/**
+ * SECURITY INVARIANTS:
+ * - All site-related operations verify site belongs to req.user.company
+ * - Cross-company access attempts return 404
+ * - Never expose internal error details to client
+ */
 
 // Report new material - worker submits photo + quantity (segnalazione flow)
-const reportNewMaterial = async (req, res) => {
+const reportNewMaterial = async (req, res, next) => {
     try {
         const { siteId, fotoUrl, numeroConfezioni, note, nomeDigitato } = req.body;
+        const companyId = req.user.company._id || req.user.company;
 
         if (!siteId || !fotoUrl || !numeroConfezioni) {
             return res.status(400).json({ message: 'Cantiere, foto e quantità sono obbligatori' });
@@ -15,9 +24,12 @@ const reportNewMaterial = async (req, res) => {
             return res.status(400).json({ message: 'Il nome del materiale è obbligatorio' });
         }
 
+        // SECURITY: Verify site belongs to user's company
+        await assertSiteBelongsToCompany(siteId, companyId);
+
         // 1. Create ReportedMaterial
         const reported = await ReportedMaterial.create({
-            company: req.user.company._id,
+            company: companyId,
             site: siteId,
             user: req.user._id,
             fotoUrl,
@@ -30,7 +42,7 @@ const reportNewMaterial = async (req, res) => {
 
         // 2. Create MaterialUsage with da_approvare status
         const usage = await MaterialUsage.create({
-            company: req.user.company._id,
+            company: companyId,
             site: siteId,
             user: req.user._id,
             material: null,  // Not yet catalogued
@@ -50,8 +62,7 @@ const reportNewMaterial = async (req, res) => {
             usage
         });
     } catch (error) {
-        console.error('Report New Material Error:', error);
-        res.status(500).json({ message: 'Errore nella segnalazione del materiale', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 

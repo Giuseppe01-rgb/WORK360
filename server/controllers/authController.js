@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Company = require('../models/Company');
 const { generateToken } = require('../utils/generateToken');
+const { logSecurity, logInfo, logError } = require('../utils/logger');
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -87,22 +88,63 @@ const login = async (req, res) => {
         // Find user
         const user = await User.findOne({ username }).populate('company');
 
-        if (user && (await user.matchPassword(password))) {
-            res.json({
-                _id: user._id,
-                username: user.username,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                role: user.role,
-                company: user.company,
-                signature: user.signature,
-                token: generateToken(user._id)
+        if (!user) {
+            // SECURITY LOG: User not found
+            logSecurity('Login failed: user not found', {
+                username,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
             });
-        } else {
-            res.status(401).json({ message: 'Username o password non validi' });
+
+            return res.status(401).json({ message: 'Username o password non validi' });
         }
+
+        // Check password
+        const isMatch = await user.matchPassword(password);
+
+        if (!isMatch) {
+            // SECURITY LOG: Wrong password
+            logSecurity('Login failed: wrong password', {
+                userId: user._id,
+                username: user.username,
+                companyId: user.company?._id,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            });
+
+            return res.status(401).json({ message: 'Username o password non validi' });
+        }
+
+        // Success - generate token
+        const token = generateToken(user._id);
+
+        // INFO LOG: Successful login
+        logInfo('Login successful', {
+            userId: user._id,
+            username: user.username,
+            companyId: user.company?._id,
+            companyName: user.company?.name,
+            role: user.role,
+            ip: req.ip,
+            userAgent: req.get('user-agent')
+        });
+
+        res.json({
+            _id: user._id,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            company: user.company,
+            signature: user.signature,
+            token
+        });
     } catch (error) {
-        console.error(error);
+        logError('Login error', {
+            error: error.message,
+            stack: error.stack,
+            ip: req.ip
+        });
         res.status(500).json({ message: 'Errore nel login', error: error.message });
     }
 };

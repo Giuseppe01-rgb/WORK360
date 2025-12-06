@@ -3,6 +3,7 @@ const Attendance = require('../models/Attendance');
 const Material = require('../models/Material');
 const Equipment = require('../models/Equipment');
 const User = require('../models/User');
+const { assertSiteBelongsToCompany } = require('../utils/security');
 
 // @desc    Get hours per employee
 // @route   GET /api/analytics/hours-per-employee
@@ -48,23 +49,42 @@ const getHoursPerEmployee = async (req, res) => {
         console.log('DEBUG: hoursData found:', hoursData.length, 'records');
         console.log('DEBUG: matchQuery used:', JSON.stringify(matchQuery));
 
-        // Populate user info
-        const result = await User.populate(hoursData, { path: '_id', select: 'firstName lastName username hourlyCost' });
+        // Populate employee details
+        const result = await Promise.all(hoursData.map(async (d) => {
+            const employee = employees.find(e => e._id.toString() === d._id.toString());
+            return {
+                employee: employee ? `${employee.firstName} ${employee.lastName}` : 'N/A',
+                totalHours: d.totalHours,
+                totalDays: d.totalDays,
+                avgHoursPerDay: d.totalDays > 0 ? (d.totalHours / d.totalDays).toFixed(2) : 0
+            };
+        }));
 
         res.json(result);
     } catch (error) {
-        console.error('ERROR in getHoursPerEmployee:', error);
-        console.error('Stack:', error.stack);
-        res.status(500).json({ message: 'Error loading employee hours', error: error.message });
+        console.error('getHoursPerEmployee error:', error);
+        res.status(500).json({ message: error.message });
     }
 };
+
+/**
+ * SECURITY INVARIANTS:
+ * - All site-related operations verify site belongs to req.user.company
+ * - Cross-company access attempts return 404
+ * - Never expose internal error details to client
+ */
 
 // @desc    Get site report
 // @route   GET /api/analytics/site-report/:siteId
 // @access  Private (Owner)
-const getSiteReport = async (req, res) => {
+const getSiteReport = async (req, res, next) => {
     try {
         const { siteId } = req.params;
+        const companyId = req.user.company._id || req.user.company;
+
+        // SECURITY: Verify site belongs to user's company
+        await assertSiteBelongsToCompany(siteId, companyId);
+
         const siteObjectId = new mongoose.Types.ObjectId(siteId);
 
         // 1. Manual Materials (from 'materials' collection)
@@ -290,8 +310,7 @@ const getSiteReport = async (req, res) => {
         console.log('✅ Sending response for site report');
         res.json(responseData);
     } catch (error) {
-        console.error('Site Report Error:', error);
-        res.status(500).json({ message: 'Errore nel report del cantiere', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 

@@ -1,10 +1,19 @@
 const Economia = require('../models/Economia');
 const ConstructionSite = require('../models/ConstructionSite');
+const { assertSiteBelongsToCompany, assertEconomiaBelongsToCompany } = require('../utils/security');
+
+/**
+ * SECURITY INVARIANTS:
+ * - All site-related operations verify site belongs to req.user.company
+ * - Cross-company access attempts return 404
+ * - Never expose internal error details to client
+ */
 
 // Create new economia (overtime record)
-exports.createEconomia = async (req, res) => {
+exports.createEconomia = async (req, res, next) => {
     try {
         const { site, hours, description } = req.body;
+        const companyId = req.user.company._id || req.user.company;
 
         // Validate required fields
         if (!site) {
@@ -17,11 +26,8 @@ exports.createEconomia = async (req, res) => {
             return res.status(400).json({ message: 'La descrizione deve contenere almeno 10 caratteri' });
         }
 
-        // Verify site exists
-        const siteExists = await ConstructionSite.findById(site);
-        if (!siteExists) {
-            return res.status(404).json({ message: 'Cantiere non trovato' });
-        }
+        // SECURITY: Verify site exists and belongs to user's company
+        await assertSiteBelongsToCompany(site, companyId);
 
         const economia = await Economia.create({
             worker: req.user._id,
@@ -35,21 +41,18 @@ exports.createEconomia = async (req, res) => {
 
         res.status(201).json(economia);
     } catch (error) {
-        console.error('Error creating economia:', error);
-        res.status(500).json({ message: 'Errore nella creazione dell\'economia', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 
 // Get all economie for a specific site (owner only)
-exports.getEconomiesBySite = async (req, res) => {
+exports.getEconomiesBySite = async (req, res, next) => {
     try {
         const { siteId } = req.params;
+        const companyId = req.user.company._id || req.user.company;
 
-        // Verify site exists and belongs to owner's company
-        const site = await ConstructionSite.findById(siteId);
-        if (!site) {
-            return res.status(404).json({ message: 'Cantiere non trovato' });
-        }
+        // SECURITY: Verify site exists and belongs to user's company
+        await assertSiteBelongsToCompany(siteId, companyId);
 
         const economie = await Economia.find({ site: siteId })
             .populate('worker', 'name surname')
@@ -58,24 +61,22 @@ exports.getEconomiesBySite = async (req, res) => {
 
         res.json(economie);
     } catch (error) {
-        console.error('Error fetching economie:', error);
-        res.status(500).json({ message: 'Errore nel recupero delle economie', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
 
 // Delete economia (owner only)
-exports.deleteEconomia = async (req, res) => {
+exports.deleteEconomia = async (req, res, next) => {
     try {
-        const economia = await Economia.findById(req.params.id);
+        const { id } = req.params;
+        const companyId = req.user.company._id || req.user.company;
 
-        if (!economia) {
-            return res.status(404).json({ message: 'Economia non trovata' });
-        }
+        // SECURITY: Verify economia exists and belongs to user's company (via site)
+        const economia = await assertEconomiaBelongsToCompany(id, companyId);
 
         await economia.deleteOne();
         res.json({ message: 'Economia eliminata con successo' });
     } catch (error) {
-        console.error('Error deleting economia:', error);
-        res.status(500).json({ message: 'Errore nell\'eliminazione dell\'economia', error: error.message });
+        next(error); // Pass to global error handler
     }
 };
