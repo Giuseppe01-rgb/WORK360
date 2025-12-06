@@ -2,48 +2,6 @@ const ConstructionSite = require('../models/ConstructionSite');
 const Economia = require('../models/Economia');
 
 /**
- * Simple in-memory cache for site validation
- * Reduces redundant DB queries for same site/company pairs
- * TTL: 5 seconds (enough to avoid N+1 but short enough to stay fresh)
- */
-const siteCache = new Map();
-const CACHE_TTL = 5000; // 5 seconds
-
-function getCacheKey(siteId, companyId) {
-    return `${siteId}-${companyId}`;
-}
-
-function getFromCache(siteId, companyId) {
-    const key = getCacheKey(siteId, companyId);
-    const cached = siteCache.get(key);
-
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-        return cached.value;
-    }
-
-    siteCache.delete(key); // Remove stale entry
-    return null;
-}
-
-function setCache(siteId, companyId, value) {
-    const key = getCacheKey(siteId, companyId);
-    siteCache.set(key, {
-        value,
-        timestamp: Date.now()
-    });
-
-    // Cleanup old entries periodically
-    if (siteCache.size > 1000) {
-        const now = Date.now();
-        for (const [k, v] of siteCache.entries()) {
-            if (now - v.timestamp > CACHE_TTL) {
-                siteCache.delete(k);
-            }
-        }
-    }
-}
-
-/**
  * Custom Security Error with status code
  */
 class SecurityError extends Error {
@@ -56,7 +14,6 @@ class SecurityError extends Error {
 
 /**
  * SECURITY: Verify that a construction site belongs to the specified company
- * Uses caching to reduce DB load for repeated checks
  * @param {string} siteId - The site ID to check
  * @param {string} companyId - The company ID that should own the site
  * @returns {Promise<ConstructionSite>} The site if found and belongs to company
@@ -67,23 +24,10 @@ async function assertSiteBelongsToCompany(siteId, companyId) {
         throw new SecurityError(400, 'ID cantiere mancante');
     }
 
-    // Check cache first
-    const cached = getFromCache(siteId, companyId);
-    if (cached !== null) {
-        if (!cached) {
-            throw new SecurityError(404, 'Cantiere non trovato');
-        }
-        return cached;
-    }
-
-    // Query database
     const site = await ConstructionSite.findOne({
         _id: siteId,
         company: companyId
     });
-
-    // Cache result (both found and not found)
-    setCache(siteId, companyId, site);
 
     if (!site) {
         throw new SecurityError(404, 'Cantiere non trovato');
