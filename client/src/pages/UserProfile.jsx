@@ -103,7 +103,18 @@ export default function UserProfile() {
                             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                                 Username
                             </div>
-                            <div className="font-semibold text-slate-900">{user?.username}</div>
+                            <div className="flex items-center gap-2">
+                                <div className="font-semibold text-slate-900 flex-1">{user?.username}</div>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(user?.username);
+                                        showSuccess('Username copiato!');
+                                    }}
+                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
+                                >
+                                    Copia
+                                </button>
+                            </div>
                         </div>
                         {user?.email && (
                             <div>
@@ -122,6 +133,18 @@ export default function UserProfile() {
                             </div>
                         )}
                     </div>
+                </div>
+
+                {/* Password Info Alert */}
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <h4 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
+                        <Lock className="w-4 h-4" />
+                        Informazioni Password
+                    </h4>
+                    <p className="text-sm text-amber-800">
+                        Per motivi di sicurezza, la password attuale non può essere visualizzata.
+                        Se non ricordi la tua password, usa il modulo qui sotto per cambiarla con una nuova password facile da ricordare.
+                    </p>
                 </div>
 
                 {/* Password Change Card */}
@@ -187,13 +210,13 @@ export default function UserProfile() {
                                 <div className="mt-2">
                                     <div className="flex items-center gap-2">
                                         <div className={`h-1 flex-1 rounded-full ${formData.newPassword.length < 6 ? 'bg-red-200' :
-                                                formData.newPassword.length < 8 ? 'bg-yellow-200' :
-                                                    'bg-green-200'
+                                            formData.newPassword.length < 8 ? 'bg-yellow-200' :
+                                                'bg-green-200'
                                             }`}></div>
                                     </div>
                                     <p className={`text-xs mt-1 ${formData.newPassword.length < 6 ? 'text-red-600' :
-                                            formData.newPassword.length < 8 ? 'text-yellow-600' :
-                                                'text-green-600'
+                                        formData.newPassword.length < 8 ? 'text-yellow-600' :
+                                            'text-green-600'
                                         }`}>
                                         {formData.newPassword.length < 6 ? 'Troppo debole (min 6 caratteri)' :
                                             formData.newPassword.length < 8 ? 'Media' :
