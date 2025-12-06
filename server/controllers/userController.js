@@ -308,6 +308,45 @@ const changePassword = async (req, res) => {
     }
 };
 
+// @desc    Reset user password (Owner only - for employees)
+// @route   POST /api/users/:id/reset-password
+// @access  Private (Owner)
+const resetUserPassword = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verify user belongs to owner's company
+        const user = await User.findOne({ _id: id, company: req.user.company });
+        if (!user) {
+            return res.status(404).json({ message: 'Utente non trovato nella tua azienda' });
+        }
+
+        // Prevent resetting own password (use change password instead)
+        if (id === req.user._id.toString()) {
+            return res.status(400).json({ message: 'Usa la funzione Cambia Password per il tuo account' });
+        }
+
+        // Generate new password
+        const newPassword = generatePassword();
+
+        // Update password (will be auto-hashed by pre-save hook)
+        user.password = newPassword;
+        await user.save();
+
+        // Return username and new password
+        res.json({
+            message: 'Password resettata con successo',
+            username: user.username,
+            password: newPassword, // Only returned this one time
+            firstName: user.firstName,
+            lastName: user.lastName
+        });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ message: 'Errore durante il reset della password', error: error.message });
+    }
+};
+
 module.exports = {
     uploadSignature,
     upload,
@@ -317,5 +356,6 @@ module.exports = {
     deleteUser,
     updateEmailConfig,
     testEmailConfig,
-    changePassword
+    changePassword,
+    resetUserPassword
 };

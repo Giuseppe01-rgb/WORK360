@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { userAPI } from '../../utils/api';
 import {
     Users, Plus, Edit, Trash2, X, CheckCircle, AlertCircle,
-    Mail, Phone, Calendar, User, Building2, Copy, Check, ChevronRight
+    Mail, Phone, Calendar, User, Building2, Copy, Check, ChevronRight, Key
 } from 'lucide-react';
 
 export default function EmployeeManagement() {
@@ -93,6 +93,23 @@ export default function EmployeeManagement() {
             loadEmployees();
         } catch (error) {
             showNotification('error', 'Errore nell\'eliminazione');
+        }
+    };
+
+    const handleResetPassword = async (employee, event) => {
+        event.stopPropagation();
+        if (!window.confirm(`Resettare la password di ${employee.firstName} ${employee.lastName}?\n\nVerrà generata una nuova password.`)) return;
+
+        try {
+            const response = await userAPI.resetPassword(employee._id);
+            showNotification('success', 'Password resettata!');
+            // Show new credentials
+            setGeneratedCredentials({
+                username: response.data.username,
+                password: response.data.password
+            });
+        } catch (error) {
+            showNotification('error', error.response?.data?.message || 'Errore nel reset della password');
         }
     };
 
@@ -205,14 +222,21 @@ export default function EmployeeManagement() {
                                         {employee._id !== user._id && (
                                             <div className="flex gap-2">
                                                 <button
-                                                    onClick={() => handleEdit(employee)}
+                                                    onClick={(e) => { e.stopPropagation(); handleResetPassword(employee, e); }}
+                                                    className="p-2 hover:bg-blue-50 rounded-lg text-blue-500 hover:text-blue-700 transition-colors"
+                                                    title="Reset Password"
+                                                >
+                                                    <Key className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
                                                     className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition-colors"
                                                     title="Modifica"
                                                 >
                                                     <Edit className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(employee._id)}
+                                                    onClick={(e) => { e.stopPropagation(); handleDelete(employee._id); }}
                                                     className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
                                                     title="Elimina"
                                                 >
@@ -376,10 +400,10 @@ export default function EmployeeManagement() {
                                     <CheckCircle className="w-8 h-8 text-green-600" />
                                 </div>
                                 <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                                    Utente Creato!
+                                    {editingEmployee ? 'Password Resettata!' : 'Utente Creato!'}
                                 </h2>
                                 <p className="text-slate-500">
-                                    Condividi queste credenziali con il nuovo utente
+                                    {editingEmployee ? 'Nuove credenziali generate' : 'Condividi queste credenziali con il nuovo utente'}
                                 </p>
                             </div>
 

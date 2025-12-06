@@ -8,7 +8,8 @@ const {
     deleteUser,
     updateEmailConfig,
     testEmailConfig,
-    changePassword
+    changePassword,
+    resetUserPassword
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -27,5 +28,6 @@ router.get('/', protect, getAllUsers);
 router.post('/', protect, createUser);
 router.put('/:id', protect, updateUser);
 router.delete('/:id', protect, deleteUser);
+router.post('/:id/reset-password', protect, resetUserPassword);
 
 module.exports = router;

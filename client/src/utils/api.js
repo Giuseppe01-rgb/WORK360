@@ -192,7 +192,8 @@ export const userAPI = {
     delete: (id) => api.delete(`/users/${id}`),
     updateEmailConfig: (data) => api.put('/users/email-config', data),
     testEmailConfig: () => api.post('/users/email-config/test'),
-    changePassword: (data) => api.post('/users/change-password', data)
+    changePassword: (data) => api.post('/users/change-password', data),
+    resetPassword: (id) => api.post(`/users/${id}/reset-password`)
 };
 
 // Communication (Email & WhatsApp)
