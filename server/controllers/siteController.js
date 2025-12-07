@@ -4,6 +4,12 @@ const { ConstructionSite, User, Attendance, WorkActivity, MaterialUsage, Note, E
 // Create construction site
 const createSite = async (req, res) => {
     try {
+        console.log('=== CREATE SITE REQUEST ===');
+        console.log('User:', req.user?.id);
+        console.log('CompanyId from user:', req.user?.companyId);
+        console.log('Company object:', req.user?.company);
+        console.log('Request body:', req.body);
+
         // Validate assignedWorkers belong to user's company
         if (req.body.assignedWorkers && req.body.assignedWorkers.length > 0) {
             const workers = await User.findAll({
@@ -18,10 +24,15 @@ const createSite = async (req, res) => {
             }
         }
 
+        const companyId = req.user.companyId || req.user.company?.id;
+        console.log('Using companyId:', companyId);
+
         const site = await ConstructionSite.create({
             ...req.body,
-            companyId: req.user.companyId || req.user.company?.id
+            companyId
         });
+
+        console.log('Site created:', site.id);
 
         // Add assigned workers to many-to-many
         if (req.body.assignedWorkers && req.body.assignedWorkers.length > 0) {
@@ -30,6 +41,9 @@ const createSite = async (req, res) => {
 
         res.status(201).json(site);
     } catch (error) {
+        console.error('=== CREATE SITE ERROR ===');
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
         res.status(500).json({ message: 'Errore nella creazione del cantiere', error: error.message });
     }
 };
