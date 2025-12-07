@@ -1,79 +1,75 @@
-const Note = require('../models/Note');
+const { Note, ConstructionSite, User } = require('../models');
 const { assertSiteBelongsToCompany } = require('../utils/security');
-
-/**
- * SECURITY INVARIANTS:
- * - All site-related operations verify site belongs to req.user.company
- * - Cross-company access attempts return 404
- * - Never expose internal error details to client
- */
 
 const createNote = async (req, res, next) => {
     try {
-        const { siteId, site, content, type } = req.body;
-        const actualSiteId = siteId || site; // Support both siteId and site
+        const { siteId, content, type } = req.body;
         const companyId = req.user.company._id || req.user.company;
 
-        // SECURITY: Verify site belongs to user's company
-        await assertSiteBelongsToCompany(actualSiteId, companyId);
+        await assertSiteBelongsToCompany(siteId, companyId);
 
         const note = await Note.create({
-            user: req.user._id,
-            company: companyId,
-            site: actualSiteId,
-            type: type || 'note',
-            content
+            userId: req.user._id,
+            siteId,
+            companyId,
+            content,
+            type: type || 'note'
         });
 
         res.status(201).json(note);
     } catch (error) {
-        next(error); // Pass to global error handler
+        next(error);
     }
 };
 
 const getNotes = async (req, res, next) => {
     try {
-        const { siteId, type } = req.query;
+        const { siteId } = req.query;
         const companyId = req.user.company._id || req.user.company;
-        const query = { company: companyId };
 
+        const where = { companyId };
         if (siteId) {
-            // SECURITY: Verify site belongs to company
             await assertSiteBelongsToCompany(siteId, companyId);
-            query.site = siteId;
+            where.siteId = siteId;
         }
 
-        if (type) {
-            query.type = type;
-        }
-
-        const notes = await Note.find(query)
-            .populate('user', 'firstName lastName')
-            .populate('site', 'name')
-            .sort({ date: -1 });
+        const notes = await Note.findAll({
+            where,
+            include: [{
+                model: User,
+                as: 'user',
+                attributes: ['id', 'firstName', 'lastName']
+            }],
+            order: [['createdAt', 'DESC']]
+        });
 
         res.json(notes);
     } catch (error) {
-        next(error); // Pass to global error handler
+        next(error);
     }
 };
 
 const deleteNote = async (req, res, next) => {
     try {
+        const { id } = req.params;
         const companyId = req.user.company._id || req.user.company;
+
         const note = await Note.findOne({
-            _id: req.params.id,
-            company: companyId
+            where: {
+                id,
+                companyId,
+                userId: req.user._id
+            }
         });
 
         if (!note) {
             return res.status(404).json({ message: 'Nota non trovata' });
         }
 
-        await note.deleteOne();
+        await note.destroy();
         res.json({ message: 'Nota eliminata con successo' });
     } catch (error) {
-        next(error); // Pass to global error handler
+        next(error);
     }
 };
 
