@@ -179,9 +179,30 @@ const getMaterialsSummary = async (req, res) => {
     }
 };
 
+// @desc    Get dashboard data (placeholder)
+// @route   GET /api/analytics/dashboard
+// @access  Private (Owner)
+const getDashboard = async (req, res) => {
+    try {
+        // Placeholder - return basic dashboard data
+        res.json({
+            message: 'Dashboard analytics coming soon',
+            stats: {
+                totalSites: 0,
+                activeSites: 0,
+                totalWorkers: 0,
+                monthlyHours: 0
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getHoursPerEmployee,
     getSiteReport,
     getEmployeeMaterials,
-    getMaterialsSummary
+    getMaterialsSummary,
+    getDashboard
 };
