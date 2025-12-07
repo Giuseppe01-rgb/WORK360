@@ -1,6 +1,5 @@
-const Economia = require('../models/Economia');
+const { Economia, User, ConstructionSite } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
-const ConstructionSite = require('../models/ConstructionSite');
 const { assertSiteBelongsToCompany, assertEconomiaBelongsToCompany } = require('../utils/security');
 
 /**
@@ -31,14 +30,19 @@ exports.createEconomia = async (req, res, next) => {
         await assertSiteBelongsToCompany(site, companyId);
 
         const economia = await Economia.create({
-            worker: getUserId(req),
-            site,
+            workerId: getUserId(req),
+            siteId: site,
             hours,
             description: description.trim()
         });
 
-        await economia.populate('worker', 'name surname');
-        await economia.populate('site', 'name');
+        // Reload with associations
+        await economia.reload({
+            include: [
+                { model: User, as: 'worker', attributes: ['firstName', 'lastName'] },
+                { model: ConstructionSite, as: 'site', attributes: ['name'] }
+            ]
+        });
 
         res.status(201).json(economia);
     } catch (error) {
@@ -55,10 +59,14 @@ exports.getEconomiesBySite = async (req, res, next) => {
         // SECURITY: Verify site exists and belongs to user's company
         await assertSiteBelongsToCompany(siteId, companyId);
 
-        const economie = await Economia.find({ site: siteId })
-            .populate('worker', 'name surname')
-            .populate('site', 'name')
-            .sort({ date: -1 });
+        const economie = await Economia.findAll({
+            where: { siteId },
+            include: [
+                { model: User, as: 'worker', attributes: ['firstName', 'lastName'] },
+                { model: ConstructionSite, as: 'site', attributes: ['name'] }
+            ],
+            order: [['date', 'DESC']]
+        });
 
         res.json(economie);
     } catch (error) {
@@ -75,7 +83,7 @@ exports.deleteEconomia = async (req, res, next) => {
         // SECURITY: Verify economia exists and belongs to user's company (via site)
         const economia = await assertEconomiaBelongsToCompany(id, companyId);
 
-        await economia.deleteOne();
+        await economia.destroy();
         res.json({ message: 'Economia eliminata con successo' });
     } catch (error) {
         next(error); // Pass to global error handler
