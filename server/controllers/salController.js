@@ -1,4 +1,5 @@
 const SAL = require('../models/SAL');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const Company = require('../models/Company');
 const { generateSALPDF } = require('../utils/pdfGenerator');
 
@@ -34,13 +35,13 @@ exports.createSAL = async (req, res) => {
 
         // Generate SAL number
         const year = new Date().getFullYear();
-        const count = await SAL.countDocuments({ owner: req.user._id });
+        const count = await SAL.countDocuments({ owner: getUserId(req) });
         const number = `SAL-${year}-${String(count + 1).padStart(4, '0')}`;
 
         console.log('CREATE SAL - Generated number:', number);
 
         const sal = new SAL({
-            owner: req.user._id,
+            owner: getUserId(req),
             site,
             number,
             date,
@@ -73,7 +74,7 @@ exports.createSAL = async (req, res) => {
 // Get all SALs for owner
 exports.getAllSALs = async (req, res) => {
     try {
-        const sals = await SAL.find({ owner: req.user._id })
+        const sals = await SAL.find({ owner: getUserId(req) })
             .populate('site')
             .sort({ date: -1 });
 
@@ -89,7 +90,7 @@ exports.getSALById = async (req, res) => {
     try {
         const sal = await SAL.findOne({
             _id: req.params.id,
-            owner: req.user._id
+            owner: getUserId(req)
         }).populate('site');
 
         if (!sal) {
@@ -110,7 +111,7 @@ exports.updateSAL = async (req, res) => {
 
         const sal = await SAL.findOne({
             _id: req.params.id,
-            owner: req.user._id
+            owner: getUserId(req)
         });
 
         if (!sal) {
@@ -150,7 +151,7 @@ exports.deleteSAL = async (req, res) => {
     try {
         const sal = await SAL.findOne({
             _id: req.params.id,
-            owner: req.user._id
+            owner: getUserId(req)
         });
 
         if (!sal) {
@@ -169,12 +170,12 @@ exports.deleteSAL = async (req, res) => {
 exports.downloadSALPDF = async (req, res) => {
     try {
         console.log('DOWNLOAD SAL PDF - Request for ID:', req.params.id);
-        console.log('DOWNLOAD SAL PDF - User:', req.user._id);
+        console.log('DOWNLOAD SAL PDF - User:', getUserId(req));
         console.log('DOWNLOAD SAL PDF - User Company ID:', req.user.company);
 
         const sal = await SAL.findOne({
             _id: req.params.id,
-            owner: req.user._id
+            owner: getUserId(req)
         }).populate('site');
 
         if (!sal) {

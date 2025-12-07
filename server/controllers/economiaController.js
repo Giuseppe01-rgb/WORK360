@@ -1,4 +1,5 @@
 const Economia = require('../models/Economia');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const ConstructionSite = require('../models/ConstructionSite');
 const { assertSiteBelongsToCompany, assertEconomiaBelongsToCompany } = require('../utils/security');
 
@@ -13,7 +14,7 @@ const { assertSiteBelongsToCompany, assertEconomiaBelongsToCompany } = require('
 exports.createEconomia = async (req, res, next) => {
     try {
         const { site, hours, description } = req.body;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         // Validate required fields
         if (!site) {
@@ -30,7 +31,7 @@ exports.createEconomia = async (req, res, next) => {
         await assertSiteBelongsToCompany(site, companyId);
 
         const economia = await Economia.create({
-            worker: req.user._id,
+            worker: getUserId(req),
             site,
             hours,
             description: description.trim()
@@ -49,7 +50,7 @@ exports.createEconomia = async (req, res, next) => {
 exports.getEconomiesBySite = async (req, res, next) => {
     try {
         const { siteId } = req.params;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         // SECURITY: Verify site exists and belongs to user's company
         await assertSiteBelongsToCompany(siteId, companyId);
@@ -69,7 +70,7 @@ exports.getEconomiesBySite = async (req, res, next) => {
 exports.deleteEconomia = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         // SECURITY: Verify economia exists and belongs to user's company (via site)
         const economia = await assertEconomiaBelongsToCompany(id, companyId);

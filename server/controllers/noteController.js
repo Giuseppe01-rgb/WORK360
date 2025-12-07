@@ -1,15 +1,16 @@
 const { Note, ConstructionSite, User } = require('../models');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { assertSiteBelongsToCompany } = require('../utils/security');
 
 const createNote = async (req, res, next) => {
     try {
         const { siteId, content, type } = req.body;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         await assertSiteBelongsToCompany(siteId, companyId);
 
         const note = await Note.create({
-            userId: req.user._id,
+            userId: getUserId(req),
             siteId,
             companyId,
             content,
@@ -25,7 +26,7 @@ const createNote = async (req, res, next) => {
 const getNotes = async (req, res, next) => {
     try {
         const { siteId } = req.query;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         const where = { companyId };
         if (siteId) {
@@ -52,13 +53,13 @@ const getNotes = async (req, res, next) => {
 const deleteNote = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         const note = await Note.findOne({
             where: {
                 id,
                 companyId,
-                userId: req.user._id
+                userId: getUserId(req)
             }
         });
 

@@ -1,4 +1,5 @@
 const { Material, ConstructionSite, MaterialMaster } = require('../models');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { normalizeMaterialInput } = require('../utils/materialNormalization');
 const { assertSiteBelongsToCompany } = require('../utils/security');
 
@@ -6,7 +7,7 @@ const createMaterial = async (req, res, next) => {
     try {
         const { name, unit, quantity, siteId, site, category, notes } = req.body;
         const actualSiteId = siteId || site;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         await assertSiteBelongsToCompany(actualSiteId, companyId);
 
@@ -30,7 +31,7 @@ const createMaterial = async (req, res, next) => {
         }
 
         const material = await Material.create({
-            userId: req.user._id,
+            userId: getUserId(req),
             companyId: companyId,
             siteId: actualSiteId,
             materialMasterId: materialMaster.id,
@@ -50,7 +51,7 @@ const createMaterial = async (req, res, next) => {
 const getMaterials = async (req, res, next) => {
     try {
         const { siteId } = req.query;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         const where = { companyId };
         if (siteId) {

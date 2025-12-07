@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const MaterialUsage = require('../models/MaterialUsage');
 const ColouraMaterial = require('../models/ColouraMaterial');
 const ReportedMaterial = require('../models/ReportedMaterial');
@@ -12,7 +13,7 @@ const recordUsage = async (req, res) => {
             siteId,
             materialId,
             numeroConfezioni,
-            userId: req.user._id
+            userId: getUserId(req)
         });
 
         if (!siteId || !materialId || !numeroConfezioni) {
@@ -22,7 +23,7 @@ const recordUsage = async (req, res) => {
         // Safe company ID access
         const companyId = req.user.company?._id || req.user.company;
         if (!companyId) {
-            console.error('User has no company assigned:', req.user._id);
+            console.error('User has no company assigned:', getUserId(req));
             return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
         }
 
@@ -42,7 +43,7 @@ const recordUsage = async (req, res) => {
             company: companyId,
             site: siteId,
             material: materialId,
-            user: req.user._id,
+            user: getUserId(req),
             numeroConfezioni,
             stato: 'catalogato',
             note: note || ''
@@ -78,7 +79,7 @@ const getTodayUsage = async (req, res) => {
 
         const query = {
             company: companyId,
-            user: req.user._id,
+            user: getUserId(req),
             dataOra: {
                 $gte: today,
                 $lt: tomorrow
@@ -116,7 +117,7 @@ const getMostUsedBySite = async (req, res) => {
         const mostUsed = await MaterialUsage.aggregate([
             {
                 $match: {
-                    company: req.user.company._id,
+                    company: getCompanyId(req),
                     site: mongoose.Types.ObjectId(siteId),
                     material: { $ne: null },  // Only catalogued materials
                     stato: 'catalogato'
@@ -165,7 +166,7 @@ const getMostUsedBySite = async (req, res) => {
 const getUsageHistory = async (req, res) => {
     try {
         const { siteId, startDate, endDate, materialId } = req.query;
-        const query = { company: req.user.company._id };
+        const query = { company: getCompanyId(req) };
 
         if (siteId) query.site = siteId;
         if (materialId) query.material = materialId;
@@ -213,7 +214,7 @@ const deleteUsage = async (req, res) => {
 
         // Optional: Check if user is the one who created it or is admin
         // For now, allow if same company (or restrict to creator if needed)
-        if (usage.user.toString() !== req.user._id.toString() && req.user.role !== 'owner') {
+        if (usage.user.toString() !== getUserId(req).toString() && req.user.role !== 'owner') {
             return res.status(403).json({ message: 'Non autorizzato a eliminare questo record' });
         }
 

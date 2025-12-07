@@ -1,10 +1,11 @@
 const { Equipment, User, ConstructionSite } = require('../models');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 
 const createEquipment = async (req, res) => {
     try {
         const equipment = await Equipment.create({
             ...req.body,
-            userId: req.user._id
+            userId: getUserId(req)
         });
 
         res.status(201).json(equipment);

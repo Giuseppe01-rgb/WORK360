@@ -1,10 +1,11 @@
 const Supplier = require('../models/Supplier');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 
 const createSupplier = async (req, res) => {
     try {
         const supplier = await Supplier.create({
             ...req.body,
-            company: req.user.company._id
+            company: getCompanyId(req)
         });
 
         res.status(201).json(supplier);
@@ -15,7 +16,7 @@ const createSupplier = async (req, res) => {
 
 const getSuppliers = async (req, res) => {
     try {
-        const suppliers = await Supplier.find({ company: req.user.company._id, active: true });
+        const suppliers = await Supplier.find({ company: getCompanyId(req), active: true });
         res.json(suppliers);
     } catch (error) {
         res.status(500).json({ message: 'Errore nel recupero dei fornitori', error: error.message });
@@ -54,7 +55,7 @@ const recommendSupplier = async (req, res) => {
 
         // Find suppliers with the material
         const suppliers = await Supplier.find({
-            company: req.user.company._id,
+            company: getCompanyId(req),
             active: true,
             'materials.name': { $regex: materialName, $options: 'i' }
         });

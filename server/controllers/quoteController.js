@@ -1,4 +1,5 @@
 const Quote = require('../models/Quote');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const Company = require('../models/Company');
 const { generateQuotePDF, generateQuotePDFBuffer } = require('../utils/pdfGenerator');
 const { sendEmailWithPDF } = require('../utils/emailService');
@@ -18,7 +19,7 @@ const createQuote = async (req, res) => {
             return res.status(400).json({ message: 'È necessario aggiungere almeno una voce al preventivo' });
         }
 
-        if (!req.user.company || !req.user.company._id) {
+        if (!req.user.company || !getCompanyId(req)) {
             console.error('User company not found!', req.user);
             return res.status(400).json({ message: 'Azienda non trovata. Rieffettua il login.' });
         }
@@ -35,10 +36,10 @@ const createQuote = async (req, res) => {
         const vatAmount = subtotal * (vatRate / 100);
         const total = subtotal + vatAmount;
 
-        console.log('Creating quote with company ID:', req.user.company._id);
+        console.log('Creating quote with company ID:', getCompanyId(req));
         const quote = await Quote.create({
             ...req.body,
-            company: req.user.company._id,
+            company: getCompanyId(req),
             items: processedItems,
             subtotal,
             vatAmount,
@@ -53,7 +54,7 @@ const createQuote = async (req, res) => {
                 console.log('Auto-sending email to:', client.email);
 
                 // Get company details
-                const company = await Company.findById(req.user.company._id);
+                const company = await Company.findById(getCompanyId(req));
 
                 // Generate PDF
                 const pdfBuffer = await generateQuotePDFBuffer(quote, company, req.user);
@@ -87,7 +88,7 @@ const createQuote = async (req, res) => {
 
 const getQuotes = async (req, res) => {
     try {
-        const quotes = await Quote.find({ company: req.user.company._id }).sort({ date: -1 });
+        const quotes = await Quote.find({ company: getCompanyId(req) }).sort({ date: -1 });
         res.json(quotes);
     } catch (error) {
         res.status(500).json({ message: 'Errore nel recupero dei preventivi', error: error.message });
@@ -99,7 +100,7 @@ const getQuote = async (req, res) => {
         const quote = await Quote.findById(req.params.id);
         if (!quote) return res.status(404).json({ message: 'Preventivo non trovato' });
 
-        if (quote.company.toString() !== req.user.company._id.toString()) {
+        if (quote.company.toString() !== getCompanyId(req).toString()) {
             return res.status(403).json({ message: 'Non autorizzato' });
         }
 
@@ -114,7 +115,7 @@ const downloadQuotePDF = async (req, res) => {
         const quote = await Quote.findById(req.params.id).populate('company');
         if (!quote) return res.status(404).json({ message: 'Preventivo non trovato' });
 
-        if (quote.company._id.toString() !== req.user.company._id.toString()) {
+        if (quote.company._id.toString() !== getCompanyId(req).toString()) {
             return res.status(403).json({ message: 'Non autorizzato' });
         }
 
@@ -132,7 +133,7 @@ const updateQuote = async (req, res) => {
         const quote = await Quote.findById(req.params.id);
         if (!quote) return res.status(404).json({ message: 'Preventivo non trovato' });
 
-        if (quote.company.toString() !== req.user.company._id.toString()) {
+        if (quote.company.toString() !== getCompanyId(req).toString()) {
             return res.status(403).json({ message: 'Non autorizzato' });
         }
 
@@ -172,7 +173,7 @@ const deleteQuote = async (req, res) => {
         const quote = await Quote.findById(req.params.id);
         if (!quote) return res.status(404).json({ message: 'Preventivo non trovato' });
 
-        if (quote.company.toString() !== req.user.company._id.toString()) {
+        if (quote.company.toString() !== getCompanyId(req).toString()) {
             return res.status(403).json({ message: 'Non autorizzato' });
         }
 

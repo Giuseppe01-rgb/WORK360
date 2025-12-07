@@ -1,11 +1,12 @@
 const { Company, User } = require('../models');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 
 // @desc    Get company data
 // @route   GET /api/company
 // @access  Private (Owner)
 const getCompany = async (req, res) => {
     try {
-        const company = await Company.findByPk(req.user.company._id);
+        const company = await Company.findByPk(getCompanyId(req));
         if (!company) {
             return res.status(404).json({ message: 'Azienda non trovata' });
         }
@@ -60,7 +61,7 @@ const updateCompany = async (req, res) => {
 
         console.log('Updating company with fields:', Object.keys(updateData));
 
-        const company = await Company.findByPk(req.user.company._id);
+        const company = await Company.findByPk(getCompanyId(req));
         if (!company) {
             throw new Error('Azienda non trovata');
         }

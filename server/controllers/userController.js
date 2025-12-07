@@ -1,4 +1,5 @@
 const { User, Company } = require('../models');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { upload } = require('./photoController');
 
 // Generate random password
@@ -125,7 +126,7 @@ const deleteUser = async (req, res) => {
         const { id } = req.params;
 
         // Prevent deleting yourself
-        if (id === req.user._id.toString()) {
+        if (id === getUserId(req).toString()) {
             return res.status(400).json({ message: 'Non puoi eliminare il tuo account' });
         }
 
@@ -149,11 +150,11 @@ const uploadSignature = async (req, res) => {
 
         // Check if signature is provided as base64 (from canvas)
         if (req.body.signature) {
-            console.log('Attempting to save signature for user:', req.user._id);
-            const user = await User.findById(req.user._id);
+            console.log('Attempting to save signature for user:', getUserId(req));
+            const user = await User.findById(getUserId(req));
 
             if (!user) {
-                console.error('User not found:', req.user._id);
+                console.error('User not found:', getUserId(req));
                 return res.status(404).json({ message: 'Utente non trovato' });
             }
 
@@ -169,7 +170,7 @@ const uploadSignature = async (req, res) => {
             return res.status(400).json({ message: 'Nessuna firma fornita' });
         }
 
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(getUserId(req));
         user.signature = req.file.path;
         await user.save();
 
@@ -194,7 +195,7 @@ const updateEmailConfig = async (req, res) => {
         const { encrypt } = require('../utils/encryption');
         const encryptedPassword = encrypt(password);
 
-        const company = await Company.findById(req.user.company._id || req.user.company);
+        const company = await Company.findById(getCompanyId(req));
         if (!company) {
             return res.status(404).json({ message: 'Azienda non trovata' });
         }
@@ -232,7 +233,7 @@ const updateEmailConfig = async (req, res) => {
 // Test email configuration
 const testEmailConfig = async (req, res) => {
     try {
-        const company = await Company.findById(req.user.company._id || req.user.company);
+        const company = await Company.findById(getCompanyId(req));
         if (!company || !company.emailConfig || !company.emailConfig.configured) {
             return res.status(400).json({
                 error: 'Email non configurata',
@@ -287,7 +288,7 @@ const changePassword = async (req, res) => {
         }
 
         // Get user with password field
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(getUserId(req));
         if (!user) {
             return res.status(404).json({ message: 'Utente non trovato' });
         }
@@ -323,7 +324,7 @@ const resetUserPassword = async (req, res) => {
         }
 
         // Prevent resetting own password (use change password instead)
-        if (id === req.user._id.toString()) {
+        if (id === getUserId(req).toString()) {
             return res.status(400).json({ message: 'Usa la funzione Cambia Password per il tuo account' });
         }
 

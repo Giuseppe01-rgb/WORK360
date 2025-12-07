@@ -1,4 +1,5 @@
 const { Photo, ConstructionSite } = require('../models');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { assertSiteBelongsToCompany } = require('../utils/security');
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
@@ -31,7 +32,7 @@ const upload = multer({
 const uploadPhoto = async (req, res, next) => {
     try {
         const { siteId, caption, type } = req.body;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         if (siteId) {
             await assertSiteBelongsToCompany(siteId, companyId);
@@ -52,7 +53,7 @@ const uploadPhoto = async (req, res, next) => {
         }
 
         const photo = await Photo.create({
-            userId: req.user._id,
+            userId: getUserId(req),
             siteId: siteId || null,
             filename: req.file.filename,
             path: photoPath,
@@ -69,7 +70,7 @@ const uploadPhoto = async (req, res, next) => {
 const getPhotos = async (req, res, next) => {
     try {
         const { siteId } = req.query;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         let photos;
 

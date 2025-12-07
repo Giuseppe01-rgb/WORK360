@@ -1,4 +1,5 @@
 const WorkActivity = require('../models/WorkActivity');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const Attendance = require('../models/Attendance');
 const mongoose = require('mongoose');
 
@@ -10,7 +11,7 @@ exports.create = async (req, res) => {
         const activity = new WorkActivity({
             company: req.user.company,
             site: siteId,
-            user: req.user._id,
+            user: getUserId(req),
             date: date || new Date(),
             activityType,
             quantity,
@@ -42,7 +43,7 @@ exports.update = async (req, res) => {
         // Authorization check: only creator or owner can update
         const userCompanyId = req.user.company?._id || req.user.company;
         const activityCompanyId = activity.company;
-        const userId = req.user._id;
+        const userId = getUserId(req);
         const activityUserId = activity.user;
 
         const isCompanyMatch = userCompanyId && activityCompanyId && userCompanyId.toString() === activityCompanyId.toString();
@@ -100,7 +101,7 @@ exports.getAll = async (req, res) => {
 exports.distributeTime = async (req, res) => {
     try {
         const { activities } = req.body; // Array of { id, percentageTime }
-        const userId = req.user._id;
+        const userId = getUserId(req);
 
         if (!activities || activities.length === 0) {
             return res.status(400).json({ message: 'Nessuna attività fornita' });
@@ -184,7 +185,7 @@ exports.deleteActivity = async (req, res) => {
         // Robust ownership check
         const userCompanyId = req.user.company?._id || req.user.company;
         const activityCompanyId = activity.company;
-        const userId = req.user._id;
+        const userId = getUserId(req);
         const activityUserId = activity.user;
 
         const isCompanyMatch = userCompanyId && activityCompanyId && userCompanyId.toString() === activityCompanyId.toString();
@@ -210,7 +211,7 @@ exports.getAnalytics = async (req, res) => {
     try {
         const { userId, siteId, startDate, endDate, groupBy } = req.query;
 
-        const matchStage = { company: req.user.company._id || req.user.company };
+        const matchStage = { company: getCompanyId(req) };
 
         if (userId) matchStage.user = new mongoose.Types.ObjectId(userId);
         if (siteId) matchStage.site = new mongoose.Types.ObjectId(siteId);

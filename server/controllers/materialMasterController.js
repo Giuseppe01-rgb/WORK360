@@ -1,4 +1,5 @@
 const MaterialMaster = require('../models/MaterialMaster');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { normalizeMaterialInput } = require('../utils/materialNormalization');
 const { parseInvoiceWithOCR } = require('../utils/invoiceParser');
 
@@ -6,7 +7,7 @@ const { parseInvoiceWithOCR } = require('../utils/invoiceParser');
 const getMaterialCatalog = async (req, res) => {
     try {
         const { filter } = req.query;
-        const query = { company: req.user.company._id };
+        const query = { company: getCompanyId(req) };
 
         const materials = await MaterialMaster.find(query)
             .populate('createdBy', 'firstName lastName')
@@ -35,7 +36,7 @@ const getMaterialByBarcode = async (req, res) => {
         }
 
         const material = await MaterialMaster.findOne({
-            company: req.user.company._id,
+            company: getCompanyId(req),
             barcode: barcode
         });
 
@@ -68,7 +69,7 @@ const createMaterialCatalogEntry = async (req, res) => {
 
         // Check if material already exists
         const existing = await MaterialMaster.findOne({
-            company: req.user.company._id,
+            company: getCompanyId(req),
             normalizedKey: normalized.normalizedKey
         });
 
@@ -85,13 +86,13 @@ const createMaterialCatalogEntry = async (req, res) => {
 
         // Create new material
         const material = await MaterialMaster.create({
-            company: req.user.company._id,
+            company: getCompanyId(req),
             ...normalized,
             displayName, // Use user's exact capitalization
             supplier: supplier || '',
             barcode: barcode || '',
             price: price || null,
-            createdBy: req.user._id
+            createdBy: getUserId(req)
         });
 
         res.status(201).json(material);
@@ -109,7 +110,7 @@ const updateMaterialCatalogEntry = async (req, res) => {
 
         const material = await MaterialMaster.findOne({
             _id: id,
-            company: req.user.company._id
+            company: getCompanyId(req)
         });
 
         if (!material) {
@@ -125,7 +126,7 @@ const updateMaterialCatalogEntry = async (req, res) => {
             // Check if new normalized key conflicts with another material
             if (normalized.normalizedKey !== material.normalizedKey) {
                 const existing = await MaterialMaster.findOne({
-                    company: req.user.company._id,
+                    company: getCompanyId(req),
                     normalizedKey: normalized.normalizedKey,
                     _id: { $ne: id }
                 });
@@ -164,7 +165,7 @@ const deleteMaterialCatalogEntry = async (req, res) => {
 
         const material = await MaterialMaster.findOneAndDelete({
             _id: id,
-            company: req.user.company._id
+            company: getCompanyId(req)
         });
 
         if (!material) {
