@@ -27,10 +27,20 @@ const createSite = async (req, res) => {
         const companyId = req.user.companyId || req.user.company?.id;
         console.log('Using companyId:', companyId);
 
-        const site = await ConstructionSite.create({
-            ...req.body,
-            companyId
-        });
+        // Sanitize dates - remove invalid dates
+        const siteData = { ...req.body, companyId };
+
+        // Validate and clean dates
+        if (siteData.startDate && (siteData.startDate === 'Invalid date' || isNaN(new Date(siteData.startDate).getTime()))) {
+            delete siteData.startDate;
+        }
+        if (siteData.endDate && (siteData.endDate === 'Invalid date' || isNaN(new Date(siteData.endDate).getTime()))) {
+            delete siteData.endDate;
+        }
+
+        console.log('Sanitized site data:', siteData);
+
+        const site = await ConstructionSite.create(siteData);
 
         console.log('Site created:', site.id);
 
