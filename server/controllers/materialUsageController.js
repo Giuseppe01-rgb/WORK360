@@ -1,8 +1,7 @@
-const mongoose = require('mongoose');
+const { MaterialUsage, ColouraMaterial, User, ConstructionSite } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
-const MaterialUsage = require('../models/MaterialUsage');
-const ColouraMaterial = require('../models/ColouraMaterial');
-const ReportedMaterial = require('../models/ReportedMaterial');
+const { Op } = require('sequelize');
+const sequelize = require('../config/database');
 
 // Record material usage (catalogato flow)
 const recordUsage = async (req, res) => {
@@ -20,8 +19,7 @@ const recordUsage = async (req, res) => {
             return res.status(400).json({ message: 'Cantiere, materiale e quantità sono obbligatori' });
         }
 
-        // Safe company ID access
-        const companyId = req.user.company?._id || req.user.company;
+        const companyId = getCompanyId(req);
         if (!companyId) {
             console.error('User has no company assigned:', getUserId(req));
             return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
@@ -29,9 +27,11 @@ const recordUsage = async (req, res) => {
 
         // Verify material exists and is active
         const material = await ColouraMaterial.findOne({
-            _id: materialId,
-            company: companyId,
-            attivo: true
+            where: {
+                id: materialId,
+                companyId,
+                attivo: true
+            }
         });
 
         if (!material) {
@@ -40,19 +40,23 @@ const recordUsage = async (req, res) => {
         }
 
         const usage = await MaterialUsage.create({
-            company: companyId,
-            site: siteId,
-            material: materialId,
-            user: getUserId(req),
+            companyId,
+            siteId,
+            materialId,
+            userId: getUserId(req),
             numeroConfezioni,
             stato: 'catalogato',
             note: note || ''
         });
 
-        const populatedUsage = await MaterialUsage.findById(usage._id)
-            .populate('material')
-            .populate('user', 'firstName lastName')
-            .populate('site', 'name');
+        // Reload with associations
+        const populatedUsage = await MaterialUsage.findByPk(usage.id, {
+            include: [
+                { model: ColouraMaterial, as: 'material' },
+                { model: User, as: 'user', attributes: ['firstName', 'lastName'] },
+                { model: ConstructionSite, as: 'site', attributes: ['name'] }
+            ]
+        });
 
         res.status(201).json(populatedUsage);
     } catch (error) {
@@ -66,8 +70,7 @@ const getTodayUsage = async (req, res) => {
     try {
         const { siteId } = req.query;
 
-        // Safe company ID access
-        const companyId = req.user.company?._id || req.user.company;
+        const companyId = getCompanyId(req);
         if (!companyId) {
             return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
         }
@@ -77,24 +80,27 @@ const getTodayUsage = async (req, res) => {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        const query = {
-            company: companyId,
-            user: getUserId(req),
+        const whereClause = {
+            companyId,
+            userId: getUserId(req),
             dataOra: {
-                $gte: today,
-                $lt: tomorrow
+                [Op.gte]: today,
+                [Op.lt]: tomorrow
             }
         };
 
         if (siteId) {
-            query.site = siteId;
+            whereClause.siteId = siteId;
         }
 
-        const usages = await MaterialUsage.find(query)
-            .populate('material')
-            .populate('site', 'name')
-            .populate('materialeReportId')
-            .sort({ dataOra: -1 });
+        const usages = await MaterialUsage.findAll({
+            where: whereClause,
+            include: [
+                { model: ColouraMaterial, as: 'material' },
+                { model: ConstructionSite, as: 'site', attributes: ['name'] }
+            ],
+            order: [['dataOra', 'DESC']]
+        });
 
         res.json(usages);
     } catch (error) {
@@ -113,45 +119,45 @@ const getMostUsedBySite = async (req, res) => {
             return res.status(400).json({ message: 'ID cantiere richiesto' });
         }
 
-        // Aggregate to find most used materials
-        const mostUsed = await MaterialUsage.aggregate([
-            {
-                $match: {
-                    company: getCompanyId(req),
-                    site: mongoose.Types.ObjectId(siteId),
-                    material: { $ne: null },  // Only catalogued materials
-                    stato: 'catalogato'
-                }
+        // Use raw SQL query for aggregation
+        const results = await sequelize.query(`
+            SELECT 
+                material_id,
+                SUM(numero_confezioni) as total_confezioni,
+                COUNT(*) as usage_count
+            FROM material_usages
+            WHERE company_id = :companyId
+                AND site_id = :siteId
+                AND material_id IS NOT NULL
+                AND stato = 'catalogato'
+            GROUP BY material_id
+            ORDER BY total_confezioni DESC
+            LIMIT :limit
+        `, {
+            replacements: {
+                companyId: getCompanyId(req),
+                siteId,
+                limit
             },
-            {
-                $group: {
-                    _id: '$material',
-                    totalConfezioni: { $sum: '$numeroConfezioni' },
-                    usageCount: { $sum: 1 }
-                }
-            },
-            {
-                $sort: { totalConfezioni: -1 }
-            },
-            {
-                $limit: limit
-            }
-        ]);
+            type: sequelize.QueryTypes.SELECT
+        });
 
-        // Populate material details
-        const materialIds = mostUsed.map(m => m._id);
-        const materials = await ColouraMaterial.find({
-            _id: { $in: materialIds },
-            attivo: true
+        // Get material details for the IDs
+        const materialIds = results.map(r => r.material_id);
+        const materials = await ColouraMaterial.findAll({
+            where: {
+                id: { [Op.in]: materialIds },
+                attivo: true
+            }
         });
 
         // Combine results
-        const result = mostUsed.map(usage => {
-            const material = materials.find(m => m._id.toString() === usage._id.toString());
+        const result = results.map(usage => {
+            const material = materials.find(m => m.id === usage.material_id);
             return {
                 material,
-                totalConfezioni: usage.totalConfezioni,
-                usageCount: usage.usageCount
+                totalConfezioni: parseInt(usage.total_confezioni),
+                usageCount: parseInt(usage.usage_count)
             };
         }).filter(item => item.material);
 
@@ -166,24 +172,27 @@ const getMostUsedBySite = async (req, res) => {
 const getUsageHistory = async (req, res) => {
     try {
         const { siteId, startDate, endDate, materialId } = req.query;
-        const query = { company: getCompanyId(req) };
+        const whereClause = { companyId: getCompanyId(req) };
 
-        if (siteId) query.site = siteId;
-        if (materialId) query.material = materialId;
+        if (siteId) whereClause.siteId = siteId;
+        if (materialId) whereClause.materialId = materialId;
 
         if (startDate || endDate) {
-            query.dataOra = {};
-            if (startDate) query.dataOra.$gte = new Date(startDate);
-            if (endDate) query.dataOra.$lte = new Date(endDate);
+            whereClause.dataOra = {};
+            if (startDate) whereClause.dataOra[Op.gte] = new Date(startDate);
+            if (endDate) whereClause.dataOra[Op.lte] = new Date(endDate);
         }
 
-        const usages = await MaterialUsage.find(query)
-            .populate('material')
-            .populate('user', 'firstName lastName')
-            .populate('site', 'name')
-            .populate('materialeReportId')
-            .sort({ dataOra: -1 })
-            .limit(100);
+        const usages = await MaterialUsage.findAll({
+            where: whereClause,
+            include: [
+                { model: ColouraMaterial, as: 'material' },
+                { model: User, as: 'user', attributes: ['firstName', 'lastName'] },
+                { model: ConstructionSite, as: 'site', attributes: ['name'] }
+            ],
+            order: [['dataOra', 'DESC']],
+            limit: 100
+        });
 
         res.json(usages);
     } catch (error) {
@@ -197,28 +206,28 @@ const deleteUsage = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Safe company ID access
-        const companyId = req.user.company?._id || req.user.company;
+        const companyId = getCompanyId(req);
         if (!companyId) {
             return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
         }
 
         const usage = await MaterialUsage.findOne({
-            _id: id,
-            company: companyId
+            where: {
+                id,
+                companyId
+            }
         });
 
         if (!usage) {
             return res.status(404).json({ message: 'Utilizzo materiale non trovato' });
         }
 
-        // Optional: Check if user is the one who created it or is admin
-        // For now, allow if same company (or restrict to creator if needed)
-        if (usage.user.toString() !== getUserId(req).toString() && req.user.role !== 'owner') {
+        // Check authorization
+        if (usage.userId !== getUserId(req) && req.user.role !== 'owner') {
             return res.status(403).json({ message: 'Non autorizzato a eliminare questo record' });
         }
 
-        await usage.deleteOne();
+        await usage.destroy();
 
         res.json({ message: 'Utilizzo materiale eliminato' });
     } catch (error) {
