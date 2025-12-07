@@ -18,8 +18,15 @@ const protect = async (req, res, next) => {
                 return res.status(401).json({ message: 'Non autorizzato, token non valido' });
             }
 
-            // Get user from token
-            req.user = await User.findById(decoded.id).select('-password').populate('company');
+            // Get user from token (Sequelize)
+            const { Company } = require('../models');
+            req.user = await User.findByPk(decoded.id, {
+                attributes: { exclude: ['password'] },
+                include: [{
+                    model: Company,
+                    as: 'company'
+                }]
+            });
 
             if (!req.user) {
                 return res.status(401).json({ message: 'Utente non trovato' });
