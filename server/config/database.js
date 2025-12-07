@@ -1,7 +1,13 @@
 const { Sequelize } = require('sequelize');
 
+// Railway PostgreSQL uses different variable names
+const databaseUrl = process.env.DATABASE_URL
+    || process.env.POSTGRES_URL
+    || process.env.DATABASE_PRIVATE_URL
+    || process.env.PGURL;
+
 // Database configuration
-const sequelize = new Sequelize(process.env.DATABASE_URL || process.env.POSTGRES_URL, {
+const sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
     protocol: 'postgres',
     dialectOptions: {

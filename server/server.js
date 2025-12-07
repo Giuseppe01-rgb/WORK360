@@ -10,9 +10,15 @@ if (!process.env.JWT_SECRET) {
     process.exit(1);
 }
 
-// Validate DATABASE_URL
-if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
-    console.error('FATAL ERROR: DATABASE_URL or POSTGRES_URL is not defined');
+// Validate DATABASE_URL from Railway PostgreSQL
+const dbUrl = process.env.DATABASE_URL
+    || process.env.POSTGRES_URL
+    || process.env.DATABASE_PRIVATE_URL
+    || process.env.PGURL;
+
+if (!dbUrl) {
+    console.error('FATAL ERROR: No PostgreSQL connection string found');
+    console.error('Checked: DATABASE_URL, POSTGRES_URL, DATABASE_PRIVATE_URL, PGURL');
     process.exit(1);
 }
 
