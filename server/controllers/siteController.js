@@ -42,9 +42,25 @@ const createSite = async (req, res) => {
         res.status(201).json(site);
     } catch (error) {
         console.error('=== CREATE SITE ERROR ===');
+        console.error('Error name:', error.name);
         console.error('Error message:', error.message);
         console.error('Error stack:', error.stack);
-        res.status(500).json({ message: 'Errore nella creazione del cantiere', error: error.message });
+        console.error('Error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+
+        // If Sequelize error, log more details
+        if (error.name && error.name.includes('Sequelize')) {
+            console.error('Sequelize error details:', {
+                sql: error.sql,
+                parameters: error.parameters,
+                original: error.original
+            });
+        }
+
+        res.status(500).json({
+            message: 'Errore nella creazione del cantiere',
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
