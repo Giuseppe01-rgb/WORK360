@@ -1,13 +1,14 @@
 const { Op } = require('sequelize');
 const { ConstructionSite, User, Attendance, WorkActivity, MaterialUsage, Note, Economia, ReportedMaterial } = require('../models');
+const { sanitizeAllDates } = require('../utils/dateValidator');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 
 // Create construction site
 const createSite = async (req, res) => {
     try {
+        const companyId = getCompanyId(req);
         console.log('=== CREATE SITE REQUEST ===');
-        console.log('User:', req.user?.id);
-        console.log('CompanyId from user:', req.user?.companyId);
-        console.log('Company object:', req.user?.company);
+        console.log('User:', getUserId(req), 'Company:', companyId);
         console.log('Request body:', req.body);
 
         // Validate assignedWorkers belong to user's company
@@ -15,7 +16,7 @@ const createSite = async (req, res) => {
             const workers = await User.findAll({
                 where: {
                     id: { [Op.in]: req.body.assignedWorkers },
-                    companyId: req.user.companyId || req.user.company?.id
+                    companyId
                 }
             });
 
@@ -24,21 +25,10 @@ const createSite = async (req, res) => {
             }
         }
 
-        const companyId = req.user.companyId || req.user.company?.id;
-        console.log('Using companyId:', companyId);
+        // Sanitize invalid dates
+        const siteData = sanitizeAllDates({ ...req.body, companyId });
 
-        // Sanitize dates - remove invalid dates
-        const siteData = { ...req.body, companyId };
-
-        // Validate and clean dates
-        if (siteData.startDate && (siteData.startDate === 'Invalid date' || isNaN(new Date(siteData.startDate).getTime()))) {
-            delete siteData.startDate;
-        }
-        if (siteData.endDate && (siteData.endDate === 'Invalid date' || isNaN(new Date(siteData.endDate).getTime()))) {
-            delete siteData.endDate;
-        }
-
-        console.log('Sanitized site data:', siteData);
+        console.log('Creating site with data:', siteData);
 
         const site = await ConstructionSite.create(siteData);
 
