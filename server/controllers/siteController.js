@@ -152,6 +152,13 @@ const updateSite = async (req, res) => {
             return res.status(404).json({ message: 'Cantiere non trovato' });
         }
 
+        // Sanitize invalid dates from update data
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] === 'Invalid date' || updateData[key] === 'Invalid Date' || updateData[key] === '') {
+                delete updateData[key];
+            }
+        });
+
         // Update site fields
         await site.update(updateData);
 
