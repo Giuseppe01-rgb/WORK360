@@ -1,5 +1,6 @@
 const { User, Company } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
+const { sanitizeAllDates } = require('../utils/dateValidator');
 const { upload } = require('./photoController');
 
 // Generate random password
@@ -16,7 +17,7 @@ const generatePassword = () => {
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll({
-            where: { companyId: req.user.company },
+            where: { companyId: getCompanyId(req) },
             attributes: { exclude: ['password'] },
             order: [['createdAt', 'DESC']]
         });
@@ -32,7 +33,7 @@ const createUser = async (req, res) => {
         const { role, firstName, lastName, email, phone, birthDate } = req.body;
 
         // Get company
-        const company = await Company.findByPk(req.user.company);
+        const company = await Company.findByPk(getCompanyId(req));
         if (!company) {
             return res.status(404).json({ message: 'Azienda non trovata' });
         }
@@ -61,12 +62,12 @@ const createUser = async (req, res) => {
         // Generate password
         const generatedPassword = generatePassword();
 
-        // Create user
-        const user = await User.create({
+        // Sanitize dates
+        const userData = sanitizeAllDates({
             username: finalUsername,
             password: generatedPassword,
             role,
-            companyId: req.user.company,
+            companyId: getCompanyId(req),
             firstName,
             lastName,
             email,
@@ -74,6 +75,9 @@ const createUser = async (req, res) => {
             birthDate,
             hourlyCost: req.body.hourlyCost || 0
         });
+
+        // Create user
+        const user = await User.create(userData);
 
         // Return user without password but include generated password for one-time display
         const userResponse = user.toJSON();
@@ -95,23 +99,33 @@ const updateUser = async (req, res) => {
         const { id } = req.params;
         const { role, firstName, lastName, email, phone, birthDate } = req.body;
 
-        const user = await User.findOne({ _id: id, company: req.user.company });
+        const user = await User.findOne({
+            where: {
+                id,
+                companyId: getCompanyId(req)
+            }
+        });
+
         if (!user) {
             return res.status(404).json({ message: 'Utente non trovato' });
         }
 
-        // Update fields
-        if (role) user.role = role;
-        if (firstName) user.firstName = firstName;
-        if (lastName) user.lastName = lastName;
-        if (email !== undefined) user.email = email;
-        if (phone !== undefined) user.phone = phone;
-        if (birthDate !== undefined) user.birthDate = birthDate;
-        if (req.body.hourlyCost !== undefined) user.hourlyCost = req.body.hourlyCost;
+        // Build update data
+        const updateData = {};
+        if (role) updateData.role = role;
+        if (firstName) updateData.firstName = firstName;
+        if (lastName) updateData.lastName = lastName;
+        if (email !== undefined) updateData.email = email;
+        if (phone !== undefined) updateData.phone = phone;
+        if (birthDate !== undefined) updateData.birthDate = birthDate;
+        if (req.body.hourlyCost !== undefined) updateData.hourlyCost = req.body.hourlyCost;
 
-        await user.save();
+        // Sanitize dates
+        const sanitizedUpdate = sanitizeAllDates(updateData);
 
-        const userResponse = user.toObject();
+        await user.update(sanitizedUpdate);
+
+        const userResponse = user.toJSON();
         delete userResponse.password;
 
         res.json(userResponse);
@@ -126,14 +140,22 @@ const deleteUser = async (req, res) => {
         const { id } = req.params;
 
         // Prevent deleting yourself
-        if (id === getUserId(req).toString()) {
+        if (id === getUserId(req)) {
             return res.status(400).json({ message: 'Non puoi eliminare il tuo account' });
         }
 
-        const user = await User.findOneAndDelete({ _id: id, company: req.user.company });
+        const user = await User.findOne({
+            where: {
+                id,
+                companyId: getCompanyId(req)
+            }
+        });
+
         if (!user) {
             return res.status(404).json({ message: 'Utente non trovato' });
         }
+
+        await user.destroy();
 
         res.json({ message: 'Utente eliminato con successo' });
     } catch (error) {
@@ -144,14 +166,14 @@ const deleteUser = async (req, res) => {
 const uploadSignature = async (req, res) => {
     try {
         console.log('=== SIGNATURE UPLOAD REQUEST ===');
-        console.log('User ID:', req.user?._id);
+        console.log('User ID:', getUserId(req));
         console.log('Has signature in body:', !!req.body.signature);
         console.log('Signature length:', req.body.signature?.length);
 
         // Check if signature is provided as base64 (from canvas)
         if (req.body.signature) {
             console.log('Attempting to save signature for user:', getUserId(req));
-            const user = await User.findById(getUserId(req));
+            const user = await User.findByPk(getUserId(req));
 
             if (!user) {
                 console.error('User not found:', getUserId(req));
@@ -160,7 +182,7 @@ const uploadSignature = async (req, res) => {
 
             user.signature = req.body.signature; // Store base64 directly
             await user.save();
-            console.log('Signature saved successfully for user:', user._id);
+            console.log('Signature saved successfully for user:', user.id);
 
             return res.json({ message: 'Firma salvata con successo', signature: user.signature });
         }
@@ -170,7 +192,7 @@ const uploadSignature = async (req, res) => {
             return res.status(400).json({ message: 'Nessuna firma fornita' });
         }
 
-        const user = await User.findById(getUserId(req));
+        const user = await User.findByPk(getUserId(req));
         user.signature = req.file.path;
         await user.save();
 
@@ -195,7 +217,7 @@ const updateEmailConfig = async (req, res) => {
         const { encrypt } = require('../utils/encryption');
         const encryptedPassword = encrypt(password);
 
-        const company = await Company.findById(getCompanyId(req));
+        const company = await Company.findByPk(getCompanyId(req));
         if (!company) {
             return res.status(404).json({ message: 'Azienda non trovata' });
         }
@@ -233,7 +255,7 @@ const updateEmailConfig = async (req, res) => {
 // Test email configuration
 const testEmailConfig = async (req, res) => {
     try {
-        const company = await Company.findById(getCompanyId(req));
+        const company = await Company.findByPk(getCompanyId(req));
         if (!company || !company.emailConfig || !company.emailConfig.configured) {
             return res.status(400).json({
                 error: 'Email non configurata',
@@ -288,7 +310,7 @@ const changePassword = async (req, res) => {
         }
 
         // Get user with password field
-        const user = await User.findById(getUserId(req));
+        const user = await User.findByPk(getUserId(req));
         if (!user) {
             return res.status(404).json({ message: 'Utente non trovato' });
         }
@@ -318,13 +340,19 @@ const resetUserPassword = async (req, res) => {
         const { id } = req.params;
 
         // Verify user belongs to owner's company
-        const user = await User.findOne({ _id: id, company: req.user.company });
+        const user = await User.findOne({
+            where: {
+                id,
+                companyId: getCompanyId(req)
+            }
+        });
+
         if (!user) {
             return res.status(404).json({ message: 'Utente non trovato nella tua azienda' });
         }
 
         // Prevent resetting own password (use change password instead)
-        if (id === getUserId(req).toString()) {
+        if (id === getUserId(req)) {
             return res.status(400).json({ message: 'Usa la funzione Cambia Password per il tuo account' });
         }
 
