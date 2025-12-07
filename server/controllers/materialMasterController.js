@@ -1,4 +1,4 @@
-const MaterialMaster = require('../models/MaterialMaster');
+const { MaterialMaster, User } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { normalizeMaterialInput } = require('../utils/materialNormalization');
 const { parseInvoiceWithOCR } = require('../utils/invoiceParser');
@@ -7,16 +7,21 @@ const { parseInvoiceWithOCR } = require('../utils/invoiceParser');
 const getMaterialCatalog = async (req, res) => {
     try {
         const { filter } = req.query;
-        const query = { company: getCompanyId(req) };
 
-        const materials = await MaterialMaster.find(query)
-            .populate('createdBy', 'firstName lastName')
-            .sort({ displayName: 1 });
+        const materials = await MaterialMaster.findAll({
+            where: { companyId: getCompanyId(req) },
+            include: [{
+                model: User,
+                as: 'createdBy',
+                attributes: ['firstName', 'lastName']
+            }],
+            order: [['displayName', 'ASC']]
+        });
 
         // Apply filter if requested
         let filteredMaterials = materials;
         if (filter === 'missing-price') {
-            filteredMaterials = materials.filter(m => m.missingPrice);
+            filteredMaterials = materials.filter(m => !m.price || m.price === null);
         }
 
         res.json(filteredMaterials);
@@ -36,8 +41,10 @@ const getMaterialByBarcode = async (req, res) => {
         }
 
         const material = await MaterialMaster.findOne({
-            company: getCompanyId(req),
-            barcode: barcode
+            where: {
+                companyId: getCompanyId(req),
+                barcode
+            }
         });
 
         if (!material) {
@@ -69,30 +76,33 @@ const createMaterialCatalogEntry = async (req, res) => {
 
         // Check if material already exists
         const existing = await MaterialMaster.findOne({
-            company: getCompanyId(req),
-            normalizedKey: normalized.normalizedKey
+            where: {
+                companyId: getCompanyId(req),
+                normalizedKey: normalized.normalizedKey
+            }
         });
 
         if (existing) {
             // Update existing material
-            existing.displayName = displayName;
-            existing.supplier = supplier || '';
-            existing.unit = normalized.unit;
-            existing.price = price || null;
-            await existing.save();
+            await existing.update({
+                displayName,
+                supplier: supplier || '',
+                unit: normalized.unit,
+                price: price || null
+            });
 
             return res.json(existing);
         }
 
         // Create new material
         const material = await MaterialMaster.create({
-            company: getCompanyId(req),
+            companyId: getCompanyId(req),
             ...normalized,
             displayName, // Use user's exact capitalization
             supplier: supplier || '',
             barcode: barcode || '',
             price: price || null,
-            createdBy: getUserId(req)
+            createdById: getUserId(req)
         });
 
         res.status(201).json(material);
@@ -109,8 +119,10 @@ const updateMaterialCatalogEntry = async (req, res) => {
         const { displayName, supplier, unit, price, barcode } = req.body;
 
         const material = await MaterialMaster.findOne({
-            _id: id,
-            company: getCompanyId(req)
+            where: {
+                id,
+                companyId: getCompanyId(req)
+            }
         });
 
         if (!material) {
@@ -125,10 +137,13 @@ const updateMaterialCatalogEntry = async (req, res) => {
 
             // Check if new normalized key conflicts with another material
             if (normalized.normalizedKey !== material.normalizedKey) {
+                const { Op } = require('sequelize');
                 const existing = await MaterialMaster.findOne({
-                    company: getCompanyId(req),
-                    normalizedKey: normalized.normalizedKey,
-                    _id: { $ne: id }
+                    where: {
+                        companyId: getCompanyId(req),
+                        normalizedKey: normalized.normalizedKey,
+                        id: { [Op.ne]: id }
+                    }
                 });
 
                 if (existing) {
@@ -163,14 +178,18 @@ const deleteMaterialCatalogEntry = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const material = await MaterialMaster.findOneAndDelete({
-            _id: id,
-            company: getCompanyId(req)
+        const material = await MaterialMaster.findOne({
+            where: {
+                id,
+                companyId: getCompanyId(req)
+            }
         });
 
         if (!material) {
             return res.status(404).json({ message: 'Materiale non trovato' });
         }
+
+        await material.destroy();
 
         res.json({ message: 'Materiale eliminato con successo' });
     } catch (error) {
