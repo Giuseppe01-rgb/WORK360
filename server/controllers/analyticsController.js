@@ -1,8 +1,6 @@
-const mongoose = require('mongoose');
-const Attendance = require('../models/Attendance');
-const Material = require('../models/Material');
-const Equipment = require('../models/Equipment');
-const User = require('../models/User');
+const { Op } = require('sequelize');
+const { sequelize } = require('../config/database');
+const { Attendance, Material, Equipment, User, ConstructionSite } = require('../models');
 const { assertSiteBelongsToCompany } = require('../utils/security');
 
 // @desc    Get hours per employee
@@ -13,68 +11,60 @@ const getHoursPerEmployee = async (req, res) => {
         const { startDate, endDate, siteId } = req.query;
         console.log('DEBUG: getHoursPerEmployee called with:', { startDate, endDate, siteId });
 
-        // Get all company employees
         const companyId = req.user.company._id || req.user.company;
-        const employees = await User.find({ company: companyId });
-        const employeeIds = employees.map(e => e._id);
 
-        const matchQuery = {
-            user: { $in: employeeIds },
-            clockOut: { $exists: true }
+        // Build where clause
+        const where = {
+            clockOut: { [Op.ne]: null } // Only completed attendances
         };
 
         if (siteId) {
-            matchQuery.site = new mongoose.Types.ObjectId(siteId);
+            where.siteId = siteId;
         }
 
         if (startDate && endDate) {
-            matchQuery['clockIn.time'] = {
-                $gte: new Date(startDate),
-                $lte: new Date(endDate)
+            where['clockIn.time'] = {
+                [Op.between]: [new Date(startDate), new Date(endDate)]
             };
         }
 
-        const hoursData = await Attendance.aggregate([
-            { $match: matchQuery },
-            {
-                $group: {
-                    _id: '$user',
-                    totalHours: { $sum: '$totalHours' },
-                    totalDays: { $sum: 1 }
-                }
-            },
-            { $sort: { totalHours: -1 } }
-        ]);
+        // Get aggregated hours using raw SQL for performance
+        const hoursData = await sequelize.query(`
+            SELECT 
+                u.id as user_id,
+                u."firstName" || ' ' || u."lastName" as employee,
+                SUM(a."totalHours") as "totalHours",
+                COUNT(a.id) as "totalDays",
+                AVG(a."totalHours") as "avgHoursPerDay"
+            FROM attendances a
+            JOIN users u ON a."userId" = u.id
+            WHERE u."companyId" = :companyId
+              AND a."clockOut" IS NOT NULL
+              ${siteId ? 'AND a."siteId" = :siteId' : ''}
+              ${startDate ? 'AND (a."clockIn"->\'time\')::timestamp >= :startDate' : ''}
+              ${endDate ? 'AND (a."clockIn"->\'time\')::timestamp <= :endDate' : ''}
+            GROUP BY u.id, u."firstName", u."lastName"
+            ORDER BY "totalHours" DESC
+        `, {
+            replacements: { companyId, siteId, startDate, endDate },
+            type: sequelize.QueryTypes.SELECT
+        });
 
         console.log('DEBUG: hoursData found:', hoursData.length, 'records');
-        console.log('DEBUG: matchQuery used:', JSON.stringify(matchQuery));
 
-        // Populate employee details
-        const result = await Promise.all(hoursData.map(async (d) => {
-            const employee = employees.find(e => e._id.toString() === d._id.toString());
-            return {
-                employee: employee ? `${employee.firstName} ${employee.lastName}` : 'N/A',
-                totalHours: d.totalHours,
-                totalDays: d.totalDays,
-                avgHoursPerDay: d.totalDays > 0 ? (d.totalHours / d.totalDays).toFixed(2) : 0
-            };
-        }));
-
-        res.json(result);
+        res.json(hoursData.map(d => ({
+            employee: d.employee,
+            totalHours: parseFloat(d.totalHours || 0),
+            totalDays: parseInt(d.totalDays || 0),
+            avgHoursPerDay: parseFloat(d.avgHoursPerDay || 0).toFixed(2)
+        })));
     } catch (error) {
         console.error('getHoursPerEmployee error:', error);
         res.status(500).json({ message: error.message });
     }
 };
 
-/**
- * SECURITY INVARIANTS:
- * - All site-related operations verify site belongs to req.user.company
- * - Cross-company access attempts return 404
- * - Never expose internal error details to client
- */
-
-// @desc    Get site report
+// @desc    Get site report (simplified version)
 // @route   GET /api/analytics/site-report/:siteId
 // @access  Private (Owner)
 const getSiteReport = async (req, res, next) => {
@@ -85,254 +75,73 @@ const getSiteReport = async (req, res, next) => {
         // SECURITY: Verify site belongs to user's company
         await assertSiteBelongsToCompany(siteId, companyId);
 
-        const siteObjectId = new mongoose.Types.ObjectId(siteId);
-
-        // 1. Manual Materials (from 'materials' collection)
-        const manualMaterials = await Material.aggregate([
-            { $match: { site: siteObjectId } },
-            {
-                $group: {
-                    _id: '$name',
-                    totalQuantity: { $sum: '$quantity' },
-                    unit: { $first: '$unit' },
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
-
-        // 2. Catalog Materials (from 'materialusages' collection)
-        const MaterialUsage = require('../models/MaterialUsage');
-        const catalogMaterials = await MaterialUsage.aggregate([
-            {
-                $match: {
-                    site: siteObjectId,
-                    material: { $ne: null } // Only linked materials
-                }
-            },
-            {
-                $lookup: {
-                    from: 'colouramaterials',
-                    localField: 'material',
-                    foreignField: '_id',
-                    as: 'materialDetails'
-                }
-            },
-            { $unwind: '$materialDetails' },
-            {
-                $group: {
-                    _id: '$materialDetails.nome_prodotto',
-                    totalQuantity: { $sum: '$numeroConfezioni' },
-                    unit: { $first: '$materialDetails.unit' },
-                    totalCost: { $sum: { $multiply: ['$numeroConfezioni', { $ifNull: ['$materialDetails.prezzo', 0] }] } },
-                    unitPrice: { $first: '$materialDetails.prezzo' },
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
-
-        // 3. Merge lists
-        const materialMap = new Map();
-        let totalMaterialCost = 0;
-
-        // Add manual
-        manualMaterials.forEach(m => {
-            materialMap.set(m._id, {
-                _id: m._id,
-                totalQuantity: m.totalQuantity,
-                unit: m.unit,
-                count: m.count,
-                source: 'manual',
-                totalCost: 0 // Manual materials have 0 cost for now
-            });
+        // Get materials summary
+        const materials = await Material.findAll({
+            where: { siteId },
+            attributes: [
+                'name',
+                [sequelize.fn('SUM', sequelize.col('quantity')), 'totalQuantity'],
+                [sequelize.fn('MAX', sequelize.col('unit')), 'unit'],
+                [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+            ],
+            group: ['name'],
+            raw: true
         });
 
-        // Add/Merge catalog
-        catalogMaterials.forEach(m => {
-            totalMaterialCost += m.totalCost || 0;
-            if (materialMap.has(m._id)) {
-                const existing = materialMap.get(m._id);
-                existing.totalQuantity += m.totalQuantity;
-                existing.count += m.count;
-                existing.totalCost = (existing.totalCost || 0) + (m.totalCost || 0);
-            } else {
-                materialMap.set(m._id, {
-                    _id: m._id,
-                    totalQuantity: m.totalQuantity,
-                    unit: m.unit || 'pz',
-                    count: m.count,
-                    source: 'catalog',
-                    totalCost: m.totalCost || 0
-                });
-            }
+        // Get equipment summary
+        const equipment = await Equipment.findAll({
+            where: { siteId },
+            attributes: [
+                'name',
+                [sequelize.fn('SUM', sequelize.col('quantity')), 'totalQuantity'],
+                [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+            ],
+            group: ['name'],
+            raw: true
         });
 
-        const allMaterials = Array.from(materialMap.values());
-
-        // Equipment used
-        const equipment = await Equipment.aggregate([
-            { $match: { site: siteObjectId } },
-            {
-                $group: {
-                    _id: '$name',
-                    totalQuantity: { $sum: '$quantity' },
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
-
-        // Total hours
-        const totalHours = await Attendance.aggregate([
-            { $match: { site: siteObjectId, clockOut: { $exists: true } } },
-            {
-                $group: {
-                    _id: null,
-                    totalHours: { $sum: '$totalHours' }
-                }
-            }
-        ]);
-
-        // Hours per employee
-        const employeeHours = await Attendance.aggregate([
-            { $match: { site: siteObjectId, clockOut: { $exists: true } } },
-            {
-                $group: {
-                    _id: '$user',
-                    totalHours: { $sum: '$totalHours' }
-                }
+        // Get attendance summary
+        const attendance = await Attendance.findAll({
+            where: {
+                siteId,
+                clockOut: { [Op.ne]: null }
             },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: '_id',
-                    foreignField: '_id',
-                    as: 'userInfo'
-                }
-            },
-            { $unwind: '$userInfo' },
-            {
-                $project: {
-                    _id: { _id: '$userInfo._id', firstName: '$userInfo.firstName', lastName: '$userInfo.lastName' },
-                    totalHours: 1
-                }
-            }
-        ]);
-
-        // === SITE COST CALCULATION ===
-        // Fetch all attendance records with user information for labor cost
-        const attendanceWithUsers = await Attendance.find({
-            site: siteObjectId,
-            clockOut: { $exists: true }
-        }).populate('user', 'hourlyCost'); // Only fetch hourlyCost field
-
-        // Calculate labor cost
-        let laborCost = 0;
-        attendanceWithUsers.forEach(attendance => {
-            if (attendance.totalHours && attendance.user && attendance.user.hourlyCost) {
-                laborCost += attendance.totalHours * attendance.user.hourlyCost;
-            }
+            attributes: [
+                [sequelize.fn('SUM', sequelize.col('totalHours')), 'totalHours'],
+                [sequelize.fn('COUNT', sequelize.col('id')), 'totalDays']
+            ],
+            raw: true
         });
 
-        // Material cost is already calculated in totalMaterialCost
-        const materialCost = totalMaterialCost;
-
-        // Total site cost
-        const siteCost = materialCost + laborCost;
-
-        console.log('✅ Site Costs:', {
-            siteId,
-            materialCost: materialCost.toFixed(2),
-            laborCost: laborCost.toFixed(2),
-            total: siteCost.toFixed(2)
-        });
-
-        // === MARGIN CALCULATION ===
-        // Get site details for contractValue and status
-        const ConstructionSite = require('../models/ConstructionSite');
-        const site = await ConstructionSite.findById(siteObjectId);
-
-        const contractValue = site?.contractValue || null;
-        const siteStatus = site?.status || 'planned';
-
-        // Calculate margin values
-        let marginCurrentValue = null;
-        let marginCurrentPercent = null;
-        let costVsRevenuePercent = null;
-
-        if (contractValue && contractValue > 0) {
-            marginCurrentValue = contractValue - siteCost;
-            marginCurrentPercent = (marginCurrentValue / contractValue) * 100;
-            costVsRevenuePercent = (siteCost / contractValue) * 100;
-        }
-
-        // === COST INCIDENCE CALCULATION ===
-        // Calculate materials vs labor incidence on total cost
-        let materialsIncidencePercent = null;
-        let laborIncidencePercent = null;
-
-        if (siteCost && siteCost > 0) {
-            materialsIncidencePercent = (materialCost / siteCost) * 100;
-            laborIncidencePercent = (laborCost / siteCost) * 100;
-        }
-
-        // 4. Daily Reports (WorkActivity)
-        const WorkActivity = require('../models/WorkActivity');
-        const dailyReports = await WorkActivity.find({
-            site: siteObjectId
-            // Removed unit: 'report' filter to show all activities/reports
-        })
-            .populate('user', 'firstName lastName username')
-            .sort({ date: -1 });
-
-        const responseData = {
-            materials: allMaterials,
+        res.json({
+            materials,
             equipment,
-            totalHours: totalHours[0]?.totalHours || 0,
-            employeeHours,
-            dailyReports, // Added daily reports
-            siteCost: {
-                materials: Math.round(materialCost * 100) / 100,
-                labor: Math.round(laborCost * 100) / 100,
-                total: Math.round(siteCost * 100) / 100
-            },
-            contractValue,
-            status: siteStatus,
-            margin: {
-                marginCurrentValue: marginCurrentValue !== null ? Math.round(marginCurrentValue * 100) / 100 : null,
-                marginCurrentPercent: marginCurrentPercent !== null ? Math.round(marginCurrentPercent * 100) / 100 : null,
-                costVsRevenuePercent: costVsRevenuePercent !== null ? Math.round(costVsRevenuePercent * 100) / 100 : null
-            },
-            costIncidence: {
-                materialsIncidencePercent: materialsIncidencePercent !== null ? Math.round(materialsIncidencePercent * 10) / 10 : null,
-                laborIncidencePercent: laborIncidencePercent !== null ? Math.round(laborIncidencePercent * 10) / 10 : null
-            }
-        };
-
-        console.log('✅ Sending response for site report');
-        res.json(responseData);
+            attendance: attendance[0] || { totalHours: 0, totalDays: 0 }
+        });
     } catch (error) {
-        next(error); // Pass to global error handler
+        next(error);
     }
 };
 
-// @desc    Get material usage per employee
+// @desc    Get employee materials
 // @route   GET /api/analytics/employee-materials/:employeeId
 // @access  Private (Owner)
 const getEmployeeMaterials = async (req, res) => {
     try {
         const { employeeId } = req.params;
 
-        const materials = await Material.aggregate([
-            { $match: { user: employeeId } },
-            {
-                $group: {
-                    _id: '$name',
-                    totalQuantity: { $sum: '$quantity' },
-                    unit: { $first: '$unit' },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { totalQuantity: -1 } }
-        ]);
+        const materials = await Material.findAll({
+            where: { userId: employeeId },
+            attributes: [
+                'name',
+                [sequelize.fn('SUM', sequelize.col('quantity')), 'totalQuantity'],
+                [sequelize.fn('MAX', sequelize.col('unit')), 'unit'],
+                [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+            ],
+            group: ['name'],
+            order: [[sequelize.fn('SUM', sequelize.col('quantity')), 'DESC']],
+            raw: true
+        });
 
         res.json(materials);
     } catch (error) {
@@ -340,153 +149,33 @@ const getEmployeeMaterials = async (req, res) => {
     }
 };
 
-// @desc    Get dashboard data
-// @route   GET /api/analytics/dashboard
+// @desc    Get materials summary
+// @route   GET /api/analytics/materials-summary
 // @access  Private (Owner)
-const getDashboard = async (req, res) => {
+const getMaterialsSummary = async (req, res) => {
     try {
+        const { siteId } = req.query;
         const companyId = req.user.company._id || req.user.company;
-        const companyUsers = await User.find({ company: companyId });
-        const userIds = companyUsers.map(u => u._id);
 
-        // Total active sites
-        const ConstructionSite = require('../models/ConstructionSite');
-        const activeSites = await ConstructionSite.countDocuments({
-            company: companyId,
-            status: { $in: ['active', 'planned'] }
+        const where = { companyId };
+        if (siteId) where.siteId = siteId;
+
+        const materials = await Material.findAll({
+            where,
+            attributes: [
+                'name',
+                'category',
+                [sequelize.fn('SUM', sequelize.col('quantity')), 'totalQuantity'],
+                [sequelize.fn('MAX', sequelize.col('unit')), 'unit']
+            ],
+            group: ['name', 'category'],
+            order: [[sequelize.fn('SUM', sequelize.col('quantity')), 'DESC']],
+            raw: true
         });
 
-        // Total employees
-        const totalEmployees = companyUsers.length;
-
-        // This month's hours
-        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-        const monthHours = await Attendance.aggregate([
-            {
-                $match: {
-                    user: { $in: userIds },
-                    'clockIn.time': { $gte: startOfMonth },
-                    clockOut: { $exists: true }
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    totalHours: { $sum: '$totalHours' }
-                }
-            }
-        ]);
-
-        // === COMPANY-WIDE COST CALCULATION ===
-        // Get all company sites
-        const companySites = await ConstructionSite.find({ company: companyId });
-        const siteIds = companySites.map(s => s._id);
-
-        // Calculate total labor cost across all sites
-        const allAttendances = await Attendance.find({
-            site: { $in: siteIds },
-            clockOut: { $exists: true }
-        }).populate('user', 'hourlyCost');
-
-        let totalLaborCost = 0;
-        allAttendances.forEach(attendance => {
-            if (attendance.totalHours && attendance.user && attendance.user.hourlyCost) {
-                totalLaborCost += attendance.totalHours * attendance.user.hourlyCost;
-            }
-        });
-
-        // Calculate total material cost across all sites
-        const MaterialUsage = require('../models/MaterialUsage');
-        const allMaterialUsages = await MaterialUsage.aggregate([
-            {
-                $match: {
-                    site: { $in: siteIds },
-                    material: { $ne: null }
-                }
-            },
-            {
-                $lookup: {
-                    from: 'colouramaterials',
-                    localField: 'material',
-                    foreignField: '_id',
-                    as: 'materialDetails'
-                }
-            },
-            { $unwind: '$materialDetails' },
-            {
-                $group: {
-                    _id: null,
-                    totalCost: { $sum: { $multiply: ['$numeroConfezioni', { $ifNull: ['$materialDetails.prezzo', 0] }] } }
-                }
-            }
-        ]);
-
-        const totalMaterialCost = allMaterialUsages[0]?.totalCost || 0;
-        const totalCompanyCost = totalLaborCost + totalMaterialCost;
-
-        console.log('✅ Company Total Costs:', {
-            labor: totalLaborCost.toFixed(2),
-            materials: totalMaterialCost.toFixed(2),
-            total: totalCompanyCost.toFixed(2)
-        });
-
-        // === COMPANY-WIDE MARGIN CALCULATION ===
-        // Calculate total contract value from all sites
-        let totalContractValue = 0;
-        let sitesWithContractValue = 0;
-
-        companySites.forEach(site => {
-            if (site.contractValue && site.contractValue > 0) {
-                totalContractValue += site.contractValue;
-                sitesWithContractValue++;
-            }
-        });
-
-        // Calculate margin
-        let companyMarginValue = null;
-        let companyMarginPercent = null;
-        let companyCostVsRevenuePercent = null;
-
-        if (totalContractValue > 0) {
-            companyMarginValue = totalContractValue - totalCompanyCost;
-            companyMarginPercent = (companyMarginValue / totalContractValue) * 100;
-            companyCostVsRevenuePercent = (totalCompanyCost / totalContractValue) * 100;
-        }
-
-        // === COMPANY COST INCIDENCE CALCULATION ===
-        // Calculate materials vs labor incidence on total company cost
-        let companyMaterialsIncidencePercent = null;
-        let companyLaborIncidencePercent = null;
-
-        if (totalCompanyCost > 0) {
-            companyMaterialsIncidencePercent = (totalMaterialCost / totalCompanyCost) * 100;
-            companyLaborIncidencePercent = (totalLaborCost / totalCompanyCost) * 100;
-        }
-
-        res.json({
-            activeSites,
-            totalEmployees,
-            monthlyHours: monthHours[0]?.totalHours || 0,
-            companyCosts: {
-                total: Math.round(totalCompanyCost * 100) / 100,
-                labor: Math.round(totalLaborCost * 100) / 100,
-                materials: Math.round(totalMaterialCost * 100) / 100
-            },
-            companyMargin: {
-                totalContractValue: totalContractValue > 0 ? Math.round(totalContractValue * 100) / 100 : null,
-                sitesWithContractValue,
-                totalSites: companySites.length,
-                marginValue: companyMarginValue !== null ? Math.round(companyMarginValue * 100) / 100 : null,
-                marginPercent: companyMarginPercent !== null ? Math.round(companyMarginPercent * 100) / 100 : null,
-                costVsRevenuePercent: companyCostVsRevenuePercent !== null ? Math.round(companyCostVsRevenuePercent * 100) / 100 : null
-            },
-            companyCostIncidence: {
-                materialsIncidencePercent: companyMaterialsIncidencePercent !== null ? Math.round(companyMaterialsIncidencePercent * 10) / 10 : null,
-                laborIncidencePercent: companyLaborIncidencePercent !== null ? Math.round(companyLaborIncidencePercent * 10) / 10 : null
-            }
-        });
+        res.json(materials);
     } catch (error) {
-        res.status(500).json({ message: 'Errore nel caricamento della dashboard', error: error.message });
+        res.status(500).json({ message: 'Errore nel riepilogo materiali', error: error.message });
     }
 };
 
@@ -494,5 +183,5 @@ module.exports = {
     getHoursPerEmployee,
     getSiteReport,
     getEmployeeMaterials,
-    getDashboard
+    getMaterialsSummary
 };

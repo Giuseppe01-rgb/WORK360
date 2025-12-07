@@ -1,47 +1,47 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const supplierSchema = new mongoose.Schema({
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+class Supplier extends Model { }
+
+Supplier.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: { model: 'companies', key: 'id' }
     },
     name: {
-        type: String,
-        required: true,
-        trim: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     contact: {
-        name: String,
-        phone: String,
-        email: String,
-        address: String
+        type: DataTypes.JSONB,
+        defaultValue: {}
     },
-    materials: [{
-        name: String,
-        category: String,
-        minPrice: Number,
-        maxPrice: Number,
-        averagePrice: Number
-    }],
-    qualityRating: {
-        type: Number,
-        min: 1,
-        max: 10,
-        default: 5
+    materials: {
+        type: DataTypes.JSONB,
+        defaultValue: []
     },
-    deliveryTime: {
-        type: Number, // days
-        default: 7
+    rating: {
+        type: DataTypes.DECIMAL(3, 2),
+        validate: { min: 0, max: 5 }
     },
-    paymentTerms: String,
-    notes: String,
+    notes: DataTypes.TEXT,
     active: {
-        type: Boolean,
-        default: true
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
 }, {
+    sequelize,
+    modelName: 'Supplier',
+    tableName: 'suppliers',
+    underscored: true,
     timestamps: true
 });
 
-module.exports = mongoose.model('Supplier', supplierSchema);
+module.exports = Supplier;

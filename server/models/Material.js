@@ -1,46 +1,77 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const materialSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+class Material extends Model { }
+
+Material.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite',
-        required: true
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'user_id',
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     },
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+    siteId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'site_id',
+        references: {
+            model: 'construction_sites',
+            key: 'id'
+        }
     },
-    materialMaster: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'MaterialMaster'
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: {
+            model: 'companies',
+            key: 'id'
+        }
+    },
+    materialMasterId: {
+        type: DataTypes.UUID,
+        field: 'material_master_id',
+        references: {
+            model: 'material_masters',
+            key: 'id'
+        }
     },
     name: {
-        type: String,
-        required: true,
-        trim: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     quantity: {
-        type: Number,
-        required: true
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false
     },
     unit: {
-        type: String,
-        default: 'pz' // pezzi, kg, m, m2, etc.
+        type: DataTypes.STRING,
+        defaultValue: 'pz'
     },
-    category: String,
-    notes: String,
+    category: {
+        type: DataTypes.STRING
+    },
+    notes: {
+        type: DataTypes.TEXT
+    },
     date: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
     }
 }, {
+    sequelize,
+    modelName: 'Material',
+    tableName: 'materials',
+    underscored: true,
     timestamps: true
 });
 
-module.exports = mongoose.model('Material', materialSchema);
+module.exports = Material;

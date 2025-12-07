@@ -1,58 +1,95 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const companySchema = new mongoose.Schema({
+class Company extends Model { }
+
+Company.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
     name: {
-        type: String,
-        required: true,
-        trim: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     ownerName: {
-        type: String,
-        required: true,
-        trim: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'owner_name'
     },
+    // Address as JSONB for PostgreSQL (nested object)
     address: {
-        street: String,
-        city: String,
-        province: String,
-        cap: String,
-        country: { type: String, default: 'Italia' }
-    },
-    phone: String,
-    email: String,
-    pec: String, // Posta Elettronica Certificata
-    piva: String, // Partita IVA
-    taxCode: String, // Codice Fiscale (se diverso da P.IVA)
-    reaNumber: String, // Numero REA
-    shareCapital: String, // Capitale Sociale (es. "10.000,00 i.v.")
-    bankName: String, // Nome Banca
-    iban: String, // IBAN
-    logo: String, // Path to logo image
-    emailConfig: {
-        service: {
-            type: String,
-            default: 'gmail',
-            enum: ['gmail', 'outlook', 'custom']
-        },
-        host: String, // smtp.gmail.com
-        port: {
-            type: Number,
-            default: 587
-        },
-        user: String, // company@example.com
-        password: String, // Encrypted app password
-        fromName: String, // Display name in emails
-        configured: {
-            type: Boolean,
-            default: false
+        type: DataTypes.JSONB,
+        defaultValue: {
+            street: null,
+            city: null,
+            province: null,
+            cap: null,
+            country: 'Italia'
         }
     },
+    phone: {
+        type: DataTypes.STRING
+    },
+    email: {
+        type: DataTypes.STRING,
+        validate: {
+            isEmail: true
+        }
+    },
+    pec: {
+        type: DataTypes.STRING
+    },
+    piva: {
+        type: DataTypes.STRING
+    },
+    taxCode: {
+        type: DataTypes.STRING,
+        field: 'tax_code'
+    },
+    reaNumber: {
+        type: DataTypes.STRING,
+        field: 'rea_number'
+    },
+    shareCapital: {
+        type: DataTypes.STRING,
+        field: 'share_capital'
+    },
+    bankName: {
+        type: DataTypes.STRING,
+        field: 'bank_name'
+    },
+    iban: {
+        type: DataTypes.STRING
+    },
+    logo: {
+        type: DataTypes.STRING
+    },
+    // Email configuration as JSONB
+    emailConfig: {
+        type: DataTypes.JSONB,
+        defaultValue: {
+            service: 'gmail',
+            host: null,
+            port: 587,
+            user: null,
+            password: null,
+            fromName: null,
+            configured: false
+        },
+        field: 'email_config'
+    },
     active: {
-        type: Boolean,
-        default: true
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
 }, {
+    sequelize,
+    modelName: 'Company',
+    tableName: 'companies',
+    underscored: true,
     timestamps: true
 });
 
-module.exports = mongoose.model('Company', companySchema);
+module.exports = Company;

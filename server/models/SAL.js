@@ -1,85 +1,72 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const salSchema = new mongoose.Schema({
-    owner: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+class SAL extends Model { }
+
+SAL.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite',
-        required: true
+    ownerId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'owner_id',
+        references: { model: 'users', key: 'id' }
+    },
+    siteId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'site_id',
+        references: { model: 'construction_sites', key: 'id' }
     },
     number: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true
     },
     date: {
-        type: Date,
-        required: true,
-        default: Date.now
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
     },
     periodStart: {
-        type: Date,
-        required: true
+        type: DataTypes.DATE,
+        allowNull: false,
+        field: 'period_start'
     },
     periodEnd: {
-        type: Date,
-        required: true
+        type: DataTypes.DATE,
+        allowNull: false,
+        field: 'period_end'
     },
     client: {
-        name: {
-            type: String,
-            required: true
-        },
-        vatNumber: {
-            type: String,
-            required: true
-        },
-        address: {
-            type: String,
-            required: true
-        }
+        type: DataTypes.JSONB,
+        allowNull: false
     },
-    contractValue: {
-        type: Number,
-        required: true,
-        min: 0
+    items: {
+        type: DataTypes.JSONB,
+        defaultValue: []
     },
-    previousAmount: {
-        type: Number,
-        required: true,
-        default: 0,
-        min: 0
+    subtotal: DataTypes.DECIMAL(12, 2),
+    vatRate: {
+        type: DataTypes.DECIMAL(5, 2),
+        field: 'vat_rate'
     },
-    currentAmount: {
-        type: Number,
-        required: true,
-        min: 0
+    vatAmount: {
+        type: DataTypes.DECIMAL(12, 2),
+        field: 'vat_amount'
     },
-    completionPercentage: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 100
-    },
-    penalties: {
-        type: Number,
-        default: 0,
-        min: 0
-    },
-    notes: {
-        type: String,
-        default: ''
-    }
+    total: DataTypes.DECIMAL(12, 2),
+    notes: DataTypes.TEXT,
+    signature: DataTypes.STRING
 }, {
+    sequelize,
+    modelName: 'SAL',
+    tableName: 'sals',
+    underscored: true,
     timestamps: true
 });
 
-// Index for faster queries
-salSchema.index({ owner: 1, site: 1 });
-salSchema.index({ number: 1 });
-
-module.exports = mongoose.model('SAL', salSchema);
+module.exports = SAL;

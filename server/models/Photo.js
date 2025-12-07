@@ -1,50 +1,65 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const photoSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite',
-        required: true
-    },
-    filename: {
-        type: String,
-        required: true
-    },
-    path: {
-        type: String,
-        required: true
-    },
-    type: {
-        type: String,
-        enum: ['progress', 'issue', 'other'],
-        default: 'progress'
-    },
-    caption: String,
-    date: {
-        type: Date,
-        default: Date.now
-    }
-}, {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-});
-
-// Virtual field to provide photoUrl
-photoSchema.virtual('photoUrl').get(function () {
-    // If path is already a full URL (Cloudinary), return it
-    if (this.path && (this.path.startsWith('http://') || this.path.startsWith('https://'))) {
+class Photo extends Model {
+    // Virtual field for photoUrl
+    get photoUrl() {
+        if (this.path && (this.path.startsWith('http://') || this.path.startsWith('https://'))) {
+            return this.path;
+        }
         return this.path;
     }
-    // For local storage, we'll just return the path
-    // The frontend should handle the construction of the full URL if needed
-    return this.path;
+}
+
+Photo.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'user_id',
+        references: {
+            model: 'users',
+            key: 'id'
+        }
+    },
+    siteId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'site_id',
+        references: {
+            model: 'construction_sites',
+            key: 'id'
+        }
+    },
+    filename: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    path: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    type: {
+        type: DataTypes.ENUM('progress', 'issue', 'other'),
+        defaultValue: 'progress'
+    },
+    caption: {
+        type: DataTypes.STRING
+    },
+    date: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    }
+}, {
+    sequelize,
+    modelName: 'Photo',
+    tableName: 'photos',
+    underscored: true,
+    timestamps: true
 });
 
-module.exports = mongoose.model('Photo', photoSchema);
-
+module.exports = Photo;

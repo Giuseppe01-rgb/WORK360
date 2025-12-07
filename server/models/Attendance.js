@@ -1,55 +1,64 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const attendanceSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+class Attendance extends Model { }
+
+Attendance.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite',
-        required: true
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'user_id',
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     },
+    siteId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'site_id',
+        references: {
+            model: 'construction_sites',
+            key: 'id'
+        }
+    },
+    // Clock in as JSONB
     clockIn: {
-        time: {
-            type: Date,
-            required: true
-        },
-        location: {
-            type: {
-                type: String,
-                enum: ['Point'],
-                default: 'Point'
-            },
-            coordinates: {
-                type: [Number], // [longitude, latitude]
-                required: true
-            },
-            address: String
+        type: DataTypes.JSONB,
+        allowNull: false,
+        field: 'clock_in',
+        validate: {
+            hasRequiredFields(value) {
+                if (!value.time || !value.location) {
+                    throw new Error('clockIn must have time and location');
+                }
+            }
         }
     },
+    // Clock out as JSONB
     clockOut: {
-        time: Date,
-        location: {
-            type: {
-                type: String,
-                enum: ['Point']
-            },
-            coordinates: [Number],
-            address: String
-        }
+        type: DataTypes.JSONB,
+        field: 'clock_out'
     },
     totalHours: {
-        type: Number,
-        default: 0
+        type: DataTypes.DECIMAL(5, 2),
+        defaultValue: 0,
+        field: 'total_hours'
     },
-    notes: String
+    notes: {
+        type: DataTypes.TEXT
+    }
 }, {
+    sequelize,
+    modelName: 'Attendance',
+    tableName: 'attendances',
+    underscored: true,
     timestamps: true
 });
 
-// Index for geospatial queries
-attendanceSchema.index({ 'clockIn.location': '2dsphere' });
-
-module.exports = mongoose.model('Attendance', attendanceSchema);
+module.exports = Attendance;

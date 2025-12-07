@@ -1,69 +1,69 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const materialMasterSchema = new mongoose.Schema({
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+class MaterialMaster extends Model {
+    get missingPrice() {
+        return this.price === null || this.price === undefined || this.price === 0;
+    }
+}
+
+MaterialMaster.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: { model: 'companies', key: 'id' }
     },
     family: {
-        type: String, // e.g., "nastro", "stucco"
-        required: true,
-        trim: true,
-        lowercase: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    spec: {
-        type: String, // e.g., "48mm", "in polvere"
-        trim: true,
-        lowercase: true
-    },
+    spec: DataTypes.STRING,
     unit: {
-        type: String, // e.g., "pz", "kg"
-        required: true,
-        trim: true,
-        lowercase: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
     displayName: {
-        type: String, // e.g., "Nastro 48mm"
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'display_name'
     },
     normalizedKey: {
-        type: String, // e.g., "nastro|48mm|pz"
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'normalized_key'
     },
     supplier: {
-        type: String,
-        trim: true,
-        default: ''
+        type: DataTypes.STRING,
+        defaultValue: ''
     },
     barcode: {
-        type: String,
-        trim: true,
-        default: '',
-        index: true // For fast lookups
+        type: DataTypes.STRING,
+        defaultValue: ''
     },
     price: {
-        type: Number,
-        default: null
+        type: DataTypes.DECIMAL(10, 2)
     },
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+    createdById: {
+        type: DataTypes.UUID,
+        field: 'created_by_id',
+        references: { model: 'users', key: 'id' }
     }
 }, {
-    timestamps: true
+    sequelize,
+    modelName: 'MaterialMaster',
+    tableName: 'material_masters',
+    underscored: true,
+    timestamps: true,
+    indexes: [
+        { fields: ['barcode'] },
+        { fields: ['company_id', 'normalized_key'], unique: true }
+    ]
 });
 
-// Virtual field for missingPrice
-materialMasterSchema.virtual('missingPrice').get(function () {
-    return this.price === null || this.price === undefined || this.price === 0;
-});
-
-// Ensure virtuals are included in JSON
-materialMasterSchema.set('toJSON', { virtuals: true });
-materialMasterSchema.set('toObject', { virtuals: true });
-
-// Ensure unique materials per company
-materialMasterSchema.index({ company: 1, normalizedKey: 1 }, { unique: true });
-
-module.exports = mongoose.model('MaterialMaster', materialMasterSchema);
+module.exports = MaterialMaster;

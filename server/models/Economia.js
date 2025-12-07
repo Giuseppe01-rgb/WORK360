@@ -1,41 +1,57 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const economiaSchema = new mongoose.Schema({
-    worker: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+class Economia extends Model { }
+
+Economia.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite',
-        required: true
+    workerId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'worker_id',
+        references: { model: 'users', key: 'id' }
+    },
+    siteId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'site_id',
+        references: { model: 'construction_sites', key: 'id' }
     },
     hours: {
-        type: Number,
-        required: true,
-        min: 0.5,
-        max: 24
+        type: DataTypes.DECIMAL(4, 1),
+        allowNull: false,
+        validate: {
+            min: 0.5,
+            max: 24
+        }
     },
     description: {
-        type: String,
-        required: true,
-        trim: true,
-        minlength: 10,
-        maxlength: 1000
+        type: DataTypes.STRING(1000),
+        allowNull: false,
+        validate: {
+            len: [10, 1000]
+        }
     },
     date: {
-        type: Date,
-        default: Date.now,
-        required: true
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
     }
 }, {
-    timestamps: true
+    sequelize,
+    modelName: 'Economia',
+    tableName: 'economias',
+    underscored: true,
+    timestamps: true,
+    indexes: [
+        { fields: ['worker_id', 'date'] },
+        { fields: ['site_id', 'date'] },
+        { fields: ['worker_id', 'site_id'] }
+    ]
 });
 
-// Indexes for performance
-economiaSchema.index({ worker: 1, date: -1 });
-economiaSchema.index({ site: 1, date: -1 });
-economiaSchema.index({ worker: 1, site: 1 });
-
-module.exports = mongoose.model('Economia', economiaSchema);
+module.exports = Economia;

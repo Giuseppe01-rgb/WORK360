@@ -1,53 +1,93 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const quoteSchema = new mongoose.Schema({
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+class Quote extends Model { }
+
+Quote.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: { model: 'companies', key: 'id' }
     },
     client: {
-        name: { type: String, required: true },
-        address: String,
-        email: String,
-        vatNumber: String,
-        phone: String
+        type: DataTypes.JSONB,
+        allowNull: false
     },
     date: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
     },
     number: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    items: [{
-        description: { type: String, required: true },
-        quantity: { type: Number, required: true },
-        unitPrice: { type: Number, required: true },
-        total: { type: Number, required: true }
-    }],
-    subtotal: { type: Number, required: true },
-    vatRate: { type: Number, default: 22 },
-    vatAmount: { type: Number, required: true },
-    total: { type: Number, required: true },
-
-    // Contract Terms
-    validityDays: { type: Number, default: 30 },
-    paymentTerms: String,
-    safetyCosts: { type: Number, default: 0 },
-    workDuration: String,
-    legalNotes: String,
-
-    notes: String,
+    items: {
+        type: DataTypes.JSONB,
+        allowNull: false,
+        defaultValue: []
+    },
+    subtotal: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: false
+    },
+    vatRate: {
+        type: DataTypes.DECIMAL(5, 2),
+        defaultValue: 22,
+        field: 'vat_rate'
+    },
+    vatAmount: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: false,
+        field: 'vat_amount'
+    },
+    total: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: false
+    },
+    validityDays: {
+        type: DataTypes.INTEGER,
+        defaultValue: 30,
+        field: 'validity_days'
+    },
+    paymentTerms: {
+        type: DataTypes.TEXT,
+        field: 'payment_terms'
+    },
+    safetyCosts: {
+        type: DataTypes.DECIMAL(12, 2),
+        defaultValue: 0,
+        field: 'safety_costs'
+    },
+    workDuration: {
+        type: DataTypes.STRING,
+        field: 'work_duration'
+    },
+    legalNotes: {
+        type: DataTypes.TEXT,
+        field: 'legal_notes'
+    },
+    notes: {
+        type: DataTypes.TEXT
+    },
     status: {
-        type: String,
-        enum: ['draft', 'sent', 'accepted', 'rejected'],
-        default: 'draft'
+        type: DataTypes.ENUM('draft', 'sent', 'accepted', 'rejected'),
+        defaultValue: 'draft'
     },
-    signature: String // Path to signature image
+    signature: {
+        type: DataTypes.STRING
+    }
 }, {
+    sequelize,
+    modelName: 'Quote',
+    tableName: 'quotes',
+    underscored: true,
     timestamps: true
 });
 
-module.exports = mongoose.model('Quote', quoteSchema);
+module.exports = Quote;

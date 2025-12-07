@@ -1,5 +1,5 @@
-const User = require('../models/User');
-const Company = require('../models/Company');
+const { Op } = require('sequelize');
+const { User, Company } = require('../models');
 const { generateToken } = require('../utils/generateToken');
 const { logSecurity, logInfo, logError } = require('../utils/logger');
 
@@ -21,10 +21,17 @@ const register = async (req, res) => {
             const compName = parts[2].trim();
 
             // Check if company exists or create new one (case-insensitive)
-            company = await Company.findOne({ name: { $regex: new RegExp(`^${compName}$`, 'i') } });
+            company = await Company.findOne({
+                where: {
+                    name: {
+                        [Op.iLike]: compName // PostgreSQL case-insensitive LIKE
+                    }
+                }
+            });
+
             if (!company) {
                 company = await Company.create({
-                    name: compName, // Store as provided, or could force lowercase
+                    name: compName,
                     ownerName: parts[1]
                 });
             }
@@ -34,8 +41,14 @@ const register = async (req, res) => {
             const compName = parts[1].trim();
             console.log(`Worker registration: searching for company '${compName}'`);
 
-            // Company must exist for worker registration (case-insensitive, ignores surrounding spaces in DB)
-            company = await Company.findOne({ name: { $regex: new RegExp(`^\\s*${compName}\\s*$`, 'i') } });
+            // Company must exist for worker registration (case-insensitive)
+            company = await Company.findOne({
+                where: {
+                    name: {
+                        [Op.iLike]: `%${compName}%`
+                    }
+                }
+            });
             console.log('Company found:', company);
 
             if (!company) {
@@ -48,7 +61,10 @@ const register = async (req, res) => {
         }
 
         // Check if user already exists
-        const userExists = await User.findOne({ username });
+        const userExists = await User.findOne({
+            where: { username }
+        });
+
         if (userExists) {
             return res.status(400).json({ message: 'Username già esistente' });
         }
@@ -56,20 +72,22 @@ const register = async (req, res) => {
         // Create user
         const user = await User.create({
             username,
-            password,
+            password, // Will be hashed by hook
+            firstName,
+            lastName,
             role,
-            company: company._id,
-            firstName: firstName || parts[role === 'owner' ? 1 : 0],
-            lastName
+            companyId: company.id
         });
 
         if (user) {
             res.status(201).json({
-                _id: user._id,
+                _id: user.id,
                 username: user.username,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 role: user.role,
                 company: company,
-                token: generateToken(user._id)
+                token: generateToken(user.id)
             });
         }
     } catch (error) {
@@ -85,8 +103,14 @@ const login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // Find user
-        const user = await User.findOne({ username }).populate('company');
+        // Find user with company
+        const user = await User.findOne({
+            where: { username },
+            include: [{
+                model: Company,
+                as: 'company'
+            }]
+        });
 
         if (!user) {
             // SECURITY LOG: User not found
@@ -105,9 +129,9 @@ const login = async (req, res) => {
         if (!isMatch) {
             // SECURITY LOG: Wrong password
             logSecurity('Login failed: wrong password', {
-                userId: user._id,
+                userId: user.id,
                 username: user.username,
-                companyId: user.company?._id,
+                companyId: user.company?.id,
                 ip: req.ip,
                 userAgent: req.get('user-agent')
             });
@@ -116,13 +140,13 @@ const login = async (req, res) => {
         }
 
         // Success - generate token
-        const token = generateToken(user._id);
+        const token = generateToken(user.id);
 
         // INFO LOG: Successful login
         logInfo('Login successful', {
-            userId: user._id,
+            userId: user.id,
             username: user.username,
-            companyId: user.company?._id,
+            companyId: user.company?.id,
             companyName: user.company?.name,
             role: user.role,
             ip: req.ip,
@@ -130,7 +154,7 @@ const login = async (req, res) => {
         });
 
         res.json({
-            _id: user._id,
+            _id: user.id,
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,
@@ -153,15 +177,31 @@ const login = async (req, res) => {
 // @route   GET /api/auth/me
 // @access  Private
 const getMe = async (req, res) => {
-    res.json({
-        _id: req.user._id,
-        username: req.user.username,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        role: req.user.role,
-        company: req.user.company,
-        signature: req.user.signature
-    });
+    try {
+        const user = await User.findByPk(req.user.id, {
+            include: [{
+                model: Company,
+                as: 'company'
+            }]
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Utente non trovato' });
+        }
+
+        res.json({
+            _id: user.id,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            company: user.company,
+            signature: user.signature
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Errore nel recupero utente', error: error.message });
+    }
 };
 
 module.exports = { register, login, getMe };

@@ -1,5 +1,4 @@
-const User = require('../models/User');
-const Company = require('../models/Company');
+const { User, Company } = require('../models');
 const { upload } = require('./photoController');
 
 // Generate random password
@@ -15,9 +14,11 @@ const generatePassword = () => {
 // Get all users in company
 const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find({ company: req.user.company })
-            .select('-password')
-            .sort({ createdAt: -1 });
+        const users = await User.findAll({
+            where: { companyId: req.user.company },
+            attributes: { exclude: ['password'] },
+            order: [['createdAt', 'DESC']]
+        });
         res.json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -30,7 +31,7 @@ const createUser = async (req, res) => {
         const { role, firstName, lastName, email, phone, birthDate } = req.body;
 
         // Get company
-        const company = await Company.findById(req.user.company);
+        const company = await Company.findByPk(req.user.company);
         if (!company) {
             return res.status(404).json({ message: 'Azienda non trovata' });
         }
@@ -51,7 +52,7 @@ const createUser = async (req, res) => {
         // Check if username exists, add number if needed
         let finalUsername = username;
         let counter = 1;
-        while (await User.findOne({ username: finalUsername })) {
+        while (await User.findOne({ where: { username: finalUsername } })) {
             finalUsername = `${username}${counter}`;
             counter++;
         }
@@ -64,7 +65,7 @@ const createUser = async (req, res) => {
             username: finalUsername,
             password: generatedPassword,
             role,
-            company: req.user.company,
+            companyId: req.user.company,
             firstName,
             lastName,
             email,
@@ -74,7 +75,7 @@ const createUser = async (req, res) => {
         });
 
         // Return user without password but include generated password for one-time display
-        const userResponse = user.toObject();
+        const userResponse = user.toJSON();
         delete userResponse.password;
 
         res.status(201).json({

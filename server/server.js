@@ -2,11 +2,17 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const connectDB = require('./config/db');
+const { sequelize, testConnection } = require('./config/database');
 
 // Security: Validate critical environment variables
 if (!process.env.JWT_SECRET) {
     console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables');
+    process.exit(1);
+}
+
+// Validate DATABASE_URL
+if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
+    console.error('FATAL ERROR: DATABASE_URL or POSTGRES_URL is not defined');
     process.exit(1);
 }
 
@@ -15,8 +21,14 @@ const helmet = require('helmet');
 // Initialize express
 const app = express();
 
-// Connect to database
-connectDB();
+// Test PostgreSQL connection
+testConnection().catch(err => {
+    console.error('Failed to connect to PostgreSQL:', err);
+    process.exit(1);
+});
+
+// Import models to establish associations
+require('./models');
 
 // Security Headers
 app.use(helmet());
@@ -177,7 +189,18 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// Sync database and start server
+sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
+    .then(() => {
+        console.log('✅ Database synced successfully');
+
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server running on port ${PORT}`);
+            console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`Database: PostgreSQL (Sequelize)`);
+        });
+    })
+    .catch(err => {
+        console.error('❌ Failed to sync database:', err);
+        process.exit(1);
+    });

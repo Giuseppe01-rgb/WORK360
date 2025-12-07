@@ -1,36 +1,59 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const noteSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+class Note extends Model { }
+
+Note.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite',
-        required: true
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'user_id',
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     },
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+    siteId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'site_id',
+        references: {
+            model: 'construction_sites',
+            key: 'id'
+        }
+    },
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: {
+            model: 'companies',
+            key: 'id'
+        }
     },
     type: {
-        type: String,
-        enum: ['note', 'daily_report'],
-        default: 'note'
+        type: DataTypes.ENUM('note', 'daily_report'),
+        defaultValue: 'note'
     },
     content: {
-        type: String,
-        required: true
+        type: DataTypes.TEXT,
+        allowNull: false
     },
     date: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
     }
 }, {
+    sequelize,
+    modelName: 'Note',
+    tableName: 'notes',
+    underscored: true,
     timestamps: true
 });
 
-module.exports = mongoose.model('Note', noteSchema);
+module.exports = Note;

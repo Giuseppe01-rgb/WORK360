@@ -1,62 +1,56 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const documentSchema = new mongoose.Schema({
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+class Document extends Model { }
+
+Document.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: { model: 'companies', key: 'id' }
     },
     type: {
-        type: String,
-        enum: ['estimate', 'sal'], // preventivo, stato avanzamento lavori
-        required: true
+        type: DataTypes.ENUM('estimate', 'sal'),
+        allowNull: false
     },
     number: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite'
+    siteId: {
+        type: DataTypes.UUID,
+        field: 'site_id',
+        references: { model: 'construction_sites', key: 'id' }
     },
     client: {
-        name: { type: String, required: true },
-        address: String,
-        phone: String,
-        email: String,
-        piva: String
+        type: DataTypes.JSONB,
+        allowNull: false
     },
-    items: [{
-        description: { type: String, required: true },
-        quantity: { type: Number, required: true },
-        unit: { type: String, default: 'pz' },
-        unitPrice: { type: Number, required: true },
-        total: { type: Number, required: true }
-    }],
-    subtotal: {
-        type: Number,
-        required: true
+    date: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
     },
-    tax: {
-        type: Number,
-        default: 22 // IVA 22%
+    items: {
+        type: DataTypes.JSONB,
+        defaultValue: []
     },
-    taxAmount: Number,
-    total: {
-        type: Number,
-        required: true
-    },
-    notes: String,
-    pdfPath: String,
-    sentAt: Date,
-    sentTo: String,
+    total: DataTypes.DECIMAL(12, 2),
     status: {
-        type: String,
-        enum: ['draft', 'sent', 'accepted', 'rejected'],
-        default: 'draft'
+        type: DataTypes.ENUM('draft', 'sent', 'approved'),
+        defaultValue: 'draft'
     }
 }, {
+    sequelize,
+    modelName: 'Document',
+    tableName: 'documents',
+    underscored: true,
     timestamps: true
 });
 
-module.exports = mongoose.model('Document', documentSchema);
+module.exports = Document;

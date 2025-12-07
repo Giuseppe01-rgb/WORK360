@@ -1,63 +1,77 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const materialUsageSchema = new mongoose.Schema({
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+class MaterialUsage extends Model { }
+
+MaterialUsage.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite',
-        required: true
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: { model: 'companies', key: 'id' }
     },
-    material: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ColouraMaterial',
-        required: false  // Optional - null if not yet catalogued
+    siteId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'site_id',
+        references: { model: 'construction_sites', key: 'id' }
     },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+    materialId: {
+        type: DataTypes.UUID,
+        field: 'material_id',
+        references: { model: 'coloura_materials', key: 'id' }
+    },
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'user_id',
+        references: { model: 'users', key: 'id' }
     },
     numeroConfezioni: {
-        type: Number,
-        required: true,
-        min: 1
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'numero_confezioni',
+        validate: { min: 1 }
     },
     foto: {
-        type: String,  // URL to photo
-        default: null
+        type: DataTypes.STRING
     },
     stato: {
-        type: String,
-        enum: ['catalogato', 'da_approvare', 'rifiutato'],
-        default: 'catalogato'
+        type: DataTypes.ENUM('catalogato', 'da_approvare', 'rifiutato'),
+        defaultValue: 'catalogato'
     },
     materialeReportId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ReportedMaterial',
-        default: null
+        type: DataTypes.UUID,
+        field: 'materiale_report_id',
+        references: { model: 'reported_materials', key: 'id' }
     },
     note: {
-        type: String,
-        trim: true,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: ''
     },
     dataOra: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        field: 'data_ora'
     }
 }, {
-    timestamps: true
+    sequelize,
+    modelName: 'MaterialUsage',
+    tableName: 'material_usages',
+    underscored: true,
+    timestamps: true,
+    indexes: [
+        { fields: ['site_id', 'data_ora'] },
+        { fields: ['company_id', 'data_ora'] },
+        { fields: ['user_id', 'data_ora'] },
+        { fields: ['stato'] },
+        { fields: ['materiale_report_id'] }
+    ]
 });
 
-// Index for efficient queries by site and date
-materialUsageSchema.index({ site: 1, dataOra: -1 });
-materialUsageSchema.index({ company: 1, dataOra: -1 });
-materialUsageSchema.index({ user: 1, dataOra: -1 });
-materialUsageSchema.index({ stato: 1 });
-materialUsageSchema.index({ materialeReportId: 1 });
-
-module.exports = mongoose.model('MaterialUsage', materialUsageSchema);
+module.exports = MaterialUsage;

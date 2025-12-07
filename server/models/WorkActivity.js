@@ -1,57 +1,47 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const workActivitySchema = new mongoose.Schema({
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+class WorkActivity extends Model { }
+
+WorkActivity.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite',
-        required: true
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: { model: 'companies', key: 'id' }
     },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+    siteId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'site_id',
+        references: { model: 'construction_sites', key: 'id' }
+    },
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'user_id',
+        references: { model: 'users', key: 'id' }
     },
     date: {
-        type: Date,
-        required: true,
-        default: Date.now
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
     },
-    activityType: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    quantity: {
-        type: Number,
-        required: true
-    },
-    unit: {
-        type: String,
-        required: true,
-        default: 'pz' // pz, m, m², stanze, etc.
-    },
-    percentageTime: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: 0
-    },
-    durationHours: {
-        type: Number,
-        default: 0
-    },
-    notes: String
+    activityType: DataTypes.STRING,
+    description: DataTypes.TEXT,
+    hours: DataTypes.DECIMAL(5, 2),
+    notes: DataTypes.TEXT
 }, {
+    sequelize,
+    modelName: 'WorkActivity',
+    tableName: 'work_activities',
+    underscored: true,
     timestamps: true
 });
 
-// Index for efficient queries
-workActivitySchema.index({ company: 1, user: 1, date: 1 });
-workActivitySchema.index({ company: 1, site: 1, date: 1 });
-
-module.exports = mongoose.model('WorkActivity', workActivitySchema);
+module.exports = WorkActivity;

@@ -1,51 +1,78 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const constructionSiteSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        trim: true
+class ConstructionSite extends Model { }
+
+ConstructionSite.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: {
+            model: 'companies',
+            key: 'id'
+        }
     },
     address: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
+    // Client info as JSONB
     client: {
-        name: String,
-        phone: String,
-        email: String
+        type: DataTypes.JSONB,
+        defaultValue: {
+            name: null,
+            phone: null,
+            email: null
+        }
     },
     startDate: {
-        type: Date,
-        required: true
+        type: DataTypes.DATE,
+        allowNull: false,
+        field: 'start_date'
     },
     endDate: {
-        type: Date
+        type: DataTypes.DATE,
+        field: 'end_date'
     },
-    actualEndDate: Date,
+    actualEndDate: {
+        type: DataTypes.DATE,
+        field: 'actual_end_date'
+    },
     status: {
-        type: String,
-        enum: ['planned', 'active', 'completed', 'suspended'],
-        default: 'planned'
+        type: DataTypes.ENUM('planned', 'active', 'completed', 'suspended'),
+        defaultValue: 'planned'
     },
-    assignedWorkers: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    }],
-    description: String,
-    notes: String,
+    // Assigned workers - will use join table
+    description: {
+        type: DataTypes.TEXT
+    },
+    notes: {
+        type: DataTypes.TEXT
+    },
     contractValue: {
-        type: Number,
-        min: 0,
-        default: null
+        type: DataTypes.DECIMAL(12, 2),
+        defaultValue: null,
+        field: 'contract_value',
+        validate: {
+            min: 0
+        }
     }
 }, {
+    sequelize,
+    modelName: 'ConstructionSite',
+    tableName: 'construction_sites',
+    underscored: true,
     timestamps: true
 });
 
-module.exports = mongoose.model('ConstructionSite', constructionSiteSchema);
+module.exports = ConstructionSite;

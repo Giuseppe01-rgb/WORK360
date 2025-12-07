@@ -1,67 +1,73 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const colouraMaterialSchema = new mongoose.Schema({
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true,
-        index: true
+class ColouraMaterial extends Model { }
+
+ColouraMaterial.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    codice_prodotto: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        index: true
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: { model: 'companies', key: 'id' }
+    },
+    codiceProdotto: {
+        type: DataTypes.STRING,
+        field: 'codice_prodotto'
     },
     marca: {
-        type: String,
-        required: true,
-        trim: true
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    nome_prodotto: {
-        type: String,
-        required: true,
-        trim: true
+    nomeProdotto: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'nome_prodotto'
     },
     quantita: {
-        type: String,
-        trim: true,
-        default: ''
+        type: DataTypes.STRING,
+        defaultValue: ''
     },
     prezzo: {
-        type: Number,
-        default: null
+        type: DataTypes.DECIMAL(10, 2)
     },
     fornitore: {
-        type: String,
-        trim: true,
-        default: ''
+        type: DataTypes.STRING,
+        defaultValue: ''
     },
     categoria: {
-        type: String,
-        required: true,
-        trim: true,
-        default: 'Altro'
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'Altro'
     },
     attivo: {
-        type: Boolean,
-        default: true
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     },
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+    createdById: {
+        type: DataTypes.UUID,
+        field: 'created_by_id',
+        references: { model: 'users', key: 'id' }
     }
 }, {
-    timestamps: true
+    sequelize,
+    modelName: 'ColouraMaterial',
+    tableName: 'coloura_materials',
+    underscored: true,
+    timestamps: true,
+    indexes: [
+        { fields: ['company_id'] },
+        { fields: ['codice_prodotto'] },
+        {
+            fields: ['company_id', 'codice_prodotto'],
+            unique: true,
+            where: { codice_prodotto: { [require('sequelize').Op.ne]: '' } }
+        }
+    ]
 });
 
-// Compound index for company + product code uniqueness
-colouraMaterialSchema.index(
-    { company: 1, codice_prodotto: 1 },
-    {
-        unique: true,
-        partialFilterExpression: { codice_prodotto: { $type: "string", $ne: "" } }
-    }
-);
-
-module.exports = mongoose.model('ColouraMaterial', colouraMaterialSchema);
+module.exports = ColouraMaterial;

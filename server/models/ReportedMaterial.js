@@ -1,75 +1,92 @@
-const mongoose = require('mongoose');
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const reportedMaterialSchema = new mongoose.Schema({
-    company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        required: true
+class ReportedMaterial extends Model { }
+
+ReportedMaterial.init({
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
-    site: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ConstructionSite',
-        required: true
+    companyId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'company_id',
+        references: { model: 'companies', key: 'id' }
     },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+    siteId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'site_id',
+        references: { model: 'construction_sites', key: 'id' }
+    },
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: 'user_id',
+        references: { model: 'users', key: 'id' }
     },
     fotoUrl: {
-        type: String,
-        required: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'foto_url'
     },
     codiceLetto: {
-        type: String,
-        trim: true,
-        default: ''
+        type: DataTypes.STRING,
+        defaultValue: '',
+        field: 'codice_letto'
     },
     nomeDigitato: {
-        type: String,
-        required: true,
-        trim: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'nome_digitato'
     },
     categoriaDigitata: {
-        type: String,
-        enum: ['Pittura interna', 'Pittura esterna', 'Stucco', 'Primer', 'Rasante', 'Altro'],
-        default: 'Altro'
+        type: DataTypes.ENUM('Pittura interna', 'Pittura esterna', 'Stucco', 'Primer', 'Rasante', 'Altro'),
+        defaultValue: 'Altro',
+        field: 'categoria_digitata'
     },
     numeroConfezioni: {
-        type: Number,
-        required: true,
-        min: 1
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'numero_confezioni',
+        validate: { min: 1 }
     },
     stato: {
-        type: String,
-        enum: ['da_approvare', 'approvato', 'rifiutato'],
-        default: 'da_approvare'
+        type: DataTypes.ENUM('da_approvare', 'approvato', 'rifiutato'),
+        defaultValue: 'da_approvare'
     },
     materialeIdDefinitivo: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ColouraMaterial',
-        default: null
+        type: DataTypes.UUID,
+        field: 'materiale_id_definitivo',
+        references: { model: 'coloura_materials', key: 'id' }
     },
     noteApprovazione: {
-        type: String,
-        trim: true,
-        default: ''
+        type: DataTypes.TEXT,
+        defaultValue: '',
+        field: 'note_approvazione'
     },
     approvatoDa: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        default: null
+        type: DataTypes.UUID,
+        field: 'approvato_da',
+        references: { model: 'users', key: 'id' }
     },
     dataOra: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        field: 'data_ora'
     }
 }, {
-    timestamps: true
+    sequelize,
+    modelName: 'ReportedMaterial',
+    tableName: 'reported_materials',
+    underscored: true,
+    timestamps: true,
+    indexes: [
+        { fields: ['company_id', 'stato', 'data_ora'] },
+        { fields: ['site_id', 'data_ora'] }
+    ]
 });
 
-// Index for efficient admin queries
-reportedMaterialSchema.index({ company: 1, stato: 1, dataOra: -1 });
-reportedMaterialSchema.index({ site: 1, dataOra: -1 });
-
-module.exports = mongoose.model('ReportedMaterial', reportedMaterialSchema);
+module.exports = ReportedMaterial;
