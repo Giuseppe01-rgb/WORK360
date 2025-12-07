@@ -39,6 +39,9 @@ require('./models');
 // Security Headers
 app.use(helmet());
 
+// Trust proxy - required for Railway/production deployments
+app.set('trust proxy', true);
+
 // Middleware
 // CORS configuration
 const getAllowedOrigins = () => {
