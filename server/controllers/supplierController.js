@@ -1,11 +1,12 @@
-const Supplier = require('../models/Supplier');
+const { Supplier } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
+const { Op } = require('sequelize');
 
 const createSupplier = async (req, res) => {
     try {
         const supplier = await Supplier.create({
             ...req.body,
-            company: getCompanyId(req)
+            companyId: getCompanyId(req)
         });
 
         res.status(201).json(supplier);
@@ -16,7 +17,12 @@ const createSupplier = async (req, res) => {
 
 const getSuppliers = async (req, res) => {
     try {
-        const suppliers = await Supplier.find({ company: getCompanyId(req), active: true });
+        const suppliers = await Supplier.findAll({
+            where: {
+                companyId: getCompanyId(req),
+                active: true
+            }
+        });
         res.json(suppliers);
     } catch (error) {
         res.status(500).json({ message: 'Errore nel recupero dei fornitori', error: error.message });
@@ -25,15 +31,13 @@ const getSuppliers = async (req, res) => {
 
 const updateSupplier = async (req, res) => {
     try {
-        const supplier = await Supplier.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        );
+        const supplier = await Supplier.findByPk(req.params.id);
 
         if (!supplier) {
             return res.status(404).json({ message: 'Fornitore non trovato' });
         }
+
+        await supplier.update(req.body);
 
         res.json(supplier);
     } catch (error) {
@@ -53,18 +57,21 @@ const recommendSupplier = async (req, res) => {
             maxDeliveryTime = Infinity
         } = preferences || {};
 
-        // Find suppliers with the material
-        const suppliers = await Supplier.find({
-            company: getCompanyId(req),
-            active: true,
-            'materials.name': { $regex: materialName, $options: 'i' }
+        // Find suppliers with the material (basic implementation - materials is JSONB)
+        const suppliers = await Supplier.findAll({
+            where: {
+                companyId: getCompanyId(req),
+                active: true
+            }
         });
 
-        // Score each supplier
+        // Filter and score suppliers client-side (since materials is JSONB)
         const scored = suppliers
             .map(supplier => {
+                if (!supplier.materials || !Array.isArray(supplier.materials)) return null;
+
                 const material = supplier.materials.find(m =>
-                    m.name.toLowerCase().includes(materialName.toLowerCase())
+                    m.name && m.name.toLowerCase().includes(materialName.toLowerCase())
                 );
 
                 if (!material) return null;
@@ -72,7 +79,7 @@ const recommendSupplier = async (req, res) => {
                 let score = 0;
 
                 // Quality score (0-50 points)
-                score += (supplier.qualityRating / 10) * 50;
+                score += (supplier.rating / 10) * 50;
 
                 // Price score (0-30 points) - lower is better
                 if (material.averagePrice) {
@@ -80,14 +87,15 @@ const recommendSupplier = async (req, res) => {
                     score += priceScore;
                 }
 
-                // Delivery time score (0-20 points) - faster is better
-                const deliveryScore = Math.max(0, 20 - (supplier.deliveryTime / maxDeliveryTime) * 20);
+                // Delivery time score (0-20 points) - faster is better  
+                const deliveryTime = supplier.deliveryTime || 0;
+                const deliveryScore = Math.max(0, 20 - (deliveryTime / maxDeliveryTime) * 20);
                 score += deliveryScore;
 
                 // Filter by constraints
                 if (material.averagePrice > maxPrice ||
-                    supplier.qualityRating < minQuality ||
-                    supplier.deliveryTime > maxDeliveryTime) {
+                    supplier.rating < minQuality ||
+                    deliveryTime > maxDeliveryTime) {
                     return null;
                 }
 
@@ -96,7 +104,7 @@ const recommendSupplier = async (req, res) => {
                     material,
                     score,
                     breakdown: {
-                        qualityScore: (supplier.qualityRating / 10) * 50,
+                        qualityScore: (supplier.rating / 10) * 50,
                         priceScore: material.averagePrice ? Math.max(0, 30 - (material.averagePrice / maxPrice) * 30) : 0,
                         deliveryScore
                     }
