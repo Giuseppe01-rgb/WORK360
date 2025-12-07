@@ -1,17 +1,18 @@
-const WorkActivity = require('../models/WorkActivity');
+const { WorkActivity, User, ConstructionSite, Attendance } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
-const Attendance = require('../models/Attendance');
-const mongoose = require('mongoose');
+const { sanitizeAllDates } = require('../utils/dateValidator');
+const { Op } = require('sequelize');
+const sequelize = require('../config/database');
 
 // Create a new work activity
 exports.create = async (req, res) => {
     try {
         const { siteId, activityType, quantity, unit, notes, date } = req.body;
 
-        const activity = new WorkActivity({
-            company: req.user.company,
-            site: siteId,
-            user: getUserId(req),
+        const activityData = sanitizeAllDates({
+            companyId: getCompanyId(req),
+            siteId,
+            userId: getUserId(req),
             date: date || new Date(),
             activityType,
             quantity,
@@ -19,7 +20,7 @@ exports.create = async (req, res) => {
             notes
         });
 
-        await activity.save();
+        const activity = await WorkActivity.create(activityData);
         res.status(201).json(activity);
     } catch (error) {
         console.error('Error creating work activity:', error);
@@ -33,36 +34,33 @@ exports.update = async (req, res) => {
         const { activityType, quantity, unit, notes, date } = req.body;
         const activityId = req.params.id;
 
-        // Find the activity
-        const activity = await WorkActivity.findById(activityId);
+        const activity = await WorkActivity.findByPk(activityId);
 
         if (!activity) {
             return res.status(404).json({ message: 'Attività non trovata' });
         }
 
-        // Authorization check: only creator or owner can update
-        const userCompanyId = req.user.company?._id || req.user.company;
-        const activityCompanyId = activity.company;
-        const userId = getUserId(req);
-        const activityUserId = activity.user;
-
-        const isCompanyMatch = userCompanyId && activityCompanyId && userCompanyId.toString() === activityCompanyId.toString();
-        const isCreatorMatch = userId && activityUserId && userId.toString() === activityUserId.toString();
+        // Authorization check
+        const userCompanyId = getCompanyId(req);
+        const isCompanyMatch = userCompanyId && activity.companyId === userCompanyId;
+        const isCreatorMatch = activity.userId === getUserId(req);
         const isOwner = req.user.role === 'owner';
 
-        // Owner can update any activity from their company, worker can only update their own
         if (!isCompanyMatch || (!isOwner && !isCreatorMatch)) {
             return res.status(403).json({ message: 'Non autorizzato a modificare questa attività' });
         }
 
-        // Update fields
-        if (activityType !== undefined) activity.activityType = activityType;
-        if (quantity !== undefined) activity.quantity = quantity;
-        if (unit !== undefined) activity.unit = unit;
-        if (notes !== undefined) activity.notes = notes;
-        if (date !== undefined) activity.date = date;
+        // Build update data
+        const updateData = {};
+        if (activityType !== undefined) updateData.activityType = activityType;
+        if (quantity !== undefined) updateData.quantity = quantity;
+        if (unit !== undefined) updateData.unit = unit;
+        if (notes !== undefined) updateData.notes = notes;
+        if (date !== undefined) updateData.date = date;
 
-        await activity.save();
+        const sanitizedUpdate = sanitizeAllDates(updateData);
+
+        await activity.update(sanitizedUpdate);
         res.json(activity);
     } catch (error) {
         console.error('Error updating work activity:', error);
@@ -75,20 +73,24 @@ exports.getAll = async (req, res) => {
     try {
         const { userId, siteId, startDate, endDate } = req.query;
 
-        const query = { company: req.user.company };
+        const where = { companyId: getCompanyId(req) };
 
-        if (userId) query.user = userId;
-        if (siteId) query.site = siteId;
+        if (userId) where.userId = userId;
+        if (siteId) where.siteId = siteId;
         if (startDate || endDate) {
-            query.date = {};
-            if (startDate) query.date.$gte = new Date(startDate);
-            if (endDate) query.date.$lte = new Date(endDate);
+            where.date = {};
+            if (startDate) where.date[Op.gte] = new Date(startDate);
+            if (endDate) where.date[Op.lte] = new Date(endDate);
         }
 
-        const activities = await WorkActivity.find(query)
-            .populate('user', 'name')
-            .populate('site', 'name')
-            .sort({ date: -1 });
+        const activities = await WorkActivity.findAll({
+            where,
+            include: [
+                { model: User, as: 'user', attributes: ['firstName', 'lastName'] },
+                { model: ConstructionSite, as: 'site', attributes: ['name'] }
+            ],
+            order: [['date', 'DESC']]
+        });
 
         res.json(activities);
     } catch (error) {
@@ -116,7 +118,7 @@ exports.distributeTime = async (req, res) => {
         }
 
         // Get the first activity to determine the date
-        const firstActivity = await WorkActivity.findById(activities[0].id);
+        const firstActivity = await WorkActivity.findByPk(activities[0].id);
         if (!firstActivity) {
             return res.status(404).json({ message: 'Attività non trovata' });
         }
@@ -128,8 +130,11 @@ exports.distributeTime = async (req, res) => {
         endOfDay.setHours(23, 59, 59, 999);
 
         const attendance = await Attendance.findOne({
-            user: userId,
-            'clockIn.time': { $gte: startOfDay, $lte: endOfDay }
+            where: {
+                userId,
+                // clockIn.time stored as JSONB - need to query it differently
+                createdAt: { [Op.between]: [startOfDay, endOfDay] }
+            }
         });
 
         if (!attendance || !attendance.totalHours) {
@@ -144,21 +149,22 @@ exports.distributeTime = async (req, res) => {
         const updatePromises = activities.map(async (activityData) => {
             const durationHours = totalHours * (activityData.percentageTime / 100);
 
-            return WorkActivity.findByIdAndUpdate(
-                activityData.id,
-                {
+            const activity = await WorkActivity.findByPk(activityData.id);
+            if (activity) {
+                await activity.update({
                     percentageTime: activityData.percentageTime,
                     durationHours: parseFloat(durationHours.toFixed(2))
-                },
-                { new: true }
-            );
+                });
+                return activity;
+            }
+            return null;
         });
 
         const updatedActivities = await Promise.all(updatePromises);
 
         res.json({
             message: 'Distribuzione del tempo salvata con successo',
-            activities: updatedActivities,
+            activities: updatedActivities.filter(Boolean),
             totalHours
         });
     } catch (error) {
@@ -167,38 +173,28 @@ exports.distributeTime = async (req, res) => {
     }
 };
 
-// @desc    Delete work activity
-// @route   DELETE /api/work-activities/:id
-// @access  Private (Worker/Owner)
-// @desc    Delete work activity
-// @route   DELETE /api/work-activities/:id
-// @access  Private (Worker/Owner)
+// Delete work activity
 exports.deleteActivity = async (req, res) => {
     try {
-        const activity = await WorkActivity.findById(req.params.id);
+        const activity = await WorkActivity.findByPk(req.params.id);
 
         if (!activity) {
             console.warn(`Activity not found for delete: ${req.params.id}`);
             return res.status(404).json({ message: 'Attività non trovata' });
         }
 
-        // Robust ownership check
-        const userCompanyId = req.user.company?._id || req.user.company;
-        const activityCompanyId = activity.company;
-        const userId = getUserId(req);
-        const activityUserId = activity.user;
-
-        const isCompanyMatch = userCompanyId && activityCompanyId && userCompanyId.toString() === activityCompanyId.toString();
-        const isCreatorMatch = userId && activityUserId && userId.toString() === activityUserId.toString();
+        // Authorization check
+        const userCompanyId = getCompanyId(req);
+        const isCompanyMatch = userCompanyId && activity.companyId === userCompanyId;
+        const isCreatorMatch = activity.userId === getUserId(req);
         const isOwner = req.user.role === 'owner';
 
-        // Owner can delete any activity from their company, worker can only delete their own
         if (!isCompanyMatch || (!isOwner && !isCreatorMatch)) {
-            console.warn(`Unauthorized activity delete attempt. User: ${userId}, Activity: ${activity._id}`);
+            console.warn(`Unauthorized activity delete attempt. User: ${getUserId(req)}, Activity: ${activity.id}`);
             return res.status(401).json({ message: 'Non autorizzato' });
         }
 
-        await activity.deleteOne();
+        await activity.destroy();
         res.json({ message: 'Attività eliminata' });
     } catch (error) {
         console.error('Error deleting activity:', error);
@@ -209,70 +205,78 @@ exports.deleteActivity = async (req, res) => {
 // Get analytics data
 exports.getAnalytics = async (req, res) => {
     try {
-        const { userId, siteId, startDate, endDate, groupBy } = req.query;
+        const { userId, siteId, startDate, endDate, groupBy = 'activity' } = req.query;
 
-        const matchStage = { company: getCompanyId(req) };
-
-        if (userId) matchStage.user = new mongoose.Types.ObjectId(userId);
-        if (siteId) matchStage.site = new mongoose.Types.ObjectId(siteId);
+        const where = { companyId: getCompanyId(req) };
+        if (userId) where.userId = userId;
+        if (siteId) where.siteId = siteId;
         if (startDate || endDate) {
-            matchStage.date = {};
-            if (startDate) matchStage.date.$gte = new Date(startDate);
-            if (endDate) matchStage.date.$lte = new Date(endDate);
+            where.date = {};
+            if (startDate) where.date[Op.gte] = new Date(startDate);
+            if (endDate) where.date[Op.lte] = new Date(endDate);
         }
 
+        // Determine group by field
         let groupByField;
         switch (groupBy) {
             case 'user':
-                groupByField = '$user';
+                groupByField = 'user_id';
                 break;
             case 'site':
-                groupByField = '$site';
+                groupByField = 'site_id';
                 break;
             case 'activity':
             default:
-                groupByField = '$activityType';
+                groupByField = 'activity_type';
                 break;
         }
 
-        const analytics = await WorkActivity.aggregate([
-            { $match: matchStage },
-            {
-                $group: {
-                    _id: groupByField,
-                    totalQuantity: { $sum: '$quantity' },
-                    totalHours: { $sum: '$durationHours' },
-                    unit: { $first: '$unit' }, // Get the unit from the first document
-                    avgProductivity: {
-                        $avg: {
-                            $cond: [
-                                { $gt: ['$durationHours', 0] },
-                                { $divide: ['$quantity', '$durationHours'] },
-                                0
-                            ]
-                        }
-                    },
-                    activities: { $push: '$$ROOT' }
-                }
-            },
-            {
-                $project: {
-                    _id: 1,
-                    totalQuantity: 1,
-                    totalHours: 1,
-                    unit: 1, // Pass unit to result
-                    productivity: {
-                        $cond: [
-                            { $gt: ['$totalHours', 0] },
-                            { $divide: ['$totalQuantity', '$totalHours'] },
-                            0
-                        ]
-                    },
-                    avgProductivity: 1,
-                    activityCount: { $size: '$activities' }
-                }
-            }
-        ]);
+        // Build WHERE clause for raw SQL
+        const whereClauses = [`company_id = :companyId`];
+        const replacements = { companyId: getCompanyId(req) };
+
+        if (userId) {
+            whereClauses.push(`user_id = :userId`);
+            replacements.userId = userId;
+        }
+        if (siteId) {
+            whereClauses.push(`site_id = :siteId`);
+            replacements.siteId = siteId;
+        }
+        if (startDate) {
+            whereClauses.push(`date >= :startDate`);
+            replacements.startDate = new Date(startDate);
+        }
+        if (endDate) {
+            whereClauses.push(`date <= :endDate`);
+            replacements.endDate = new Date(endDate);
+        }
+
+        // Use raw SQL for analytics aggregation
+        const analytics = await sequelize.query(`
+            SELECT 
+                ${groupByField} as group_key,
+                SUM(quantity) as total_quantity,
+                SUM(duration_hours) as total_hours,
+                MAX(unit) as unit,
+                CASE 
+                    WHEN SUM(duration_hours) > 0 THEN SUM(quantity) / SUM(duration_hours)
+                    ELSE 0
+                END as productivity,
+                AVG(
+                    CASE 
+                        WHEN duration_hours > 0 THEN quantity / duration_hours
+                        ELSE 0
+                    END
+                ) as avg_productivity,
+                COUNT(*) as activity_count
+            FROM work_activities
+            WHERE ${whereClauses.join(' AND ')}
+            GROUP BY ${groupByField}
+        `, {
+            replacements,
+            type: sequelize.QueryTypes.SELECT
+        });
 
         res.json(analytics);
     } catch (error) {
