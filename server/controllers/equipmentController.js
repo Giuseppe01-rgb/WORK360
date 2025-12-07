@@ -1,10 +1,10 @@
-const Equipment = require('../models/Equipment');
+const { Equipment, User, ConstructionSite } = require('../models');
 
 const createEquipment = async (req, res) => {
     try {
         const equipment = await Equipment.create({
             ...req.body,
-            user: req.user._id
+            userId: req.user._id
         });
 
         res.status(201).json(equipment);
@@ -16,12 +16,16 @@ const createEquipment = async (req, res) => {
 const getEquipment = async (req, res) => {
     try {
         const { siteId } = req.query;
-        const query = siteId ? { site: siteId } : {};
+        const where = siteId ? { siteId } : {};
 
-        const equipment = await Equipment.find(query)
-            .populate('user', 'firstName lastName')
-            .populate('site', 'name')
-            .sort({ date: -1 });
+        const equipment = await Equipment.findAll({
+            where,
+            include: [
+                { model: User, as: 'user', attributes: ['firstName', 'lastName'] },
+                { model: ConstructionSite, as: 'site', attributes: ['name'] }
+            ],
+            order: [['date', 'DESC']]
+        });
 
         res.json(equipment);
     } catch (error) {

@@ -1,12 +1,11 @@
-const Company = require('../models/Company');
-const User = require('../models/User');
+const { Company, User } = require('../models');
 
 // @desc    Get company data
 // @route   GET /api/company
 // @access  Private (Owner)
 const getCompany = async (req, res) => {
     try {
-        const company = await Company.findById(req.user.company._id);
+        const company = await Company.findByPk(req.user.company._id);
         if (!company) {
             return res.status(404).json({ message: 'Azienda non trovata' });
         }
@@ -28,7 +27,6 @@ const updateCompany = async (req, res) => {
 
         const { name, ownerName, piva, phone, email, pec, address, reaNumber, shareCapital, taxCode, bankName, iban } = req.body;
 
-        // Build update data - only include fields that are actually provided
         const updateData = {};
 
         if (name !== undefined) updateData.name = name;
@@ -62,15 +60,12 @@ const updateCompany = async (req, res) => {
 
         console.log('Updating company with fields:', Object.keys(updateData));
 
-        const company = await Company.findByIdAndUpdate(
-            req.user.company._id,
-            { $set: updateData },
-            { new: true, runValidators: true }
-        );
-
+        const company = await Company.findByPk(req.user.company._id);
         if (!company) {
             throw new Error('Azienda non trovata');
         }
+
+        await company.update(updateData);
 
         console.log('Company updated successfully');
         res.json(company);
