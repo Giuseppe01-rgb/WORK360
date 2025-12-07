@@ -9,7 +9,7 @@ const createSite = async (req, res) => {
             const workers = await User.findAll({
                 where: {
                     id: { [Op.in]: req.body.assignedWorkers },
-                    companyId: req.user.company._id
+                    companyId: req.user.companyId || req.user.company?.id
                 }
             });
 
@@ -20,7 +20,7 @@ const createSite = async (req, res) => {
 
         const site = await ConstructionSite.create({
             ...req.body,
-            companyId: req.user.company._id
+            companyId: req.user.companyId || req.user.company?.id
         });
 
         // Add assigned workers to many-to-many
@@ -37,10 +37,11 @@ const createSite = async (req, res) => {
 // Get all sites for company
 const getSites = async (req, res) => {
     try {
-        console.log('GetSites User:', req.user._id, 'Company:', req.user.company?._id);
+        const companyId = req.user.companyId || req.user.company?.id;
+        console.log('GetSites User:', req.user.id, 'Company:', companyId);
 
         const sites = await ConstructionSite.findAll({
-            where: { companyId: req.user.company._id },
+            where: { companyId },
             include: [{
                 model: User,
                 as: 'assignedWorkers',
@@ -63,7 +64,7 @@ const getSite = async (req, res) => {
         const site = await ConstructionSite.findOne({
             where: {
                 id: req.params.id,
-                companyId: req.user.company._id
+                companyId: req.user.companyId || req.user.company?.id
             },
             include: [{
                 model: User,
@@ -94,7 +95,7 @@ const updateSite = async (req, res) => {
             const workers = await User.findAll({
                 where: {
                     id: { [Op.in]: updateData.assignedWorkers },
-                    companyId: req.user.company._id
+                    companyId: req.user.companyId || req.user.company?.id
                 }
             });
 
@@ -106,7 +107,7 @@ const updateSite = async (req, res) => {
         const site = await ConstructionSite.findOne({
             where: {
                 id: req.params.id,
-                companyId: req.user.company._id
+                companyId: req.user.companyId || req.user.company?.id
             }
         });
 
@@ -142,7 +143,7 @@ const updateSite = async (req, res) => {
 const deleteSite = async (req, res) => {
     try {
         const siteId = req.params.id;
-        const companyId = req.user.company._id;
+        const companyId = req.user.companyId || req.user.company?.id;
 
         // Check if site exists and belongs to company
         const site = await ConstructionSite.findOne({
