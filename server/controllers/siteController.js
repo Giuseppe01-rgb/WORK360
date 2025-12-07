@@ -25,8 +25,15 @@ const createSite = async (req, res) => {
             }
         }
 
-        // Sanitize invalid dates
-        const siteData = sanitizeAllDates({ ...req.body, companyId });
+        // Sanitize invalid dates - be explicit about all date fields
+        let siteData = { ...req.body, companyId };
+
+        // Remove any field with "Invalid date" value
+        Object.keys(siteData).forEach(key => {
+            if (siteData[key] === 'Invalid date' || siteData[key] === 'Invalid Date' || siteData[key] === '') {
+                delete siteData[key];
+            }
+        });
 
         console.log('Creating site with data:', siteData);
 
