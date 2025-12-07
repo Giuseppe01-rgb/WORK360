@@ -11,7 +11,7 @@ const getHoursPerEmployee = async (req, res) => {
         const { startDate, endDate, siteId } = req.query;
         console.log('DEBUG: getHoursPerEmployee called with:', { startDate, endDate, siteId });
 
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         // Build where clause
         const where = {
@@ -70,7 +70,7 @@ const getHoursPerEmployee = async (req, res) => {
 const getSiteReport = async (req, res, next) => {
     try {
         const { siteId } = req.params;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         // Validate siteId
         if (!siteId || siteId === 'undefined' || siteId === 'null') {
@@ -160,7 +160,7 @@ const getEmployeeMaterials = async (req, res) => {
 const getMaterialsSummary = async (req, res) => {
     try {
         const { siteId } = req.query;
-        const companyId = req.user.company._id || req.user.company;
+        const companyId = getCompanyId(req);
 
         const where = { companyId };
         if (siteId) where.siteId = siteId;

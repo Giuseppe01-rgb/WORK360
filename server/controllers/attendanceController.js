@@ -24,7 +24,7 @@ const clockIn = async (req, res) => {
         if (!site) {
             return res.status(404).json({ message: 'Cantiere non trovato' });
         }
-        if (site.companyId !== req.user.company._id.toString()) {
+        if (site.companyId !== getCompanyId(req)) {
             return res.status(403).json({ message: 'Non autorizzato a timbrare su questo cantiere' });
         }
 
@@ -201,7 +201,7 @@ const getAllAttendance = async (req, res) => {
                     model: User,
                     as: 'user',
                     attributes: ['id', 'firstName', 'lastName', 'username'],
-                    where: { companyId: req.user.company._id }
+                    where: { companyId: getCompanyId(req) }
                 },
                 {
                     model: ConstructionSite,
