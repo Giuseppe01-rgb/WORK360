@@ -1,6 +1,6 @@
-const SAL = require('../models/SAL');
+const { SAL, ConstructionSite, Company } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
-const Company = require('../models/Company');
+const { sanitizeAllDates } = require('../utils/dateValidator');
 const { generateSALPDF } = require('../utils/pdfGenerator');
 
 
@@ -8,7 +8,7 @@ const { generateSALPDF } = require('../utils/pdfGenerator');
 exports.createSAL = async (req, res) => {
     try {
         console.log('CREATE SAL - Request body:', JSON.stringify(req.body, null, 2));
-        console.log('CREATE SAL - User:', req.user?._id);
+        console.log('CREATE SAL - User:', getUserId(req));
 
         const { site, date, periodStart, periodEnd, client, contractValue, previousAmount, currentAmount, penalties, notes } = req.body;
 
@@ -35,14 +35,15 @@ exports.createSAL = async (req, res) => {
 
         // Generate SAL number
         const year = new Date().getFullYear();
-        const count = await SAL.countDocuments({ owner: getUserId(req) });
+        const count = await SAL.count({ where: { ownerId: getUserId(req) } });
         const number = `SAL-${year}-${String(count + 1).padStart(4, '0')}`;
 
         console.log('CREATE SAL - Generated number:', number);
 
-        const sal = new SAL({
-            owner: getUserId(req),
-            site,
+        // Sanitize dates
+        const salData = sanitizeAllDates({
+            ownerId: getUserId(req),
+            siteId: site,
             number,
             date,
             periodStart,
@@ -56,10 +57,14 @@ exports.createSAL = async (req, res) => {
             notes: notes || ''
         });
 
-        console.log('CREATE SAL - About to save:', JSON.stringify(sal, null, 2));
+        console.log('CREATE SAL - About to save:', JSON.stringify(salData, null, 2));
 
-        await sal.save();
-        await sal.populate('site');
+        const sal = await SAL.create(salData);
+
+        // Reload with associations
+        await sal.reload({
+            include: [{ model: ConstructionSite, as: 'site' }]
+        });
 
         console.log('CREATE SAL - Success!');
         res.status(201).json(sal);
@@ -74,9 +79,11 @@ exports.createSAL = async (req, res) => {
 // Get all SALs for owner
 exports.getAllSALs = async (req, res) => {
     try {
-        const sals = await SAL.find({ owner: getUserId(req) })
-            .populate('site')
-            .sort({ date: -1 });
+        const sals = await SAL.findAll({
+            where: { ownerId: getUserId(req) },
+            include: [{ model: ConstructionSite, as: 'site' }],
+            order: [['date', 'DESC']]
+        });
 
         res.json(sals);
     } catch (error) {
@@ -89,9 +96,12 @@ exports.getAllSALs = async (req, res) => {
 exports.getSALById = async (req, res) => {
     try {
         const sal = await SAL.findOne({
-            _id: req.params.id,
-            owner: getUserId(req)
-        }).populate('site');
+            where: {
+                id: req.params.id,
+                ownerId: getUserId(req)
+            },
+            include: [{ model: ConstructionSite, as: 'site' }]
+        });
 
         if (!sal) {
             return res.status(404).json({ message: 'SAL non trovato' });
@@ -110,8 +120,10 @@ exports.updateSAL = async (req, res) => {
         const { site, date, periodStart, periodEnd, client, contractValue, previousAmount, currentAmount, penalties, notes } = req.body;
 
         const sal = await SAL.findOne({
-            _id: req.params.id,
-            owner: getUserId(req)
+            where: {
+                id: req.params.id,
+                ownerId: getUserId(req)
+            }
         });
 
         if (!sal) {
@@ -122,22 +134,29 @@ exports.updateSAL = async (req, res) => {
         const totalSpent = previousAmount + currentAmount;
         const completionPercentage = Math.min(100, Math.max(0, (totalSpent / contractValue) * 100));
 
-        // Update fields
-        if (site) sal.site = site;
-        if (date) sal.date = date;
-        if (periodStart) sal.periodStart = periodStart;
-        if (periodEnd) sal.periodEnd = periodEnd;
-        if (client) sal.client = client;
-        if (contractValue !== undefined) sal.contractValue = contractValue;
-        if (previousAmount !== undefined) sal.previousAmount = previousAmount;
-        if (currentAmount !== undefined) sal.currentAmount = currentAmount;
-        if (penalties !== undefined) sal.penalties = penalties;
-        if (notes !== undefined) sal.notes = notes;
+        // Build update data
+        const updateData = {};
+        if (site) updateData.siteId = site;
+        if (date) updateData.date = date;
+        if (periodStart) updateData.periodStart = periodStart;
+        if (periodEnd) updateData.periodEnd = periodEnd;
+        if (client) updateData.client = client;
+        if (contractValue !== undefined) updateData.contractValue = contractValue;
+        if (previousAmount !== undefined) updateData.previousAmount = previousAmount;
+        if (currentAmount !== undefined) updateData.currentAmount = currentAmount;
+        if (penalties !== undefined) updateData.penalties = penalties;
+        if (notes !== undefined) updateData.notes = notes;
+        updateData.completionPercentage = Math.round(completionPercentage * 100) / 100;
 
-        sal.completionPercentage = Math.round(completionPercentage * 100) / 100;
+        // Sanitize dates
+        const sanitizedUpdate = sanitizeAllDates(updateData);
 
-        await sal.save();
-        await sal.populate('site');
+        await sal.update(sanitizedUpdate);
+
+        // Reload with associations
+        await sal.reload({
+            include: [{ model: ConstructionSite, as: 'site' }]
+        });
 
         res.json(sal);
     } catch (error) {
@@ -150,15 +169,17 @@ exports.updateSAL = async (req, res) => {
 exports.deleteSAL = async (req, res) => {
     try {
         const sal = await SAL.findOne({
-            _id: req.params.id,
-            owner: getUserId(req)
+            where: {
+                id: req.params.id,
+                ownerId: getUserId(req)
+            }
         });
 
         if (!sal) {
             return res.status(404).json({ message: 'SAL non trovato' });
         }
 
-        await sal.deleteOne();
+        await sal.destroy();
         res.json({ message: 'SAL eliminato con successo' });
     } catch (error) {
         console.error('Error deleting SAL:', error);
@@ -171,12 +192,15 @@ exports.downloadSALPDF = async (req, res) => {
     try {
         console.log('DOWNLOAD SAL PDF - Request for ID:', req.params.id);
         console.log('DOWNLOAD SAL PDF - User:', getUserId(req));
-        console.log('DOWNLOAD SAL PDF - User Company ID:', req.user.company);
+        console.log('DOWNLOAD SAL PDF - User Company ID:', getCompanyId(req));
 
         const sal = await SAL.findOne({
-            _id: req.params.id,
-            owner: getUserId(req)
-        }).populate('site');
+            where: {
+                id: req.params.id,
+                ownerId: getUserId(req)
+            },
+            include: [{ model: ConstructionSite, as: 'site' }]
+        });
 
         if (!sal) {
             console.error('DOWNLOAD SAL PDF - SAL not found');
@@ -184,17 +208,17 @@ exports.downloadSALPDF = async (req, res) => {
         }
         console.log('DOWNLOAD SAL PDF - SAL found:', sal.number);
 
-        // Get company details using the ID from the user object
-        // The user object should have the company ID populated or available
-        if (!req.user.company) {
+        // Get company details
+        const companyId = getCompanyId(req);
+        if (!companyId) {
             console.error('DOWNLOAD SAL PDF - User has no company assigned');
             return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
         }
 
-        const company = await Company.findById(req.user.company);
+        const company = await Company.findByPk(companyId);
 
         if (!company) {
-            console.error('DOWNLOAD SAL PDF - Company not found for ID:', req.user.company);
+            console.error('DOWNLOAD SAL PDF - Company not found for ID:', companyId);
             return res.status(404).json({ message: 'Dati azienda non trovati. Configura prima la tua azienda.' });
         }
         console.log('DOWNLOAD SAL PDF - Company found:', company.name);
