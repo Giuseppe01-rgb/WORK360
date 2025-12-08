@@ -75,22 +75,45 @@ const createSite = async (req, res) => {
 const getSites = async (req, res) => {
     try {
         const companyId = req.user.companyId || req.user.company?.id;
-        console.log('GetSites User:', req.user.id, 'Company:', companyId);
+        const userId = req.user.id;
+        const userRole = req.user.role;
 
-        const sites = await ConstructionSite.findAll({
-            where: { companyId },
-            include: [{
-                model: User,
-                as: 'assignedWorkers',
-                attributes: ['id', 'firstName', 'lastName', 'username'],
-                through: { attributes: [] } // Don't include join table
-            }],
-            order: [['startDate', 'DESC']]
-        });
+        console.log('GetSites User:', userId, 'Company:', companyId, 'Role:', userRole);
+
+        let sites;
+
+        if (userRole === 'worker') {
+            // For workers, only return sites they are assigned to
+            sites = await ConstructionSite.findAll({
+                where: { companyId },
+                include: [{
+                    model: User,
+                    as: 'assignedWorkers',
+                    attributes: ['id', 'firstName', 'lastName', 'username'],
+                    through: { attributes: [] },
+                    where: { id: userId },
+                    required: true // INNER JOIN - only sites with this worker assigned
+                }],
+                order: [['startDate', 'DESC']]
+            });
+        } else {
+            // For owners, return all company sites
+            sites = await ConstructionSite.findAll({
+                where: { companyId },
+                include: [{
+                    model: User,
+                    as: 'assignedWorkers',
+                    attributes: ['id', 'firstName', 'lastName', 'username'],
+                    through: { attributes: [] }
+                }],
+                order: [['startDate', 'DESC']]
+            });
+        }
 
         console.log('Sites found:', sites.length);
         res.json(sites);
     } catch (error) {
+        console.error('GetSites error:', error);
         res.status(500).json({ message: 'Errore nel recupero dei cantieri', error: error.message });
     }
 };
