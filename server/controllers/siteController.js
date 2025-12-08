@@ -153,19 +153,18 @@ const getSite = async (req, res) => {
         const contractValue = parseFloat(site.contractValue || 0);
         const costIncidence = contractValue > 0 ? (totalCost / contractValue) * 100 : 0;
 
-        // Enhanced response with analytics
+        // Enhanced response with analytics at ROOT level
         const siteWithAnalytics = {
             ...site.toJSON(),
-            analytics: {
-                totalCost: parseFloat(totalCost.toFixed(2)),
-                materialsCost: parseFloat(materialsCost.toFixed(2)),
-                laborCost: parseFloat(laborCost.toFixed(2)),
-                equipmentCost: parseFloat(equipmentCost.toFixed(2)),
-                costIncidence: parseFloat(costIncidence.toFixed(2)),
-                materialsCount: materials.length,
-                equipmentCount: equipment.length,
-                attendanceCount: attendances.length
-            }
+            // Analytics fields at ROOT level for frontend compatibility
+            totalCost: parseFloat(totalCost.toFixed(2)),
+            materialsCost: parseFloat(materialsCost.toFixed(2)),
+            laborCost: parseFloat(laborCost.toFixed(2)),
+            equipmentCost: parseFloat(equipmentCost.toFixed(2)),
+            costIncidence: parseFloat(costIncidence.toFixed(2)),
+            materialsCount: materials.length,
+            equipmentCount: equipment.length,
+            attendanceCount: attendances.length
         };
 
         res.json(siteWithAnalytics);
