@@ -327,18 +327,20 @@ const getDashboard = async (req, res) => {
             laborCost += hours * hourlyCost;
         });
 
-        // Get materials cost (if materials have unitPrice)
-        const materials = await Material.findAll({
-            include: [{
-                model: ConstructionSite,
-                as: 'site',
-                where: { companyId }
-            }]
+        // Get materials cost from material_usages (linked to material_masters)
+        const materialsCostResult = await sequelize.query(`
+            SELECT 
+                SUM(mu.numero_confezioni * COALESCE(mm.price, 0)) as total_cost
+            FROM material_usages mu
+            JOIN material_masters mm ON mu.material_id = mm.id
+            WHERE mm.company_id = :companyId
+              AND mu.stato = 'catalogato'
+        `, {
+            replacements: { companyId },
+            type: sequelize.QueryTypes.SELECT
         });
 
-        materials.forEach(m => {
-            materialsCost += (parseFloat(m.quantity) || 0) * (parseFloat(m.unitPrice) || 0);
-        });
+        materialsCost = parseFloat(materialsCostResult[0]?.total_cost || 0);
 
         const totalCost = laborCost + materialsCost;
 
