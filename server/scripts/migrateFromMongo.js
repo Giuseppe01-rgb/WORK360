@@ -1,26 +1,35 @@
 /**
- * MongoDB to PostgreSQL Migration Script
- * Migrates data from MongoDB Atlas to PostgreSQL on Railway
+ * MongoDB LOCAL to PostgreSQL Migration Script
+ * Migrates data from local MongoDB to PostgreSQL on Railway
  */
 
 const { MongoClient } = require('mongodb');
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize } = require('sequelize');
 
-// MongoDB connection
-const MONGO_URI = 'mongodb+srv://admin:admin123@cluster0.fwejqek.mongodb.net/?appName=Cluster0';
+// MongoDB LOCAL connection
+const MONGO_URI = 'mongodb://localhost:27017/work360';
 
-// PostgreSQL connection (Railway)
+// PostgreSQL connection (Railway) - get from environment or use public URL
 const POSTGRES_URI = process.env.DATABASE_URL || 'postgresql://postgres:NYTDndcXjrMBnOAOCvYqTnCTFgGjHuqL@junction.proxy.rlwy.net:41125/railway';
 
-async function migrate() {
-    console.log('🚀 Starting MongoDB to PostgreSQL Migration...\n');
+// Helper function to generate UUID
+const generateUUID = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+};
 
-    // Connect to MongoDB
-    console.log('📦 Connecting to MongoDB Atlas...');
+async function migrate() {
+    console.log('🚀 Starting MongoDB LOCAL to PostgreSQL Migration...\n');
+
+    // Connect to MongoDB LOCAL
+    console.log('📦 Connecting to MongoDB LOCAL...');
     const mongoClient = new MongoClient(MONGO_URI);
     await mongoClient.connect();
-    const mongoDb = mongoClient.db('test'); // Default database name, might need adjustment
-    console.log('✅ Connected to MongoDB\n');
+    const mongoDb = mongoClient.db('work360');
+    console.log('✅ Connected to MongoDB LOCAL\n');
 
     // Connect to PostgreSQL
     console.log('🐘 Connecting to PostgreSQL...');
@@ -37,33 +46,14 @@ async function migrate() {
     await sequelize.authenticate();
     console.log('✅ Connected to PostgreSQL\n');
 
-    // List all collections in MongoDB
-    console.log('📋 Listing MongoDB collections...');
-    const collections = await mongoDb.listCollections().toArray();
-    console.log('Collections found:', collections.map(c => c.name).join(', '));
-    console.log('');
-
-    // Migration stats
-    const stats = {};
-
-    // Helper function to generate UUID from MongoDB ObjectId
-    const generateUUID = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            const r = Math.random() * 16 | 0;
-            const v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    };
-
     // ID mapping (MongoDB ObjectId -> PostgreSQL UUID)
     const idMaps = {
         users: {},
         companies: {},
-        sites: {},
-        attendances: {},
-        materials: {},
-        quotes: {}
+        sites: {}
     };
+
+    const stats = {};
 
     // 1. Migrate Companies
     console.log('🏢 Migrating companies...');
@@ -94,14 +84,15 @@ async function migrate() {
                     }
                 });
                 stats.companies.migrated++;
+                console.log(`  ✓ Company: ${company.name}`);
             } catch (err) {
-                console.error(`  Error migrating company ${company._id}:`, err.message);
+                console.error(`  ✗ Error: ${err.message}`);
                 stats.companies.errors++;
             }
         }
-        console.log(`  ✅ Companies: ${stats.companies.migrated}/${stats.companies.found} migrated\n`);
+        console.log(`  ✅ Companies: ${stats.companies.migrated}/${stats.companies.found}\n`);
     } catch (err) {
-        console.log('  ⚠️ No companies collection or error:', err.message, '\n');
+        console.log('  ⚠️ No companies: ' + err.message + '\n');
     }
 
     // 2. Migrate Users
@@ -115,57 +106,65 @@ async function migrate() {
                 const newId = generateUUID();
                 idMaps.users[user._id.toString()] = newId;
 
-                // Get or create company mapping
+                // Get or create company
                 let companyId = null;
                 if (user.company) {
                     const companyIdStr = user.company._id?.toString() || user.company.toString();
                     companyId = idMaps.companies[companyIdStr];
                     if (!companyId) {
-                        // Create company if not exists
                         companyId = generateUUID();
                         idMaps.companies[companyIdStr] = companyId;
                         await sequelize.query(`
                             INSERT INTO companies (id, name, created_at, updated_at)
                             VALUES (:id, :name, NOW(), NOW())
                             ON CONFLICT (id) DO NOTHING
-                        `, {
-                            replacements: {
-                                id: companyId,
-                                name: 'Azienda ' + (user.firstName || 'Migrata')
-                            }
-                        });
+                        `, { replacements: { id: companyId, name: 'Azienda ' + (user.firstName || 'Migrata') } });
                     }
+                }
+
+                // Check if username exists
+                const [existing] = await sequelize.query(
+                    `SELECT id FROM users WHERE username = :username`,
+                    { replacements: { username: user.username || 'user_migrated' } }
+                );
+
+                if (existing.length > 0) {
+                    console.log(`  ⚠️ Username exists: ${user.username}, updating ID map`);
+                    idMaps.users[user._id.toString()] = existing[0].id;
+                    stats.users.migrated++;
+                    continue;
                 }
 
                 await sequelize.query(`
                     INSERT INTO users (id, username, email, password, first_name, last_name, role, company_id, hourly_cost, active, created_at, updated_at)
                     VALUES (:id, :username, :email, :password, :firstName, :lastName, :role, :companyId, :hourlyCost, :active, :createdAt, :updatedAt)
-                    ON CONFLICT (id) DO NOTHING
+                    ON CONFLICT (username) DO NOTHING
                 `, {
                     replacements: {
                         id: newId,
                         username: user.username || user.email?.split('@')[0] || 'user_' + Date.now(),
                         email: user.email || null,
-                        password: user.password || '$2b$10$defaulthashedpassword',
-                        firstName: user.firstName || user.name?.split(' ')[0] || 'Nome',
-                        lastName: user.lastName || user.name?.split(' ').slice(1).join(' ') || 'Cognome',
+                        password: user.password || '$2b$10$default',
+                        firstName: user.firstName || 'Nome',
+                        lastName: user.lastName || 'Cognome',
                         role: user.role || 'worker',
                         companyId: companyId,
-                        hourlyCost: user.hourlyCost || user.hourlyRate || 25,
+                        hourlyCost: user.hourlyCost || 25,
                         active: user.active !== false,
                         createdAt: user.createdAt || new Date(),
                         updatedAt: user.updatedAt || new Date()
                     }
                 });
                 stats.users.migrated++;
+                console.log(`  ✓ User: ${user.username} (${user.role})`);
             } catch (err) {
-                console.error(`  Error migrating user ${user._id}:`, err.message);
+                console.error(`  ✗ User error: ${err.message}`);
                 stats.users.errors++;
             }
         }
-        console.log(`  ✅ Users: ${stats.users.migrated}/${stats.users.found} migrated\n`);
+        console.log(`  ✅ Users: ${stats.users.migrated}/${stats.users.found}\n`);
     } catch (err) {
-        console.log('  ⚠️ No users collection or error:', err.message, '\n');
+        console.log('  ⚠️ No users: ' + err.message + '\n');
     }
 
     // 3. Migrate Construction Sites
@@ -179,7 +178,6 @@ async function migrate() {
                 const newId = generateUUID();
                 idMaps.sites[site._id.toString()] = newId;
 
-                // Get company mapping
                 let companyId = null;
                 if (site.company) {
                     const companyIdStr = site.company._id?.toString() || site.company.toString();
@@ -198,7 +196,7 @@ async function migrate() {
                         status: site.status || 'active',
                         startDate: site.startDate || null,
                         endDate: site.endDate || null,
-                        description: site.description || site.notes || null,
+                        description: site.description || null,
                         companyId: companyId,
                         contractValue: site.contractValue || site.budget || null,
                         createdAt: site.createdAt || new Date(),
@@ -206,14 +204,15 @@ async function migrate() {
                     }
                 });
                 stats.sites.migrated++;
+                console.log(`  ✓ Site: ${site.name}`);
             } catch (err) {
-                console.error(`  Error migrating site ${site._id}:`, err.message);
+                console.error(`  ✗ Site error: ${err.message}`);
                 stats.sites.errors++;
             }
         }
-        console.log(`  ✅ Sites: ${stats.sites.migrated}/${stats.sites.found} migrated\n`);
+        console.log(`  ✅ Sites: ${stats.sites.migrated}/${stats.sites.found}\n`);
     } catch (err) {
-        console.log('  ⚠️ No constructionsites collection or error:', err.message, '\n');
+        console.log('  ⚠️ No sites: ' + err.message + '\n');
     }
 
     // 4. Migrate Attendances
@@ -225,8 +224,6 @@ async function migrate() {
         for (const att of attendances) {
             try {
                 const newId = generateUUID();
-
-                // Get user and site mappings
                 const userIdStr = att.user?._id?.toString() || att.user?.toString() || att.userId?.toString();
                 const siteIdStr = att.site?._id?.toString() || att.site?.toString() || att.siteId?.toString();
 
@@ -248,26 +245,68 @@ async function migrate() {
                         id: newId,
                         userId: userId,
                         siteId: siteId,
-                        clockIn: att.clockIn?.time || att.clockIn || att.checkIn || null,
-                        clockOut: att.clockOut?.time || att.clockOut || att.checkOut || null,
-                        totalHours: att.totalHours || att.hours || 0,
+                        clockIn: att.clockIn?.time || att.clockIn || null,
+                        clockOut: att.clockOut?.time || att.clockOut || null,
+                        totalHours: att.totalHours || 0,
                         notes: att.notes || null,
                         createdAt: att.createdAt || new Date(),
                         updatedAt: att.updatedAt || new Date()
                     }
                 });
                 stats.attendances.migrated++;
+                console.log(`  ✓ Attendance migrated`);
             } catch (err) {
-                console.error(`  Error migrating attendance ${att._id}:`, err.message);
+                console.error(`  ✗ Attendance error: ${err.message}`);
                 stats.attendances.errors++;
             }
         }
-        console.log(`  ✅ Attendances: ${stats.attendances.migrated}/${stats.attendances.found} migrated\n`);
+        console.log(`  ✅ Attendances: ${stats.attendances.migrated}/${stats.attendances.found}\n`);
     } catch (err) {
-        console.log('  ⚠️ No attendances collection or error:', err.message, '\n');
+        console.log('  ⚠️ No attendances: ' + err.message + '\n');
     }
 
-    // 5. Migrate Materials
+    // 5. Migrate Notes
+    console.log('📝 Migrating notes...');
+    try {
+        const notes = await mongoDb.collection('notes').find({}).toArray();
+        stats.notes = { found: notes.length, migrated: 0, errors: 0 };
+
+        for (const note of notes) {
+            try {
+                const newId = generateUUID();
+                const userIdStr = note.user?._id?.toString() || note.user?.toString() || note.userId?.toString();
+                const siteIdStr = note.site?._id?.toString() || note.site?.toString() || note.siteId?.toString();
+
+                const userId = idMaps.users[userIdStr];
+                const siteId = idMaps.sites[siteIdStr];
+
+                await sequelize.query(`
+                    INSERT INTO notes (id, content, user_id, site_id, created_at, updated_at)
+                    VALUES (:id, :content, :userId, :siteId, :createdAt, :updatedAt)
+                    ON CONFLICT (id) DO NOTHING
+                `, {
+                    replacements: {
+                        id: newId,
+                        content: note.content || note.text || '',
+                        userId: userId,
+                        siteId: siteId,
+                        createdAt: note.createdAt || new Date(),
+                        updatedAt: note.updatedAt || new Date()
+                    }
+                });
+                stats.notes.migrated++;
+                console.log(`  ✓ Note migrated`);
+            } catch (err) {
+                console.error(`  ✗ Note error: ${err.message}`);
+                stats.notes.errors++;
+            }
+        }
+        console.log(`  ✅ Notes: ${stats.notes.migrated}/${stats.notes.found}\n`);
+    } catch (err) {
+        console.log('  ⚠️ No notes: ' + err.message + '\n');
+    }
+
+    // 6. Migrate Materials
     console.log('📦 Migrating materials...');
     try {
         const materials = await mongoDb.collection('materials').find({}).toArray();
@@ -276,7 +315,6 @@ async function migrate() {
         for (const mat of materials) {
             try {
                 const newId = generateUUID();
-
                 const siteIdStr = mat.site?._id?.toString() || mat.site?.toString() || mat.siteId?.toString();
                 const siteId = idMaps.sites[siteIdStr];
 
@@ -292,85 +330,43 @@ async function migrate() {
                         unit: mat.unit || 'pz',
                         siteId: siteId,
                         unitPrice: mat.unitPrice || mat.price || null,
-                        notes: mat.notes || mat.description || null,
+                        notes: mat.notes || null,
                         createdAt: mat.createdAt || new Date(),
                         updatedAt: mat.updatedAt || new Date()
                     }
                 });
                 stats.materials.migrated++;
+                console.log(`  ✓ Material: ${mat.name}`);
             } catch (err) {
-                console.error(`  Error migrating material ${mat._id}:`, err.message);
+                console.error(`  ✗ Material error: ${err.message}`);
                 stats.materials.errors++;
             }
         }
-        console.log(`  ✅ Materials: ${stats.materials.migrated}/${stats.materials.found} migrated\n`);
+        console.log(`  ✅ Materials: ${stats.materials.migrated}/${stats.materials.found}\n`);
     } catch (err) {
-        console.log('  ⚠️ No materials collection or error:', err.message, '\n');
-    }
-
-    // 6. Migrate Quotes
-    console.log('📋 Migrating quotes...');
-    try {
-        const quotes = await mongoDb.collection('quotes').find({}).toArray();
-        stats.quotes = { found: quotes.length, migrated: 0, errors: 0 };
-
-        for (const quote of quotes) {
-            try {
-                const newId = generateUUID();
-
-                const companyIdStr = quote.company?._id?.toString() || quote.company?.toString();
-                const companyId = idMaps.companies[companyIdStr];
-
-                await sequelize.query(`
-                    INSERT INTO quotes (id, quote_number, type, client_name, client_address, client_email, client_phone, items, subtotal, vat_rate, vat_amount, total, notes, status, company_id, created_at, updated_at)
-                    VALUES (:id, :quoteNumber, :type, :clientName, :clientAddress, :clientEmail, :clientPhone, :items, :subtotal, :vatRate, :vatAmount, :total, :notes, :status, :companyId, :createdAt, :updatedAt)
-                    ON CONFLICT (id) DO NOTHING
-                `, {
-                    replacements: {
-                        id: newId,
-                        quoteNumber: quote.quoteNumber || quote.number || 'Q-' + Date.now(),
-                        type: quote.type || 'preventivo',
-                        clientName: quote.clientName || quote.client?.name || 'Cliente',
-                        clientAddress: quote.clientAddress || quote.client?.address || null,
-                        clientEmail: quote.clientEmail || quote.client?.email || null,
-                        clientPhone: quote.clientPhone || quote.client?.phone || null,
-                        items: JSON.stringify(quote.items || []),
-                        subtotal: quote.subtotal || 0,
-                        vatRate: quote.vatRate || 22,
-                        vatAmount: quote.vatAmount || 0,
-                        total: quote.total || 0,
-                        notes: quote.notes || null,
-                        status: quote.status || 'draft',
-                        companyId: companyId,
-                        createdAt: quote.createdAt || new Date(),
-                        updatedAt: quote.updatedAt || new Date()
-                    }
-                });
-                stats.quotes.migrated++;
-            } catch (err) {
-                console.error(`  Error migrating quote ${quote._id}:`, err.message);
-                stats.quotes.errors++;
-            }
-        }
-        console.log(`  ✅ Quotes: ${stats.quotes.migrated}/${stats.quotes.found} migrated\n`);
-    } catch (err) {
-        console.log('  ⚠️ No quotes collection or error:', err.message, '\n');
+        console.log('  ⚠️ No materials: ' + err.message + '\n');
     }
 
     // Print summary
     console.log('═══════════════════════════════════════════');
     console.log('📊 MIGRATION SUMMARY');
     console.log('═══════════════════════════════════════════');
+    let totalMigrated = 0;
+    let totalFound = 0;
     for (const [collection, data] of Object.entries(stats)) {
         console.log(`${collection}: ${data.migrated}/${data.found} migrated (${data.errors} errors)`);
+        totalMigrated += data.migrated;
+        totalFound += data.found;
     }
+    console.log('═══════════════════════════════════════════');
+    console.log(`TOTAL: ${totalMigrated}/${totalFound} documents migrated`);
     console.log('═══════════════════════════════════════════');
 
     // Close connections
     await mongoClient.close();
     await sequelize.close();
 
-    console.log('\n✅ Migration completed!');
+    console.log('\n✅ Migration completed successfully!');
 }
 
 migrate().catch(err => {
