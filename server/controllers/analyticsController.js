@@ -35,6 +35,8 @@ const getHoursPerEmployee = async (req, res) => {
                 u.id as user_id,
                 u.first_name,
                 u.last_name,
+                u.username,
+                u.hourly_cost,
                 u.first_name || ' ' || u.last_name as employee,
                 SUM(a.total_hours) as total_hours,
                 COUNT(a.id) as total_days,
@@ -46,7 +48,7 @@ const getHoursPerEmployee = async (req, res) => {
               ${siteId ? 'AND a.site_id = :siteId' : ''}
               ${startDate ? 'AND (a.clock_in->>\'time\')::timestamp >= :startDate' : ''}
               ${endDate ? 'AND (a.clock_in->>\'time\')::timestamp <= :endDate' : ''}
-            GROUP BY u.id, u.first_name, u.last_name
+            GROUP BY u.id, u.first_name, u.last_name, u.username, u.hourly_cost
             ORDER BY total_hours DESC
         `, {
             replacements: { companyId, siteId, startDate, endDate },
@@ -60,7 +62,9 @@ const getHoursPerEmployee = async (req, res) => {
             id: {
                 id: d.user_id,
                 firstName: d.first_name,
-                lastName: d.last_name
+                lastName: d.last_name,
+                username: d.username,
+                hourlyCost: parseFloat(d.hourly_cost) || 0
             },
             employee: d.employee,
             totalHours: parseFloat(d.total_hours || 0),
