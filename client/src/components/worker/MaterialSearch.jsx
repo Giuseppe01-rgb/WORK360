@@ -204,7 +204,7 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
 
                                     {filteredMaterials.map((material) => (
                                         <MaterialCard
-                                            key={material._id}
+                                            key={material.id}
                                             material={material}
                                             onClick={() => onSelect(material)}
                                         />
@@ -232,7 +232,7 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
                                     </p>
                                     {mostUsed.map((item) => (
                                         <MaterialCard
-                                            key={item.material._id}
+                                            key={item.material.id}
                                             material={item.material}
                                             onClick={() => onSelect(item.material)}
                                             usageStats={{

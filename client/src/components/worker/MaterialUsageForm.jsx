@@ -18,7 +18,7 @@ const MaterialUsageForm = ({ material, siteId, onConfirm, onCancel, editMode = f
         setSubmitting(true);
         try {
             await onConfirm({
-                materialId: material._id,
+                materialId: material.id,
                 siteId,
                 numeroConfezioni,
                 note,

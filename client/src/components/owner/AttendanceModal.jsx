@@ -22,8 +22,8 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
         if (attendance) {
             // Edit mode - populate form
             setFormData({
-                userId: attendance.user?._id || '',
-                siteId: attendance.site?._id || '',
+                userId: attendance.user?.id || '',
+                siteId: attendance.site?.id || '',
                 clockInTime: attendance.clockIn?.time ? formatDateTimeLocal(new Date(attendance.clockIn.time)) : '',
                 clockOutTime: attendance.clockOut?.time ? formatDateTimeLocal(new Date(attendance.clockOut.time)) : '',
                 notes: attendance.notes || ''
@@ -70,7 +70,7 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
         try {
             if (attendance) {
                 // Update existing
-                await attendanceAPI.update(attendance._id, formData);
+                await attendanceAPI.update(attendance.id, formData);
                 showSuccess('Presenza aggiornata con successo');
             } else {
                 // Create new
@@ -119,7 +119,7 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
                         >
                             <option value="">Seleziona operaio...</option>
                             {users.map(user => (
-                                <option key={user._id} value={user._id}>
+                                <option key={user.id} value={user.id}>
                                     {user.firstName || user.username}
                                 </option>
                             ))}
@@ -143,7 +143,7 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
                         >
                             <option value="">Seleziona cantiere...</option>
                             {sites.map(site => (
-                                <option key={site._id} value={site._id}>{site.name}</option>
+                                <option key={site.id} value={site.id}>{site.name}</option>
                             ))}
                         </select>
                     </div>

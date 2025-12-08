@@ -28,7 +28,7 @@ const EconomiaForm = () => {
             const res = await siteAPI.getAll();
             setSites(res.data);
             if (res.data.length > 0) {
-                setFormData(prev => ({ ...prev, site: res.data[0]._id }));
+                setFormData(prev => ({ ...prev, site: res.data[0].id }));
             }
         } catch (error) {
             console.error('Error loading sites:', error);
@@ -71,7 +71,7 @@ const EconomiaForm = () => {
             await economiaAPI.create(formData);
             showSuccess('✅ Ore extra registrate con successo!');
             setFormData({
-                site: sites.length > 0 ? sites[0]._id : '',
+                site: sites.length > 0 ? sites[0].id : '',
                 hours: 1,
                 description: ''
             });
@@ -124,7 +124,7 @@ const EconomiaForm = () => {
                                 required
                             >
                                 {sites.map(site => (
-                                    <option key={site._id} value={site._id}>
+                                    <option key={site.id} value={site.id}>
                                         {site.name}
                                     </option>
                                 ))}

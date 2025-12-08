@@ -155,7 +155,7 @@ export default function AttendanceList() {
                         >
                             <option value="">Tutti i cantieri</option>
                             {sites.map(site => (
-                                <option key={site._id} value={site._id}>{site.name}</option>
+                                <option key={site.id} value={site.id}>{site.name}</option>
                             ))}
                         </select>
                     </div>
@@ -264,7 +264,7 @@ export default function AttendanceList() {
                             const clockOutCoords = attendance?.clockOut?.location?.coordinates;
 
                             return (
-                                <div key={attendance._id} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
+                                <div key={attendance.id} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-slate-100 group">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0 text-slate-600">
@@ -358,7 +358,7 @@ export default function AttendanceList() {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     e.preventDefault();
-                                                    handleDeleteAttendance(attendance._id);
+                                                    handleDeleteAttendance(attendance.id);
                                                 }}
                                                 className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                                 title="Elimina presenza"

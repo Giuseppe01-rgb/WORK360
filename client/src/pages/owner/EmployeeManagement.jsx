@@ -51,7 +51,7 @@ export default function EmployeeManagement() {
         e.preventDefault();
         try {
             if (editingEmployee) {
-                await userAPI.update(editingEmployee._id, formData);
+                await userAPI.update(editingEmployee.id, formData);
                 showNotification('success', 'Utente aggiornato con successo!');
                 setGeneratedCredentials(null);
             } else {
@@ -101,7 +101,7 @@ export default function EmployeeManagement() {
         if (!window.confirm(`Resettare la password di ${employee.firstName} ${employee.lastName}?\n\nVerrà generata una nuova password.`)) return;
 
         try {
-            const response = await userAPI.resetPassword(employee._id);
+            const response = await userAPI.resetPassword(employee.id);
             showNotification('success', 'Password resettata!');
             // Show new credentials
             setGeneratedCredentials({
@@ -180,7 +180,7 @@ export default function EmployeeManagement() {
                     <div className="grid gap-4">
                         {employees.map(employee => (
                             <div
-                                key={employee._id}
+                                key={employee.id}
                                 onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
                                 className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group relative"
                             >
@@ -219,7 +219,7 @@ export default function EmployeeManagement() {
                                             {employee.role === 'owner' ? 'Titolare' : 'Operaio'}
                                         </span>
 
-                                        {employee._id !== user._id && (
+                                        {employee.id !== user.id && (
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleResetPassword(employee, e); }}
@@ -236,7 +236,7 @@ export default function EmployeeManagement() {
                                                     <Edit className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); handleDelete(employee._id); }}
+                                                    onClick={(e) => { e.stopPropagation(); handleDelete(employee.id); }}
                                                     className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
                                                     title="Elimina"
                                                 >

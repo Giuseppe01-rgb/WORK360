@@ -47,7 +47,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
         if (selectedWorkers.length === users.length) {
             setSelectedWorkers([]);
         } else {
-            setSelectedWorkers(users.map(u => u._id));
+            setSelectedWorkers(users.map(u => u.id));
         }
     };
 
@@ -144,7 +144,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                                 >
                                     <option value="">Seleziona cantiere...</option>
                                     {sites.map(site => (
-                                        <option key={site._id} value={site._id}>{site.name}</option>
+                                        <option key={site.id} value={site.id}>{site.name}</option>
                                     ))}
                                 </select>
                             </div>
@@ -170,13 +170,13 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                                         <div className="space-y-2">
                                             {users.map(user => (
                                                 <label
-                                                    key={user._id}
+                                                    key={user.id}
                                                     className="flex items-center gap-3 p-3 hover:bg-white rounded-lg cursor-pointer transition-colors"
                                                 >
                                                     <input
                                                         type="checkbox"
-                                                        checked={selectedWorkers.includes(user._id)}
-                                                        onChange={() => toggleWorker(user._id)}
+                                                        checked={selectedWorkers.includes(user.id)}
+                                                        onChange={() => toggleWorker(user.id)}
                                                         className="w-5 h-5 text-slate-900 rounded focus:ring-slate-900"
                                                     />
                                                     <div className="flex-1">
@@ -311,7 +311,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                                 <ul className="text-sm text-green-700 mt-2 space-y-1">
                                     <li>• {selectedWorkers.length} operai</li>
                                     <li>• {dateEntries.filter(d => d.date).length} date</li>
-                                    <li>• Cantiere: {sites.find(s => s._id === selectedSite)?.name}</li>
+                                    <li>• Cantiere: {sites.find(s => s.id === selectedSite)?.name}</li>
                                 </ul>
                             </div>
 
@@ -331,7 +331,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                                                 dateEntries
                                                     .filter(d => d.date)
                                                     .map((entry, idx) => {
-                                                        const user = users.find(u => u._id === workerId);
+                                                        const user = users.find(u => u.id === workerId);
                                                         return (
                                                             <tr key={`${workerId}-${idx}`} className="border-t border-slate-100 hover:bg-slate-50">
                                                                 <td className="px-4 py-3 text-sm font-medium text-slate-900">

@@ -80,9 +80,9 @@ export default function WorkerDashboard() {
             setSites(sitesData.data);
 
             // Set active attendance (open session)
-            if (attendanceData.data && attendanceData.data._id) {
+            if (attendanceData.data && attendanceData.data.id) {
                 setActiveAttendance(attendanceData.data);
-                const siteId = attendanceData.data.site?._id || attendanceData.data.site;
+                const siteId = attendanceData.data.site?.id || attendanceData.data.site;
                 setSelectedSite(siteId);
             }
 
@@ -91,7 +91,7 @@ export default function WorkerDashboard() {
                 // Get the latest one
                 const latest = myRecordsData.data[myRecordsData.data.length - 1];
                 setTodayAttendance(latest);
-            } else if (attendanceData.data && attendanceData.data._id) {
+            } else if (attendanceData.data && attendanceData.data.id) {
                 // If no records found but active exists (e.g. first one today), use active
                 setTodayAttendance(attendanceData.data);
             }
@@ -131,7 +131,7 @@ export default function WorkerDashboard() {
                 <option value="">{placeholder}</option>
                 {options.length === 0 && <option disabled>Nessun cantiere trovato (Verifica con il titolare)</option>}
                 {options.map(opt => (
-                    <option key={opt._id} value={opt._id}>{opt.name}</option>
+                    <option key={opt.id} value={opt.id}>{opt.name}</option>
                 ))}
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500">
@@ -212,7 +212,7 @@ export default function WorkerDashboard() {
         try {
             const location = await getLocation();
             await attendanceAPI.clockOut({
-                attendanceId: activeAttendance._id,
+                attendanceId: activeAttendance.id,
                 ...location
             });
             setActiveAttendance(null);
@@ -258,14 +258,14 @@ export default function WorkerDashboard() {
 
         try {
             if (editingActivity) {
-                const response = await workActivityAPI.update(editingActivity._id, {
+                const response = await workActivityAPI.update(editingActivity.id, {
                     activityType: materialForm.name,
                     quantity: 1,
                     unit: 'report',
                     date: new Date()
                 });
                 setTodayActivities(prev => prev.map(act =>
-                    act._id === editingActivity._id ? response.data : act
+                    act.id === editingActivity.id ? response.data : act
                 ));
                 showSuccess('✅ Rapporto aggiornato con successo');
                 setEditingActivity(null);
@@ -974,7 +974,7 @@ export default function WorkerDashboard() {
                                 <div className="space-y-3 mb-6">
                                     <h4 className="font-semibold text-slate-900 text-sm uppercase tracking-wider">Attività di Oggi</h4>
                                     {todayActivities.map((activity, idx) => (
-                                        <div key={idx} className={`flex justify-between items-center p-3 rounded-lg border transition-all ${editingActivity?._id === activity._id ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-100'}`}>
+                                        <div key={idx} className={`flex justify-between items-center p-3 rounded-lg border transition-all ${editingActivity?.id === activity.id ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-100'}`}>
                                             <div>
                                                 <p className="font-medium text-slate-900">{activity.activityType}</p>
                                                 <p className="text-xs text-slate-500">{activity.quantity} {activity.unit}</p>
@@ -1006,9 +1006,9 @@ export default function WorkerDashboard() {
                                                         e.preventDefault();
                                                         if (window.confirm('Eliminare questa attività?')) {
                                                             try {
-                                                                await workActivityAPI.delete(activity._id);
+                                                                await workActivityAPI.delete(activity.id);
                                                                 showSuccess('Attività eliminata');
-                                                                if (editingActivity?._id === activity._id) {
+                                                                if (editingActivity?.id === activity.id) {
                                                                     setEditingActivity(null);
                                                                     setMaterialForm({ name: '', quantity: '', unit: '' });
                                                                 }

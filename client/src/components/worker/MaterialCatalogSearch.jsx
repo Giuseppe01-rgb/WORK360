@@ -135,7 +135,7 @@ const MaterialCatalogSearch = ({ onSelect, onClose, onReportNew }) => {
                         <div className="space-y-3">
                             {materials.map(material => (
                                 <button
-                                    key={material._id}
+                                    key={material.id}
                                     onClick={() => onSelect(material)}
                                     className="w-full p-4 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-xl transition-all text-left"
                                 >

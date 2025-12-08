@@ -26,7 +26,7 @@ export default function AnalyticsDashboard() {
             // Load real stats for each site
             const siteStatsPromises = sitesResp.data.map(async (site) => {
                 try {
-                    const siteReport = await analyticsAPI.getSiteReport(site._id);
+                    const siteReport = await analyticsAPI.getSiteReport(site.id);
                     return {
                         site: site,
                         totalAttendances: siteReport.data.employeeHours?.length || 0,
@@ -35,7 +35,7 @@ export default function AnalyticsDashboard() {
                         materials: siteReport.data.materials?.slice(0, 5) || []
                     };
                 } catch (err) {
-                    console.error(`Error loading stats for site ${site._id}:`, err);
+                    console.error(`Error loading stats for site ${site.id}:`, err);
                     return {
                         site: site,
                         totalAttendances: 0,
@@ -82,7 +82,7 @@ export default function AnalyticsDashboard() {
                         >
                             <option value="">Tutti i cantieri</option>
                             {siteStats.map(stat => (
-                                <option key={stat.site._id} value={stat.site._id}>
+                                <option key={stat.site.id} value={stat.site.id}>
                                     {stat.site.name}
                                 </option>
                             ))}
@@ -305,11 +305,11 @@ export default function AnalyticsDashboard() {
                     <div className="space-y-3">
                         {analytics.weeklyHours.map(day => (
                             <div
-                                key={day._id}
+                                key={day.id}
                                 className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100"
                             >
                                 <div className="font-semibold text-slate-700 capitalize">
-                                    {new Date(day._id).toLocaleDateString('it-IT', {
+                                    {new Date(day.id).toLocaleDateString('it-IT', {
                                         weekday: 'long',
                                         year: 'numeric',
                                         month: 'short',
@@ -345,7 +345,7 @@ export default function AnalyticsDashboard() {
                     <div className="grid gap-6">
                         {siteStats.map(stat => (
                             <div
-                                key={stat.site._id}
+                                key={stat.site.id}
                                 className="bg-slate-50 p-6 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors"
                             >
                                 <div className="flex justify-between items-center mb-6">

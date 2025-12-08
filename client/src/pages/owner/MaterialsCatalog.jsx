@@ -193,7 +193,7 @@ export default function MaterialsCatalog() {
                 quantita: formData.quantityValue ? `${formData.quantityValue} ${formData.unit}` : '',
                 prezzo: formData.prezzo ? parseFloat(formData.prezzo) : null
             };
-            await colouraMaterialAPI.update(selectedMaterial._id, data);
+            await colouraMaterialAPI.update(selectedMaterial.id, data);
             resetForm();
             await loadMaterials();
             showSuccess('Materiale aggiornato con successo');
@@ -209,7 +209,7 @@ export default function MaterialsCatalog() {
 
     const handleDeleteConfirm = async () => {
         try {
-            await colouraMaterialAPI.delete(selectedMaterial._id);
+            await colouraMaterialAPI.delete(selectedMaterial.id);
             setShowDeleteConfirm(false);
             setSelectedMaterial(null);
             await loadMaterials();
@@ -482,7 +482,7 @@ export default function MaterialsCatalog() {
                             </tr>
                         ) : (
                             filteredMaterials.map((material) => (
-                                <tr key={material._id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                <tr key={material.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                     <td className="px-6 py-4">
                                         <span className="font-mono text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded">
                                             {material.codice_prodotto || '-'}
@@ -556,7 +556,7 @@ export default function MaterialsCatalog() {
                     </div>
                 ) : (
                     filteredMaterials.map((material) => (
-                        <div key={material._id} className="bg-white rounded-2xl p-6 shadow-sm">
+                        <div key={material.id} className="bg-white rounded-2xl p-6 shadow-sm">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">

@@ -16,9 +16,9 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
             activities.forEach((activity, index) => {
                 // Give the first activity any leftover to ensure we start at exactly 100%
                 if (index === 0) {
-                    initial[activity._id] = parseFloat((100 - evenPercentage * (activities.length - 1)).toFixed(1));
+                    initial[activity.id] = parseFloat((100 - evenPercentage * (activities.length - 1)).toFixed(1));
                 } else {
-                    initial[activity._id] = evenPercentage;
+                    initial[activity.id] = evenPercentage;
                 }
             });
             setPercentages(initial);
@@ -83,8 +83,8 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
         setIsProcessing(true);
         try {
             const activitiesData = activities.map(activity => ({
-                id: activity._id,
-                percentageTime: percentages[activity._id]
+                id: activity.id,
+                percentageTime: percentages[activity.id]
             }));
 
             await workActivityAPI.distributeTime({ activities: activitiesData });
@@ -128,11 +128,11 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="space-y-6">
                         {activities.map((activity) => {
-                            const percentage = percentages[activity._id] || 0;
+                            const percentage = percentages[activity.id] || 0;
                             const hours = calculateHours(percentage);
 
                             return (
-                                <div key={activity._id} className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <div key={activity.id} className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                                     <div className="mb-3">
                                         <h3 className="font-semibold text-slate-900">
                                             {activity.activityType}
@@ -150,7 +150,7 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
                                             max="100"
                                             step="1"
                                             value={percentage}
-                                            onChange={(e) => handlePercentageChange(activity._id, e.target.value)}
+                                            onChange={(e) => handlePercentageChange(activity.id, e.target.value)}
                                             className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                                             style={{
                                                 background: `linear-gradient(to right, rgb(37, 99, 235) ${percentage}%, rgb(226, 232, 240) ${percentage}%)`
@@ -167,7 +167,7 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
                                                 max="100"
                                                 step="0.1"
                                                 value={percentage}
-                                                onChange={(e) => handlePercentageChange(activity._id, e.target.value)}
+                                                onChange={(e) => handlePercentageChange(activity.id, e.target.value)}
                                                 className="w-20 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
                                             />
                                             <span className="text-sm font-medium text-slate-600">%</span>

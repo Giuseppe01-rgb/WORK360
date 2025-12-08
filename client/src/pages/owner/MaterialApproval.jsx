@@ -56,7 +56,7 @@ const MaterialApproval = () => {
         if (note === null) return; // User cancelled
 
         try {
-            await reportedMaterialAPI.reject(report._id, {
+            await reportedMaterialAPI.reject(report.id, {
                 noteApprovazione: note || 'Segnalazione non valida'
             });
             showSuccess('Segnalazione rifiutata');
@@ -151,7 +151,7 @@ const MaterialApproval = () => {
                 ) : (
                     <div className="grid grid-cols-1 gap-4">
                         {reportedMaterials.map(report => (
-                            <div key={report._id} className="bg-white rounded-xl border border-slate-200 p-6">
+                            <div key={report.id} className="bg-white rounded-xl border border-slate-200 p-6">
                                 <div className="flex gap-6">
                                     {/* Photo */}
                                     <div className="flex-shrink-0">
@@ -324,7 +324,7 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
         setLoading(true);
 
         try {
-            await reportedMaterialAPI.approveAndCreateNew(report._id, {
+            await reportedMaterialAPI.approveAndCreateNew(report.id, {
                 materialeData: formData
             });
             showSuccess('Materiale approvato e aggiunto al catalogo!');
@@ -470,7 +470,7 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
 
         setLoading(true);
         try {
-            await reportedMaterialAPI.approveAndAssociate(report._id, {
+            await reportedMaterialAPI.approveAndAssociate(report.id, {
                 materialId: selectedMaterialId
             });
             showSuccess('Segnalazione collegata al materiale esistente!');
@@ -507,9 +507,9 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
                     <div className="space-y-2">
                         {filteredMaterials.map(material => (
                             <button
-                                key={material._id}
-                                onClick={() => setSelectedMaterialId(material._id)}
-                                className={`w-full p-4 border-2 rounded-lg text-left transition-all ${selectedMaterialId === material._id
+                                key={material.id}
+                                onClick={() => setSelectedMaterialId(material.id)}
+                                className={`w-full p-4 border-2 rounded-lg text-left transition-all ${selectedMaterialId === material.id
                                         ? 'border-blue-600 bg-blue-50'
                                         : 'border-slate-200 hover:border-blue-300'
                                     }`}

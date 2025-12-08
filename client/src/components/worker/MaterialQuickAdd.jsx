@@ -41,7 +41,7 @@ const MaterialQuickAdd = ({ selectedSite, onSuccess }) => {
                 },
                 body: JSON.stringify({
                     siteId: selectedSite,
-                    materialId: scannedMaterial._id,
+                    materialId: scannedMaterial.id,
                     numeroConfezioni: quantidade
                 })
             });

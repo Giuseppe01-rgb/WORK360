@@ -30,7 +30,7 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
         try {
             await noteAPI.delete(noteId);
             // Refresh notes
-            const notesData = await noteAPI.getAll({ siteId: site._id });
+            const notesData = await noteAPI.getAll({ siteId: site.id });
             setNotes(notesData.data);
         } catch (error) {
             console.error('Error deleting note:', error);
@@ -43,7 +43,7 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
         try {
             await economiaAPI.delete(economiaId);
             // Refresh economie
-            const economieData = await economiaAPI.getBySite(site._id);
+            const economieData = await economiaAPI.getBySite(site.id);
             setEconomie(economieData.data);
         } catch (error) {
             console.error('Error deleting economia:', error);
@@ -55,10 +55,10 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
         const loadDetails = async () => {
             try {
                 const [rep, hours, notesData, economieData] = await Promise.all([
-                    analyticsAPI.getSiteReport(site._id),
-                    analyticsAPI.getHoursPerEmployee({ siteId: site._id }),
-                    noteAPI.getAll({ siteId: site._id }),
-                    economiaAPI.getBySite(site._id)
+                    analyticsAPI.getSiteReport(site.id),
+                    analyticsAPI.getHoursPerEmployee({ siteId: site.id }),
+                    noteAPI.getAll({ siteId: site.id }),
+                    economiaAPI.getBySite(site.id)
                 ]);
                 setReport(rep.data);
                 setEmployeeHours(hours.data);
@@ -324,8 +324,8 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
                             {employeeHours.length > 0 ? (
                                 <div className="space-y-3 overflow-x-auto">
                                     {employeeHours.map((emp) => (
-                                        <div key={emp._id._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg min-w-[200px]">
-                                            <span className="font-medium text-slate-700 truncate mr-2">{emp._id.firstName} {emp._id.lastName}</span>
+                                        <div key={emp.id.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg min-w-[200px]">
+                                            <span className="font-medium text-slate-700 truncate mr-2">{emp.id.firstName} {emp.id.lastName}</span>
                                             <span className="font-bold text-slate-900 whitespace-nowrap">{emp.totalHours.toFixed(2)} h</span>
                                         </div>
                                     ))}
@@ -343,8 +343,8 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
                             {report?.materials?.length > 0 ? (
                                 <div className="space-y-3 overflow-x-auto">
                                     {report.materials.map((mat) => (
-                                        <div key={mat._id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg min-w-[200px]">
-                                            <span className="font-medium text-slate-700 truncate mr-2">{mat._id}</span>
+                                        <div key={mat.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg min-w-[200px]">
+                                            <span className="font-medium text-slate-700 truncate mr-2">{mat.id}</span>
                                             <span className="font-bold text-slate-900 whitespace-nowrap">{mat.totalQuantity} {mat.unit}</span>
                                         </div>
                                     ))}
@@ -373,7 +373,7 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {report.dailyReports.map((dailyReport) => (
                                 <div
-                                    key={dailyReport._id}
+                                    key={dailyReport.id}
                                     onClick={() => setSelectedReport(dailyReport)}
                                     className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer border border-slate-100 group"
                                 >
@@ -399,7 +399,7 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
 
                                     <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
                                         <button
-                                            onClick={(e) => handleDeleteReport(e, dailyReport._id)}
+                                            onClick={(e) => handleDeleteReport(e, dailyReport.id)}
                                             className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
                                             title="Elimina"
                                         >
@@ -428,7 +428,7 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
                     {notes.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {notes.map((note) => (
-                                <div key={note._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <div key={note.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xs">
@@ -455,7 +455,7 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
                                                 // Wait, SiteDetails is defined IN the same file.
                                                 // I need to move handleDeleteNote inside SiteDetails or pass it down.
                                                 // Let's move it inside SiteDetails since it has the state.
-                                                handleDeleteNote(note._id);
+                                                handleDeleteNote(note.id);
                                             }}
                                             className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
                                             title="Elimina"
@@ -484,7 +484,7 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
                     {economie.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {economie.map((economia) => (
-                                <div key={economia._id} className="bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
+                                <div key={economia.id} className="bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
@@ -497,7 +497,7 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleDeleteEconomia(economia._id);
+                                                handleDeleteEconomia(economia.id);
                                             }}
                                             className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
                                             title="Elimina"
@@ -633,7 +633,7 @@ export default function SiteManagement() {
         e.preventDefault();
         try {
             if (editingSite) {
-                await siteAPI.update(editingSite._id, formData);
+                await siteAPI.update(editingSite.id, formData);
                 showNotification('success', 'Cantiere aggiornato con successo!');
             } else {
                 await siteAPI.create(formData);
@@ -689,7 +689,7 @@ export default function SiteManagement() {
             await workActivityAPI.delete(reportId);
             // Refresh reports
             const [rep] = await Promise.all([
-                analyticsAPI.getSiteReport(selectedSite._id)
+                analyticsAPI.getSiteReport(selectedSite.id)
             ]);
             setReport(rep.data);
             showNotification('success', 'Rapporto eliminato');
@@ -713,7 +713,7 @@ export default function SiteManagement() {
                     site={selectedSite}
                     onBack={() => setSelectedSite(null)}
                     onDelete={(e) => {
-                        handleDelete(e, selectedSite._id);
+                        handleDelete(e, selectedSite.id);
                         setSelectedSite(null);
                     }}
                 />
@@ -794,7 +794,7 @@ export default function SiteManagement() {
             <div className="grid gap-4">
                 {sites.map(site => (
                     <div
-                        key={site._id}
+                        key={site.id}
                         onClick={() => setSelectedSite(site)}
                         className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group"
                     >
@@ -834,7 +834,7 @@ export default function SiteManagement() {
                                         <Edit className="w-4 h-4" />
                                     </button>
                                     <button
-                                        onClick={(e) => handleDelete(e, site._id)}
+                                        onClick={(e) => handleDelete(e, site.id)}
                                         className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
                                         title="Elimina"
                                     >
@@ -944,7 +944,7 @@ export default function SiteManagement() {
                                             type="button"
                                             onClick={(e) => {
                                                 if (window.confirm('Eliminare questo cantiere?')) {
-                                                    handleDelete(e, editingSite._id);
+                                                    handleDelete(e, editingSite.id);
                                                     resetForm();
                                                 }
                                             }}

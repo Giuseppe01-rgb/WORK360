@@ -67,7 +67,7 @@ const MaterialsList = ({ materials, loading, onDelete }) => {
         <div className="space-y-3">
             {materials.map((usage) => (
                 <div
-                    key={usage._id}
+                    key={usage.id}
                     className="bg-white border border-slate-200 rounded-lg p-4 hover:border-blue-300 transition-colors group"
                 >
                     <div className="flex items-start justify-between">
@@ -110,7 +110,7 @@ const MaterialsList = ({ materials, loading, onDelete }) => {
                             {getStatusBadge(usage.stato)}
                             {onDelete && (
                                 <button
-                                    onClick={() => onDelete(usage._id)}
+                                    onClick={() => onDelete(usage.id)}
                                     className="text-slate-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 transition-colors"
                                     title="Elimina"
                                 >

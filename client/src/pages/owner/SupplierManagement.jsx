@@ -53,7 +53,7 @@ export default function SupplierManagement() {
 
         try {
             if (editingSupplier) {
-                await supplierAPI.update(editingSupplier._id, submitData);
+                await supplierAPI.update(editingSupplier.id, submitData);
                 setMessage({ type: 'success', text: 'Fornitore aggiornato con successo!' });
             } else {
                 await supplierAPI.create(submitData);
@@ -326,7 +326,7 @@ export default function SupplierManagement() {
                     </div>
                 ) : (
                     suppliers.map(supplier => (
-                        <div key={supplier._id} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                        <div key={supplier.id} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
@@ -408,7 +408,7 @@ export default function SupplierManagement() {
                                     Modifica
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(supplier._id)}
+                                    onClick={() => handleDelete(supplier.id)}
                                     className="flex-1 py-2 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                                 >
                                     <Trash2 className="w-4 h-4" />

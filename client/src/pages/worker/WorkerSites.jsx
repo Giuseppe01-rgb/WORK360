@@ -26,9 +26,9 @@ const SiteDetails = ({ site, onBack }) => {
             try {
                 setLoading(true);
                 const [reportsData, notesData, photosData] = await Promise.all([
-                    workActivityAPI.getAll({ siteId: site._id }),
-                    noteAPI.getAll({ siteId: site._id }),
-                    photoAPI.getAll({ siteId: site._id })
+                    workActivityAPI.getAll({ siteId: site.id }),
+                    noteAPI.getAll({ siteId: site.id }),
+                    photoAPI.getAll({ siteId: site.id })
                 ]);
                 setReports(reportsData.data || []);
                 setNotes(notesData.data || []);
@@ -109,7 +109,7 @@ const SiteDetails = ({ site, onBack }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {reports.map((report) => (
                                 <div
-                                    key={report._id}
+                                    key={report.id}
                                     className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
                                 >
                                     <div className="flex items-center justify-between mb-3">
@@ -152,7 +152,7 @@ const SiteDetails = ({ site, onBack }) => {
                     {notes.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {notes.map((note) => (
-                                <div key={note._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <div key={note.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xs">
@@ -191,7 +191,7 @@ const SiteDetails = ({ site, onBack }) => {
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {photos.map((photo) => (
                                 <div
-                                    key={photo._id}
+                                    key={photo.id}
                                     className="group relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all cursor-pointer"
                                     onClick={() => window.open(photo.photoUrl || photo.url, '_blank')}
                                 >
@@ -288,7 +288,7 @@ export default function WorkerSites() {
                 ) : (
                     sites.map(site => (
                         <div
-                            key={site._id}
+                            key={site.id}
                             onClick={() => setSelectedSite(site)}
                             className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group"
                         >

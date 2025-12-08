@@ -33,7 +33,7 @@ const ActivityProductivityAnalytics = () => {
     };
 
     const getUserName = (userId) => {
-        const user = users.find(u => u._id === userId);
+        const user = users.find(u => u.id === userId);
         return user?.name || 'Sconosciuto';
     };
 
@@ -100,8 +100,8 @@ const ActivityProductivityAnalytics = () => {
                 {analytics.length > 0 ? (
                     analytics.map((item, index) => {
                         const label = filter.groupBy === 'user'
-                            ? getUserName(item._id)
-                            : item._id;
+                            ? getUserName(item.id)
+                            : item.id;
                         const productivity = item.productivity?.toFixed(2) || 0;
 
                         return (
@@ -154,8 +154,8 @@ const ActivityProductivityAnalytics = () => {
                     <div className="space-y-3">
                         {analytics.map((item, index) => {
                             const label = filter.groupBy === 'user'
-                                ? getUserName(item._id)
-                                : item._id;
+                                ? getUserName(item.id)
+                                : item.id;
                             const productivity = item.productivity || 0;
                             const maxProductivity = Math.max(...analytics.map(a => a.productivity || 0));
                             const percentage = maxProductivity > 0 ? (productivity / maxProductivity) * 100 : 0;

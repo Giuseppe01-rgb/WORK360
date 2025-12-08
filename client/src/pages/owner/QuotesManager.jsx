@@ -313,7 +313,7 @@ export default function QuotesManager() {
                 await quoteAPI.update(id, dataToSave);
             } else {
                 const res = await quoteAPI.create(dataToSave);
-                id = res.data._id;
+                id = res.data.id;
                 setEditingId(id);
             }
 
@@ -433,7 +433,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                 piva: companyData.piva
             }
         });
-        setEditingId(quote._id);
+        setEditingId(quote.id);
         setShowModal(true);
     };
 
@@ -500,7 +500,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             // Or better, I should fix the backend controller to handle partial updates properly without requiring items.
             // But for now, let's just find the quote in our local state and send it all back with new status.
 
-            const quote = quotes.find(q => q._id === quoteId);
+            const quote = quotes.find(q => q.id === quoteId);
             if (!quote) return;
 
             const updateData = {
@@ -512,7 +512,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             await quoteAPI.update(quoteId, updateData);
 
             // Optimistic update
-            setQuotes(quotes.map(q => q._id === quoteId ? { ...q, status: newStatus } : q));
+            setQuotes(quotes.map(q => q.id === quoteId ? { ...q, status: newStatus } : q));
             showSuccess('Stato aggiornato');
         } catch (error) {
             console.error('Error updating status:', error);
@@ -604,7 +604,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             {activeTab === 'quotes' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {quotes.map(quote => (
-                        <div key={quote._id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                        <div key={quote.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                             <div className="mb-6">
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
@@ -613,7 +613,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     </div>
                                     <select
                                         value={quote.status}
-                                        onChange={(e) => handleStatusChange(quote._id, e.target.value)}
+                                        onChange={(e) => handleStatusChange(quote.id, e.target.value)}
                                         className={`text-xs font-bold px-3 py-1 rounded-full border-none focus:ring-0 cursor-pointer appearance-none text-center min-w-[80px] ${quote.status === 'accepted' ? 'bg-green-100 text-green-700' :
                                             quote.status === 'rejected' ? 'bg-red-100 text-red-700' :
                                                 quote.status === 'sent' ? 'bg-blue-100 text-blue-700' :
@@ -636,7 +636,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                             </div>
                             <div className="flex gap-2 pt-4 border-t border-slate-100">
                                 <button
-                                    onClick={() => downloadPDF(quote._id)}
+                                    onClick={() => downloadPDF(quote.id)}
                                     className="flex-1 py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 font-medium text-sm flex items-center justify-center gap-1 transition-colors"
                                     title="Scarica PDF"
                                 >
@@ -650,7 +650,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     <Edit className="w-4 h-4" /> Edit
                                 </button>
                                 <button
-                                    onClick={(e) => handleDelete(e, quote._id)}
+                                    onClick={(e) => handleDelete(e, quote.id)}
                                     className="py-2 px-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
                                     title="Elimina"
                                 >
@@ -662,7 +662,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {sals.map(sal => (
-                        <div key={sal._id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                        <div key={sal.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                             <div className="mb-6">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-2 text-slate-900 font-bold text-lg">
@@ -707,9 +707,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                             <div className="flex gap-2 pt-4 border-t border-slate-100">
                                 <button
                                     onClick={() => {
-                                        setEditingSALId(sal._id);
+                                        setEditingSALId(sal.id);
                                         setSalFormData({
-                                            site: sal.site?._id || '',
+                                            site: sal.site?.id || '',
                                             date: new Date(sal.date).toISOString().split('T')[0],
                                             periodStart: new Date(sal.periodStart).toISOString().split('T')[0],
                                             periodEnd: new Date(sal.periodEnd).toISOString().split('T')[0],
@@ -731,14 +731,14 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     <Edit className="w-4 h-4" /> Modifica
                                 </button>
                                 <button
-                                    onClick={() => downloadSALPDF(sal._id)}
+                                    onClick={() => downloadSALPDF(sal.id)}
                                     className="py-2 px-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
                                     title="Scarica PDF"
                                 >
                                     <Download className="w-4 h-4" />
                                 </button>
                                 <button
-                                    onClick={() => setDeleteConfirm({ isOpen: true, id: sal._id, type: 'sal' })}
+                                    onClick={() => setDeleteConfirm({ isOpen: true, id: sal.id, type: 'sal' })}
                                     className="py-2 px-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
                                     title="Elimina"
                                 >
@@ -1077,7 +1077,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     >
                                                         <option value="">Seleziona un cantiere...</option>
                                                         {Array.isArray(sites) && sites.filter(s => s).map(site => (
-                                                            <option key={site._id} value={site._id}>{site?.name || 'Cantiere senza nome'}</option>
+                                                            <option key={site.id} value={site.id}>{site?.name || 'Cantiere senza nome'}</option>
                                                         ))}
                                                     </select>
                                                 </div>

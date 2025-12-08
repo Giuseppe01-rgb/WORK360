@@ -27,7 +27,7 @@ const SiteDetails = ({ site, onBack }) => {
         if (!window.confirm('Sei sicuro di voler eliminare questa nota?')) return;
         try {
             await noteAPI.delete(noteId);
-            const notesData = await noteAPI.getAll({ siteId: site._id, type: 'note' });
+            const notesData = await noteAPI.getAll({ siteId: site.id, type: 'note' });
             setNotes(notesData.data || []);
         } catch (error) {
             console.error('Error deleting note:', error);
@@ -40,7 +40,7 @@ const SiteDetails = ({ site, onBack }) => {
         if (!window.confirm('Sei sicuro di voler eliminare questo rapporto?')) return;
         try {
             await workActivityAPI.delete(reportId);
-            const rep = await analyticsAPI.getSiteReport(site._id);
+            const rep = await analyticsAPI.getSiteReport(site.id);
             setReport(rep.data);
         } catch (error) {
             console.error('Error deleting report:', error);
@@ -53,7 +53,7 @@ const SiteDetails = ({ site, onBack }) => {
         if (!window.confirm('Sei sicuro di voler eliminare questa economia?')) return;
         try {
             await economiaAPI.delete(economiaId);
-            const economieData = await economiaAPI.getBySite(site._id);
+            const economieData = await economiaAPI.getBySite(site.id);
             setEconomie(economieData.data);
         } catch (error) {
             console.error('Error deleting economia:', error);
@@ -65,12 +65,12 @@ const SiteDetails = ({ site, onBack }) => {
         const loadDetails = async () => {
             try {
                 const [rep, hours, notesData, reportsData, photosData, economieData] = await Promise.all([
-                    analyticsAPI.getSiteReport(site._id),
-                    analyticsAPI.getHoursPerEmployee({ siteId: site._id }),
-                    noteAPI.getAll({ siteId: site._id, type: 'note' }),
-                    noteAPI.getAll({ siteId: site._id, type: 'daily_report' }),
-                    photoAPI.getAll({ siteId: site._id }),
-                    economiaAPI.getBySite(site._id)
+                    analyticsAPI.getSiteReport(site.id),
+                    analyticsAPI.getHoursPerEmployee({ siteId: site.id }),
+                    noteAPI.getAll({ siteId: site.id, type: 'note' }),
+                    noteAPI.getAll({ siteId: site.id, type: 'daily_report' }),
+                    photoAPI.getAll({ siteId: site.id }),
+                    economiaAPI.getBySite(site.id)
                 ]);
                 setReport(rep.data);
                 setEmployeeHours(hours.data);
@@ -459,7 +459,7 @@ const SiteDetails = ({ site, onBack }) => {
                     {report?.dailyReports?.length > 0 ? (
                         report.dailyReports.map((dailyReport) => (
                             <div
-                                key={dailyReport._id}
+                                key={dailyReport.id}
                                 onClick={() => setSelectedNote({ ...dailyReport, content: dailyReport.activityType })}
                                 className="bg-white rounded-3xl border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer group"
                             >
@@ -475,7 +475,7 @@ const SiteDetails = ({ site, onBack }) => {
                                         </div>
                                     </div>
                                     <button
-                                        onClick={(e) => handleDeleteReport(e, dailyReport._id)}
+                                        onClick={(e) => handleDeleteReport(e, dailyReport.id)}
                                         className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-100 md:opacity-0 group-hover:opacity-100"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -499,9 +499,9 @@ const SiteDetails = ({ site, onBack }) => {
                     {economie.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {economie.map((economia) => (
-                                <div key={economia._id} className="bg-white p-6 rounded-3xl shadow-sm border border-amber-100 relative group">
+                                <div key={economia.id} className="bg-white p-6 rounded-3xl shadow-sm border border-amber-100 relative group">
                                     <button
-                                        onClick={(e) => handleDeleteEconomia(e, economia._id)}
+                                        onClick={(e) => handleDeleteEconomia(e, economia.id)}
                                         className="absolute top-4 right-4 p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -551,7 +551,7 @@ const SiteDetails = ({ site, onBack }) => {
                     {notes.length > 0 ? (
                         notes.map((note) => (
                             <div
-                                key={note._id}
+                                key={note.id}
                                 onClick={() => setSelectedNote(note)}
                                 className="bg-white rounded-3xl border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer"
                             >
@@ -567,7 +567,7 @@ const SiteDetails = ({ site, onBack }) => {
                                         </div>
                                     </div>
                                     <button
-                                        onClick={(e) => handleDeleteNote(e, note._id)}
+                                        onClick={(e) => handleDeleteNote(e, note.id)}
                                         className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-100 md:opacity-0 group-hover:opacity-100"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -592,7 +592,7 @@ const SiteDetails = ({ site, onBack }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {photos.map((photo) => (
                                 <div
-                                    key={photo._id}
+                                    key={photo.id}
                                     onClick={() => setSelectedPhoto(photo)}
                                     className="bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-md transition-all cursor-pointer"
                                 >
@@ -722,19 +722,19 @@ const SiteDetails = ({ site, onBack }) => {
                                     </thead>
                                     <tbody>
                                         {employeeHours.map((emp) => (
-                                            <tr key={emp._id._id} className="border-b border-slate-100 hover:bg-slate-50">
+                                            <tr key={emp.id.id} className="border-b border-slate-100 hover:bg-slate-50">
                                                 <td className="px-4 py-3">
-                                                    <div className="font-bold text-slate-900">{emp._id.firstName} {emp._id.lastName}</div>
-                                                    <div className="text-xs text-slate-500">{emp._id.username}</div>
+                                                    <div className="font-bold text-slate-900">{emp.id.firstName} {emp.id.lastName}</div>
+                                                    <div className="text-xs text-slate-500">{emp.id.username}</div>
                                                 </td>
                                                 <td className="px-4 py-3 text-right font-mono text-slate-700">
                                                     {emp.totalHours.toFixed(2)} h
                                                 </td>
                                                 <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                    {emp._id.hourlyCost ? `€ ${emp._id.hourlyCost.toFixed(2)}` : '-'}
+                                                    {emp.id.hourlyCost ? `€ ${emp.id.hourlyCost.toFixed(2)}` : '-'}
                                                 </td>
                                                 <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
-                                                    € {((emp.totalHours || 0) * (emp._id.hourlyCost || 0)).toFixed(2)}
+                                                    € {((emp.totalHours || 0) * (emp.id.hourlyCost || 0)).toFixed(2)}
                                                 </td>
                                             </tr>
                                         ))}
@@ -747,7 +747,7 @@ const SiteDetails = ({ site, onBack }) => {
                                             </td>
                                             <td className="px-4 py-3 text-right text-slate-900">-</td>
                                             <td className="px-4 py-3 text-right text-green-600">
-                                                € {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr._id.hourlyCost || 0)), 0).toFixed(2)}
+                                                € {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toFixed(2)}
                                             </td>
                                         </tr>
                                     </tfoot>
@@ -787,9 +787,9 @@ const SiteDetails = ({ site, onBack }) => {
                                     </thead>
                                     <tbody>
                                         {report?.materials?.map((mat) => (
-                                            <tr key={mat._id} className="border-b border-slate-100 hover:bg-slate-50">
+                                            <tr key={mat.id} className="border-b border-slate-100 hover:bg-slate-50">
                                                 <td className="px-4 py-3 font-bold text-slate-900">
-                                                    {mat._id}
+                                                    {mat.id}
                                                 </td>
                                                 <td className="px-4 py-3 text-right font-mono text-slate-700">
                                                     {mat.totalQuantity} {mat.unit}
@@ -865,7 +865,7 @@ export default function OwnerDashboard() {
         e.preventDefault();
         try {
             if (editingSite) {
-                await siteAPI.update(editingSite._id, formData);
+                await siteAPI.update(editingSite.id, formData);
                 showNotification('success', 'Cantiere aggiornato con successo!');
             } else {
                 await siteAPI.create(formData);
@@ -1001,7 +1001,7 @@ export default function OwnerDashboard() {
                         <div className="space-y-4">
                             {filteredSites.map((site) => (
                                 <div
-                                    key={site._id}
+                                    key={site.id}
                                     onClick={() => setSelectedSite(site)}
                                     className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 relative group active:scale-[0.98] transition-all cursor-pointer"
                                 >
