@@ -33,6 +33,8 @@ const getHoursPerEmployee = async (req, res) => {
         const hoursData = await sequelize.query(`
             SELECT 
                 u.id as user_id,
+                u.first_name,
+                u.last_name,
                 u.first_name || ' ' || u.last_name as employee,
                 SUM(a.total_hours) as total_hours,
                 COUNT(a.id) as total_days,
@@ -53,11 +55,17 @@ const getHoursPerEmployee = async (req, res) => {
 
         console.log('DEBUG: hoursData found:', hoursData.length, 'records');
 
+        // Format response to match frontend expectations
         res.json(hoursData.map(d => ({
+            id: {
+                id: d.user_id,
+                firstName: d.first_name,
+                lastName: d.last_name
+            },
             employee: d.employee,
-            totalHours: parseFloat(d.totalHours || 0),
-            totalDays: parseInt(d.totalDays || 0),
-            avgHoursPerDay: parseFloat(d.avgHoursPerDay || 0).toFixed(2)
+            totalHours: parseFloat(d.total_hours || 0),
+            totalDays: parseInt(d.total_days || 0),
+            avgHoursPerDay: parseFloat(d.avg_hours_per_day || 0).toFixed(2)
         })));
     } catch (error) {
         console.error('getHoursPerEmployee error:', error);
