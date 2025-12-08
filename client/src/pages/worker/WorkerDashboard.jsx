@@ -69,31 +69,43 @@ export default function WorkerDashboard() {
 
     const loadData = async () => {
         try {
-            const [sitesData, attendanceData, myRecordsData] = await Promise.all([
-                siteAPI.getAll(),
-                attendanceAPI.getActive(),
-                attendanceAPI.getMyRecords({
-                    startDate: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
-                    endDate: new Date(new Date().setHours(23, 59, 59, 999)).toISOString()
-                })
-            ]);
-            setSites(sitesData.data);
-
-            // Set active attendance (open session)
-            if (attendanceData.data && attendanceData.data.id) {
-                setActiveAttendance(attendanceData.data);
-                const siteId = attendanceData.data.site?.id || attendanceData.data.site;
-                setSelectedSite(siteId);
+            // Load sites separately to ensure they load even if other APIs fail
+            let sitesData = { data: [] };
+            try {
+                sitesData = await siteAPI.getAll();
+                console.log('Sites API response:', sitesData);
+                console.log('Sites data:', sitesData.data);
+            } catch (sitesError) {
+                console.error('Error loading sites:', sitesError);
             }
+            setSites(Array.isArray(sitesData.data) ? sitesData.data : []);
 
-            // Set today's attendance (latest one, could be closed)
-            if (myRecordsData.data && myRecordsData.data.length > 0) {
-                // Get the latest one
-                const latest = myRecordsData.data[myRecordsData.data.length - 1];
-                setTodayAttendance(latest);
-            } else if (attendanceData.data && attendanceData.data.id) {
-                // If no records found but active exists (e.g. first one today), use active
-                setTodayAttendance(attendanceData.data);
+            // Load attendance data
+            try {
+                const [attendanceData, myRecordsData] = await Promise.all([
+                    attendanceAPI.getActive(),
+                    attendanceAPI.getMyRecords({
+                        startDate: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
+                        endDate: new Date(new Date().setHours(23, 59, 59, 999)).toISOString()
+                    })
+                ]);
+
+                // Set active attendance (open session)
+                if (attendanceData.data && attendanceData.data.id) {
+                    setActiveAttendance(attendanceData.data);
+                    const siteId = attendanceData.data.site?.id || attendanceData.data.site;
+                    setSelectedSite(siteId);
+                }
+
+                // Set today's attendance (latest one, could be closed)
+                if (myRecordsData.data && myRecordsData.data.length > 0) {
+                    const latest = myRecordsData.data[myRecordsData.data.length - 1];
+                    setTodayAttendance(latest);
+                } else if (attendanceData.data && attendanceData.data.id) {
+                    setTodayAttendance(attendanceData.data);
+                }
+            } catch (attendanceError) {
+                console.error('Error loading attendance:', attendanceError);
             }
 
             // Load today's activities
