@@ -1,4 +1,4 @@
-const { MaterialUsage, ColouraMaterial, User, ConstructionSite } = require('../models');
+const { MaterialUsage, MaterialMaster, User, ConstructionSite } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
@@ -25,18 +25,17 @@ const recordUsage = async (req, res) => {
             return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
         }
 
-        // Verify material exists and is active
-        const material = await ColouraMaterial.findOne({
+        // Verify material exists in MaterialMaster (catalog)
+        const material = await MaterialMaster.findOne({
             where: {
                 id: materialId,
-                companyId,
-                attivo: true
+                companyId
             }
         });
 
         if (!material) {
-            console.warn(`Material not found or inactive. ID: ${materialId}, Company: ${companyId}`);
-            return res.status(404).json({ message: 'Materiale non trovato o non attivo' });
+            console.warn(`Material not found. ID: ${materialId}, Company: ${companyId}`);
+            return res.status(404).json({ message: 'Materiale non trovato nel catalogo' });
         }
 
         const usage = await MaterialUsage.create({
@@ -49,10 +48,10 @@ const recordUsage = async (req, res) => {
             note: note || ''
         });
 
-        // Reload with associations
+        // Reload with associations - use MaterialMaster
         const populatedUsage = await MaterialUsage.findByPk(usage.id, {
             include: [
-                { model: ColouraMaterial, as: 'material' },
+                { model: MaterialMaster, as: 'materialMaster' },
                 { model: User, as: 'user', attributes: ['firstName', 'lastName'] },
                 { model: ConstructionSite, as: 'site', attributes: ['name'] }
             ]
@@ -96,7 +95,7 @@ const getTodayUsage = async (req, res) => {
         const usages = await MaterialUsage.findAll({
             where: whereClause,
             include: [
-                { model: ColouraMaterial, as: 'material' },
+                { model: MaterialMaster, as: 'materialMaster' },
                 { model: ConstructionSite, as: 'site', attributes: ['name'] }
             ],
             order: [['dataOra', 'DESC']]
@@ -142,12 +141,11 @@ const getMostUsedBySite = async (req, res) => {
             type: sequelize.QueryTypes.SELECT
         });
 
-        // Get material details for the IDs
+        // Get material details for the IDs from MaterialMaster
         const materialIds = results.map(r => r.material_id);
-        const materials = await ColouraMaterial.findAll({
+        const materials = await MaterialMaster.findAll({
             where: {
-                id: { [Op.in]: materialIds },
-                attivo: true
+                id: { [Op.in]: materialIds }
             }
         });
 
@@ -186,7 +184,7 @@ const getUsageHistory = async (req, res) => {
         const usages = await MaterialUsage.findAll({
             where: whereClause,
             include: [
-                { model: ColouraMaterial, as: 'material' },
+                { model: MaterialMaster, as: 'materialMaster' },
                 { model: User, as: 'user', attributes: ['firstName', 'lastName'] },
                 { model: ConstructionSite, as: 'site', attributes: ['name'] }
             ],

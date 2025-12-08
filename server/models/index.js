@@ -128,7 +128,9 @@ MaterialUsage.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
 MaterialUsage.belongsTo(ConstructionSite, { foreignKey: 'siteId', as: 'site' });
 MaterialUsage.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 MaterialUsage.belongsTo(ColouraMaterial, { foreignKey: 'materialId', as: 'material' });
+MaterialUsage.belongsTo(MaterialMaster, { foreignKey: 'materialId', as: 'materialMaster' });
 MaterialUsage.belongsTo(ReportedMaterial, { foreignKey: 'materialeReportId', as: 'reportedMaterial' });
+
 
 module.exports = {
     User,
