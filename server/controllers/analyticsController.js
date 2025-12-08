@@ -207,7 +207,7 @@ const getMaterialsSummary = async (req, res) => {
 // @access  Private (Owner)
 const getDashboard = async (req, res) => {
     try {
-        // Return dashboard data with costIncidence for frontend compatibility
+        // Return dashboard data with companyCostIncidence for frontend compatibility
         res.json({
             message: 'Dashboard analytics',
             stats: {
@@ -216,7 +216,7 @@ const getDashboard = async (req, res) => {
                 totalWorkers: 0,
                 monthlyHours: 0
             },
-            costIncidence: {
+            companyCostIncidence: {
                 materialsIncidencePercent: 0,
                 laborIncidencePercent: 0,
                 totalCost: 0,

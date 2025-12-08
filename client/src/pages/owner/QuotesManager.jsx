@@ -4,7 +4,7 @@ import { quoteAPI, communicationAPI, salAPI, siteAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
-import { Plus, Search, FileText, Calendar, DollarSign, User, MapPin, Edit, Trash2, X, CheckCircle, AlertTriangle, Send, Loader, ChevronDown, ChevronUp, Building2, Percent, Euro, Download } from 'lucide-react';
+import { Plus, Search, FileText, Calendar, DollarSign, User, MapPin, Edit, Trash2, X, CheckCircle, AlertTriangle, Send, Loader, ChevronDown, ChevronUp, Building2, Percent, Euro, Download, Eye } from 'lucide-react';
 import React from 'react';
 
 class DebugErrorBoundary extends React.Component {
