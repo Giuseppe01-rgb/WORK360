@@ -32,7 +32,7 @@ const clockIn = async (req, res) => {
         // Check if user already has an active attendance (not clocked out)
         const activeAttendance = await Attendance.findOne({
             where: {
-                userId: req.user._id,
+                userId: getUserId(req),
                 clockOut: null
             }
         });
@@ -46,7 +46,7 @@ const clockIn = async (req, res) => {
         const lng = longitude || 0;
 
         const attendance = await Attendance.create({
-            userId: req.user._id,
+            userId: getUserId(req),
             siteId: siteId,
             clockIn: {
                 time: new Date(),
@@ -88,7 +88,7 @@ const clockOut = async (req, res) => {
             return res.status(404).json({ message: 'Presenza non trovata' });
         }
 
-        if (attendance.userId !== req.user._id.toString()) {
+        if (attendance.userId !== getUserId(req)) {
             return res.status(403).json({ message: 'Non autorizzato' });
         }
 
@@ -129,7 +129,7 @@ const getMyAttendance = async (req, res) => {
         const { startDate, endDate } = req.query;
 
         const where = {
-            userId: req.user._id
+            userId: getUserId(req)
         };
 
         if (startDate || endDate) {
@@ -161,7 +161,7 @@ const getActiveAttendance = async (req, res) => {
     try {
         const attendance = await Attendance.findOne({
             where: {
-                userId: req.user._id,
+                userId: getUserId(req),
                 clockOut: null
             },
             include: [{
