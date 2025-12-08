@@ -113,7 +113,7 @@ const getSiteReport = async (req, res, next) => {
                 clockOut: { [Op.ne]: null }
             },
             attributes: [
-                [sequelize.fn('SUM', sequelize.col('totalHours')), 'totalHours'],
+                [sequelize.fn('SUM', sequelize.col('total_hours')), 'totalHours'],
                 [sequelize.fn('COUNT', sequelize.col('id')), 'totalDays']
             ],
             raw: true
