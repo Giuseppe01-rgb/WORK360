@@ -221,19 +221,164 @@ const getAllAttendance = async (req, res) => {
 
 // Placeholder functions for other endpoints (simplified for migration)
 const createManualAttendance = async (req, res) => {
-    res.status(501).json({ message: 'Funzione non ancora implementata in PostgreSQL' });
+    try {
+        const { userId, siteId, date, clockIn, clockOut, notes, totalHours } = req.body;
+        const companyId = getCompanyId(req);
+
+        if (!userId || !siteId || !date) {
+            return res.status(400).json({ message: 'userId, siteId e date sono obbligatori' });
+        }
+
+        // Verify site belongs to company
+        const site = await ConstructionSite.findOne({ where: { id: siteId, companyId } });
+        if (!site) {
+            return res.status(404).json({ message: 'Cantiere non trovato' });
+        }
+
+        // Verify user belongs to company
+        const user = await User.findOne({ where: { id: userId, companyId } });
+        if (!user) {
+            return res.status(404).json({ message: 'Utente non trovato' });
+        }
+
+        // Build clockIn/clockOut JSONB
+        const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}`), location: null } : null;
+        const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}`), location: null } : null;
+
+        // Calculate hours if both present
+        let hours = totalHours || 0;
+        if (clockInData && clockOutData && !totalHours) {
+            hours = (new Date(clockOutData.time) - new Date(clockInData.time)) / (1000 * 60 * 60);
+        }
+
+        const attendance = await Attendance.create({
+            userId,
+            siteId,
+            clockIn: clockInData,
+            clockOut: clockOutData,
+            totalHours: hours,
+            notes: notes || null
+        });
+
+        res.status(201).json(attendance);
+    } catch (error) {
+        console.error('createManualAttendance error:', error);
+        res.status(500).json({ message: error.message });
+    }
 };
 
 const bulkCreateAttendances = async (req, res) => {
-    res.status(501).json({ message: 'Funzione non ancora implementata in PostgreSQL' });
+    try {
+        const { attendances } = req.body;
+        const companyId = getCompanyId(req);
+
+        if (!attendances || !Array.isArray(attendances) || attendances.length === 0) {
+            return res.status(400).json({ message: 'Array di presenze richiesto' });
+        }
+
+        const results = { created: 0, errors: [] };
+
+        for (let i = 0; i < attendances.length; i++) {
+            const att = attendances[i];
+            try {
+                const { userId, siteId, date, clockIn, clockOut, notes, totalHours } = att;
+
+                // Verify site
+                const site = await ConstructionSite.findOne({ where: { id: siteId, companyId } });
+                if (!site) {
+                    results.errors.push({ index: i, error: 'Cantiere non trovato' });
+                    continue;
+                }
+
+                const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}`), location: null } : null;
+                const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}`), location: null } : null;
+
+                let hours = totalHours || 0;
+                if (clockInData && clockOutData && !totalHours) {
+                    hours = (new Date(clockOutData.time) - new Date(clockInData.time)) / (1000 * 60 * 60);
+                }
+
+                await Attendance.create({
+                    userId,
+                    siteId,
+                    clockIn: clockInData,
+                    clockOut: clockOutData,
+                    totalHours: hours,
+                    notes: notes || null
+                });
+                results.created++;
+            } catch (rowError) {
+                results.errors.push({ index: i, error: rowError.message });
+            }
+        }
+
+        res.json({
+            message: `${results.created}/${attendances.length} presenze create`,
+            results
+        });
+    } catch (error) {
+        console.error('bulkCreateAttendances error:', error);
+        res.status(500).json({ message: error.message });
+    }
 };
 
 const updateAttendance = async (req, res) => {
-    res.status(501).json({ message: 'Funzione non ancora implementata in PostgreSQL' });
+    try {
+        const { id } = req.params;
+        const companyId = getCompanyId(req);
+        const { clockIn, clockOut, notes, totalHours } = req.body;
+
+        // Find the attendance and verify it belongs to company
+        const attendance = await Attendance.findByPk(id, {
+            include: [{ model: ConstructionSite, as: 'site' }]
+        });
+
+        if (!attendance) {
+            return res.status(404).json({ message: 'Presenza non trovata' });
+        }
+
+        if (attendance.site.companyId !== companyId) {
+            return res.status(403).json({ message: 'Non autorizzato a modificare questa presenza' });
+        }
+
+        // Update fields
+        if (clockIn !== undefined) attendance.clockIn = clockIn;
+        if (clockOut !== undefined) attendance.clockOut = clockOut;
+        if (notes !== undefined) attendance.notes = notes;
+        if (totalHours !== undefined) attendance.totalHours = totalHours;
+
+        await attendance.save();
+        res.json(attendance);
+    } catch (error) {
+        console.error('updateAttendance error:', error);
+        res.status(500).json({ message: error.message });
+    }
 };
 
 const deleteAttendance = async (req, res) => {
-    res.status(501).json({ message: 'Funzione non ancora implementata in PostgreSQL' });
+    try {
+        const { id } = req.params;
+        const companyId = getCompanyId(req);
+
+        // Find the attendance and verify it belongs to company
+        const attendance = await Attendance.findByPk(id, {
+            include: [{ model: ConstructionSite, as: 'site' }]
+        });
+
+        if (!attendance) {
+            return res.status(404).json({ message: 'Presenza non trovata' });
+        }
+
+        if (attendance.site.companyId !== companyId) {
+            return res.status(403).json({ message: 'Non autorizzato a eliminare questa presenza' });
+        }
+
+        await attendance.destroy();
+        res.json({ message: 'Presenza eliminata con successo' });
+    } catch (error) {
+        console.error('deleteAttendance error:', error);
+        res.status(500).json({ message: error.message });
+    }
 };
 
 module.exports = {
