@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
-import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI } from '../../utils/api';
+import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight,
@@ -21,6 +21,39 @@ const SiteDetails = ({ site, onBack }) => {
     const [selectedPhoto, setSelectedPhoto] = useState(null);
     const [showMaterialsModal, setShowMaterialsModal] = useState(false);
     const [showEmployeesModal, setShowEmployeesModal] = useState(false);
+    const [materialUsages, setMaterialUsages] = useState([]);
+    const [loadingMaterials, setLoadingMaterials] = useState(false);
+
+    const loadMaterialUsages = async () => {
+        setLoadingMaterials(true);
+        try {
+            const res = await materialUsageAPI.getBySite(site.id);
+            setMaterialUsages(res.data || []);
+        } catch (error) {
+            console.error('Error loading material usages:', error);
+        } finally {
+            setLoadingMaterials(false);
+        }
+    };
+
+    const handleOpenMaterialsModal = () => {
+        setShowMaterialsModal(true);
+        loadMaterialUsages();
+    };
+
+    const handleDeleteMaterialUsage = async (usageId) => {
+        if (!window.confirm('Sei sicuro di voler eliminare questo utilizzo materiale?')) return;
+        try {
+            await materialUsageAPI.delete(usageId);
+            await loadMaterialUsages();
+            // Reload report to update totals
+            const rep = await analyticsAPI.getSiteReport(site.id);
+            setReport(rep.data);
+        } catch (error) {
+            console.error('Error deleting material usage:', error);
+            alert(`Errore nell'eliminazione: ${error.response?.data?.message || error.message}`);
+        }
+    };
 
     const handleDeleteNote = async (e, noteId) => {
         e.stopPropagation();
@@ -433,7 +466,7 @@ const SiteDetails = ({ site, onBack }) => {
 
                         {/* MATERIALS CARD */}
                         <div
-                            onClick={() => setShowMaterialsModal(true)}
+                            onClick={handleOpenMaterialsModal}
                             className="bg-white rounded-3xl border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
                         >
                             <div className="flex items-center gap-4">
@@ -761,11 +794,11 @@ const SiteDetails = ({ site, onBack }) => {
             {/* Materials Detail Modal */}
             {showMaterialsModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowMaterialsModal(false)}>
-                    <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between z-10">
                             <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
                                 <Package className="w-6 h-6 text-purple-600" />
-                                Dettaglio Costi Materiali
+                                Gestione Materiali Cantiere
                             </h3>
                             <button
                                 onClick={() => setShowMaterialsModal(false)}
@@ -774,44 +807,85 @@ const SiteDetails = ({ site, onBack }) => {
                                 <X className="w-6 h-6 text-slate-500" />
                             </button>
                         </div>
-                        <div className="p-6">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-slate-50 border-b border-slate-200">
-                                            <th className="text-left px-4 py-3 font-bold text-slate-700">Materiale</th>
-                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Quantità</th>
-                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Prezzo Unit.</th>
-                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Totale</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {report?.materials?.map((mat) => (
-                                            <tr key={mat.id} className="border-b border-slate-100 hover:bg-slate-50">
-                                                <td className="px-4 py-3 font-bold text-slate-900">
-                                                    {mat.name}
-                                                </td>
-                                                <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                    {mat.totalQuantity} {mat.unit}
-                                                </td>
-                                                <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                    {mat.unitPrice ? `€ ${mat.unitPrice.toFixed(2)}` : '-'}
-                                                </td>
-                                                <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
-                                                    € {(mat.totalCost || 0).toFixed(2)}
+                        <div className="p-6 space-y-6">
+                            {/* Summary Table */}
+                            <div>
+                                <h4 className="text-lg font-bold text-slate-900 mb-3">Riepilogo Costi</h4>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="bg-slate-50 border-b border-slate-200">
+                                                <th className="text-left px-4 py-3 font-bold text-slate-700">Materiale</th>
+                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Quantità</th>
+                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Prezzo Unit.</th>
+                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Totale</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {report?.materials?.map((mat) => (
+                                                <tr key={mat.id} className="border-b border-slate-100 hover:bg-slate-50">
+                                                    <td className="px-4 py-3 font-bold text-slate-900">
+                                                        {mat.name}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right font-mono text-slate-700">
+                                                        {mat.totalQuantity} {mat.unit}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right font-mono text-slate-700">
+                                                        {mat.unitPrice ? `€ ${mat.unitPrice.toFixed(2)}` : '-'}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
+                                                        € {(mat.totalCost || 0).toFixed(2)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                        <tfoot className="bg-slate-50 font-bold">
+                                            <tr>
+                                                <td className="px-4 py-3 text-slate-900" colSpan="3">TOTALE</td>
+                                                <td className="px-4 py-3 text-right text-green-600">
+                                                    € {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toFixed(2)}
                                                 </td>
                                             </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Individual Usages with Delete */}
+                            <div>
+                                <h4 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                    Utilizzi Individuali
+                                    {loadingMaterials && <span className="text-sm text-slate-500 font-normal">Caricamento...</span>}
+                                </h4>
+                                {materialUsages.length === 0 && !loadingMaterials ? (
+                                    <p className="text-slate-500 text-center py-4">Nessun utilizzo materiale registrato</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {materialUsages.map((usage) => (
+                                            <div key={usage.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                                <div className="flex-1">
+                                                    <div className="font-semibold text-slate-900">
+                                                        {usage.materialMaster?.displayName || usage.materialMaster?.display_name || 'Materiale sconosciuto'}
+                                                    </div>
+                                                    <div className="text-sm text-slate-600 flex flex-wrap gap-4 mt-1">
+                                                        <span>Qtà: <strong>{usage.numeroConfezioni || usage.numero_confezioni}</strong> {usage.materialMaster?.unit || 'pz'}</span>
+                                                        <span>Data: {new Date(usage.dataOra || usage.data_ora).toLocaleDateString('it-IT')}</span>
+                                                        {usage.user && (
+                                                            <span>Da: {usage.user.firstName} {usage.user.lastName}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDeleteMaterialUsage(usage.id)}
+                                                    className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                                                    title="Elimina utilizzo"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
                                         ))}
-                                    </tbody>
-                                    <tfoot className="bg-slate-50 font-bold">
-                                        <tr>
-                                            <td className="px-4 py-3 text-slate-900" colSpan="3">TOTALE</td>
-                                            <td className="px-4 py-3 text-right text-green-600">
-                                                € {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toFixed(2)}
-                                            </td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

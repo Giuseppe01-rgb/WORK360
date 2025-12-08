@@ -93,6 +93,7 @@ export const materialUsageAPI = {
     getTodayUsage: (siteId) => api.get('/material-usage/today', { params: siteId ? { siteId } : {} }),
     getMostUsedBySite: (siteId) => api.get(`/material-usage/most-used/${siteId}`),
     getHistory: (params) => api.get('/material-usage', { params }),
+    getBySite: (siteId) => api.get('/material-usage', { params: { siteId } }),
     delete: (id) => api.delete(`/material-usage/${id}`)
 };
 
