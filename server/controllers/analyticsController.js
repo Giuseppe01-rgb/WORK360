@@ -81,6 +81,9 @@ const getSiteReport = async (req, res, next) => {
         // SECURITY: Verify site belongs to user's company
         await assertSiteBelongsToCompany(siteId, companyId);
 
+        // Get the site to get contractValue
+        const site = await ConstructionSite.findByPk(siteId);
+
         // Get materials summary
         const materials = await Material.findAll({
             where: { siteId },
@@ -119,7 +122,7 @@ const getSiteReport = async (req, res, next) => {
             raw: true
         });
 
-        // Calculate cost incidence for frontend
+        // Calculate costs
         const totalHours = parseFloat(attendance[0]?.totalHours || 0);
         const laborCost = totalHours * 25; // Default hourly rate
         const materialsCost = 0; // Materials don't have price in current model
@@ -129,10 +132,29 @@ const getSiteReport = async (req, res, next) => {
         const materialsIncidencePercent = totalCost > 0 ? (materialsCost / totalCost) * 100 : 0;
         const laborIncidencePercent = totalCost > 0 ? (laborCost / totalCost) * 100 : 0;
 
+        // Get contractValue and calculate margin
+        const contractValue = parseFloat(site?.contractValue) || 0;
+        const marginCurrentValue = contractValue - totalCost;
+        const marginCurrentPercent = contractValue > 0 ? (marginCurrentValue / contractValue) * 100 : 0;
+        const costVsRevenuePercent = contractValue > 0 ? (totalCost / contractValue) * 100 : 0;
+
         res.json({
             materials,
             equipment,
             attendance: attendance[0] || { totalHours: 0, totalDays: 0 },
+            totalHours,
+            contractValue: contractValue || null,
+            status: site?.status || 'active', // 'active' or 'completed'
+            siteCost: {
+                total: parseFloat(totalCost.toFixed(2)),
+                laborCost: parseFloat(laborCost.toFixed(2)),
+                materialsCost: parseFloat(materialsCost.toFixed(2))
+            },
+            margin: contractValue ? {
+                marginCurrentValue: parseFloat(marginCurrentValue.toFixed(2)),
+                marginCurrentPercent: parseFloat(marginCurrentPercent.toFixed(2)),
+                costVsRevenuePercent: parseFloat(costVsRevenuePercent.toFixed(2))
+            } : null,
             costIncidence: {
                 materialsIncidencePercent: parseFloat(materialsIncidencePercent.toFixed(2)),
                 laborIncidencePercent: parseFloat(laborIncidencePercent.toFixed(2)),
