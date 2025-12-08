@@ -20,7 +20,7 @@ const getAllMaterials = async (req, res) => {
 
         // Map to expected frontend format
         const formatted = materials.map(m => ({
-            _id: m.id,
+            id: m.id,
             codice_prodotto: m.barcode || '',
             marca: m.spec || '',
             nome_prodotto: m.displayName,
@@ -63,7 +63,7 @@ const searchMaterials = async (req, res) => {
 
         // Map to frontend format
         const formatted = materials.map(m => ({
-            _id: m.id,
+            id: m.id,
             codice_prodotto: m.barcode || '',
             marca: m.spec || '',
             nome_prodotto: m.displayName,
@@ -98,7 +98,7 @@ const getMaterialByCode = async (req, res) => {
         res.json({
             found: true,
             material: {
-                _id: material.id,
+                id: material.id,
                 codice_prodotto: material.barcode || '',
                 marca: material.spec || '',
                 nome_prodotto: material.displayName,
