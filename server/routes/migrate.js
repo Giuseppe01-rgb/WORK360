@@ -1,5 +1,5 @@
 /**
- * Migration API Route
+ * Migration API Route - FIXED
  * Endpoint to import MongoDB data to PostgreSQL
  */
 
@@ -30,7 +30,7 @@ router.post('/import', express.json({ limit: '50mb' }), async (req, res) => {
         const data = req.body;
         log('🚀 Starting data import...');
 
-        // ID mapping
+        // ID mapping (MongoDB _id -> PostgreSQL UUID)
         const idMaps = {
             users: {},
             companies: {},
@@ -48,19 +48,22 @@ router.post('/import', express.json({ limit: '50mb' }), async (req, res) => {
                     const newId = generateUUID();
                     idMaps.companies[company._id] = newId;
 
+                    // Use correct column names from Company model
                     await sequelize.query(`
-                        INSERT INTO companies (id, name, vat_number, address, phone, email, logo, created_at, updated_at)
-                        VALUES (:id, :name, :vatNumber, :address, :phone, :email, :logo, :createdAt, :updatedAt)
+                        INSERT INTO companies (id, name, owner_name, address, phone, email, piva, logo, active, created_at, updated_at)
+                        VALUES (:id, :name, :ownerName, :address, :phone, :email, :piva, :logo, :active, :createdAt, :updatedAt)
                         ON CONFLICT (id) DO NOTHING
                     `, {
                         replacements: {
                             id: newId,
                             name: company.name || 'Azienda',
-                            vatNumber: company.vatNumber || company.piva || null,
-                            address: typeof company.address === 'object' ? JSON.stringify(company.address) : (company.address || null),
+                            ownerName: company.ownerName || 'Proprietario',
+                            address: JSON.stringify(company.address || {}),
                             phone: company.phone || null,
                             email: company.email || null,
+                            piva: company.piva || company.vatNumber || null,
                             logo: company.logo || null,
+                            active: company.active !== false,
                             createdAt: company.createdAt || new Date(),
                             updatedAt: company.updatedAt || new Date()
                         }
@@ -184,20 +187,28 @@ router.post('/import', express.json({ limit: '50mb' }), async (req, res) => {
                         continue;
                     }
 
-                    // Handle clockIn structure
+                    // Handle clockIn structure - convert to JSONB format expected by PostgreSQL
                     let clockIn = null;
                     if (att.clockIn) {
-                        clockIn = att.clockIn.time || att.clockIn;
+                        if (typeof att.clockIn === 'object') {
+                            clockIn = JSON.stringify(att.clockIn);
+                        } else {
+                            clockIn = JSON.stringify({ time: att.clockIn, location: null });
+                        }
                     }
 
                     let clockOut = null;
                     if (att.clockOut) {
-                        clockOut = att.clockOut.time || att.clockOut;
+                        if (typeof att.clockOut === 'object') {
+                            clockOut = JSON.stringify(att.clockOut);
+                        } else {
+                            clockOut = JSON.stringify({ time: att.clockOut, location: null });
+                        }
                     }
 
                     await sequelize.query(`
                         INSERT INTO attendances (id, user_id, site_id, clock_in, clock_out, total_hours, notes, created_at, updated_at)
-                        VALUES (:id, :userId, :siteId, :clockIn, :clockOut, :totalHours, :notes, :createdAt, :updatedAt)
+                        VALUES (:id, :userId, :siteId, :clockIn::jsonb, :clockOut::jsonb, :totalHours, :notes, :createdAt, :updatedAt)
                         ON CONFLICT (id) DO NOTHING
                     `, {
                         replacements: {
@@ -232,9 +243,27 @@ router.post('/import', express.json({ limit: '50mb' }), async (req, res) => {
                     const userId = idMaps.users[note.user] || idMaps.users[note.userId];
                     const siteId = idMaps.sites[note.site] || idMaps.sites[note.siteId];
 
+                    // Get company ID from user or site
+                    let companyId = null;
+                    if (userId) {
+                        const [userRow] = await sequelize.query(
+                            `SELECT company_id FROM users WHERE id = :userId`,
+                            { replacements: { userId } }
+                        );
+                        if (userRow.length > 0) {
+                            companyId = userRow[0].company_id;
+                        }
+                    }
+
+                    if (!companyId) {
+                        log(`  ⚠️ Skipping note - no company found`);
+                        stats.notes.errors++;
+                        continue;
+                    }
+
                     await sequelize.query(`
-                        INSERT INTO notes (id, content, user_id, site_id, created_at, updated_at)
-                        VALUES (:id, :content, :userId, :siteId, :createdAt, :updatedAt)
+                        INSERT INTO notes (id, content, user_id, site_id, company_id, type, created_at, updated_at)
+                        VALUES (:id, :content, :userId, :siteId, :companyId, :type, :createdAt, :updatedAt)
                         ON CONFLICT (id) DO NOTHING
                     `, {
                         replacements: {
@@ -242,6 +271,8 @@ router.post('/import', express.json({ limit: '50mb' }), async (req, res) => {
                             content: note.content || note.text || '',
                             userId: userId,
                             siteId: siteId,
+                            companyId: companyId,
+                            type: 'note',
                             createdAt: note.createdAt || new Date(),
                             updatedAt: note.updatedAt || new Date()
                         }
@@ -255,7 +286,7 @@ router.post('/import', express.json({ limit: '50mb' }), async (req, res) => {
             }
         }
 
-        // 6. Import Materials
+        // 6. Import Materials (with correct columns)
         log('📦 Importing materials...');
         if (data.materials && data.materials.length > 0) {
             stats.materials = { found: data.materials.length, migrated: 0, errors: 0 };
@@ -264,10 +295,29 @@ router.post('/import', express.json({ limit: '50mb' }), async (req, res) => {
                 try {
                     const newId = generateUUID();
                     const siteId = idMaps.sites[mat.site] || idMaps.sites[mat.siteId];
+                    const userId = idMaps.users[mat.user] || idMaps.users[mat.userId];
+
+                    // Get company ID from user
+                    let companyId = null;
+                    if (userId) {
+                        const [userRow] = await sequelize.query(
+                            `SELECT company_id FROM users WHERE id = :userId`,
+                            { replacements: { userId } }
+                        );
+                        if (userRow.length > 0) {
+                            companyId = userRow[0].company_id;
+                        }
+                    }
+
+                    if (!userId || !siteId || !companyId) {
+                        log(`  ⚠️ Skipping material - missing user/site/company`);
+                        stats.materials.errors++;
+                        continue;
+                    }
 
                     await sequelize.query(`
-                        INSERT INTO materials (id, name, quantity, unit, site_id, unit_price, notes, created_at, updated_at)
-                        VALUES (:id, :name, :quantity, :unit, :siteId, :unitPrice, :notes, :createdAt, :updatedAt)
+                        INSERT INTO materials (id, name, quantity, unit, site_id, user_id, company_id, notes, created_at, updated_at)
+                        VALUES (:id, :name, :quantity, :unit, :siteId, :userId, :companyId, :notes, :createdAt, :updatedAt)
                         ON CONFLICT (id) DO NOTHING
                     `, {
                         replacements: {
@@ -276,7 +326,8 @@ router.post('/import', express.json({ limit: '50mb' }), async (req, res) => {
                             quantity: mat.quantity || 1,
                             unit: mat.unit || 'pz',
                             siteId: siteId,
-                            unitPrice: mat.unitPrice || mat.price || null,
+                            userId: userId,
+                            companyId: companyId,
                             notes: mat.notes || null,
                             createdAt: mat.createdAt || new Date(),
                             updatedAt: mat.updatedAt || new Date()
