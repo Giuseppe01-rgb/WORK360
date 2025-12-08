@@ -138,6 +138,7 @@ app.use('/api/sites', require('./routes/siteRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/suppliers', require('./routes/supplierRoutes'));
+app.use('/api/migrate', require('./routes/migrate')); // Temporary migration endpoint
 app.use('/api/work-activities', require('./routes/workActivityRoutes'));
 app.use('/api/communication', require('./routes/communicationRoutes'));
 app.use('/api/economia', require('./routes/economiaRoutes'));
