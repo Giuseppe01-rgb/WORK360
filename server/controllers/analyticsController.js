@@ -207,14 +207,21 @@ const getMaterialsSummary = async (req, res) => {
 // @access  Private (Owner)
 const getDashboard = async (req, res) => {
     try {
-        // Placeholder - return basic dashboard data
+        // Return dashboard data with costIncidence for frontend compatibility
         res.json({
-            message: 'Dashboard analytics coming soon',
+            message: 'Dashboard analytics',
             stats: {
                 totalSites: 0,
                 activeSites: 0,
                 totalWorkers: 0,
                 monthlyHours: 0
+            },
+            costIncidence: {
+                materialsIncidencePercent: 0,
+                laborIncidencePercent: 0,
+                totalCost: 0,
+                laborCost: 0,
+                materialsCost: 0
             }
         });
     } catch (error) {
