@@ -269,17 +269,42 @@ const createManualAttendance = async (req, res) => {
 
 const bulkCreateAttendances = async (req, res) => {
     try {
-        const { attendances } = req.body;
         const companyId = getCompanyId(req);
+        let attendancesToCreate = [];
 
-        if (!attendances || !Array.isArray(attendances) || attendances.length === 0) {
-            return res.status(400).json({ message: 'Array di presenze richiesto' });
+        // Support both old format (attendances array) and new format (workers + siteId + dates)
+        if (req.body.attendances && Array.isArray(req.body.attendances)) {
+            // Old format: direct array of attendance objects
+            attendancesToCreate = req.body.attendances;
+        } else if (req.body.workers && req.body.siteId && req.body.dates) {
+            // New format: workers array, siteId, dates array
+            const { workers, siteId, dates } = req.body;
+
+            // Create attendance entries for each worker × date combination
+            for (const workerId of workers) {
+                for (const dateEntry of dates) {
+                    attendancesToCreate.push({
+                        userId: workerId,
+                        siteId: siteId,
+                        date: dateEntry.date,
+                        clockIn: dateEntry.clockIn,
+                        clockOut: dateEntry.clockOut,
+                        notes: dateEntry.notes || ''
+                    });
+                }
+            }
+        } else {
+            return res.status(400).json({ message: 'Array di presenze richiesto o workers/siteId/dates' });
+        }
+
+        if (attendancesToCreate.length === 0) {
+            return res.status(400).json({ message: 'Nessuna presenza da creare' });
         }
 
         const results = { created: 0, errors: [] };
 
-        for (let i = 0; i < attendances.length; i++) {
-            const att = attendances[i];
+        for (let i = 0; i < attendancesToCreate.length; i++) {
+            const att = attendancesToCreate[i];
             try {
                 const { userId, siteId, date, clockIn, clockOut, notes, totalHours } = att;
 
@@ -313,7 +338,8 @@ const bulkCreateAttendances = async (req, res) => {
         }
 
         res.json({
-            message: `${results.created}/${attendances.length} presenze create`,
+            message: `${results.created}/${attendancesToCreate.length} presenze create`,
+            created: results.created,
             results
         });
     } catch (error) {
