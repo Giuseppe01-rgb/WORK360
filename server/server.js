@@ -91,6 +91,12 @@ const corsOptions = {
             return callback(new Error('CORS not configured'));
         }
 
+        // Allow requests with no origin for migrate endpoint (handled separately)
+        if (!origin) {
+            // This will be handled by the migrate route's own CORS bypass
+            return callback(null, true);
+        }
+
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
