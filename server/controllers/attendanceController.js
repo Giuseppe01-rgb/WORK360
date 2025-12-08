@@ -308,9 +308,12 @@ const bulkCreateAttendances = async (req, res) => {
             try {
                 const { userId, siteId, date, clockIn, clockOut, notes, totalHours } = att;
 
+                console.log(`Processing attendance ${i + 1}/${attendancesToCreate.length}:`, { userId, siteId, date, clockIn, clockOut });
+
                 // Verify site
                 const site = await ConstructionSite.findOne({ where: { id: siteId, companyId } });
                 if (!site) {
+                    console.log(`Site not found for siteId: ${siteId}, companyId: ${companyId}`);
                     results.errors.push({ index: i, error: 'Cantiere non trovato' });
                     continue;
                 }
@@ -323,6 +326,8 @@ const bulkCreateAttendances = async (req, res) => {
                     hours = (new Date(clockOutData.time) - new Date(clockInData.time)) / (1000 * 60 * 60);
                 }
 
+                console.log(`Creating attendance with hours: ${hours}`);
+
                 await Attendance.create({
                     userId,
                     siteId,
@@ -332,14 +337,20 @@ const bulkCreateAttendances = async (req, res) => {
                     notes: notes || null
                 });
                 results.created++;
+                console.log(`Successfully created attendance ${i + 1}`);
             } catch (rowError) {
+                console.error(`Error creating attendance ${i + 1}:`, rowError.message);
                 results.errors.push({ index: i, error: rowError.message });
             }
         }
 
+        console.log('Bulk create finished:', results);
+
         res.json({
             message: `${results.created}/${attendancesToCreate.length} presenze create`,
             created: results.created,
+            total: attendancesToCreate.length,
+            errors: results.errors,
             results
         });
     } catch (error) {
