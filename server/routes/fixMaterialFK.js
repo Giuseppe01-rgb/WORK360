@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const sequelize = require('../config/database');
+const { sequelize } = require('../config/database');
 
 // Fix the foreign key constraint on material_usages
 // Change from coloura_materials to material_masters
