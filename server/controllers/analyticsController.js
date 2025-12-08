@@ -147,8 +147,17 @@ const getSiteReport = async (req, res, next) => {
         const costVsRevenuePercent = contractValue > 0 ? (totalCost / contractValue) * 100 : 0;
 
         res.json({
-            materials,
-            equipment,
+            // Parse numeric fields from raw SQL results
+            materials: materials.map(m => ({
+                ...m,
+                totalQuantity: parseFloat(m.totalQuantity) || 0,
+                count: parseInt(m.count) || 0
+            })),
+            equipment: equipment.map(e => ({
+                ...e,
+                totalQuantity: parseFloat(e.totalQuantity) || 0,
+                count: parseInt(e.count) || 0
+            })),
             attendance: attendance[0] || { totalHours: 0, totalDays: 0 },
             totalHours,
             contractValue: contractValue || null,
