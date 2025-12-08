@@ -25,6 +25,7 @@ const loginLimiter = rateLimit({
     },
     standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    validate: { trustProxy: false }, // Disable trust proxy validation for Railway
 
     // Custom handler to log security events
     handler: (req, res, next, options) => {
@@ -56,6 +57,7 @@ const heavyEndpointLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { trustProxy: false }, // Disable trust proxy validation for Railway
 
     // Custom handler to log security events
     handler: (req, res, next, options) => {
@@ -91,7 +93,8 @@ const generalLimiter = rateLimit({
         message: 'Troppe richieste. Rallenta un po\'.'
     },
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    validate: { trustProxy: false } // Disable trust proxy validation for Railway
 });
 
 module.exports = {
