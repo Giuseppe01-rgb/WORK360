@@ -12,16 +12,22 @@ const recordUsage = async (req, res) => {
             siteId,
             materialId,
             numeroConfezioni,
-            userId: getUserId(req)
+            userId: getUserId(req),
+            body: req.body
         });
 
         if (!siteId || !materialId || !numeroConfezioni) {
-            return res.status(400).json({ message: 'Cantiere, materiale e quantità sono obbligatori' });
+            console.error('Validation failed - missing fields:', { siteId: !!siteId, materialId: !!materialId, numeroConfezioni: !!numeroConfezioni });
+            return res.status(400).json({
+                message: 'Cantiere, materiale e quantità sono obbligatori',
+                details: { siteId: !!siteId, materialId: !!materialId, numeroConfezioni: !!numeroConfezioni }
+            });
         }
 
         const companyId = getCompanyId(req);
+        console.log('Company ID resolved:', companyId);
         if (!companyId) {
-            console.error('User has no company assigned:', getUserId(req));
+            console.error('User has no company assigned:', getUserId(req), 'User object:', req.user);
             return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
         }
 
