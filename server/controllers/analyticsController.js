@@ -92,17 +92,24 @@ const getSiteReport = async (req, res, next) => {
         // Get the site to get contractValue
         const site = await ConstructionSite.findByPk(siteId);
 
-        // Get materials summary
-        const materials = await Material.findAll({
-            where: { siteId },
-            attributes: [
-                'name',
-                [sequelize.fn('SUM', sequelize.col('quantity')), 'totalQuantity'],
-                [sequelize.fn('MAX', sequelize.col('unit')), 'unit'],
-                [sequelize.fn('COUNT', sequelize.col('id')), 'count']
-            ],
-            group: ['name'],
-            raw: true
+        // Get materials summary from material_usages (linked to material_masters)
+        const materials = await sequelize.query(`
+            SELECT 
+                mm.id,
+                mm.display_name as name,
+                mm.unit,
+                mm.price as "unitPrice",
+                SUM(mu.numero_confezioni) as "totalQuantity",
+                SUM(mu.numero_confezioni * COALESCE(mm.price, 0)) as "totalCost"
+            FROM material_usages mu
+            LEFT JOIN material_masters mm ON mu.material_id = mm.id
+            WHERE mu.site_id = :siteId
+              AND mu.stato = 'catalogato'
+            GROUP BY mm.id, mm.display_name, mm.unit, mm.price
+            ORDER BY "totalCost" DESC
+        `, {
+            replacements: { siteId },
+            type: sequelize.QueryTypes.SELECT
         });
 
         // Get equipment summary
@@ -163,9 +170,12 @@ const getSiteReport = async (req, res, next) => {
         res.json({
             // Parse numeric fields from raw SQL results
             materials: materials.map(m => ({
-                ...m,
+                id: m.id,
+                name: m.name || 'Materiale sconosciuto',
+                unit: m.unit || 'pz',
+                unitPrice: parseFloat(m.unitPrice) || 0,
                 totalQuantity: parseFloat(m.totalQuantity) || 0,
-                count: parseInt(m.count) || 0
+                totalCost: parseFloat(m.totalCost) || 0
             })),
             equipment: equipment.map(e => ({
                 ...e,

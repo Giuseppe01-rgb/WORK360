@@ -789,7 +789,7 @@ const SiteDetails = ({ site, onBack }) => {
                                         {report?.materials?.map((mat) => (
                                             <tr key={mat.id} className="border-b border-slate-100 hover:bg-slate-50">
                                                 <td className="px-4 py-3 font-bold text-slate-900">
-                                                    {mat.id}
+                                                    {mat.name}
                                                 </td>
                                                 <td className="px-4 py-3 text-right font-mono text-slate-700">
                                                     {mat.totalQuantity} {mat.unit}
