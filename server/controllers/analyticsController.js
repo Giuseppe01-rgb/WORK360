@@ -119,10 +119,27 @@ const getSiteReport = async (req, res, next) => {
             raw: true
         });
 
+        // Calculate cost incidence for frontend
+        const totalHours = parseFloat(attendance[0]?.totalHours || 0);
+        const laborCost = totalHours * 25; // Default hourly rate
+        const materialsCost = 0; // Materials don't have price in current model
+        const totalCost = laborCost + materialsCost;
+
+        // Calculate percentages (avoid division by zero)
+        const materialsIncidencePercent = totalCost > 0 ? (materialsCost / totalCost) * 100 : 0;
+        const laborIncidencePercent = totalCost > 0 ? (laborCost / totalCost) * 100 : 0;
+
         res.json({
             materials,
             equipment,
-            attendance: attendance[0] || { totalHours: 0, totalDays: 0 }
+            attendance: attendance[0] || { totalHours: 0, totalDays: 0 },
+            costIncidence: {
+                materialsIncidencePercent: parseFloat(materialsIncidencePercent.toFixed(2)),
+                laborIncidencePercent: parseFloat(laborIncidencePercent.toFixed(2)),
+                totalCost: parseFloat(totalCost.toFixed(2)),
+                laborCost: parseFloat(laborCost.toFixed(2)),
+                materialsCost: parseFloat(materialsCost.toFixed(2))
+            }
         });
     } catch (error) {
         next(error);
