@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
-const { Attendance, Material, Equipment, User, ConstructionSite } = require('../models');
+const { Attendance, Material, Equipment, User, ConstructionSite, MaterialUsage, MaterialMaster } = require('../models');
 const { assertSiteBelongsToCompany } = require('../utils/security');
 const { getCompanyId } = require('../utils/sequelizeHelpers');
 
@@ -133,7 +133,21 @@ const getSiteReport = async (req, res, next) => {
         // Calculate costs
         const totalHours = parseFloat(attendance[0]?.totalHours || 0);
         const laborCost = totalHours * 25; // Default hourly rate
-        const materialsCost = 0; // Materials don't have price in current model
+
+        // Calculate materials cost from material_usages
+        const materialUsages = await sequelize.query(`
+            SELECT 
+                SUM(mu.numero_confezioni * COALESCE(mm.price, 0)) as total_cost
+            FROM material_usages mu
+            LEFT JOIN material_masters mm ON mu.material_id = mm.id
+            WHERE mu.site_id = :siteId
+              AND mu.stato = 'catalogato'
+        `, {
+            replacements: { siteId },
+            type: sequelize.QueryTypes.SELECT
+        });
+
+        const materialsCost = parseFloat(materialUsages[0]?.total_cost || 0);
         const totalCost = laborCost + materialsCost;
 
         // Calculate percentages (avoid division by zero)
