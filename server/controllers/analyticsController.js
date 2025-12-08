@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 const { Attendance, Material, Equipment, User, ConstructionSite } = require('../models');
 const { assertSiteBelongsToCompany } = require('../utils/security');
+const { getCompanyId } = require('../utils/sequelizeHelpers');
 
 // @desc    Get hours per employee
 // @route   GET /api/analytics/hours-per-employee

@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { Attendance, ConstructionSite, User } = require('../models');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 
 // @desc    Clock in
 // @route   POST /api/attendance/clock-in
