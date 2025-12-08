@@ -245,7 +245,7 @@ const deleteAllMaterials = async (req, res) => {
     }
 };
 
-// Import from Excel/CSV
+// Import from Excel/CSV with preview support
 const importFromExcel = async (req, res) => {
     try {
         if (!req.file) {
@@ -254,78 +254,127 @@ const importFromExcel = async (req, res) => {
 
         const companyId = getCompanyId(req);
         const userId = req.user.id;
+        const isPreview = req.query.preview === 'true';
 
         // Parse Excel file
         const rows = parseExcelFile(req.file.buffer);
-        console.log(`Parsed ${rows.length} rows from Excel`);
+        console.log(`Parsed ${rows.length} rows from Excel, preview mode: ${isPreview}`);
 
         if (rows.length === 0) {
             return res.status(400).json({ message: 'Il file è vuoto o non contiene dati validi' });
         }
 
-        const results = {
-            total: rows.length,
-            imported: 0,
-            updated: 0,
-            skipped: 0,
-            errors: []
+        const stats = {
+            totalRows: rows.length,
+            validMaterials: 0,
+            duplicateRows: 0,
+            errorRows: 0
         };
+        const errors = [];
+        const duplicates = [];
+        const materials = [];
 
+        // Process each row
         for (let i = 0; i < rows.length; i++) {
             try {
                 const mapped = mapRowToMaterial(rows[i]);
                 const validationErrors = validateMaterial(mapped, i);
 
                 if (validationErrors.length > 0) {
-                    results.errors.push(...validationErrors);
-                    results.skipped++;
+                    errors.push(...validationErrors);
+                    stats.errorRows++;
                     continue;
                 }
 
                 const displayName = mapped.nome_prodotto;
                 const normalizedKey = displayName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 100);
 
-                // Check if already exists
+                // Check if already exists in database
                 const existing = await MaterialMaster.findOne({
                     where: { companyId, normalizedKey }
                 });
 
                 if (existing) {
-                    // Update existing
-                    existing.spec = mapped.marca || existing.spec;
-                    existing.family = mapped.categoria || existing.family;
-                    existing.unit = mapped.quantita || existing.unit;
-                    existing.supplier = mapped.fornitore || existing.supplier;
-                    existing.barcode = mapped.codice_prodotto || existing.barcode;
-                    if (mapped.prezzo) existing.price = mapped.prezzo;
-                    await existing.save();
-                    results.updated++;
-                } else {
-                    // Create new
-                    await MaterialMaster.create({
-                        companyId,
-                        family: mapped.categoria || 'Altro',
-                        spec: mapped.marca || '',
-                        unit: mapped.quantita || 'pz',
-                        displayName,
-                        normalizedKey,
-                        supplier: mapped.fornitore || '',
-                        barcode: mapped.codice_prodotto || '',
-                        price: mapped.prezzo || null,
-                        createdById: userId
+                    duplicates.push({
+                        row: i + 2,
+                        codice: mapped.codice_prodotto || '-',
+                        nome: displayName
                     });
-                    results.imported++;
+                    stats.duplicateRows++;
+                } else {
+                    // Parse quantity into value and unit
+                    const quantita = mapped.quantita || 'pz';
+                    const qMatch = quantita.match(/^(\d+\.?\d*)\s*(.*)$/);
+                    const capacitaValore = qMatch ? qMatch[1] : '';
+                    const capacitaUnita = qMatch ? qMatch[2] || 'pz' : quantita;
+
+                    materials.push({
+                        nome: displayName,
+                        codiceProdotto: mapped.codice_prodotto || '-',
+                        marca: mapped.marca || '',
+                        capacitaValore: capacitaValore,
+                        capacitaUnita: capacitaUnita,
+                        prezzoPerConfezione: mapped.prezzo || null,
+                        categoria: mapped.categoria || 'Altro',
+                        fornitore: mapped.fornitore || '',
+                        // Internal data for actual import
+                        _normalizedKey: normalizedKey,
+                        _mapped: mapped
+                    });
+                    stats.validMaterials++;
                 }
             } catch (rowError) {
-                results.errors.push(`Riga ${i + 2}: ${rowError.message}`);
-                results.skipped++;
+                errors.push(`Riga ${i + 2}: ${rowError.message}`);
+                stats.errorRows++;
+            }
+        }
+
+        // If preview mode, just return the analysis
+        if (isPreview) {
+            return res.json({
+                stats,
+                errors,
+                duplicates,
+                materials: materials.map(m => ({
+                    nome: m.nome,
+                    codiceProdotto: m.codiceProdotto,
+                    marca: m.marca,
+                    capacitaValore: m.capacitaValore,
+                    capacitaUnita: m.capacitaUnita,
+                    prezzoPerConfezione: m.prezzoPerConfezione
+                }))
+            });
+        }
+
+        // Actual import mode - insert materials
+        let importedCount = 0;
+        for (const mat of materials) {
+            try {
+                await MaterialMaster.create({
+                    companyId,
+                    family: mat.categoria || 'Altro',
+                    spec: mat.marca || '',
+                    unit: mat._mapped.quantita || 'pz',
+                    displayName: mat.nome,
+                    normalizedKey: mat._normalizedKey,
+                    supplier: mat.fornitore || '',
+                    barcode: mat.codiceProdotto || '',
+                    price: mat.prezzoPerConfezione || null,
+                    createdById: userId
+                });
+                importedCount++;
+            } catch (importError) {
+                console.error(`Import error for ${mat.nome}:`, importError.message);
+                stats.errorRows++;
             }
         }
 
         res.json({
-            success: true,
-            message: `Importazione completata: ${results.imported} nuovi, ${results.updated} aggiornati, ${results.skipped} saltati`,
-            results
+            stats,
+            errors,
+            duplicates,
+            materials: [],
+            importedCount
         });
     } catch (error) {
         console.error('importFromExcel error:', error);
