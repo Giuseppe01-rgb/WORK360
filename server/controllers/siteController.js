@@ -82,33 +82,18 @@ const getSites = async (req, res) => {
 
         let sites;
 
-        if (userRole === 'worker') {
-            // For workers, only return sites they are assigned to
-            sites = await ConstructionSite.findAll({
-                where: { companyId },
-                include: [{
-                    model: User,
-                    as: 'assignedWorkers',
-                    attributes: ['id', 'firstName', 'lastName', 'username'],
-                    through: { attributes: [] },
-                    where: { id: userId },
-                    required: true // INNER JOIN - only sites with this worker assigned
-                }],
-                order: [['startDate', 'DESC']]
-            });
-        } else {
-            // For owners, return all company sites
-            sites = await ConstructionSite.findAll({
-                where: { companyId },
-                include: [{
-                    model: User,
-                    as: 'assignedWorkers',
-                    attributes: ['id', 'firstName', 'lastName', 'username'],
-                    through: { attributes: [] }
-                }],
-                order: [['startDate', 'DESC']]
-            });
-        }
+        // Show all company sites to all users (workers and owners)
+        // Previously workers only saw assigned sites, but this created confusion
+        sites = await ConstructionSite.findAll({
+            where: { companyId },
+            include: [{
+                model: User,
+                as: 'assignedWorkers',
+                attributes: ['id', 'firstName', 'lastName', 'username'],
+                through: { attributes: [] }
+            }],
+            order: [['startDate', 'DESC']]
+        });
 
         console.log('Sites found:', sites.length);
         res.json(sites);
