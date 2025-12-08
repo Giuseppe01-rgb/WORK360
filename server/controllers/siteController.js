@@ -115,8 +115,62 @@ const getSite = async (req, res) => {
             return res.status(404).json({ message: 'Cantiere non trovato' });
         }
 
-        res.json(site);
+        // Calculate analytics for frontend
+        const { Material, Equipment, Attendance } = require('../models');
+
+        // Get materials cost
+        const materials = await Material.findAll({
+            where: { siteId: site.id },
+            attributes: ['quantity', 'unit', 'notes']
+        });
+
+        // Get equipment
+        const equipment = await Equipment.findAll({
+            where: { siteId: site.id }
+        });
+
+        // Get attendance for labor cost
+        const attendances = await Attendance.findAll({
+            where: { siteId: site.id },
+            attributes: ['totalHours'],
+            include: [{
+                model: User,
+                as: 'user',
+                attributes: ['hourlyCost']
+            }]
+        });
+
+        // Calculate totals
+        const materialsCost = 0; // Materials don't have price in model
+        const laborCost = attendances.reduce((sum, att) => {
+            const hours = parseFloat(att.totalHours || 0);
+            const hourlyRate = parseFloat(att.user?.hourlyCost || 0);
+            return sum + (hours * hourlyRate);
+        }, 0);
+        const equipmentCost = 0; // Equipment doesn't have cost in model
+        const totalCost = materialsCost + laborCost + equipmentCost;
+
+        const contractValue = parseFloat(site.contractValue || 0);
+        const costIncidence = contractValue > 0 ? (totalCost / contractValue) * 100 : 0;
+
+        // Enhanced response with analytics
+        const siteWithAnalytics = {
+            ...site.toJSON(),
+            analytics: {
+                totalCost: parseFloat(totalCost.toFixed(2)),
+                materialsCost: parseFloat(materialsCost.toFixed(2)),
+                laborCost: parseFloat(laborCost.toFixed(2)),
+                equipmentCost: parseFloat(equipmentCost.toFixed(2)),
+                costIncidence: parseFloat(costIncidence.toFixed(2)),
+                materialsCount: materials.length,
+                equipmentCount: equipment.length,
+                attendanceCount: attendances.length
+            }
+        };
+
+        res.json(siteWithAnalytics);
     } catch (error) {
+        console.error('Error in getSite:', error);
         res.status(500).json({ message: 'Errore nel recupero del cantiere', error: error.message });
     }
 };
