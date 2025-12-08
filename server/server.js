@@ -1,3 +1,4 @@
+// PostgreSQL Migration v1.0 - All fixes verified locally 2024-12-08
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
