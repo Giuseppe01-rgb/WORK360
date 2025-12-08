@@ -96,7 +96,26 @@ const getQuotes = async (req, res) => {
             where: { companyId: getCompanyId(req) },
             order: [['date', 'DESC']]
         });
-        res.json(quotes);
+
+        // Convert DECIMAL strings to numbers for frontend
+        const quotesWithNumbers = quotes.map(q => {
+            const quote = q.toJSON();
+            return {
+                ...quote,
+                total: parseFloat(quote.total) || 0,
+                subtotal: parseFloat(quote.subtotal) || 0,
+                vatAmount: parseFloat(quote.vatAmount) || 0,
+                vatRate: parseFloat(quote.vatRate) || 22,
+                items: (quote.items || []).map(item => ({
+                    ...item,
+                    quantity: parseFloat(item.quantity) || 0,
+                    unitPrice: parseFloat(item.unitPrice) || 0,
+                    total: parseFloat(item.total) || 0
+                }))
+            };
+        });
+
+        res.json(quotesWithNumbers);
     } catch (error) {
         res.status(500).json({ message: 'Errore nel recupero dei preventivi', error: error.message });
     }
