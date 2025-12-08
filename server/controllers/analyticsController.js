@@ -164,8 +164,8 @@ const getSiteReport = async (req, res, next) => {
             status: site?.status || 'active', // 'active' or 'completed'
             siteCost: {
                 total: parseFloat(totalCost.toFixed(2)),
-                laborCost: parseFloat(laborCost.toFixed(2)),
-                materialsCost: parseFloat(materialsCost.toFixed(2))
+                labor: parseFloat(laborCost.toFixed(2)),
+                materials: parseFloat(materialsCost.toFixed(2))
             },
             margin: contractValue ? {
                 marginCurrentValue: parseFloat(marginCurrentValue.toFixed(2)),
