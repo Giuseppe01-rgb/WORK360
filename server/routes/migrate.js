@@ -373,6 +373,7 @@ router.get('/status', async (req, res) => {
         const [users] = await sequelize.query('SELECT COUNT(*) as count FROM users');
         const [sites] = await sequelize.query('SELECT COUNT(*) as count FROM construction_sites');
         const [attendances] = await sequelize.query('SELECT COUNT(*) as count FROM attendances');
+        const [catalog] = await sequelize.query('SELECT COUNT(*) as count FROM material_masters');
 
         res.json({
             success: true,
@@ -380,13 +381,112 @@ router.get('/status', async (req, res) => {
                 companies: parseInt(companies[0].count),
                 users: parseInt(users[0].count),
                 sites: parseInt(sites[0].count),
-                attendances: parseInt(attendances[0].count)
+                attendances: parseInt(attendances[0].count),
+                catalog: parseInt(catalog[0].count)
             }
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             error: error.message
+        });
+    }
+});
+
+// @route   POST /api/migrate/catalog
+// @desc    Import catalog (colouramaterials) to material_masters
+// @access  Public (temporary - remove after migration)
+router.post('/catalog', express.json({ limit: '50mb' }), async (req, res) => {
+    const logs = [];
+    const log = (msg) => {
+        console.log(msg);
+        logs.push(msg);
+    };
+
+    try {
+        const data = req.body;
+        log('🚀 Starting catalog import...');
+
+        const stats = { found: 0, migrated: 0, errors: 0 };
+
+        // Get company ID from PostgreSQL (use existing company)
+        const [companies] = await sequelize.query('SELECT id FROM companies LIMIT 1');
+        if (companies.length === 0) {
+            return res.status(400).json({ success: false, error: 'No company found in database' });
+        }
+        const companyId = companies[0].id;
+
+        // Get user ID for createdById
+        const [users] = await sequelize.query('SELECT id FROM users LIMIT 1');
+        const userId = users.length > 0 ? users[0].id : null;
+
+        log(`Using company: ${companyId}`);
+
+        if (data.colouramaterials && data.colouramaterials.length > 0) {
+            stats.found = data.colouramaterials.length;
+
+            for (const mat of data.colouramaterials) {
+                try {
+                    const generateUUID = () => {
+                        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                            const r = Math.random() * 16 | 0;
+                            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                            return v.toString(16);
+                        });
+                    };
+
+                    const newId = generateUUID();
+                    const displayName = mat.nome_prodotto || 'Materiale';
+                    const normalizedKey = displayName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 100);
+
+                    await sequelize.query(`
+                        INSERT INTO material_masters (id, company_id, family, spec, unit, display_name, normalized_key, supplier, barcode, price, created_by_id, created_at, updated_at)
+                        VALUES (:id, :companyId, :family, :spec, :unit, :displayName, :normalizedKey, :supplier, :barcode, :price, :createdById, :createdAt, :updatedAt)
+                        ON CONFLICT (company_id, normalized_key) DO NOTHING
+                    `, {
+                        replacements: {
+                            id: newId,
+                            companyId: companyId,
+                            family: mat.categoria || 'Altro',
+                            spec: mat.marca || '',
+                            unit: mat.quantita || 'pz',
+                            displayName: displayName,
+                            normalizedKey: normalizedKey,
+                            supplier: mat.fornitore || '',
+                            barcode: mat.codice_prodotto || '',
+                            price: mat.prezzo || null,
+                            createdById: userId,
+                            createdAt: mat.createdAt || new Date(),
+                            updatedAt: mat.updatedAt || new Date()
+                        }
+                    });
+                    stats.migrated++;
+
+                    if (stats.migrated % 50 === 0) {
+                        log(`  Progress: ${stats.migrated}/${stats.found}`);
+                    }
+                } catch (err) {
+                    stats.errors++;
+                    if (stats.errors < 5) {
+                        log(`  ✗ Error: ${err.message}`);
+                    }
+                }
+            }
+        }
+
+        log(`✅ Catalog import complete: ${stats.migrated}/${stats.found} (${stats.errors} errors)`);
+
+        res.json({
+            success: true,
+            stats,
+            logs
+        });
+    } catch (error) {
+        log('❌ Catalog import failed: ' + error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            logs
         });
     }
 });
