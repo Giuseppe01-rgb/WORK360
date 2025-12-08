@@ -105,9 +105,8 @@ const corsOptions = {
     maxAge: 86400 // 24 hours
 };
 
-app.use(cors(corsOptions));
-
 // CORS bypass for migration endpoint (temporary - remove after migration)
+// This MUST come BEFORE the general CORS middleware
 app.use('/api/migrate', (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -117,6 +116,8 @@ app.use('/api/migrate', (req, res, next) => {
     }
     next();
 });
+
+app.use(cors(corsOptions));
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
