@@ -56,6 +56,11 @@ exports.getEconomiesBySite = async (req, res, next) => {
         const { siteId } = req.params;
         const companyId = getCompanyId(req);
 
+        // Validate siteId
+        if (!siteId || siteId === 'undefined' || siteId === 'null') {
+            return res.status(400).json({ message: 'ID cantiere non valido' });
+        }
+
         // SECURITY: Verify site exists and belongs to user's company
         await assertSiteBelongsToCompany(siteId, companyId);
 

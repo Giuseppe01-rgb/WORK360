@@ -33,19 +33,19 @@ const getHoursPerEmployee = async (req, res) => {
         const hoursData = await sequelize.query(`
             SELECT 
                 u.id as user_id,
-                u."firstName" || ' ' || u."lastName" as employee,
-                SUM(a."totalHours") as "totalHours",
-                COUNT(a.id) as "totalDays",
-                AVG(a."totalHours") as "avgHoursPerDay"
+                u.first_name || ' ' || u.last_name as employee,
+                SUM(a.total_hours) as total_hours,
+                COUNT(a.id) as total_days,
+                AVG(a.total_hours) as avg_hours_per_day
             FROM attendances a
-            JOIN users u ON a."userId" = u.id
-            WHERE u."companyId" = :companyId
-              AND a."clockOut" IS NOT NULL
-              ${siteId ? 'AND a."siteId" = :siteId' : ''}
-              ${startDate ? 'AND (a."clockIn"->\'time\')::timestamp >= :startDate' : ''}
-              ${endDate ? 'AND (a."clockIn"->\'time\')::timestamp <= :endDate' : ''}
-            GROUP BY u.id, u."firstName", u."lastName"
-            ORDER BY "totalHours" DESC
+            JOIN users u ON a.user_id = u.id
+            WHERE u.company_id = :companyId
+              AND a.clock_out IS NOT NULL
+              ${siteId ? 'AND a.site_id = :siteId' : ''}
+              ${startDate ? 'AND (a.clock_in->>\'time\')::timestamp >= :startDate' : ''}
+              ${endDate ? 'AND (a.clock_in->>\'time\')::timestamp <= :endDate' : ''}
+            GROUP BY u.id, u.first_name, u.last_name
+            ORDER BY total_hours DESC
         `, {
             replacements: { companyId, siteId, startDate, endDate },
             type: sequelize.QueryTypes.SELECT
