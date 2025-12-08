@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
-const { Attendance, Material, Equipment, User, ConstructionSite, MaterialUsage, MaterialMaster } = require('../models');
+const { Attendance, Material, Equipment, User, ConstructionSite, MaterialUsage, MaterialMaster, Note } = require('../models');
 const { assertSiteBelongsToCompany } = require('../utils/security');
 const { getCompanyId } = require('../utils/sequelizeHelpers');
 
@@ -171,6 +171,14 @@ const getSiteReport = async (req, res, next) => {
         const marginCurrentPercent = contractValue > 0 ? (marginCurrentValue / contractValue) * 100 : 0;
         const costVsRevenuePercent = contractValue > 0 ? (totalCost / contractValue) * 100 : 0;
 
+        // Get daily reports (type = 'daily_report')
+        const dailyReports = await Note.findAll({
+            where: { siteId, type: 'daily_report' },
+            include: [{ model: User, as: 'user', attributes: ['firstName', 'lastName'] }],
+            order: [['createdAt', 'DESC']],
+            limit: 50
+        });
+
         res.json({
             // Parse numeric fields from raw SQL results
             materials: materials.map(m => ({
@@ -206,7 +214,16 @@ const getSiteReport = async (req, res, next) => {
                 totalCost: parseFloat(totalCost.toFixed(2)),
                 laborCost: parseFloat(laborCost.toFixed(2)),
                 materialsCost: parseFloat(materialsCost.toFixed(2))
-            }
+            },
+            dailyReports: dailyReports.map(r => ({
+                id: r.id,
+                content: r.content,
+                createdAt: r.createdAt,
+                user: r.user ? {
+                    firstName: r.user.firstName,
+                    lastName: r.user.lastName
+                } : null
+            }))
         });
     } catch (error) {
         next(error);

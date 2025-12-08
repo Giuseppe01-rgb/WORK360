@@ -1092,9 +1092,14 @@ export default function OwnerDashboard() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <button onClick={(e) => handleEdit(e, site)} className="p-2 text-slate-400 hover:text-slate-600">
-                                            <MoreVertical className="w-5 h-5" />
-                                        </button>
+                                        <div className="flex gap-1">
+                                            <button onClick={(e) => handleEdit(e, site)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Modifica">
+                                                <Edit className="w-5 h-5" />
+                                            </button>
+                                            <button onClick={(e) => handleDelete(e, site.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Elimina">
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="flex items-center justify-between mb-4">
