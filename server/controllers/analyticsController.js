@@ -207,24 +207,117 @@ const getMaterialsSummary = async (req, res) => {
 // @access  Private (Owner)
 const getDashboard = async (req, res) => {
     try {
-        // Return dashboard data with companyCostIncidence for frontend compatibility
+        const companyId = getCompanyId(req);
+
+        // Get all sites for this company
+        const sites = await ConstructionSite.findAll({
+            where: { companyId }
+        });
+
+        const totalSites = sites.length;
+        const activeSites = sites.filter(s => s.status === 'active').length;
+
+        // Get total employees
+        const totalEmployees = await User.count({
+            where: { companyId, role: 'worker', active: true }
+        });
+
+        // Get monthly hours (current month)
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthlyAttendances = await Attendance.findAll({
+            where: {
+                clockOut: { [Op.ne]: null },
+                clockIn: { [Op.gte]: startOfMonth }
+            },
+            include: [{
+                model: User,
+                as: 'user',
+                where: { companyId }
+            }]
+        });
+
+        const monthlyHours = monthlyAttendances.reduce((sum, a) => sum + (parseFloat(a.totalHours) || 0), 0);
+
+        // Calculate company-wide costs
+        let laborCost = 0;
+        let materialsCost = 0;
+
+        // Get all attendances for company
+        const allAttendances = await Attendance.findAll({
+            where: { clockOut: { [Op.ne]: null } },
+            include: [{
+                model: User,
+                as: 'user',
+                where: { companyId },
+                attributes: ['hourlyCost']
+            }]
+        });
+
+        allAttendances.forEach(a => {
+            const hours = parseFloat(a.totalHours) || 0;
+            const hourlyCost = parseFloat(a.user?.hourlyCost) || 25; // default €25/h
+            laborCost += hours * hourlyCost;
+        });
+
+        // Get materials cost (if materials have unitPrice)
+        const materials = await Material.findAll({
+            include: [{
+                model: ConstructionSite,
+                as: 'site',
+                where: { companyId }
+            }]
+        });
+
+        materials.forEach(m => {
+            materialsCost += (parseFloat(m.quantity) || 0) * (parseFloat(m.unitPrice) || 0);
+        });
+
+        const totalCost = laborCost + materialsCost;
+
+        // Calculate cost incidence percentages
+        const materialsIncidencePercent = totalCost > 0 ? (materialsCost / totalCost) * 100 : 0;
+        const laborIncidencePercent = totalCost > 0 ? (laborCost / totalCost) * 100 : 0;
+
+        // Calculate company margin
+        const totalContractValue = sites.reduce((sum, s) => sum + (parseFloat(s.contractValue) || 0), 0);
+        const sitesWithContractValue = sites.filter(s => parseFloat(s.contractValue) > 0).length;
+        const marginValue = totalContractValue - totalCost;
+        const costVsRevenuePercent = totalContractValue > 0 ? (totalCost / totalContractValue) * 100 : 0;
+
         res.json({
             message: 'Dashboard analytics',
+            activeSites,
+            totalEmployees,
+            monthlyHours: parseFloat(monthlyHours.toFixed(2)),
             stats: {
-                totalSites: 0,
-                activeSites: 0,
-                totalWorkers: 0,
-                monthlyHours: 0
+                totalSites,
+                activeSites,
+                totalWorkers: totalEmployees,
+                monthlyHours: parseFloat(monthlyHours.toFixed(2))
+            },
+            companyCosts: {
+                total: parseFloat(totalCost.toFixed(2)),
+                labor: parseFloat(laborCost.toFixed(2)),
+                materials: parseFloat(materialsCost.toFixed(2))
             },
             companyCostIncidence: {
-                materialsIncidencePercent: 0,
-                laborIncidencePercent: 0,
-                totalCost: 0,
-                laborCost: 0,
-                materialsCost: 0
+                materialsIncidencePercent: parseFloat(materialsIncidencePercent.toFixed(2)),
+                laborIncidencePercent: parseFloat(laborIncidencePercent.toFixed(2)),
+                totalCost: parseFloat(totalCost.toFixed(2)),
+                laborCost: parseFloat(laborCost.toFixed(2)),
+                materialsCost: parseFloat(materialsCost.toFixed(2))
+            },
+            companyMargin: {
+                totalContractValue: parseFloat(totalContractValue.toFixed(2)),
+                totalSites,
+                sitesWithContractValue,
+                marginValue: parseFloat(marginValue.toFixed(2)),
+                costVsRevenuePercent: parseFloat(costVsRevenuePercent.toFixed(2))
             }
         });
     } catch (error) {
+        console.error('getDashboard error:', error);
         res.status(500).json({ message: error.message });
     }
 };
