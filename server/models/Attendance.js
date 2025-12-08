@@ -34,8 +34,9 @@ Attendance.init({
         field: 'clock_in',
         validate: {
             hasRequiredFields(value) {
-                if (!value.time || !value.location) {
-                    throw new Error('clockIn must have time and location');
+                // Only require time - location is optional for manual entries
+                if (!value.time) {
+                    throw new Error('clockIn must have time');
                 }
             }
         }
