@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
+const { validateReportMaterial } = require('../middleware/validators');
 const {
     reportNewMaterial,
     getReportedMaterials,
@@ -13,7 +14,7 @@ const {
 router.use(protect);
 
 // Worker: Report new material (segnalazione flow)
-router.post('/', reportNewMaterial);
+router.post('/', validateReportMaterial, reportNewMaterial);
 
 // Admin: Get all reported materials
 router.get('/', getReportedMaterials);

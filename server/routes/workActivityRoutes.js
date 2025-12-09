@@ -9,12 +9,13 @@ const {
     deleteActivity
 } = require('../controllers/workActivityController');
 const { protect } = require('../middleware/authMiddleware');
+const { validateWorkActivity } = require('../middleware/validators');
 
 // All routes require authentication
 router.use(protect);
 
 // Create a new work activity
-router.post('/', createActivity);
+router.post('/', validateWorkActivity, createActivity);
 
 // Get work activities with filters
 router.get('/', getActivities);

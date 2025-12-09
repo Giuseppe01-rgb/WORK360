@@ -244,7 +244,7 @@ const updateSite = async (req, res) => {
     }
 };
 
-// Delete site and related data
+// Delete site (soft-delete with paranoid mode)
 const deleteSite = async (req, res) => {
     try {
         const siteId = req.params.id;
@@ -262,20 +262,11 @@ const deleteSite = async (req, res) => {
             return res.status(404).json({ message: 'Cantiere non trovato' });
         }
 
-        // Delete related data in parallel
-        await Promise.all([
-            Attendance.destroy({ where: { siteId } }),
-            WorkActivity.destroy({ where: { siteId } }),
-            MaterialUsage.destroy({ where: { siteId } }),
-            Note.destroy({ where: { siteId } }),
-            Economia.destroy({ where: { siteId } }),
-            ReportedMaterial.destroy({ where: { siteId } })
-        ]);
-
-        // Delete the site
+        // Soft-delete the site (paranoid mode sets deleted_at)
+        // Related data (attendance, materials, etc.) is preserved for historical purposes
         await site.destroy();
 
-        res.json({ message: 'Cantiere e dati correlati eliminati con successo' });
+        res.json({ message: 'Cantiere eliminato con successo' });
     } catch (error) {
         console.error('Error deleting site:', error);
         res.status(500).json({ message: 'Errore nell\'eliminazione del cantiere', error: error.message });

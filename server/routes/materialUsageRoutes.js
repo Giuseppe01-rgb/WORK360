@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
+const { validateMaterialUsage } = require('../middleware/validators');
 const {
     recordUsage,
     getTodayUsage,
@@ -19,7 +20,7 @@ router.get('/today', protect, getTodayUsage);
 router.get('/most-used/:siteId', protect, getMostUsedBySite);
 
 // Record usage (catalogato flow)
-router.post('/', recordUsage);
+router.post('/', validateMaterialUsage, recordUsage);
 
 // Get usage history
 router.get('/', getUsageHistory);
