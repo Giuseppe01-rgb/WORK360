@@ -99,11 +99,11 @@ const validateCreateSite = [
         .isLength({ max: 200 }).withMessage("L'indirizzo è troppo lungo.")
         .trim(),
     body('startDate')
-        .optional()
+        .optional({ checkFalsy: true })
         .isISO8601().withMessage('La data di inizio non è valida.')
         .toDate(),
     body('endDate')
-        .optional()
+        .optional({ checkFalsy: true })
         .isISO8601().withMessage('La data di fine non è valida.')
         .toDate(),
     body('contractValue')
@@ -126,11 +126,11 @@ const validateUpdateSite = [
         .isLength({ max: 200 }).withMessage("L'indirizzo è troppo lungo.")
         .trim(),
     body('startDate')
-        .optional()
+        .optional({ checkFalsy: true })
         .isISO8601().withMessage('La data di inizio non è valida.')
         .toDate(),
     body('endDate')
-        .optional()
+        .optional({ checkFalsy: true })
         .isISO8601().withMessage('La data di fine non è valida.')
         .toDate(),
     body('contractValue')
