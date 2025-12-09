@@ -2,7 +2,8 @@
     "name": "work360-root",
     "version": "1.0.0",
     "scripts": {
-        "build": "cd client && npm install && npm run build"
+        "build": "cd client && npm install && npm run build",
+        "backup:all": "cd server && npm run backup:all"
     },
     "engines": {
         "node": "22.x"
