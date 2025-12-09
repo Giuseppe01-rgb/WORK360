@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, AlertCircle, Lock, User as UserIcon } from 'lucide-react';
+import Loading from '../components/Loading';
 
 export default function LoginPage() {
     const [formData, setFormData] = useState({
@@ -10,10 +11,32 @@ export default function LoginPage() {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const { login } = useAuth();
+    const { login, user, loading } = useAuth();
     const navigate = useNavigate();
+
+    // Se l'utente è già loggato, reindirizza alla dashboard appropriata
+    useEffect(() => {
+        if (!loading && user) {
+            console.log('[LoginPage] Utente già loggato, redirect a dashboard');
+            if (user.role === 'owner') {
+                navigate('/owner', { replace: true });
+            } else {
+                navigate('/worker', { replace: true });
+            }
+        }
+    }, [user, loading, navigate]);
+
+    // Mostra loader mentre verifica autenticazione
+    if (loading) {
+        return <Loading />;
+    }
+
+    // Se l'utente è loggato, non mostrare la login page
+    if (user) {
+        return <Loading />;
+    }
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,7 +46,7 @@ export default function LoginPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
+        setIsLoading(true);
 
         try {
             const { username, password } = formData;
@@ -40,7 +63,7 @@ export default function LoginPage() {
             const msg = err.response?.data?.message || err.message || 'Credenziali non valide';
             setError(msg);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -130,10 +153,10 @@ export default function LoginPage() {
                     <div className="space-y-3 pt-2">
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={isLoading}
                             className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Accesso in corso...' : 'Accedi'}
+                            {isLoading ? 'Accesso in corso...' : 'Accedi'}
                         </button>
 
                         <button

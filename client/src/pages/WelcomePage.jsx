@@ -1,8 +1,33 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, ArrowRight, LogIn } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import Loading from '../components/Loading';
 
 export default function WelcomePage() {
     const navigate = useNavigate();
+    const { user, loading } = useAuth();
+
+    // Se l'utente è già loggato, reindirizza alla dashboard appropriata
+    useEffect(() => {
+        if (!loading && user) {
+            console.log('[WelcomePage] Utente già loggato, redirect a dashboard');
+            if (user.role === 'owner') {
+                navigate('/owner', { replace: true });
+            } else {
+                navigate('/worker', { replace: true });
+            }
+        }
+    }, [user, loading, navigate]);
+
+    // Mostra loader mentre verifica autenticazione
+    if (loading) {
+        return <Loading />;
+    }
+
+    // Se l'utente è loggato, non mostrare la welcome page (il redirect avverrà nel useEffect)
+    if (user) {
+        return <Loading />;
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-white p-4 font-sans">
