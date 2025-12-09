@@ -17,7 +17,8 @@ const Supplier = require('./Supplier');
 const WorkActivity = require('./WorkActivity');
 const Document = require('./Document');
 const AuditLog = require('./AuditLog');
-const PushSubscription = require('./PushSubscription');
+// TEMPORARILY DISABLED - debugging Railway crash
+// const PushSubscription = require('./PushSubscription');
 
 // ========== ASSOCIATIONS ==========
 
@@ -138,9 +139,9 @@ MaterialUsage.belongsTo(ReportedMaterial, { foreignKey: 'materialeReportId', as:
 AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 AuditLog.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
 
-// PushSubscription relationships
-PushSubscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-User.hasMany(PushSubscription, { foreignKey: 'userId', as: 'pushSubscriptions' });
+// PushSubscription relationships (TEMPORARILY DISABLED)
+// PushSubscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+// User.hasMany(PushSubscription, { foreignKey: 'userId', as: 'pushSubscriptions' });
 
 module.exports = {
     User,
@@ -161,6 +162,6 @@ module.exports = {
     Supplier,
     WorkActivity,
     Document,
-    AuditLog,
-    PushSubscription
+    AuditLog
+    // PushSubscription // TEMPORARILY DISABLED
 };

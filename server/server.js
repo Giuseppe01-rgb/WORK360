@@ -214,8 +214,8 @@ app.use('/api/material-usage', require('./routes/materialUsageRoutes'));
 app.use('/api/reported-materials', require('./routes/reportedMaterialRoutes'));
 app.use('/api/fix-fk', require('./routes/fixMaterialFK')); // Temporary FK fix
 
-// Push Notifications
-app.use('/api/push', require('./routes/push'));
+// Push Notifications (temporarily disabled for debugging)
+// app.use('/api/push', require('./routes/push'));
 
 // =============================================================================
 // HEALTHCHECK ENDPOINT (Level 6 Security)
@@ -295,8 +295,9 @@ sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
         console.log('✅ Database synced successfully');
 
         // Initialize notification scheduler after DB is ready
-        const { initScheduler } = require('./jobs/notificationScheduler');
-        initScheduler();
+        // TEMPORARILY DISABLED - debugging Railway crash
+        // const { initScheduler } = require('./jobs/notificationScheduler');
+        // initScheduler();
 
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`Server running on port ${PORT}`);
