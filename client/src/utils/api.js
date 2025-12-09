@@ -220,4 +220,10 @@ export const companyAPI = {
     }),
 };
 
+// Audit Logs
+export const auditLogAPI = {
+    getAll: (params) => api.get('/audit-logs', { params }),
+    getActions: () => api.get('/audit-logs/actions'),
+};
+
 export default api;
