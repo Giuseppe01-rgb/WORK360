@@ -2,6 +2,7 @@ const { User, Company } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { sanitizeAllDates } = require('../utils/dateValidator');
 const { upload } = require('./photoController');
+const { logAction, AUDIT_ACTIONS } = require('../utils/auditLogger');
 
 // Generate random password
 const generatePassword = () => {
@@ -79,6 +80,17 @@ const createUser = async (req, res) => {
         // Create user
         const user = await User.create(userData);
 
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId: getCompanyId(req),
+            action: AUDIT_ACTIONS.USER_CREATED,
+            targetType: 'user',
+            targetId: user.id,
+            ipAddress: req.ip,
+            meta: { firstName, lastName, role, username: finalUsername }
+        });
+
         // Return user without password but include generated password for one-time display
         const userResponse = user.toJSON();
         delete userResponse.password;
@@ -125,6 +137,17 @@ const updateUser = async (req, res) => {
 
         await user.update(sanitizedUpdate);
 
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId: getCompanyId(req),
+            action: AUDIT_ACTIONS.USER_UPDATED,
+            targetType: 'user',
+            targetId: user.id,
+            ipAddress: req.ip,
+            meta: { firstName: user.firstName, lastName: user.lastName, updatedFields: Object.keys(updateData) }
+        });
+
         const userResponse = user.toJSON();
         delete userResponse.password;
 
@@ -155,7 +178,21 @@ const deleteUser = async (req, res) => {
             return res.status(404).json({ message: 'Utente non trovato' });
         }
 
+        // Store info for audit log
+        const userInfo = { firstName: user.firstName, lastName: user.lastName };
+
         await user.destroy();
+
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId: getCompanyId(req),
+            action: AUDIT_ACTIONS.USER_DELETED,
+            targetType: 'user',
+            targetId: id,
+            ipAddress: req.ip,
+            meta: userInfo
+        });
 
         res.json({ message: 'Utente eliminato con successo' });
     } catch (error) {

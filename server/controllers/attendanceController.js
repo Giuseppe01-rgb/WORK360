@@ -419,6 +419,18 @@ const updateAttendance = async (req, res) => {
         if (totalHours !== undefined) attendance.totalHours = totalHours;
 
         await attendance.save();
+
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId,
+            action: AUDIT_ACTIONS.ATTENDANCE_UPDATED,
+            targetType: 'attendance',
+            targetId: id,
+            ipAddress: req.ip,
+            meta: { siteId: attendance.siteId, siteName: attendance.site?.name }
+        });
+
         res.json(attendance);
     } catch (error) {
         console.error('updateAttendance error:', error);
@@ -444,7 +456,22 @@ const deleteAttendance = async (req, res) => {
             return res.status(403).json({ message: 'Non autorizzato a eliminare questa presenza' });
         }
 
+        // Save info for audit log
+        const attendanceInfo = { siteId: attendance.siteId, siteName: attendance.site?.name };
+
         await attendance.destroy();
+
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId,
+            action: AUDIT_ACTIONS.ATTENDANCE_DELETED,
+            targetType: 'attendance',
+            targetId: id,
+            ipAddress: req.ip,
+            meta: attendanceInfo
+        });
+
         res.json({ message: 'Presenza eliminata con successo' });
     } catch (error) {
         console.error('deleteAttendance error:', error);
