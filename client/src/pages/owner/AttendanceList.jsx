@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI } from '../../utils/api';
-import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2, Zap } from 'lucide-react';
+import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2, Zap, Download } from 'lucide-react';
+import { exportAttendanceReport } from '../../utils/excelExport';
 import AttendanceModal from '../../components/owner/AttendanceModal';
 import BulkAttendanceModal from '../../components/owner/BulkAttendanceModal';
 import { useToast } from '../../context/ToastContext';
@@ -142,13 +143,31 @@ export default function AttendanceList() {
                         <Filter className="w-5 h-5 text-slate-400" />
                         Filtri
                     </h3>
-                    <button
-                        onClick={() => setFilters({ siteId: '', startDate: '', endDate: '', status: 'all' })}
-                        className="text-sm font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
-                    >
-                        <RefreshCcw className="w-4 h-4" />
-                        Reset
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => {
+                                const siteName = filters.siteId
+                                    ? sites.find(s => s.id === parseInt(filters.siteId))?.name
+                                    : null;
+                                const dateRange = (filters.startDate || filters.endDate)
+                                    ? `${filters.startDate || 'inizio'} - ${filters.endDate || 'oggi'}`
+                                    : null;
+                                exportAttendanceReport(attendances, { siteName, dateRange });
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-sm font-medium"
+                            title="Esporta presenze in Excel"
+                        >
+                            <Download className="w-4 h-4" />
+                            <span className="hidden sm:inline">Esporta</span>
+                        </button>
+                        <button
+                            onClick={() => setFilters({ siteId: '', startDate: '', endDate: '', status: 'all' })}
+                            className="text-sm font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
+                        >
+                            <RefreshCcw className="w-4 h-4" />
+                            Reset
+                        </button>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

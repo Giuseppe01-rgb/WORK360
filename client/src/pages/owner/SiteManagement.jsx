@@ -5,8 +5,9 @@ import { siteAPI, analyticsAPI, workActivityAPI, noteAPI, economiaAPI } from '..
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search,
-    FileText, Camera, Zap
+    FileText, Camera, Zap, Download
 } from 'lucide-react';
+import { exportSiteReport } from '../../utils/excelExport';
 
 const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     // v1.2.1 - Economie integration
@@ -108,13 +109,23 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                         </div>
                     </div>
                 </div>
-                <button
-                    onClick={onDelete}
-                    className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium"
-                >
-                    <Trash2 className="w-4 h-4" />
-                    <span className="hidden sm:inline">Elimina Cantiere</span>
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => exportSiteReport(site, report, employeeHours, economie)}
+                        className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors font-medium"
+                        title="Esporta report Excel per il commercialista"
+                    >
+                        <Download className="w-4 h-4" />
+                        <span className="hidden sm:inline">Esporta Excel</span>
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        <span className="hidden sm:inline">Elimina Cantiere</span>
+                    </button>
+                </div>
             </div>
 
             {/* Desktop Tabs */}
