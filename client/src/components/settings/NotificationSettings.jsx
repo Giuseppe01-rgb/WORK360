@@ -11,10 +11,7 @@ import {
 } from '../../utils/pushNotifications';
 
 export default function NotificationSettings() {
-    // Get token from localStorage since AuthContext doesn't expose it
-    const token = localStorage.getItem('token');
     const { showSuccess, showError, showInfo } = useToast();
-
 
     const [isSupported, setIsSupported] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
@@ -38,10 +35,15 @@ export default function NotificationSettings() {
     };
 
     const handleToggle = async () => {
+        // Get token fresh each time
+        const token = localStorage.getItem('token');
+        console.log('[NotificationSettings] Token:', token ? 'present' : 'missing');
+
         if (!token) {
             showError('Devi essere loggato per attivare le notifiche');
             return;
         }
+
 
         setIsLoading(true);
         try {
@@ -69,6 +71,7 @@ export default function NotificationSettings() {
     };
 
     const handleTestNotification = async () => {
+        const token = localStorage.getItem('token');
         if (!token) return;
 
         showInfo('Invio notifica di test...');
