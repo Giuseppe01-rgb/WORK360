@@ -175,6 +175,16 @@ export function exportAttendanceReport(attendances = [], filters = {}) {
     const workbook = XLSX.utils.book_new();
     const today = new Date().toLocaleDateString('it-IT');
 
+    // Helper to calculate hours worked
+    const calculateHours = (clockIn, clockOut) => {
+        if (!clockIn?.time || !clockOut?.time) return '-';
+        const start = new Date(clockIn.time);
+        const end = new Date(clockOut.time);
+        const diffMs = end - start;
+        const diffHrs = diffMs / 3600000;
+        return `${diffHrs.toFixed(1)}h`;
+    };
+
     // === Sheet 1: Presenze ===
     const attendanceData = [
         ['REGISTRO PRESENZE'],
@@ -183,16 +193,24 @@ export function exportAttendanceReport(attendances = [], filters = {}) {
         filters.dateRange ? [`Periodo: ${filters.dateRange}`] : [],
         [''],
         ['DATA', 'DIPENDENTE', 'CANTIERE', 'ENTRATA', 'USCITA', 'ORE', 'STATUS'],
-        ...attendances.map(att => [
-            formatDate(att.date || att.clockIn),
-            att.user?.name || att.userName || 'N/A',
-            att.site?.name || att.siteName || 'N/A',
-            att.clockIn ? new Date(att.clockIn).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '-',
-            att.clockOut ? new Date(att.clockOut).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : 'In corso',
-            att.hoursWorked ? `${Number(att.hoursWorked).toFixed(1)}h` : '-',
-            att.clockOut ? 'Completato' : 'In corso'
-        ])
+        ...attendances.map(att => {
+            const clockInTime = att.clockIn?.time;
+            const clockOutTime = att.clockOut?.time;
+            const userName = att.user?.name || att.userName || 'N/A';
+            const siteName = att.site?.name || att.siteName || 'N/A';
+
+            return [
+                clockInTime ? new Date(clockInTime).toLocaleDateString('it-IT') : '-',
+                userName,
+                siteName,
+                clockInTime ? new Date(clockInTime).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '-',
+                clockOutTime ? new Date(clockOutTime).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : 'In corso',
+                calculateHours(att.clockIn, att.clockOut),
+                clockOutTime ? 'Completato' : 'In corso'
+            ];
+        })
     ];
+
 
     const attendanceSheet = XLSX.utils.aoa_to_sheet(attendanceData);
     attendanceSheet['!cols'] = [
