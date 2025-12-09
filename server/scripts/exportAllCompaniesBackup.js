@@ -73,8 +73,7 @@ async function exportCompanyData(companyId) {
             attributes: { exclude: ['password'] }
         }),
         ConstructionSite.findAll({
-            where: { companyId },
-            paranoid: false
+            where: { companyId }
         }),
         Material.findAll({ where: { companyId } }),
         MaterialMaster.findAll({ where: { companyId } }),
@@ -104,8 +103,7 @@ async function exportCompanyData(companyId) {
                 where: { companyId },
                 attributes: ['id', 'name'],
                 required: false
-            }],
-            paranoid: false
+            }]
         }),
         ReportedMaterial.findAll({ where: { companyId } }),
         MaterialUsage.findAll({ where: { companyId } }),
