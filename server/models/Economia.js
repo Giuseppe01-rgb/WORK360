@@ -40,12 +40,6 @@ Economia.init({
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW
-    },
-    // Soft-delete field
-    deletedAt: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        field: 'deleted_at'
     }
 }, {
     sequelize,
@@ -53,7 +47,7 @@ Economia.init({
     tableName: 'economias',
     underscored: true,
     timestamps: true,
-    paranoid: true, // Enable soft-delete
+    // paranoid: true - Disabled until deleted_at column is added to production DB
     indexes: [
         { fields: ['worker_id', 'date'] },
         { fields: ['site_id', 'date'] },

@@ -66,20 +66,14 @@ ConstructionSite.init({
         validate: {
             min: 0
         }
-    },
-    // Soft-delete field
-    deletedAt: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        field: 'deleted_at'
     }
 }, {
     sequelize,
     modelName: 'ConstructionSite',
     tableName: 'construction_sites',
     underscored: true,
-    timestamps: true,
-    paranoid: true // Enable soft-delete
+    timestamps: true
+    // paranoid: true - Disabled until deleted_at column is added to production DB
 });
 
 module.exports = ConstructionSite;
