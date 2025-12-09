@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
-const { Attendance, Material, Equipment, User, ConstructionSite, MaterialUsage, MaterialMaster, Note } = require('../models');
+const { Attendance, Material, Equipment, User, ConstructionSite, MaterialUsage, MaterialMaster, WorkActivity } = require('../models');
 const { assertSiteBelongsToCompany } = require('../utils/security');
 const { getCompanyId } = require('../utils/sequelizeHelpers');
 
@@ -171,11 +171,11 @@ const getSiteReport = async (req, res, next) => {
         const marginCurrentPercent = contractValue > 0 ? (marginCurrentValue / contractValue) * 100 : 0;
         const costVsRevenuePercent = contractValue > 0 ? (totalCost / contractValue) * 100 : 0;
 
-        // Get daily reports (type = 'daily_report')
-        const dailyReports = await Note.findAll({
-            where: { siteId, type: 'daily_report' },
+        // Get daily reports from WorkActivity (work activities submitted by workers)
+        const dailyReports = await WorkActivity.findAll({
+            where: { siteId },
             include: [{ model: User, as: 'user', attributes: ['firstName', 'lastName'] }],
-            order: [['createdAt', 'DESC']],
+            order: [['date', 'DESC']],
             limit: 50
         });
 
@@ -217,7 +217,11 @@ const getSiteReport = async (req, res, next) => {
             },
             dailyReports: dailyReports.map(r => ({
                 id: r.id,
-                content: r.content,
+                date: r.date,
+                activityType: r.activityType,
+                description: r.description,
+                hours: parseFloat(r.hours) || 0,
+                notes: r.notes,
                 createdAt: r.createdAt,
                 user: r.user ? {
                     firstName: r.user.firstName,
