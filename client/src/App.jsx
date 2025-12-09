@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { ConfirmModalProvider } from './context/ConfirmModalContext';
 import WelcomePage from './pages/WelcomePage';
 import OnboardingPage from './pages/OnboardingPage';
 import LoginPage from './pages/LoginPage';
@@ -201,11 +202,13 @@ function App() {
   return (
     <ErrorBoundary>
       <ToastProvider>
-        <AuthProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </AuthProvider>
+        <ConfirmModalProvider>
+          <AuthProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </AuthProvider>
+        </ConfirmModalProvider>
       </ToastProvider>
     </ErrorBoundary>
   );

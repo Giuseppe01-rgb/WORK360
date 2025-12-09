@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
+import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { userAPI } from '../../utils/api';
 import {
     Users, Plus, Edit, Trash2, X, CheckCircle, AlertCircle,
@@ -9,6 +10,7 @@ import {
 
 export default function EmployeeManagement() {
     const { user } = useAuth();
+    const { showConfirm } = useConfirmModal();
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -85,7 +87,13 @@ export default function EmployeeManagement() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Sei sicuro di voler eliminare questo utente?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina utente',
+            message: 'Sei sicuro di voler eliminare questo utente? Questa azione non può essere annullata.',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
 
         try {
             await userAPI.delete(id);
@@ -98,7 +106,13 @@ export default function EmployeeManagement() {
 
     const handleResetPassword = async (employee, event) => {
         event.stopPropagation();
-        if (!window.confirm(`Resettare la password di ${employee.firstName} ${employee.lastName}?\n\nVerrà generata una nuova password.`)) return;
+        const confirmed = await showConfirm({
+            title: 'Reset password',
+            message: `Resettare la password di ${employee.firstName} ${employee.lastName}? Verrà generata una nuova password.`,
+            confirmText: 'Reset Password',
+            variant: 'warning'
+        });
+        if (!confirmed) return;
 
         try {
             const response = await userAPI.resetPassword(employee.id);

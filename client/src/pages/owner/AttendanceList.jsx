@@ -5,9 +5,11 @@ import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCi
 import AttendanceModal from '../../components/owner/AttendanceModal';
 import BulkAttendanceModal from '../../components/owner/BulkAttendanceModal';
 import { useToast } from '../../context/ToastContext';
+import { useConfirmModal } from '../../context/ConfirmModalContext';
 
 export default function AttendanceList() {
     const { showSuccess, showError } = useToast();
+    const { showConfirm } = useConfirmModal();
     const [attendances, setAttendances] = useState([]);
     const [sites, setSites] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -100,9 +102,13 @@ export default function AttendanceList() {
     };
 
     const handleDeleteAttendance = async (attendanceId) => {
-        if (!window.confirm('Sei sicuro di voler eliminare questa presenza?')) {
-            return;
-        }
+        const confirmed = await showConfirm({
+            title: 'Elimina presenza',
+            message: 'Sei sicuro di voler eliminare questa presenza?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
 
         try {
             await attendanceAPI.delete(attendanceId);
