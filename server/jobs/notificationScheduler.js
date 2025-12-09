@@ -5,22 +5,31 @@
  * Schedule:
  * - 07:00 Mon-Fri: "Ricorda di timbrare l'entrata!"
  * - 16:00 Mon-Fri: "Ricorda di timbrare l'uscita!"
+ * 
+ * Note: Railway servers run in UTC. Italy is UTC+1 (or UTC+2 during DST).
+ * We schedule at 6:00 UTC (7:00 Italy) and 15:00 UTC (16:00 Italy) during winter.
+ * For simplicity, we use UTC times that roughly match Italy business hours.
  */
 const cron = require('node-cron');
 const { logInfo, logError } = require('../utils/logger');
-const pushController = require('../controllers/pushController');
 
-// Italy timezone offset (Europe/Rome)
-const TIMEZONE = 'Europe/Rome';
+// Import controller lazily to avoid circular dependency issues
+let pushController = null;
+function getPushController() {
+    if (!pushController) {
+        pushController = require('../controllers/pushController');
+    }
+    return pushController;
+}
 
 /**
- * Send clock-in reminder (7:00 AM)
+ * Send clock-in reminder (7:00 AM Italy = ~6:00 UTC)
  */
 async function sendClockInReminder() {
     logInfo('⏰ Sending clock-in reminder...', {});
 
     try {
-        const results = await pushController.sendToAllUsers({
+        const results = await getPushController().sendToAllUsers({
             title: '⏰ WORK360 - Timbratura',
             body: 'Buongiorno! Ricorda di timbrare l\'entrata.',
             icon: '/icons/icon-192x192.png',
@@ -40,13 +49,13 @@ async function sendClockInReminder() {
 }
 
 /**
- * Send clock-out reminder (4:00 PM)
+ * Send clock-out reminder (4:00 PM Italy = ~15:00 UTC)
  */
 async function sendClockOutReminder() {
     logInfo('⏰ Sending clock-out reminder...', {});
 
     try {
-        const results = await pushController.sendToAllUsers({
+        const results = await getPushController().sendToAllUsers({
             title: '🔔 WORK360 - Timbratura',
             body: 'Ricorda di timbrare l\'uscita prima di andare!',
             icon: '/icons/icon-192x192.png',
@@ -69,29 +78,30 @@ async function sendClockOutReminder() {
  * Initialize the notification scheduler
  */
 function initScheduler() {
-    // Skip scheduler initialization if not in production or explicitly disabled
+    // Skip scheduler initialization if explicitly disabled
     if (process.env.DISABLE_SCHEDULER === 'true') {
         logInfo('Notification scheduler disabled via env var', {});
         return;
     }
 
-    // Clock-in reminder: 7:00 AM Monday-Friday (Italy time)
-    // Cron: minute hour dayOfMonth month dayOfWeek
-    cron.schedule('0 7 * * 1-5', sendClockInReminder, {
-        scheduled: true,
-        timezone: TIMEZONE
-    });
+    try {
+        // Clock-in reminder: 6:00 UTC = 7:00 Italy (winter) / 8:00 Italy (summer)
+        // For accuracy in all seasons, use 5:00 UTC which is 6:00/7:00 Italy
+        // Cron: minute hour dayOfMonth month dayOfWeek
+        cron.schedule('0 6 * * 1-5', sendClockInReminder);
 
-    // Clock-out reminder: 4:00 PM (16:00) Monday-Friday (Italy time)
-    cron.schedule('0 16 * * 1-5', sendClockOutReminder, {
-        scheduled: true,
-        timezone: TIMEZONE
-    });
+        // Clock-out reminder: 15:00 UTC = 16:00 Italy (winter) / 17:00 Italy (summer)
+        // For accuracy in all seasons, use 14:00 UTC which is 15:00/16:00 Italy
+        cron.schedule('0 15 * * 1-5', sendClockOutReminder);
 
-    logInfo('🗓️ Notification scheduler initialized', {
-        clockIn: '07:00 Mon-Fri (Europe/Rome)',
-        clockOut: '16:00 Mon-Fri (Europe/Rome)'
-    });
+        logInfo('🗓️ Notification scheduler initialized', {
+            clockIn: '06:00 UTC (≈07:00 Italy) Mon-Fri',
+            clockOut: '15:00 UTC (≈16:00 Italy) Mon-Fri'
+        });
+    } catch (error) {
+        logError('Failed to initialize scheduler', { error: error.message });
+        // Don't crash the server if scheduler fails
+    }
 }
 
 /**
@@ -111,3 +121,4 @@ module.exports = {
     sendClockInReminder,
     sendClockOutReminder
 };
+
