@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Bell, BellOff, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import {
     isPushSupported,
@@ -12,8 +11,10 @@ import {
 } from '../../utils/pushNotifications';
 
 export default function NotificationSettings() {
-    const { token } = useAuth();
+    // Get token from localStorage since AuthContext doesn't expose it
+    const token = localStorage.getItem('token');
     const { showSuccess, showError, showInfo } = useToast();
+
 
     const [isSupported, setIsSupported] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
