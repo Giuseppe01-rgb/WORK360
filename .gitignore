@@ -1,10 +1,33 @@
+# Dependencies
 node_modules/
+
+# Environment files (NEVER commit these with real values!)
 .env
 .env.local
+.env.*.local
+*.env
+server/.env
+client/.env
+client/.env.local
+
+# Build outputs
 dist/
 build/
+
+# Logs
 *.log
+npm-debug.log*
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# IDE
 .vscode/
+.idea/
+
+# Uploads and temp files
 uploads/
 *.tmp
+backups/
+
