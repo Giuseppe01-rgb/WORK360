@@ -283,6 +283,17 @@ const createManualAttendance = async (req, res) => {
             notes: notes || null
         });
 
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId,
+            action: AUDIT_ACTIONS.CLOCK_IN,
+            targetType: 'attendance',
+            targetId: attendance.id,
+            ipAddress: req.ip,
+            meta: { siteId, siteName: site.name, manual: true, workerUserId: userId }
+        });
+
         res.status(201).json(attendance);
     } catch (error) {
         console.error('createManualAttendance error:', error);
