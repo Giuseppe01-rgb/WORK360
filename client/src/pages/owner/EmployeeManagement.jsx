@@ -5,7 +5,7 @@ import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { userAPI } from '../../utils/api';
 import {
     Users, Plus, Edit, Trash2, X, CheckCircle, AlertCircle,
-    Mail, Phone, Calendar, User, Building2, Copy, Check, ChevronRight, Key
+    Mail, Phone, Calendar, User, Building2, Copy, Check, ChevronRight, Key, Send
 } from 'lucide-react';
 
 export default function EmployeeManagement() {
@@ -143,6 +143,35 @@ export default function EmployeeManagement() {
         }
     };
 
+    const handleSendWelcomeEmail = async (employee, event) => {
+        event.stopPropagation();
+
+        if (!employee.email) {
+            showNotification('error', 'L\'utente non ha un indirizzo email. Aggiungilo prima di inviare l\'email.');
+            return;
+        }
+
+        const confirmed = await showConfirm({
+            title: 'Invia Email di Benvenuto',
+            message: `Inviare l'email di benvenuto a ${employee.firstName} ${employee.lastName} (${employee.email})? Verrà generata una nuova password e inviata via email.`,
+            confirmText: 'Invia Email',
+            variant: 'primary'
+        });
+        if (!confirmed) return;
+
+        try {
+            const response = await userAPI.sendWelcomeEmail(employee.id);
+            showNotification('success', `Email inviata a ${employee.email}!`);
+            // Show new credentials
+            setGeneratedCredentials({
+                username: response.data.username,
+                password: response.data.password
+            });
+        } catch (error) {
+            showNotification('error', error.response?.data?.message || 'Errore nell\'invio dell\'email');
+        }
+    };
+
     if (loading) {
         return (
             <Layout title="Lista Operai">
@@ -235,6 +264,16 @@ export default function EmployeeManagement() {
 
                                         {employee.id !== user.id && (
                                             <div className="flex gap-2">
+                                                <button
+                                                    onClick={(e) => handleSendWelcomeEmail(employee, e)}
+                                                    className={`p-2 rounded-lg transition-colors ${employee.email
+                                                        ? 'hover:bg-green-50 text-green-500 hover:text-green-700'
+                                                        : 'text-slate-300 cursor-not-allowed'}`}
+                                                    title={employee.email ? 'Invia Email di Benvenuto' : 'Aggiungi email per inviare'}
+                                                    disabled={!employee.email}
+                                                >
+                                                    <Send className="w-4 h-4" />
+                                                </button>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleResetPassword(employee, e); }}
                                                     className="p-2 hover:bg-blue-50 rounded-lg text-blue-500 hover:text-blue-700 transition-colors"

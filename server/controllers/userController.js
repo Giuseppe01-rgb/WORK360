@@ -414,6 +414,94 @@ const resetUserPassword = async (req, res) => {
     }
 };
 
+// @desc    Send welcome email to user with credentials
+// @route   POST /api/users/:id/send-welcome
+// @access  Private (Owner)
+const sendWelcomeEmailToUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Get user
+        const user = await User.findOne({
+            where: {
+                id,
+                companyId: getCompanyId(req)
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Utente non trovato nella tua azienda' });
+        }
+
+        // Check if user has email
+        if (!user.email) {
+            return res.status(400).json({
+                message: 'L\'utente non ha un indirizzo email configurato. Aggiungi prima l\'email nelle informazioni utente.'
+            });
+        }
+
+        // Get company with email config
+        const company = await Company.findByPk(getCompanyId(req));
+        if (!company) {
+            return res.status(404).json({ message: 'Azienda non trovata' });
+        }
+
+        // Check if company email is configured
+        if (!company.emailConfig || !company.emailConfig.configured) {
+            return res.status(400).json({
+                message: 'Configurazione email aziendale mancante. Vai in Impostazioni Azienda per configurare l\'email SMTP.'
+            });
+        }
+
+        // Generate new password for the user
+        const newPassword = generatePassword();
+
+        // Update user password
+        user.password = newPassword;
+        await user.save();
+
+        // Send welcome email
+        const { sendWelcomeEmail } = require('../utils/emailService');
+
+        await sendWelcomeEmail(
+            company.emailConfig,
+            user.email,
+            user.firstName,
+            user.username,
+            newPassword,
+            company.name
+        );
+
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId: getCompanyId(req),
+            action: 'WELCOME_EMAIL_SENT',
+            targetType: 'user',
+            targetId: user.id,
+            ipAddress: req.ip,
+            meta: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email
+            }
+        });
+
+        res.json({
+            success: true,
+            message: `Email di benvenuto inviata a ${user.email}`,
+            username: user.username,
+            password: newPassword // Return for display in modal
+        });
+    } catch (error) {
+        console.error('Send welcome email error:', error);
+        res.status(500).json({
+            message: 'Errore nell\'invio dell\'email di benvenuto',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     uploadSignature,
     upload,
@@ -424,5 +512,6 @@ module.exports = {
     updateEmailConfig,
     testEmailConfig,
     changePassword,
-    resetUserPassword
+    resetUserPassword,
+    sendWelcomeEmailToUser
 };

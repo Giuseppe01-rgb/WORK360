@@ -9,7 +9,8 @@ const {
     updateEmailConfig,
     testEmailConfig,
     changePassword,
-    resetUserPassword
+    resetUserPassword,
+    sendWelcomeEmailToUser
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -29,5 +30,6 @@ router.post('/', protect, createUser);
 router.put('/:id', protect, updateUser);
 router.delete('/:id', protect, deleteUser);
 router.post('/:id/reset-password', protect, resetUserPassword);
+router.post('/:id/send-welcome', protect, sendWelcomeEmailToUser);
 
 module.exports = router;

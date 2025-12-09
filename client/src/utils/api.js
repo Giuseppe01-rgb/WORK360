@@ -194,7 +194,8 @@ export const userAPI = {
     updateEmailConfig: (data) => api.put('/users/email-config', data),
     testEmailConfig: () => api.post('/users/email-config/test'),
     changePassword: (data) => api.post('/users/change-password', data),
-    resetPassword: (id) => api.post(`/users/${id}/reset-password`)
+    resetPassword: (id) => api.post(`/users/${id}/reset-password`),
+    sendWelcomeEmail: (id) => api.post(`/users/${id}/send-welcome`)
 };
 
 // Communication (Email & WhatsApp)
