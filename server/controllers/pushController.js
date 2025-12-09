@@ -3,7 +3,7 @@
  * Handles subscription management and manual notification sending
  */
 const PushSubscription = require('../models/PushSubscription');
-const { sendPushNotification, sendBulkPushNotifications, getVapidPublicKey } = require('../utils/pushNotification');
+const pushUtils = require('../utils/pushNotification');
 const { logInfo, logError } = require('../utils/logger');
 
 /**
@@ -11,7 +11,7 @@ const { logInfo, logError } = require('../utils/logger');
  */
 exports.getVapidPublicKey = async (req, res) => {
     try {
-        const publicKey = getVapidPublicKey();
+        const publicKey = pushUtils.getVapidPublicKey();
         if (!publicKey) {
             return res.status(500).json({
                 message: 'Push notifications not configured'
@@ -153,7 +153,7 @@ exports.sendTestNotification = async (req, res) => {
             tag: 'test-notification'
         };
 
-        const results = await sendBulkPushNotifications(subscriptions, payload);
+        const results = await pushUtils.sendBulkPushNotifications(subscriptions, payload);
 
         // Update lastPushAt for successful sends
         if (results.sent > 0) {
@@ -196,7 +196,7 @@ exports.sendToAllUsers = async (payload) => {
             return { sent: 0, total: 0 };
         }
 
-        const results = await sendBulkPushNotifications(subscriptions, payload);
+        const results = await pushUtils.sendBulkPushNotifications(subscriptions, payload);
 
         // Update lastPushAt for all
         await PushSubscription.update(
