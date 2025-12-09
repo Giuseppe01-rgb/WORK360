@@ -5,7 +5,7 @@ import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI, w
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
-import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2, Building2 } from 'lucide-react';
+import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2, Building2, Bell } from 'lucide-react';
 import TimeDistributionModal from '../../components/worker/TimeDistributionModal';
 import BarcodeScanner from '../../components/common/BarcodeScanner';
 import MaterialsList from '../../components/worker/MaterialsList';
@@ -13,6 +13,7 @@ import MaterialSearch from '../../components/worker/MaterialSearch';
 import MaterialUsageForm from '../../components/worker/MaterialUsageForm';
 import ReportMaterialForm from '../../components/worker/ReportMaterialForm';
 import MaterialCart from '../../components/worker/MaterialCart';
+import NotificationSettings from '../../components/settings/NotificationSettings';
 
 export default function WorkerDashboard() {
     const { user } = useAuth();
@@ -691,6 +692,11 @@ export default function WorkerDashboard() {
                                 <MapPin className="w-4 h-4" />
                                 <span>La tua posizione GPS verrà registrata automaticamente</span>
                             </div>
+                        </div>
+
+                        {/* Push Notifications Section */}
+                        <div className="mt-6 pt-6 border-t border-slate-100">
+                            <NotificationSettings />
                         </div>
                     </div>
                 )}

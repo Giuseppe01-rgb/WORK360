@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/*.png', 'assets/*.png'],
+      includeAssets: ['favicon.ico', 'icons/*.png', 'assets/*.png', 'sw-push.js'],
 
       manifest: {
         name: 'WORK360 - Gestionale Edile',
@@ -74,6 +74,9 @@ export default defineConfig({
       },
 
       workbox: {
+        // Import custom push notification handler
+        importScripts: ['/sw-push.js'],
+
         // Intelligent caching strategies
         runtimeCaching: [
           {
@@ -128,3 +131,4 @@ export default defineConfig({
     })
   ],
 })
+
