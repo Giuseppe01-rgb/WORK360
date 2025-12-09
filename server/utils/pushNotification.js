@@ -5,16 +5,23 @@
 const webpush = require('web-push');
 const { logInfo, logError } = require('./logger');
 
-// Configure web-push with VAPID keys
+// Configure web-push with VAPID keys (lazy initialization)
+let vapidConfigured = false;
 const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
 const vapidEmail = process.env.VAPID_EMAIL || 'mailto:colorasnc@gmail.com';
 
-if (vapidPublicKey && vapidPrivateKey) {
-    webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
-    logInfo('Web Push configured successfully', { vapidPublicKey: vapidPublicKey.substring(0, 20) + '...' });
-} else {
-    logError('VAPID keys not configured! Push notifications will not work.', {});
+// Don't crash on startup if VAPID keys are missing - just log warning
+try {
+    if (vapidPublicKey && vapidPrivateKey) {
+        webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
+        vapidConfigured = true;
+        console.log('[Push] Web Push configured successfully');
+    } else {
+        console.log('[Push] VAPID keys not configured - push notifications disabled');
+    }
+} catch (error) {
+    console.error('[Push] Failed to configure VAPID:', error.message);
 }
 
 /**
