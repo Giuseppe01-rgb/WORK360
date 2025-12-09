@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
-import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI, materialUsageAPI, auditLogAPI } from '../../utils/api';
+import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight,
-    FileText, Camera, Image, Zap, Bell, MoreVertical, Activity
+    FileText, Camera, Image, Zap, Bell, MoreVertical
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack }) => {
@@ -904,8 +904,6 @@ export default function OwnerDashboard() {
     const [selectedSite, setSelectedSite] = useState(null);
     const [notification, setNotification] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [activityLogs, setActivityLogs] = useState([]);
-    const [loadingLogs, setLoadingLogs] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -936,22 +934,6 @@ export default function OwnerDashboard() {
             setLoading(false);
         }
     };
-
-    const loadActivityLogs = async () => {
-        try {
-            setLoadingLogs(true);
-            const response = await auditLogAPI.getAll({ limit: 10 });
-            setActivityLogs(response.data.logs || []);
-        } catch (error) {
-            console.error('Error loading activity logs:', error);
-        } finally {
-            setLoadingLogs(false);
-        }
-    };
-
-    useEffect(() => {
-        loadActivityLogs();
-    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -1144,69 +1126,6 @@ export default function OwnerDashboard() {
                             ))}
                         </div>
                     )}
-                </div>
-
-                {/* ACTIVITY SUMMARY SECTION */}
-                <div className="mt-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                            <Activity className="w-5 h-5 text-blue-600" />
-                            Riepilogo Attività
-                        </h3>
-                    </div>
-
-                    <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
-                        {loadingLogs ? (
-                            <div className="p-8 text-center">
-                                <div className="w-8 h-8 border-3 border-slate-200 border-t-slate-600 rounded-full animate-spin mx-auto"></div>
-                                <p className="text-slate-500 mt-2">Caricamento...</p>
-                            </div>
-                        ) : activityLogs.length === 0 ? (
-                            <div className="p-8 text-center">
-                                <Activity className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                                <p className="text-slate-500 font-medium">Nessuna attività recente</p>
-                            </div>
-                        ) : (
-                            <div className="divide-y divide-slate-50">
-                                {activityLogs.map((log) => (
-                                    <div key={log.id} className="p-4 hover:bg-slate-50 transition-colors">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold ${log.action?.includes('CREATED') ? 'bg-green-100 text-green-600' :
-                                                        log.action?.includes('UPDATED') ? 'bg-blue-100 text-blue-600' :
-                                                            log.action?.includes('DELETED') ? 'bg-red-100 text-red-600' :
-                                                                log.action?.includes('CLOCK') ? 'bg-amber-100 text-amber-600' :
-                                                                    'bg-slate-100 text-slate-600'
-                                                    }`}>
-                                                    {log.targetType === 'site' ? <Building2 className="w-5 h-5" /> :
-                                                        log.targetType === 'attendance' ? <Clock className="w-5 h-5" /> :
-                                                            log.targetType === 'material' ? <Package className="w-5 h-5" /> :
-                                                                <Activity className="w-5 h-5" />}
-                                                </div>
-                                                <div>
-                                                    <p className="font-semibold text-slate-900">
-                                                        {log.user?.name || 'Sistema'}
-                                                    </p>
-                                                    <p className="text-sm text-slate-600">
-                                                        {log.action?.replace(/_/g, ' ').toLowerCase()}
-                                                        {log.meta?.name && <span className="text-slate-400"> - {log.meta.name}</span>}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-xs text-slate-400">
-                                                    {new Date(log.createdAt).toLocaleDateString('it-IT')}
-                                                </p>
-                                                <p className="text-xs text-slate-400">
-                                                    {new Date(log.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
 

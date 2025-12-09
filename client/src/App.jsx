@@ -18,6 +18,7 @@ import CompanySettings from './pages/owner/CompanySettings';
 import EmployeeManagement from './pages/owner/EmployeeManagement';
 import MaterialsCatalog from './pages/owner/MaterialsCatalog';
 import MaterialApproval from './pages/owner/MaterialApproval';
+import ActivityLogPage from './pages/owner/ActivityLogPage';
 import EconomiaForm from './pages/worker/EconomiaForm';
 import UserProfile from './pages/UserProfile';
 import Loading from './components/Loading';
@@ -181,6 +182,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute requireOwner>
             <WorkerDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/owner/activity-log"
+        element={
+          <ProtectedRoute requireOwner>
+            <ActivityLogPage />
           </ProtectedRoute>
         }
       />
