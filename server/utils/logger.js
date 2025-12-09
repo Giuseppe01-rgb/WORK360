@@ -51,8 +51,20 @@ function logSecurity(message, meta = {}) {
     console.warn(formatLog('SECURITY', message, meta));
 }
 
+/**
+ * Log fatal errors
+ * Use for: unhandledRejection, uncaughtException, critical system failures
+ * These indicate the process may be in an unstable state
+ * @param {string} message - Fatal error description
+ * @param {object} meta - Additional context (type, reason, stack, etc.)
+ */
+function logFatal(message, meta = {}) {
+    console.error(formatLog('FATAL', message, meta));
+}
+
 module.exports = {
     logInfo,
     logError,
-    logSecurity
+    logSecurity,
+    logFatal
 };

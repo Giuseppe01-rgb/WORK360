@@ -28,6 +28,51 @@ const helmet = require('helmet');
 // Initialize express
 const app = express();
 
+// Import logger for global error handlers
+const { logFatal } = require('./utils/logger');
+
+// =============================================================================
+// GLOBAL ERROR HANDLERS (Level 6 Security)
+// Must be registered early, before any async operations start
+// =============================================================================
+
+/**
+ * Handle unhandled promise rejections
+ * Common causes: forgotten .catch(), database connection failures, external API timeouts
+ * 
+ * We log the error but do NOT exit the process:
+ * - Railway will detect repeated unhealthy responses and restart if needed
+ * - Exiting on every rejection could cause restart loops
+ * - Some rejections are recoverable (e.g., a single failed DB query)
+ */
+process.on('unhandledRejection', (reason, promise) => {
+    logFatal('Unhandled Promise Rejection', {
+        type: 'unhandledRejection',
+        reason: reason instanceof Error ? reason.message : String(reason),
+        stack: reason instanceof Error ? reason.stack : undefined
+    });
+    // Do NOT exit - let the healthcheck detect if the app is truly broken
+});
+
+/**
+ * Handle uncaught synchronous exceptions
+ * These are more serious - the process may be in an unstable state
+ * 
+ * We log and exit:
+ * - Uncaught exceptions leave the process in undefined state
+ * - Railway will automatically restart the container
+ * - This is the recommended Node.js best practice
+ */
+process.on('uncaughtException', (err) => {
+    logFatal('Uncaught Exception - Process will exit', {
+        type: 'uncaughtException',
+        message: err.message,
+        stack: err.stack
+    });
+    // Exit with error code - Railway will restart the container
+    process.exit(1);
+});
+
 // Test PostgreSQL connection
 testConnection().catch(err => {
     console.error('Failed to connect to PostgreSQL:', err);
@@ -169,9 +214,29 @@ app.use('/api/material-usage', require('./routes/materialUsageRoutes'));
 app.use('/api/reported-materials', require('./routes/reportedMaterialRoutes'));
 app.use('/api/fix-fk', require('./routes/fixMaterialFK')); // Temporary FK fix
 
-// Health check
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', message: 'WORK360 API is running' });
+// =============================================================================
+// HEALTHCHECK ENDPOINT (Level 6 Security)
+// Used by Railway for service health monitoring
+// =============================================================================
+app.get('/api/health', async (req, res) => {
+    let dbStatus = 'error';
+
+    try {
+        // Quick database connectivity check
+        await sequelize.query('SELECT 1');
+        dbStatus = 'ok';
+    } catch (error) {
+        // Log DB health check failure but don't crash - let Railway know via response
+        console.error('[HEALTH] Database check failed:', error.message);
+    }
+
+    // Return comprehensive health status
+    res.json({
+        status: 'ok',
+        uptime: Math.floor(process.uptime()),  // Server uptime in seconds
+        timestamp: new Date().toISOString(),    // Current server time
+        db: dbStatus                             // Database connectivity
+    });
 });
 
 // Global error handling middleware

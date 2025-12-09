@@ -137,6 +137,51 @@ WORK360 implementa diversi livelli di sicurezza:
 2. **Level 2**: Rate limiting + Helmet headers
 3. **Level 3**: Input validation con express-validator
 4. **Level 4**: Data protection + Backup automatici
+5. **Level 5**: Audit trail (log di tutte le azioni)
+6. **Level 6**: Monitoring & Operational Security
+
+---
+
+## Healthcheck e Monitoring (Level 6)
+
+### Endpoint Healthcheck
+
+```
+GET /api/health
+```
+
+Risposta:
+```json
+{
+  "status": "ok",
+  "uptime": 12345,
+  "timestamp": "2024-12-09T12:00:00.000Z",
+  "db": "ok"
+}
+```
+
+- `uptime`: secondi di uptime del server
+- `db`: "ok" se il database è raggiungibile, "error" altrimenti
+
+### Configurazione Railway Healthcheck
+
+1. Vai su **Railway → Il tuo servizio WORK360 → Settings**
+2. Nella sezione **Deploy**, trova **Health Check Path**
+3. Imposta: `/api/health`
+4. Railway verificherà periodicamente questo endpoint per monitorare lo stato del servizio
+
+### Log degli Errori
+
+I log sono strutturati in formato JSON con i seguenti livelli:
+- `INFO`: Operazioni normali
+- `ERROR`: Errori tecnici (richieste fallite, eccezioni catturate)
+- `SECURITY`: Eventi di sicurezza (login falliti, rate limiting, accessi non autorizzati)
+- `FATAL`: Errori critici (uncaughtException, unhandledRejection)
+
+Esempio di log FATAL:
+```
+[2024-12-09T12:00:00.000Z] [FATAL] Uncaught Exception {...}
+```
 
 ---
 
