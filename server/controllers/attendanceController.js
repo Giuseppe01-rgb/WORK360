@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { Attendance, ConstructionSite, User } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
+const { logAction, AUDIT_ACTIONS } = require('../utils/auditLogger');
 
 // @desc    Clock in
 // @route   POST /api/attendance/clock-in
@@ -58,6 +59,17 @@ const clockIn = async (req, res) => {
             }
         });
 
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId: getCompanyId(req),
+            action: AUDIT_ACTIONS.CLOCK_IN,
+            targetType: 'attendance',
+            targetId: attendance.id,
+            ipAddress: req.ip,
+            meta: { siteId, siteName: site.name }
+        });
+
         res.status(201).json(attendance);
     } catch (error) {
         console.error('ClockIn Error:', error);
@@ -112,6 +124,17 @@ const clockOut = async (req, res) => {
                 }
             },
             totalHours: parseFloat(totalHours)
+        });
+
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId: getCompanyId(req),
+            action: AUDIT_ACTIONS.CLOCK_OUT,
+            targetType: 'attendance',
+            targetId: attendance.id,
+            ipAddress: req.ip,
+            meta: { siteId: attendance.siteId, totalHours }
         });
 
         res.json(attendance);

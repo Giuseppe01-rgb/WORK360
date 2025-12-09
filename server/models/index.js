@@ -16,6 +16,7 @@ const SAL = require('./SAL');
 const Supplier = require('./Supplier');
 const WorkActivity = require('./WorkActivity');
 const Document = require('./Document');
+const AuditLog = require('./AuditLog');
 
 // ========== ASSOCIATIONS ==========
 
@@ -132,6 +133,10 @@ MaterialUsage.belongsTo(MaterialMaster, { foreignKey: 'materialId', as: 'materia
 MaterialUsage.belongsTo(ReportedMaterial, { foreignKey: 'materialeReportId', as: 'reportedMaterial' });
 
 
+// AuditLog relationships
+AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+AuditLog.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
+
 module.exports = {
     User,
     Company,
@@ -150,5 +155,6 @@ module.exports = {
     SAL,
     Supplier,
     WorkActivity,
-    Document
+    Document,
+    AuditLog
 };

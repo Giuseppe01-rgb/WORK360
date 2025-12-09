@@ -22,7 +22,8 @@ const {
     WorkActivity,
     Document
 } = require('../models');
-const { getCompanyId } = require('../utils/sequelizeHelpers');
+const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
+const { logAction, AUDIT_ACTIONS } = require('../utils/auditLogger');
 
 /**
  * Export all company data as downloadable JSON
@@ -155,6 +156,17 @@ const exportCompanyData = async (req, res) => {
         // Set headers for download
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId,
+            action: AUDIT_ACTIONS.COMPANY_DATA_EXPORTED,
+            targetType: 'company',
+            targetId: companyId,
+            ipAddress: req.ip,
+            meta: { filename, companyName: company.name }
+        });
 
         res.json(exportData);
     } catch (error) {

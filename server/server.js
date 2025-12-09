@@ -161,6 +161,7 @@ app.use('/api/migrate', require('./routes/migrate')); // Temporary migration end
 app.use('/api/work-activities', require('./routes/workActivityRoutes'));
 app.use('/api/communication', require('./routes/communicationRoutes'));
 app.use('/api/economia', require('./routes/economiaRoutes'));
+app.use('/api/audit-logs', require('./routes/auditLogRoutes'));
 
 // Colora Material Tracking System
 app.use('/api/coloura-materials', require('./routes/colouraMaterialRoutes'));

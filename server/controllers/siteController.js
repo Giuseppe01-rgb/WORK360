@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { ConstructionSite, User, Attendance, WorkActivity, MaterialUsage, Note, Economia, ReportedMaterial } = require('../models');
 const { sanitizeAllDates } = require('../utils/dateValidator');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
+const { logAction, AUDIT_ACTIONS } = require('../utils/auditLogger');
 
 // Create construction site
 const createSite = async (req, res) => {
@@ -45,6 +46,17 @@ const createSite = async (req, res) => {
         if (req.body.assignedWorkers && req.body.assignedWorkers.length > 0) {
             await site.setAssignedWorkers(req.body.assignedWorkers);
         }
+
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId,
+            action: AUDIT_ACTIONS.SITE_CREATED,
+            targetType: 'site',
+            targetId: site.id,
+            ipAddress: req.ip,
+            meta: { name: site.name, address: site.address }
+        });
 
         res.status(201).json(site);
     } catch (error) {
@@ -238,6 +250,17 @@ const updateSite = async (req, res) => {
             }]
         });
 
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId: getCompanyId(req),
+            action: AUDIT_ACTIONS.SITE_UPDATED,
+            targetType: 'site',
+            targetId: site.id,
+            ipAddress: req.ip,
+            meta: { name: site.name, updatedFields: Object.keys(updateData) }
+        });
+
         res.json(site);
     } catch (error) {
         res.status(500).json({ message: 'Errore nell\'aggiornamento del cantiere', error: error.message });
@@ -262,9 +285,23 @@ const deleteSite = async (req, res) => {
             return res.status(404).json({ message: 'Cantiere non trovato' });
         }
 
+        // Store site info before deletion
+        const siteName = site.name;
+
         // Soft-delete the site (paranoid mode sets deleted_at)
         // Related data (attendance, materials, etc.) is preserved for historical purposes
         await site.destroy();
+
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId,
+            action: AUDIT_ACTIONS.SITE_DELETED,
+            targetType: 'site',
+            targetId: siteId,
+            ipAddress: req.ip,
+            meta: { name: siteName }
+        });
 
         res.json({ message: 'Cantiere eliminato con successo' });
     } catch (error) {
