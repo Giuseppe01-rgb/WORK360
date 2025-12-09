@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { auth } = require('../middleware/auth');
+const { auth } = require('../middleware/authMiddleware');
 const pushController = require('../controllers/pushController');
 
 // Get VAPID public key (no auth needed)
