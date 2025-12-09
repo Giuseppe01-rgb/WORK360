@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
+import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
@@ -8,7 +9,7 @@ import {
     FileText, Camera, Image, Zap, Bell, MoreVertical
 } from 'lucide-react';
 
-const SiteDetails = ({ site, onBack }) => {
+const SiteDetails = ({ site, onBack, showConfirm }) => {
     const [activeTab, setActiveTab] = useState('dati');
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
@@ -42,7 +43,13 @@ const SiteDetails = ({ site, onBack }) => {
     };
 
     const handleDeleteMaterialUsage = async (usageId) => {
-        if (!window.confirm('Sei sicuro di voler eliminare questo utilizzo materiale?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina materiale',
+            message: 'Sei sicuro di voler eliminare questo utilizzo materiale?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
         try {
             await materialUsageAPI.delete(usageId);
             await loadMaterialUsages();
@@ -51,46 +58,60 @@ const SiteDetails = ({ site, onBack }) => {
             setReport(rep.data);
         } catch (error) {
             console.error('Error deleting material usage:', error);
-            alert(`Errore nell'eliminazione: ${error.response?.data?.message || error.message}`);
         }
     };
 
     const handleDeleteNote = async (e, noteId) => {
         e.stopPropagation();
-        if (!window.confirm('Sei sicuro di voler eliminare questa nota?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina nota',
+            message: 'Sei sicuro di voler eliminare questa nota?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
         try {
             await noteAPI.delete(noteId);
             const notesData = await noteAPI.getAll({ siteId: site.id, type: 'note' });
             setNotes(notesData.data || []);
         } catch (error) {
             console.error('Error deleting note:', error);
-            alert(`Errore nell'eliminazione della nota: ${error.response?.data?.message || error.message}`);
         }
     };
 
     const handleDeleteReport = async (e, reportId) => {
         e.stopPropagation();
-        if (!window.confirm('Sei sicuro di voler eliminare questo rapporto?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina rapporto',
+            message: 'Sei sicuro di voler eliminare questo rapporto?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
         try {
             await workActivityAPI.delete(reportId);
             const rep = await analyticsAPI.getSiteReport(site.id);
             setReport(rep.data);
         } catch (error) {
             console.error('Error deleting report:', error);
-            alert(`Errore nell'eliminazione del report: ${error.response?.data?.message || error.message}`);
         }
     };
 
     const handleDeleteEconomia = async (e, economiaId) => {
         e.stopPropagation();
-        if (!window.confirm('Sei sicuro di voler eliminare questa economia?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina economia',
+            message: 'Sei sicuro di voler eliminare questa economia?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
         try {
             await economiaAPI.delete(economiaId);
             const economieData = await economiaAPI.getBySite(site.id);
             setEconomie(economieData.data);
         } catch (error) {
             console.error('Error deleting economia:', error);
-            alert('Errore nell\'eliminazione');
         }
     };
 
@@ -897,6 +918,7 @@ const SiteDetails = ({ site, onBack }) => {
 
 export default function OwnerDashboard() {
     const { user } = useAuth();
+    const { showConfirm } = useConfirmModal();
     const [sites, setSites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -970,7 +992,13 @@ export default function OwnerDashboard() {
     const handleDelete = async (e, id) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!window.confirm('Sei sicuro di voler eliminare questo cantiere?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina cantiere',
+            message: 'Sei sicuro di voler eliminare questo cantiere? Tutti i dati associati verranno eliminati.',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
 
         try {
             await siteAPI.delete(id);
@@ -1005,7 +1033,7 @@ export default function OwnerDashboard() {
     if (selectedSite) {
         return (
             <Layout title="Dettagli Cantiere" hideHeader={true}>
-                <SiteDetails site={selectedSite} onBack={() => setSelectedSite(null)} />
+                <SiteDetails site={selectedSite} onBack={() => setSelectedSite(null)} showConfirm={showConfirm} />
             </Layout>
         );
     }

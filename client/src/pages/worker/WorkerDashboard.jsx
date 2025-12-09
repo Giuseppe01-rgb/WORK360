@@ -4,6 +4,7 @@ import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI, workActivityAPI, materialMasterAPI, materialUsageAPI, reportedMaterialAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2, Building2 } from 'lucide-react';
 import TimeDistributionModal from '../../components/worker/TimeDistributionModal';
 import BarcodeScanner from '../../components/common/BarcodeScanner';
@@ -16,6 +17,7 @@ import MaterialCart from '../../components/worker/MaterialCart';
 export default function WorkerDashboard() {
     const { user } = useAuth();
     const { showSuccess, showError, showInfo } = useToast();
+    const { showConfirm } = useConfirmModal();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const activeTab = searchParams.get('tab') || 'attendance';
@@ -361,12 +363,17 @@ export default function WorkerDashboard() {
             showSuccess('Materiale aggiunto al catalogo!');
 
             // Ask if they want to add to daily report
-            if (window.confirm('Vuoi aggiungere questo materiale al report di oggi?')) {
+            const addToReport = await showConfirm({
+                title: 'Aggiungi al report',
+                message: 'Vuoi aggiungere questo materiale al report di oggi?',
+                confirmText: 'Sì, aggiungi',
+                cancelText: 'No, grazie',
+                variant: 'default'
+            });
+            if (addToReport) {
                 setScannedMaterial(newMaterial.data);
                 setShowNewMaterialForm(false);
-                // Material form is already filled, just need quantity
             } else {
-                // Reset
                 setShowNewMaterialForm(false);
                 setScannedBarcode('');
                 setMaterialForm({ name: '', quantity: '', unit: '' });
@@ -546,15 +553,20 @@ export default function WorkerDashboard() {
     }, [activeTab, selectedSite]);
 
     const handleDeleteMaterial = async (usageId) => {
-        if (!window.confirm('Sei sicuro di voler eliminare questo materiale?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina materiale',
+            message: 'Sei sicuro di voler eliminare questo materiale?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
 
         try {
             await materialUsageAPI.delete(usageId);
-            // Refresh list
             loadTodayMaterials();
         } catch (error) {
             console.error('Delete error:', error);
-            alert('Errore durante l\'eliminazione');
+            showError('Errore durante l\'eliminazione');
         }
     };
 
@@ -1016,7 +1028,13 @@ export default function WorkerDashboard() {
                                                     onClick={async (e) => {
                                                         e.stopPropagation();
                                                         e.preventDefault();
-                                                        if (window.confirm('Eliminare questa attività?')) {
+                                                        const confirmed = await showConfirm({
+                                                            title: 'Elimina attività',
+                                                            message: 'Eliminare questa attività?',
+                                                            confirmText: 'Elimina',
+                                                            variant: 'danger'
+                                                        });
+                                                        if (confirmed) {
                                                             try {
                                                                 await workActivityAPI.delete(activity.id);
                                                                 showSuccess('Attività eliminata');

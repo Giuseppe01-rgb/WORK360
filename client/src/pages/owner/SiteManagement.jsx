@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
+import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { siteAPI, analyticsAPI, workActivityAPI, noteAPI, economiaAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
@@ -7,7 +8,7 @@ import {
     FileText, Camera, Zap
 } from 'lucide-react';
 
-const SiteDetails = ({ site, onBack, onDelete }) => {
+const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     // v1.2.1 - Economie integration
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
@@ -26,28 +27,36 @@ const SiteDetails = ({ site, onBack, onDelete }) => {
     ];
 
     const handleDeleteNote = async (noteId) => {
-        if (!window.confirm('Sei sicuro di voler eliminare questa nota?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina nota',
+            message: 'Sei sicuro di voler eliminare questa nota?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
         try {
             await noteAPI.delete(noteId);
-            // Refresh notes
             const notesData = await noteAPI.getAll({ siteId: site.id });
             setNotes(notesData.data);
         } catch (error) {
             console.error('Error deleting note:', error);
-            alert('Errore nell\'eliminazione');
         }
     };
 
     const handleDeleteEconomia = async (economiaId) => {
-        if (!window.confirm('Sei sicuro di voler eliminare questa economia?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina economia',
+            message: 'Sei sicuro di voler eliminare questa economia?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
         try {
             await economiaAPI.delete(economiaId);
-            // Refresh economie
             const economieData = await economiaAPI.getBySite(site.id);
             setEconomie(economieData.data);
         } catch (error) {
             console.error('Error deleting economia:', error);
-            alert('Errore nell\'eliminazione');
         }
     };
 
@@ -592,6 +601,7 @@ const ReportModal = ({ report, onClose }) => {
 };
 
 export default function SiteManagement() {
+    const { showConfirm } = useConfirmModal();
     const [sites, setSites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -664,7 +674,13 @@ export default function SiteManagement() {
     const handleDelete = async (e, id) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!window.confirm('Sei sicuro di voler eliminare questo cantiere?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina cantiere',
+            message: 'Sei sicuro di voler eliminare questo cantiere? Tutti i dati associati verranno eliminati.',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
 
         try {
             await siteAPI.delete(id);
@@ -683,11 +699,16 @@ export default function SiteManagement() {
 
     const handleDeleteReport = async (e, reportId) => {
         e.stopPropagation();
-        if (!window.confirm('Sei sicuro di voler eliminare questo rapporto?')) return;
+        const confirmed = await showConfirm({
+            title: 'Elimina rapporto',
+            message: 'Sei sicuro di voler eliminare questo rapporto?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
 
         try {
             await workActivityAPI.delete(reportId);
-            // Refresh reports
             const [rep] = await Promise.all([
                 analyticsAPI.getSiteReport(selectedSite.id)
             ]);
@@ -716,6 +737,7 @@ export default function SiteManagement() {
                         handleDelete(e, selectedSite.id);
                         setSelectedSite(null);
                     }}
+                    showConfirm={showConfirm}
                 />
             </Layout>
         );
@@ -942,8 +964,14 @@ export default function SiteManagement() {
                                     {editingSite && (
                                         <button
                                             type="button"
-                                            onClick={(e) => {
-                                                if (window.confirm('Eliminare questo cantiere?')) {
+                                            onClick={async (e) => {
+                                                const confirmed = await showConfirm({
+                                                    title: 'Elimina cantiere',
+                                                    message: 'Eliminare questo cantiere?',
+                                                    confirmText: 'Elimina',
+                                                    variant: 'danger'
+                                                });
+                                                if (confirmed) {
                                                     handleDelete(e, editingSite.id);
                                                     resetForm();
                                                 }
