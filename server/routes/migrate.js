@@ -491,4 +491,98 @@ router.post('/catalog', express.json({ limit: '50mb' }), async (req, res) => {
     }
 });
 
+// @route   GET /api/migrate/lunch-break
+// @desc    Apply lunch break deduction to all existing attendances
+// @access  Public (temporary - remove after migration complete)
+router.get('/lunch-break', async (req, res) => {
+    const logs = [];
+    const log = (msg) => {
+        console.log(msg);
+        logs.push(msg);
+    };
+
+    try {
+        const { calculateWorkedHours } = require('../utils/workedHoursCalculator');
+        const { Op } = require('sequelize');
+
+        log('===========================================');
+        log('Migration: Apply Lunch Break Deduction');
+        log('===========================================');
+        log('');
+
+        // Get all attendances with both clockIn and clockOut
+        const [attendances] = await sequelize.query(`
+            SELECT id, clock_in, clock_out, total_hours 
+            FROM attendances 
+            WHERE clock_out IS NOT NULL
+        `);
+
+        log(`Found ${attendances.length} completed attendances to process`);
+        log('');
+
+        let updated = 0;
+        let unchanged = 0;
+        let errors = 0;
+
+        for (const attendance of attendances) {
+            try {
+                const clockIn = attendance.clock_in?.time;
+                const clockOut = attendance.clock_out?.time;
+
+                if (!clockIn || !clockOut) {
+                    log(`  [SKIP] ${attendance.id}: missing timestamps`);
+                    unchanged++;
+                    continue;
+                }
+
+                // Calculate with new lunch break rule
+                const { workedHours, presenceHours, lunchBreakApplied } = calculateWorkedHours(clockIn, clockOut);
+                const oldHours = parseFloat(attendance.total_hours) || 0;
+
+                // Only update if there's a difference (more than 0.5h change = lunch break applied)
+                if (Math.abs(oldHours - workedHours) > 0.4) {
+                    await sequelize.query(
+                        `UPDATE attendances SET total_hours = :workedHours WHERE id = :id`,
+                        { replacements: { workedHours, id: attendance.id } }
+                    );
+                    log(`  [UPDATED] ${attendance.id}: ${oldHours}h → ${workedHours}h (presence: ${presenceHours}h, lunch: ${lunchBreakApplied ? 'YES' : 'NO'})`);
+                    updated++;
+                } else {
+                    unchanged++;
+                }
+            } catch (err) {
+                log(`  [ERROR] ${attendance.id}: ${err.message}`);
+                errors++;
+            }
+        }
+
+        log('');
+        log('===========================================');
+        log('Migration Complete');
+        log('===========================================');
+        log(`  Updated: ${updated}`);
+        log(`  Unchanged: ${unchanged}`);
+        log(`  Errors: ${errors}`);
+        log(`  Total: ${attendances.length}`);
+
+        res.json({
+            success: true,
+            results: {
+                updated,
+                unchanged,
+                errors,
+                total: attendances.length
+            },
+            logs
+        });
+    } catch (error) {
+        log('❌ Migration failed: ' + error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            logs
+        });
+    }
+});
+
 module.exports = router;
