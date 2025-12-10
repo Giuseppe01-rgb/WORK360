@@ -1,7 +1,69 @@
-import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, CheckCircle, Copy } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Plus, Trash2, CheckCircle, Copy, ChevronDown, Check } from 'lucide-react';
 import { attendanceAPI, siteAPI, userAPI } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+
+// Multi-select dropdown component
+function MultiSelect({ options, selected, onChange, placeholder }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const toggleOption = (id) => {
+        if (selected.includes(id)) {
+            onChange(selected.filter(s => s !== id));
+        } else {
+            onChange([...selected, id]);
+        }
+    };
+
+    const selectedNames = options
+        .filter(o => selected.includes(o.id))
+        .map(o => o.firstName || o.username)
+        .join(', ');
+
+    return (
+        <div ref={ref} className="relative">
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-left flex items-center justify-between"
+            >
+                <span className={selected.length === 0 ? 'text-slate-400' : 'text-slate-900 truncate'}>
+                    {selected.length === 0 ? placeholder : `${selected.length} selezionati`}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isOpen && (
+                <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {options.map(option => (
+                        <label
+                            key={option.id}
+                            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer"
+                        >
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center ${selected.includes(option.id)
+                                    ? 'bg-slate-900 border-slate-900'
+                                    : 'border-slate-300'
+                                }`}>
+                                {selected.includes(option.id) && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                            <span className="text-sm">{option.firstName || option.username}</span>
+                        </label>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function BulkAttendanceModal({ onClose, onSuccess }) {
     const { showSuccess, showError } = useToast();
@@ -9,12 +71,12 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
     const [sites, setSites] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Cart of attendance entries - each row is independent
+    // Cart of attendance entries - userIds is now an array for multi-select
     const [entries, setEntries] = useState([
         {
             id: Date.now(),
             siteId: '',
-            userId: '',
+            userIds: [], // Array of user IDs
             date: new Date().toISOString().split('T')[0],
             clockIn: '08:00',
             clockOut: '17:00'
@@ -39,14 +101,13 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
     };
 
     const addEntry = () => {
-        // Copy values from last entry for convenience
         const lastEntry = entries[entries.length - 1];
         setEntries([
             ...entries,
             {
                 id: Date.now(),
                 siteId: lastEntry?.siteId || '',
-                userId: '',
+                userIds: [],
                 date: lastEntry?.date || new Date().toISOString().split('T')[0],
                 clockIn: lastEntry?.clockIn || '08:00',
                 clockOut: lastEntry?.clockOut || '17:00'
@@ -60,7 +121,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
             {
                 ...entry,
                 id: Date.now(),
-                userId: '' // Reset operaio for new row
+                userIds: [] // Reset operai for new row
             }
         ]);
     };
@@ -77,27 +138,40 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
         ));
     };
 
-    const getValidEntries = () => {
-        return entries.filter(e => e.siteId && e.userId && e.date && e.clockIn);
+    // Count total attendances (entries × users per entry)
+    const getTotalAttendances = () => {
+        return entries.reduce((sum, e) => {
+            if (e.siteId && e.userIds.length > 0 && e.date && e.clockIn) {
+                return sum + e.userIds.length;
+            }
+            return sum;
+        }, 0);
     };
 
     const handleSubmit = async () => {
-        const validEntries = getValidEntries();
-        if (validEntries.length === 0) {
+        const totalCount = getTotalAttendances();
+        if (totalCount === 0) {
             showError('Compila almeno una riga completa');
             return;
         }
 
         setLoading(true);
         try {
-            // Convert to the format expected by backend
-            const attendances = validEntries.map(e => ({
-                userId: e.userId,
-                siteId: e.siteId,
-                date: e.date,
-                clockIn: e.clockIn,
-                clockOut: e.clockOut || null
-            }));
+            // Expand entries: each row with multiple users becomes multiple attendances
+            const attendances = [];
+            for (const entry of entries) {
+                if (entry.siteId && entry.userIds.length > 0 && entry.date && entry.clockIn) {
+                    for (const userId of entry.userIds) {
+                        attendances.push({
+                            userId,
+                            siteId: entry.siteId,
+                            date: entry.date,
+                            clockIn: entry.clockIn,
+                            clockOut: entry.clockOut || null
+                        });
+                    }
+                }
+            }
 
             const response = await attendanceAPI.bulkCreate({ attendances });
 
@@ -116,7 +190,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
         }
     };
 
-    const validCount = getValidEntries().length;
+    const totalCount = getTotalAttendances();
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -126,7 +200,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                     <div>
                         <h3 className="text-2xl font-bold">Aggiungi Presenze</h3>
                         <p className="text-slate-300 text-sm mt-1">
-                            {validCount} {validCount === 1 ? 'presenza pronta' : 'presenze pronte'}
+                            {totalCount} {totalCount === 1 ? 'presenza pronta' : 'presenze pronte'}
                         </p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
@@ -137,7 +211,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                 {/* Entries List */}
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="space-y-3">
-                        {entries.map((entry, index) => (
+                        {entries.map((entry) => (
                             <div
                                 key={entry.id}
                                 className="bg-slate-50 border border-slate-200 rounded-xl p-4"
@@ -158,21 +232,17 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                                         </select>
                                     </div>
 
-                                    {/* Operaio */}
+                                    {/* Operai - Multi Select */}
                                     <div>
-                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Operaio</label>
-                                        <select
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-                                            value={entry.userId}
-                                            onChange={(e) => updateEntry(entry.id, 'userId', e.target.value)}
-                                        >
-                                            <option value="">Seleziona...</option>
-                                            {users.map(user => (
-                                                <option key={user.id} value={user.id}>
-                                                    {user.firstName || user.username}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <label className="block text-xs font-semibold text-slate-600 mb-1">
+                                            Operai {entry.userIds.length > 0 && `(${entry.userIds.length})`}
+                                        </label>
+                                        <MultiSelect
+                                            options={users}
+                                            selected={entry.userIds}
+                                            onChange={(ids) => updateEntry(entry.id, 'userIds', ids)}
+                                            placeholder="Seleziona..."
+                                        />
                                     </div>
 
                                     {/* Data */}
@@ -259,7 +329,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                         <button
                             type="button"
                             onClick={handleSubmit}
-                            disabled={loading || validCount === 0}
+                            disabled={loading || totalCount === 0}
                             className="px-6 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             {loading ? (
@@ -270,7 +340,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                             ) : (
                                 <>
                                     <CheckCircle className="w-5 h-5" />
-                                    Crea {validCount} {validCount === 1 ? 'Presenza' : 'Presenze'}
+                                    Crea {totalCount} {totalCount === 1 ? 'Presenza' : 'Presenze'}
                                 </>
                             )}
                         </button>
