@@ -30,9 +30,9 @@ export default function AnalyticsDashboard() {
                     const siteReport = await analyticsAPI.getSiteReport(site.id);
                     return {
                         site: site,
-                        totalAttendances: siteReport.data.employeeHours?.length || 0,
+                        totalAttendances: siteReport.data.totalAttendances || 0,
                         totalHours: siteReport.data.totalHours || 0,
-                        uniqueWorkers: siteReport.data.employeeHours?.length || 0,
+                        uniqueWorkers: siteReport.data.uniqueWorkers || 0,
                         materials: siteReport.data.materials?.slice(0, 5) || []
                     };
                 } catch (err) {

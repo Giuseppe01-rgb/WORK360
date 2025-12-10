@@ -261,7 +261,10 @@ const getSiteReport = async (req, res, next) => {
                     lastName: r.user.lastName
                 } : null
             })),
-            employeeHours
+            employeeHours,
+            // Explicit counts for frontend
+            totalAttendances: employeeHours.reduce((sum, e) => sum + (e.totalDays || 0), 0),
+            uniqueWorkers: employeeHours.length
         });
     } catch (error) {
         next(error);
