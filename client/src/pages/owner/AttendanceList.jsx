@@ -182,41 +182,45 @@ export default function AttendanceList() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1">Cantiere</label>
-                        <select
-                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                            value={filters.siteId}
-                            onChange={(e) => setFilters({ ...filters, siteId: e.target.value })}
-                        >
-                            <option value="">Tutti i cantieri</option>
-                            {sites.map(site => (
-                                <option key={site.id} value={site.id}>{site.name}</option>
-                            ))}
-                        </select>
+                <div className="space-y-4">
+                    {/* Row 1: Cantiere e Operaio */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Cantiere</label>
+                            <select
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                value={filters.siteId}
+                                onChange={(e) => setFilters({ ...filters, siteId: e.target.value })}
+                            >
+                                <option value="">Tutti i cantieri</option>
+                                {sites.map(site => (
+                                    <option key={site.id} value={site.id}>{site.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Operaio</label>
+                            <select
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                value={filters.userId}
+                                onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
+                            >
+                                <option value="">Tutti gli operai</option>
+                                {users.map(user => (
+                                    <option key={user.id} value={user.id}>
+                                        {user.firstName} {user.lastName || user.username}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1">Operaio</label>
-                        <select
-                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                            value={filters.userId}
-                            onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
-                        >
-                            <option value="">Tutti gli operai</option>
-                            {users.map(user => (
-                                <option key={user.id} value={user.id}>
-                                    {user.firstName} {user.lastName || user.username}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
+                    {/* Row 2: Stato */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Stato</label>
                         <select
-                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                             value={filters.status}
                             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                         >
@@ -226,24 +230,27 @@ export default function AttendanceList() {
                         </select>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1">Data Inizio</label>
-                        <input
-                            type="date"
-                            className="w-full max-w-full min-w-0 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
-                            value={filters.startDate}
-                            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                        />
-                    </div>
+                    {/* Row 3: Date su stessa riga */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Data Inizio</label>
+                            <input
+                                type="date"
+                                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                value={filters.startDate}
+                                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1">Data Fine</label>
-                        <input
-                            type="date"
-                            className="w-full max-w-full min-w-0 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
-                            value={filters.endDate}
-                            onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                        />
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Data Fine</label>
+                            <input
+                                type="date"
+                                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                value={filters.endDate}
+                                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
