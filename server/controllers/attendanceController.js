@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { Attendance, ConstructionSite, User } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { logAction, AUDIT_ACTIONS } = require('../utils/auditLogger');
+const { calculateWorkedHours } = require('../utils/workedHoursCalculator');
 
 // @desc    Clock in
 // @route   POST /api/attendance/clock-in
@@ -112,7 +113,9 @@ const clockOut = async (req, res) => {
         const lng = longitude || 0;
         const clockOutTime = new Date();
         const clockInTime = new Date(attendance.clockIn.time);
-        const totalHours = ((clockOutTime - clockInTime) / (1000 * 60 * 60)).toFixed(2);
+
+        // Calculate worked hours with automatic lunch break deduction
+        const { workedHours } = calculateWorkedHours(clockInTime, clockOutTime);
 
         await attendance.update({
             clockOut: {
@@ -123,7 +126,7 @@ const clockOut = async (req, res) => {
                     address
                 }
             },
-            totalHours: parseFloat(totalHours)
+            totalHours: workedHours
         });
 
         // Audit log
@@ -268,10 +271,11 @@ const createManualAttendance = async (req, res) => {
         const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}:00+01:00`), location: null } : null;
         const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}:00+01:00`), location: null } : null;
 
-        // Calculate hours if both present
+        // Calculate worked hours with automatic lunch break deduction
         let hours = totalHours || 0;
         if (clockInData && clockOutData && !totalHours) {
-            hours = (new Date(clockOutData.time) - new Date(clockInData.time)) / (1000 * 60 * 60);
+            const { workedHours } = calculateWorkedHours(clockInData.time, clockOutData.time);
+            hours = workedHours;
         }
 
         const attendance = await Attendance.create({
@@ -355,9 +359,11 @@ const bulkCreateAttendances = async (req, res) => {
                 const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}:00+01:00`), location: null } : null;
                 const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}:00+01:00`), location: null } : null;
 
+                // Calculate worked hours with automatic lunch break deduction
                 let hours = totalHours || 0;
                 if (clockInData && clockOutData && !totalHours) {
-                    hours = (new Date(clockOutData.time) - new Date(clockInData.time)) / (1000 * 60 * 60);
+                    const { workedHours } = calculateWorkedHours(clockInData.time, clockOutData.time);
+                    hours = workedHours;
                 }
 
                 console.log(`Creating attendance with hours: ${hours}`);
@@ -447,14 +453,13 @@ const updateAttendance = async (req, res) => {
             updateData.notes = notes;
         }
 
-        // Calculate totalHours
+        // Calculate totalHours with lunch break deduction
         const newClockIn = updateData.clockIn?.time || attendance.clockIn?.time;
         const newClockOut = updateData.clockOut?.time || attendance.clockOut?.time;
         if (newClockIn && newClockOut) {
-            const start = new Date(newClockIn);
-            const end = new Date(newClockOut);
-            updateData.totalHours = parseFloat(((end - start) / (1000 * 60 * 60)).toFixed(2));
-            console.log('Calculated totalHours:', updateData.totalHours);
+            const { workedHours } = calculateWorkedHours(newClockIn, newClockOut);
+            updateData.totalHours = workedHours;
+            console.log('Calculated totalHours with lunch break:', updateData.totalHours);
         } else if (totalHours !== undefined) {
             updateData.totalHours = totalHours;
         }
