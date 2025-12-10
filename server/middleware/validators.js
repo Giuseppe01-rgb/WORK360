@@ -256,7 +256,7 @@ const validateWorkActivity = [
         .isLength({ max: 50 }).withMessage('ID cantiere non valido.'),
     body('activityType')
         .notEmpty().withMessage("Il tipo di attività è obbligatorio.")
-        .isLength({ max: 100 }).withMessage("Il tipo di attività è troppo lungo.")
+        .isLength({ max: 1000 }).withMessage("Il tipo di attività è troppo lungo (max 1000 caratteri).")
         .trim(),
     body('quantity')
         .optional()
