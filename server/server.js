@@ -25,6 +25,19 @@ if (!dbUrl) {
 
 const helmet = require('helmet');
 
+// Configure Cloudinary for photo uploads (required for Railway - no persistent disk storage)
+const cloudinary = require('cloudinary').v2;
+if (process.env.CLOUDINARY_CLOUD_NAME) {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+    console.log('✅ Cloudinary configured:', process.env.CLOUDINARY_CLOUD_NAME);
+} else {
+    console.warn('⚠️ Cloudinary not configured - photo uploads will fail');
+}
+
 // Initialize express
 const app = express();
 
