@@ -104,8 +104,8 @@ const MaterialApproval = () => {
                         <button
                             onClick={() => setFilter('da_approvare')}
                             className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${filter === 'da_approvare'
-                                    ? 'bg-amber-600 text-white'
-                                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                                ? 'bg-amber-600 text-white'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
                             In Attesa
@@ -113,8 +113,8 @@ const MaterialApproval = () => {
                         <button
                             onClick={() => setFilter('approvato')}
                             className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${filter === 'approvato'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
                             Approvati
@@ -122,8 +122,8 @@ const MaterialApproval = () => {
                         <button
                             onClick={() => setFilter('rifiutato')}
                             className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${filter === 'rifiutato'
-                                    ? 'bg-red-600 text-white'
-                                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                                ? 'bg-red-600 text-white'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
                             Rifiutati
@@ -151,86 +151,104 @@ const MaterialApproval = () => {
                 ) : (
                     <div className="grid grid-cols-1 gap-4">
                         {reportedMaterials.map(report => (
-                            <div key={report.id} className="bg-white rounded-xl border border-slate-200 p-6">
-                                <div className="flex gap-6">
-                                    {/* Photo */}
-                                    <div className="flex-shrink-0">
+                            <div key={report.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                {/* Mobile: Stack vertically, Desktop: Side by side */}
+                                <div className="flex flex-col md:flex-row">
+                                    {/* Photo Section */}
+                                    <div
+                                        className="relative md:w-48 h-48 md:h-auto flex-shrink-0 cursor-pointer group"
+                                        onClick={() => window.open(report.fotoUrl, '_blank')}
+                                    >
                                         <img
                                             src={report.fotoUrl}
-                                            alt="Label"
-                                            className="w-32 h-32 object-cover rounded-lg border-2 border-slate-200 cursor-pointer hover:border-blue-400 transition-colors"
-                                            onClick={() => window.open(report.fotoUrl, '_blank')}
+                                            alt="Foto etichetta"
+                                            className="w-full h-full object-cover"
                                         />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                            <Image className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </div>
                                     </div>
 
-                                    {/* Info */}
-                                    <div className="flex-1">
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <h3 className="text-xl font-bold text-slate-900">
-                                                        {report.nomeDigitato || 'Nome non specificato'}
-                                                    </h3>
+                                    {/* Content Section */}
+                                    <div className="flex-1 p-5">
+                                        {/* Header: Name + Status */}
+                                        <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-lg font-bold text-slate-900 truncate">
+                                                    {report.nomeDigitato || 'Nome non specificato'}
+                                                </h3>
+                                                <div className="flex flex-wrap items-center gap-2 mt-1">
                                                     {getStatusBadge(report.stato)}
-                                                </div>
-                                                <div className="flex gap-2">
                                                     {report.categoriaDigitata && (
-                                                        <span className="text-sm bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                                                        <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
                                                             {report.categoriaDigitata}
                                                         </span>
                                                     )}
-                                                    {report.codiceLetto && (
-                                                        <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded font-mono">
-                                                            {report.codiceLetto}
-                                                        </span>
-                                                    )}
                                                 </div>
                                             </div>
-                                            <div className="text-right text-sm text-slate-600">
-                                                <p><strong>{report.user?.firstName} {report.user?.lastName}</strong></p>
-                                                <p>{report.site?.name}</p>
-                                                <p className="text-xs text-slate-500">
-                                                    {new Date(report.dataOra).toLocaleDateString('it-IT')} {new Date(report.dataOra).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
+                                        </div>
+
+                                        {/* Info Grid */}
+                                        <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                                            <div className="bg-slate-50 rounded-lg p-3">
+                                                <p className="text-slate-500 text-xs uppercase tracking-wide">Quantità</p>
+                                                <p className="font-bold text-slate-900 text-lg">{report.numeroConfezioni} <span className="text-sm font-normal text-slate-500">pz</span></p>
+                                            </div>
+                                            <div className="bg-slate-50 rounded-lg p-3">
+                                                <p className="text-slate-500 text-xs uppercase tracking-wide">Cantiere</p>
+                                                <p className="font-semibold text-slate-900 truncate">{report.site?.name || 'N/D'}</p>
                                             </div>
                                         </div>
 
-                                        <div className="text-sm text-slate-700 mb-4">
-                                            <p><strong>Confezioni usate:</strong> {report.numeroConfezioni}</p>
-                                            {report.noteApprovazione && (
-                                                <p className="mt-2 text-slate-600 italic">
-                                                    <strong>Note:</strong> {report.noteApprovazione}
-                                                </p>
-                                            )}
-                                            {report.materialeIdDefinitivo && (
-                                                <p className="mt-2 text-green-700">
-                                                    ✓ Collegato al catalogo
-                                                </p>
-                                            )}
+                                        {/* Meta info */}
+                                        <div className="flex items-center gap-3 text-xs text-slate-500 mb-4">
+                                            <span className="inline-flex items-center gap-1">
+                                                👤 {report.user?.firstName} {report.user?.lastName}
+                                            </span>
+                                            <span>•</span>
+                                            <span>
+                                                📅 {new Date(report.dataOra).toLocaleDateString('it-IT')}
+                                            </span>
                                         </div>
 
-                                        {/* Actions - only for pending */}
+                                        {/* Notes if any */}
+                                        {report.noteApprovazione && (
+                                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
+                                                <strong>Note:</strong> {report.noteApprovazione}
+                                            </div>
+                                        )}
+
+                                        {/* Linked indicator */}
+                                        {report.materialeIdDefinitivo && (
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 text-sm text-green-700 flex items-center gap-2">
+                                                <CheckCircle className="w-4 h-4" />
+                                                Collegato al catalogo
+                                            </div>
+                                        )}
+
+                                        {/* Action Buttons - only for pending */}
                                         {report.stato === 'da_approvare' && (
-                                            <div className="flex gap-2">
+                                            <div className="flex flex-col sm:flex-row gap-2">
                                                 <button
                                                     onClick={() => handleApprove(report)}
-                                                    className="flex-1 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                                    className="flex-1 py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                                                 >
-                                                    <CheckCircle className="w-4 h-4" />
-                                                    Crea nuovo materiale
+                                                    <CheckCircle className="w-5 h-5" />
+                                                    <span>Crea Nuovo</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleLinkToExisting(report)}
-                                                    className="flex-1 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                                                    className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                                                 >
-                                                    <LinkIcon className="w-4 h-4" />
-                                                    Collega esistente
+                                                    <LinkIcon className="w-5 h-5" />
+                                                    <span>Collega</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleReject(report)}
-                                                    className="px-4 py-2 bg-red-100 text-red-700 font-semibold rounded-lg hover:bg-red-200 transition-colors"
+                                                    className="py-3 px-4 bg-red-50 text-red-600 font-semibold rounded-xl hover:bg-red-100 transition-all flex items-center justify-center gap-2 border border-red-200"
                                                 >
                                                     <XCircle className="w-5 h-5" />
+                                                    <span className="sm:hidden">Rifiuta</span>
                                                 </button>
                                             </div>
                                         )}
@@ -510,8 +528,8 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
                                 key={material.id}
                                 onClick={() => setSelectedMaterialId(material.id)}
                                 className={`w-full p-4 border-2 rounded-lg text-left transition-all ${selectedMaterialId === material.id
-                                        ? 'border-blue-600 bg-blue-50'
-                                        : 'border-slate-200 hover:border-blue-300'
+                                    ? 'border-blue-600 bg-blue-50'
+                                    : 'border-slate-200 hover:border-blue-300'
                                     }`}
                             >
                                 <p className="font-bold text-lg">{material.nome_prodotto}</p>
