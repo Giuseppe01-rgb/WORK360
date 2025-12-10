@@ -46,18 +46,23 @@ function MultiSelect({ options, selected, onChange, placeholder }) {
             {isOpen && (
                 <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                     {options.map(option => (
-                        <label
+                        <div
                             key={option.id}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleOption(option.id);
+                            }}
                             className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer"
                         >
-                            <div className={`w-4 h-4 rounded border flex items-center justify-center ${selected.includes(option.id)
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${selected.includes(option.id)
                                     ? 'bg-slate-900 border-slate-900'
                                     : 'border-slate-300'
                                 }`}>
                                 {selected.includes(option.id) && <Check className="w-3 h-3 text-white" />}
                             </div>
                             <span className="text-sm">{option.firstName || option.username}</span>
-                        </label>
+                        </div>
                     ))}
                 </div>
             )}
