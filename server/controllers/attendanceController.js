@@ -399,6 +399,8 @@ const updateAttendance = async (req, res) => {
         const companyId = getCompanyId(req);
         const { clockIn, clockOut, clockInTime, clockOutTime, notes, totalHours } = req.body;
 
+        console.log('updateAttendance called with:', { id, clockInTime, clockOutTime, notes });
+
         // Find the attendance and verify it belongs to company
         const attendance = await Attendance.findByPk(id, {
             include: [{ model: ConstructionSite, as: 'site' }]
@@ -412,50 +414,64 @@ const updateAttendance = async (req, res) => {
             return res.status(403).json({ message: 'Non autorizzato a modificare questa presenza' });
         }
 
+        // Build update object
+        const updateData = {};
+
         // Handle clockInTime string format from frontend (datetime-local input)
         if (clockInTime) {
-            console.log('Updating clockIn from:', attendance.clockIn, 'to new time:', clockInTime);
-            const clockInDate = new Date(clockInTime);
-            attendance.clockIn = {
-                time: clockInDate,
+            console.log('Setting clockIn to:', clockInTime);
+            updateData.clockIn = {
+                time: new Date(clockInTime),
                 location: attendance.clockIn?.location || null
             };
-            attendance.changed('clockIn', true); // Force Sequelize to detect change
         } else if (clockIn !== undefined) {
-            // Handle legacy object format
-            attendance.clockIn = clockIn;
-            attendance.changed('clockIn', true);
+            updateData.clockIn = clockIn;
         }
 
         // Handle clockOutTime string format from frontend
         if (clockOutTime) {
-            console.log('Updating clockOut from:', attendance.clockOut, 'to new time:', clockOutTime);
-            const clockOutDate = new Date(clockOutTime);
-            attendance.clockOut = {
-                time: clockOutDate,
+            console.log('Setting clockOut to:', clockOutTime);
+            updateData.clockOut = {
+                time: new Date(clockOutTime),
                 location: attendance.clockOut?.location || null
             };
-            attendance.changed('clockOut', true); // Force Sequelize to detect change
         } else if (clockOut !== undefined) {
-            attendance.clockOut = clockOut;
-            attendance.changed('clockOut', true);
+            updateData.clockOut = clockOut;
         }
 
-        if (notes !== undefined) attendance.notes = notes;
+        if (notes !== undefined) {
+            updateData.notes = notes;
+        }
 
-        // Recalculate totalHours if both times are present
-        if (attendance.clockIn?.time && attendance.clockOut?.time) {
-            const start = new Date(attendance.clockIn.time);
-            const end = new Date(attendance.clockOut.time);
-            const hours = (end - start) / (1000 * 60 * 60);
-            attendance.totalHours = parseFloat(hours.toFixed(2));
-            console.log('Recalculated totalHours:', attendance.totalHours);
+        // Calculate totalHours
+        const newClockIn = updateData.clockIn?.time || attendance.clockIn?.time;
+        const newClockOut = updateData.clockOut?.time || attendance.clockOut?.time;
+        if (newClockIn && newClockOut) {
+            const start = new Date(newClockIn);
+            const end = new Date(newClockOut);
+            updateData.totalHours = parseFloat(((end - start) / (1000 * 60 * 60)).toFixed(2));
+            console.log('Calculated totalHours:', updateData.totalHours);
         } else if (totalHours !== undefined) {
-            attendance.totalHours = totalHours;
+            updateData.totalHours = totalHours;
         }
 
-        console.log('Saving attendance with changes:', attendance.changed());
-        await attendance.save();
+        console.log('Updating attendance with:', JSON.stringify(updateData, null, 2));
+
+        // Use update() directly on the model
+        await Attendance.update(updateData, {
+            where: { id: id }
+        });
+
+        // Fetch the updated record to return
+        const updatedAttendance = await Attendance.findByPk(id, {
+            include: [
+                { model: ConstructionSite, as: 'site' },
+                { model: User, as: 'user' }
+            ]
+        });
+
+        console.log('Updated attendance clockIn:', updatedAttendance.clockIn);
+        console.log('Updated attendance clockOut:', updatedAttendance.clockOut);
 
         // Audit log
         await logAction({
@@ -468,7 +484,7 @@ const updateAttendance = async (req, res) => {
             meta: { siteId: attendance.siteId, siteName: attendance.site?.name }
         });
 
-        res.json(attendance);
+        res.json(updatedAttendance);
     } catch (error) {
         console.error('updateAttendance error:', error);
         res.status(500).json({ message: error.message });
