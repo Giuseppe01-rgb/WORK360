@@ -178,7 +178,7 @@ const validateReportMaterial = [
         .isLength({ max: 50 }).withMessage('ID cantiere non valido.'),
     body('fotoUrl')
         .notEmpty().withMessage('La foto è obbligatoria.')
-        .isURL().withMessage("L'URL della foto non è valido.")
+        // Allow both URLs (Cloudinary) and local paths (./uploads/...)
         .isLength({ max: 500 }).withMessage("L'URL della foto è troppo lungo."),
     body('nomeDigitato')
         .notEmpty().withMessage('Il nome del materiale è obbligatorio.')

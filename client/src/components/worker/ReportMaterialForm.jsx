@@ -167,9 +167,10 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
             // I'll abort this replace and check the controller first.
 
             // 2. Create reported material
+            // Backend returns 'path' field (which is cloudinary URL if configured, or local path)
             await onSubmit({
                 siteId,
-                fotoUrl: uploadData.url || uploadData.photoUrl,
+                fotoUrl: uploadData.path,
                 nomeDigitato,
                 numeroConfezioni,
                 note
