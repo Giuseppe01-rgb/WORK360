@@ -53,6 +53,12 @@ Photo.init({
     date: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
+    },
+    photoUrl: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return this.path;
+        }
     }
 }, {
     sequelize,
