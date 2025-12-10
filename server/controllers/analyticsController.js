@@ -3,6 +3,7 @@ const { sequelize } = require('../config/database');
 const { Attendance, Material, Equipment, User, ConstructionSite, MaterialUsage, MaterialMaster, WorkActivity } = require('../models');
 const { assertSiteBelongsToCompany } = require('../utils/security');
 const { getCompanyId } = require('../utils/sequelizeHelpers');
+const { getSiteMarginInfo } = require('../utils/marginCalculator');
 
 // @desc    Get hours per employee
 // @route   GET /api/analytics/hours-per-employee
@@ -264,7 +265,9 @@ const getSiteReport = async (req, res, next) => {
             employeeHours,
             // Explicit counts for frontend
             totalAttendances: employeeHours.reduce((sum, e) => sum + (e.totalDays || 0), 0),
-            uniqueWorkers: employeeHours.length
+            uniqueWorkers: employeeHours.length,
+            // Margin info with semaphore status for analytics cards
+            ...getSiteMarginInfo({ contractValue, totalCost })
         });
     } catch (error) {
         next(error);

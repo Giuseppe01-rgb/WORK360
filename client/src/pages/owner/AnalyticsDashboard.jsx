@@ -33,7 +33,9 @@ export default function AnalyticsDashboard() {
                         totalAttendances: siteReport.data.totalAttendances || 0,
                         totalHours: siteReport.data.totalHours || 0,
                         uniqueWorkers: siteReport.data.uniqueWorkers || 0,
-                        materials: siteReport.data.materials?.slice(0, 5) || []
+                        materials: siteReport.data.materials?.slice(0, 5) || [],
+                        marginPercent: siteReport.data.marginPercent,
+                        marginStatus: siteReport.data.status || 'unknown'
                     };
                 } catch (err) {
                     console.error(`Error loading stats for site ${site.id}:`, err);
@@ -42,7 +44,9 @@ export default function AnalyticsDashboard() {
                         totalAttendances: 0,
                         totalHours: 0,
                         uniqueWorkers: 0,
-                        materials: []
+                        materials: [],
+                        marginPercent: null,
+                        marginStatus: 'unknown'
                     };
                 }
             });
@@ -372,7 +376,7 @@ export default function AnalyticsDashboard() {
                                     </span>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                                     <div className="bg-white p-4 rounded-lg border border-slate-100">
                                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Presenze</div>
                                         <div className="font-bold text-xl text-slate-900">
@@ -391,6 +395,24 @@ export default function AnalyticsDashboard() {
                                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Dipendenti</div>
                                         <div className="font-bold text-xl text-slate-900">
                                             {stat.uniqueWorkers}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-lg border border-slate-100">
+                                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Margine Stimato</div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="font-bold text-xl text-slate-900">
+                                                {stat.marginPercent != null ? `${stat.marginPercent.toFixed(1)}%` : '—'}
+                                            </div>
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${stat.marginStatus === 'high' ? 'bg-green-100 text-green-700' :
+                                                    stat.marginStatus === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                                        stat.marginStatus === 'low' ? 'bg-red-100 text-red-700' :
+                                                            'bg-slate-100 text-slate-500'
+                                                }`}>
+                                                {stat.marginStatus === 'high' ? 'Buono' :
+                                                    stat.marginStatus === 'medium' ? 'Medio' :
+                                                        stat.marginStatus === 'low' ? 'Basso' : 'N/D'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
