@@ -179,6 +179,39 @@ const getSiteReport = async (req, res, next) => {
             limit: 50
         });
 
+        // Get employee hours breakdown for this site
+        const employeeHoursData = await sequelize.query(`
+            SELECT 
+                u.id as user_id,
+                u.first_name,
+                u.last_name,
+                u.username,
+                u.hourly_cost,
+                SUM(a.total_hours) as total_hours,
+                COUNT(a.id) as total_days
+            FROM attendances a
+            JOIN users u ON a.user_id = u.id
+            WHERE a.site_id = :siteId
+              AND a.clock_out IS NOT NULL
+            GROUP BY u.id, u.first_name, u.last_name, u.username, u.hourly_cost
+            ORDER BY total_hours DESC
+        `, {
+            replacements: { siteId },
+            type: sequelize.QueryTypes.SELECT
+        });
+
+        const employeeHours = employeeHoursData.map(d => ({
+            id: {
+                id: d.user_id,
+                firstName: d.first_name,
+                lastName: d.last_name,
+                username: d.username,
+                hourlyCost: parseFloat(d.hourly_cost) || 0
+            },
+            totalHours: parseFloat(d.total_hours || 0),
+            totalDays: parseInt(d.total_days || 0)
+        }));
+
         res.json({
             // Parse numeric fields from raw SQL results
             materials: materials.map(m => ({
@@ -227,7 +260,8 @@ const getSiteReport = async (req, res, next) => {
                     firstName: r.user.firstName,
                     lastName: r.user.lastName
                 } : null
-            }))
+            })),
+            employeeHours
         });
     } catch (error) {
         next(error);
