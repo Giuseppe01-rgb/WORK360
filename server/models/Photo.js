@@ -48,7 +48,7 @@ Photo.init({
         defaultValue: 'progress'
     },
     caption: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING(1000)
     },
     date: {
         type: DataTypes.DATE,

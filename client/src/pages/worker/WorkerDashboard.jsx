@@ -421,7 +421,7 @@ export default function WorkerDashboard() {
             formData.append('photo', photoFile);
             formData.append('caption', photoCaption);
 
-            await photoAPI.create(formData);
+            await photoAPI.upload(formData);
             setPhotoFile(null);
             setPhotoCaption('');
             showSuccess('✅ Foto caricata con successo!');
@@ -711,7 +711,32 @@ export default function WorkerDashboard() {
                             </h3>
                         </div>
 
-                        {/* Site Selection */}
+                        {/* Site Selection - Always show for materials */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                Seleziona Cantiere
+                            </label>
+                            <CustomSelect
+                                value={selectedSite}
+                                onChange={(e) => setSelectedSite(e.target.value)}
+                                options={sites}
+                                placeholder="Scegli un cantiere..."
+                                disabled={!!activeAttendance}
+                            />
+                            {activeAttendance && (
+                                <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                    Cantiere selezionato automaticamente (sei timbrato)
+                                </p>
+                            )}
+                            {!activeAttendance && selectedSite && (
+                                <p className="text-xs text-blue-600 mt-2">
+                                    💡 Puoi aggiungere materiali anche senza timbratura attiva
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Site Selection Warning */}
                         {!selectedSite ? (
                             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                                 <p className="text-amber-800">
