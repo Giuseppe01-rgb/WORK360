@@ -98,4 +98,39 @@ const getPhotos = async (req, res, next) => {
     }
 };
 
-module.exports = { uploadPhoto, getPhotos, upload };
+const deletePhoto = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const companyId = getCompanyId(req);
+
+        // Find the photo
+        const photo = await Photo.findByPk(id);
+        if (!photo) {
+            return res.status(404).json({ message: 'Foto non trovata' });
+        }
+
+        // Verify site belongs to company
+        await assertSiteBelongsToCompany(photo.siteId, companyId);
+
+        // Delete from Cloudinary if it's a Cloudinary URL
+        if (photo.path && photo.path.includes('cloudinary.com')) {
+            try {
+                // Extract public_id from Cloudinary URL
+                const urlParts = photo.path.split('/');
+                const filenameWithExt = urlParts[urlParts.length - 1];
+                const publicId = `work360/photos/${filenameWithExt.split('.')[0]}`;
+                await cloudinary.uploader.destroy(publicId);
+            } catch (cloudinaryError) {
+                console.error('Error deleting from Cloudinary:', cloudinaryError);
+                // Continue with database deletion even if Cloudinary fails
+            }
+        }
+
+        await photo.destroy();
+        res.json({ message: 'Foto eliminata con successo' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { uploadPhoto, getPhotos, deletePhoto, upload };

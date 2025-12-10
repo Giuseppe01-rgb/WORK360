@@ -115,6 +115,24 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
         }
     };
 
+    const handleDeletePhoto = async (e, photoId) => {
+        e.stopPropagation();
+        const confirmed = await showConfirm({
+            title: 'Elimina foto',
+            message: 'Sei sicuro di voler eliminare questa foto?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
+        try {
+            await photoAPI.delete(photoId);
+            const photosData = await photoAPI.getAll({ siteId: site.id });
+            setPhotos(photosData.data || []);
+        } catch (error) {
+            console.error('Error deleting photo:', error);
+        }
+    };
+
     useEffect(() => {
         const loadDetails = async () => {
             try {
@@ -651,8 +669,14 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     <div
                                         key={photo.id}
                                         onClick={() => setSelectedPhoto(photo)}
-                                        className="bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-md transition-all cursor-pointer"
+                                        className="bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-md transition-all cursor-pointer group relative"
                                     >
+                                        <button
+                                            onClick={(e) => handleDeletePhoto(e, photo.id)}
+                                            className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-red-50 rounded-full text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 z-10 shadow-sm"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
                                         <div className="aspect-video bg-slate-100 relative">
                                             <img
                                                 src={photo.photoUrl}

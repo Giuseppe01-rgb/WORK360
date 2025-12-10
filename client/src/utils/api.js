@@ -125,6 +125,7 @@ export const photoAPI = {
         headers: { 'Content-Type': 'multipart/form-data' }
     }),
     getAll: (params) => api.get('/photos', { params }),
+    delete: (id) => api.delete(`/photos/${id}`),
 };
 
 // Construction Sites
