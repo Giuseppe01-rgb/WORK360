@@ -5,7 +5,7 @@ import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI, w
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
-import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2, Building2, Bell } from 'lucide-react';
+import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2, Building2 } from 'lucide-react';
 import TimeDistributionModal from '../../components/worker/TimeDistributionModal';
 import BarcodeScanner from '../../components/common/BarcodeScanner';
 import MaterialsList from '../../components/worker/MaterialsList';
@@ -572,7 +572,7 @@ export default function WorkerDashboard() {
     };
 
     return (
-        <Layout title="WORK360 Operaio" subtitle={user?.username}>
+        <Layout title={`Benvenuto ${user?.firstName || ''}`} subtitle={user?.username}>
             <div className="max-w-3xl mx-auto">
                 {/* Geo Help Modal */}
                 {showGeoHelp && (

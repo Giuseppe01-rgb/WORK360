@@ -6,7 +6,7 @@ import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI,
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight,
-    FileText, Camera, Image, Zap, Bell, MoreVertical
+    FileText, Camera, Image, Zap, MoreVertical
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack, showConfirm }) => {
@@ -177,12 +177,6 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         <span>{site.address}</span>
                     </div>
                 </div>
-                <div className="ml-auto">
-                    <button className="p-2 relative">
-                        <Bell className="w-6 h-6 text-slate-400" />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                    </button>
-                </div>
             </div>
 
             {/* TAB SWITCHER */}
@@ -212,707 +206,725 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             </div>
 
             {/* DATI TAB */}
-            {activeTab === 'dati' && (
-                <>
-                    {/* COSTO CANTIERE - NEW DESIGN */}
-                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
-                        <div className="flex justify-between items-start mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                                    <span className="font-bold text-lg">$</span>
-                                </div>
-                                <div>
-                                    <h3 className="text-slate-500 font-bold text-sm leading-tight">Costo Totale<br />Cantiere</h3>
-                                </div>
-                            </div>
-                            <span className="bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1 rounded-full tracking-wide">
-                                IN TEMPO REALE
-                            </span>
-                        </div>
-
-                        <div className="mb-8">
-                            <p className="text-5xl font-black text-slate-900 tracking-tight">
-                                {totalCost.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<span className="text-3xl text-slate-400 font-medium ml-1">€</span>
-                            </p>
-                        </div>
-
-                        <div className="space-y-6">
-                            {/* Materiali */}
-                            <div>
-                                <div className="flex justify-between text-sm mb-2">
-                                    <span className="flex items-center gap-2 text-slate-600 font-bold">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                                        Materiali
-                                    </span>
-                                    <span className="font-black text-slate-900">{materialCost.toFixed(2)}€</span>
-                                </div>
-                                <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-purple-500 rounded-full transition-all duration-500" style={{ width: `${materialPct}%` }}></div>
-                                </div>
-                            </div>
-
-                            {/* Manodopera */}
-                            <div>
-                                <div className="flex justify-between text-sm mb-2">
-                                    <span className="flex items-center gap-2 text-slate-600 font-bold">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                                        Manodopera
-                                    </span>
-                                    <span className="font-black text-slate-900">{laborCost.toFixed(2)}€</span>
-                                </div>
-                                <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${laborPct}%` }}></div>
-                                </div>
-                            </div>
-
-                            {/* Economie */}
-                            <div>
-                                <div className="flex justify-between text-sm mb-2">
-                                    <span className="flex items-center gap-2 text-slate-600 font-bold">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                        Economie
-                                    </span>
-                                    <span className="font-black text-slate-900">{economieCost.toFixed(2)}€</span>
-                                </div>
-                                <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${economiePct}%` }}></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* COST INCIDENCE CARD */}
-                    {report?.costIncidence?.materialsIncidencePercent !== null ? (
+            {
+                activeTab === 'dati' && (
+                    <>
+                        {/* COSTO CANTIERE - NEW DESIGN */}
                         <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
                             <div className="flex justify-between items-start mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                        <Package className="w-5 h-5" />
+                                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                        <span className="font-bold text-lg">$</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-slate-500 font-bold text-sm leading-tight">
-                                            Incidenza materiali /<br />manodopera
-                                        </h3>
+                                        <h3 className="text-slate-500 font-bold text-sm leading-tight">Costo Totale<br />Cantiere</h3>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                                        Materiali
-                                    </span>
-                                    <span className="font-black text-slate-900 text-2xl">{report.costIncidence.materialsIncidencePercent.toFixed(1)}%</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                                        Manodopera
-                                    </span>
-                                    <span className="font-black text-slate-900 text-2xl">{report.costIncidence.laborIncidencePercent.toFixed(1)}%</span>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
-                                    <Package className="w-5 h-5 text-slate-500" />
-                                </div>
-                                <h3 className="text-slate-700 font-bold text-sm">Incidenza materiali / manodopera</h3>
-                            </div>
-                            <p className="text-slate-600 text-sm">
-                                Nessun dato di costo disponibile per calcolare l'incidenza.
-                            </p>
-                        </div>
-                    )}
-
-                    {/* MARGIN CARD */}
-                    {report?.contractValue ? (
-                        <div className={`p-6 rounded-3xl shadow-sm border mb-6 relative overflow-hidden ${report.margin?.marginCurrentValue >= 0
-                            ? 'bg-white border-green-100'
-                            : 'bg-white border-red-100'
-                            }`}>
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${report.margin?.marginCurrentValue >= 0
-                                        ? 'bg-green-100 text-green-600'
-                                        : 'bg-red-100 text-red-600'
-                                        }`}>
-                                        <FileText className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-slate-500 font-bold text-sm leading-tight">
-                                            {report.status === 'completed' ? 'Margine finale' : 'Margine'}<br />cantiere
-                                        </h3>
-                                    </div>
-                                </div>
-                                <span className={`text-[10px] font-bold px-3 py-1 rounded-full tracking-wide ${report.status === 'completed'
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'bg-amber-50 text-amber-600'
-                                    }`}>
-                                    {report.status === 'completed' ? 'A CONSUNTIVO' : 'PROVVISORIO'}
+                                <span className="bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1 rounded-full tracking-wide">
+                                    IN TEMPO REALE
                                 </span>
                             </div>
 
-                            <div className="mb-6">
-                                <p className={`text-5xl font-black tracking-tight ${report.margin?.marginCurrentValue >= 0
-                                    ? 'text-green-600'
-                                    : 'text-red-600'
-                                    }`}>
-                                    {(report.margin?.marginCurrentValue || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    <span className="text-3xl text-slate-400 font-medium ml-1">€</span>
+                            <div className="mb-8">
+                                <p className="text-5xl font-black text-slate-900 tracking-tight">
+                                    {totalCost.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<span className="text-3xl text-slate-400 font-medium ml-1">€</span>
                                 </p>
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                                        {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
-                                    </span>
-                                    <span className="font-black text-slate-900">{(report.contractValue || 0).toFixed(2)}€</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                                        {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}
-                                    </span>
-                                    <span className="font-black text-slate-900">{totalCost.toFixed(2)}€</span>
-                                </div>
-                                {report.status !== 'completed' && (
-                                    <div className="flex justify-between items-center">
-                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                            Costo su ricavo
-                                        </span>
-                                        <span className="font-black text-slate-900">{(report.margin?.costVsRevenuePercent || 0).toFixed(1)}%</span>
-                                    </div>
-                                )}
-                                {report.status === 'completed' && (
-                                    <div className="flex justify-between items-center">
-                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                            Margine %
-                                        </span>
-                                        <span className="font-black text-slate-900">{(report.margin?.marginCurrentPercent || 0).toFixed(1)}%</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {report.status !== 'completed' && (
-                                <p className="text-xs text-slate-500 italic mt-4">
-                                    Valore provvisorio basato sui costi registrati finora.
-                                </p>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
-                                    <FileText className="w-5 h-5 text-slate-500" />
-                                </div>
-                                <h3 className="text-slate-700 font-bold text-sm">Margine cantiere</h3>
-                            </div>
-                            <p className="text-slate-600 text-sm mb-4">
-                                Inserisci il prezzo pattuito per vedere il margine di questo cantiere.
-                            </p>
-                            <button
-                                onClick={onBack}
-                                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-                            >
-                                Modifica cantiere →
-                            </button>
-                        </div>
-                    )}
-
-                    {/* SUMMARY GRID - NEW DESIGN */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                                    <Clock className="w-5 h-5" />
-                                </div>
-                                <span className="text-green-500 text-xs font-bold bg-green-50 px-2 py-1 rounded-full">
-                                    <Users className="w-3 h-3 inline mr-1" />
-                                    Active
-                                </span>
-                            </div>
-                            <h3 className="text-slate-500 font-medium text-sm mb-1">Ore Totali</h3>
-                            <p className="text-3xl font-black text-slate-900">
-                                {report?.totalHours?.toFixed(2) || '0.00'} <span className="text-lg font-medium text-slate-400">h</span>
-                            </p>
-                        </div>
-
-                        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-                                    <Package className="w-5 h-5" />
-                                </div>
-                                <span className="text-purple-600 text-xs font-bold bg-purple-50 px-2 py-1 rounded-full">
-                                    +{report?.materials?.length || 0}
-                                </span>
-                            </div>
-                            <h3 className="text-slate-500 font-medium text-sm mb-1">Materiali</h3>
-                            <p className="text-3xl font-black text-slate-900">
-                                {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0) || 0} <span className="text-lg font-medium text-slate-400">pz</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Accesso Rapido Header */}
-                    <h3 className="text-lg font-bold text-slate-900 mb-4">Accesso Rapido</h3>
-
-                    {/* INTERACTIVE CARDS GRID */}
-                    <div className="space-y-4">
-                        {/* EMPLOYEES CARD */}
-                        <div
-                            onClick={() => setShowEmployeesModal(true)}
-                            className="bg-white rounded-3xl border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
-                                    <Users className="w-6 h-6" />
-                                </div>
+                            <div className="space-y-6">
+                                {/* Materiali */}
                                 <div>
-                                    <h3 className="font-bold text-slate-900">Dettaglio Dipendenti</h3>
-                                    <p className="text-sm text-slate-500">{employeeHours.length} dipendenti attivi</p>
-                                </div>
-                            </div>
-                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
-                                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-orange-500" />
-                            </div>
-                        </div>
-
-                        {/* MATERIALS CARD */}
-                        <div
-                            onClick={handleOpenMaterialsModal}
-                            className="bg-white rounded-3xl border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-500">
-                                    <Package className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-slate-900">Dettaglio Materiali</h3>
-                                    <p className="text-sm text-slate-500">{report?.materials?.length || 0} tipi di materiali</p>
-                                </div>
-                            </div>
-                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-purple-50 group-hover:text-purple-500 transition-colors">
-                                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-purple-500" />
-                            </div>
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {/* REPORT GIORNALIERO TAB */}
-            {activeTab === 'report' && (
-                <div className="space-y-4">
-                    {report?.dailyReports?.length > 0 ? (
-                        report.dailyReports.map((dailyReport) => (
-                            <div
-                                key={dailyReport.id}
-                                onClick={() => setSelectedNote({ ...dailyReport, content: dailyReport.activityType })}
-                                className="bg-white rounded-3xl border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer group"
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <div>
-                                        <h4 className="font-bold text-slate-900">
-                                            {dailyReport.user?.firstName} {dailyReport.user?.lastName}
-                                        </h4>
-                                        <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                                            <span>{new Date(dailyReport.date).toLocaleDateString('it-IT')}</span>
-                                            <span>•</span>
-                                            <span>{new Date(dailyReport.date).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
-                                        </div>
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span className="flex items-center gap-2 text-slate-600 font-bold">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                                            Materiali
+                                        </span>
+                                        <span className="font-black text-slate-900">{materialCost.toFixed(2)}€</span>
                                     </div>
-                                    <button
-                                        onClick={(e) => handleDeleteReport(e, dailyReport.id)}
-                                        className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-100 md:opacity-0 group-hover:opacity-100"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-purple-500 rounded-full transition-all duration-500" style={{ width: `${materialPct}%` }}></div>
+                                    </div>
                                 </div>
-                                <p className="text-slate-600 line-clamp-2">{dailyReport.activityType}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
-                            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                            <p className="text-slate-400 font-medium">Nessun report giornaliero disponibile</p>
-                        </div>
-                    )}
-                </div>
-            )}
 
-            {/* ECONOMIE TAB */}
-            {activeTab === 'economie' && (
-                <div className="space-y-4">
-                    {economie.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {economie.map((economia) => (
-                                <div key={economia.id} className="bg-white p-6 rounded-3xl shadow-sm border border-amber-100 relative group">
-                                    <button
-                                        onClick={(e) => handleDeleteEconomia(e, economia.id)}
-                                        className="absolute top-4 right-4 p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 font-bold">
-                                            {economia.worker?.name?.charAt(0)}{economia.worker?.surname?.charAt(0)}
+                                {/* Manodopera */}
+                                <div>
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span className="flex items-center gap-2 text-slate-600 font-bold">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                            Manodopera
+                                        </span>
+                                        <span className="font-black text-slate-900">{laborCost.toFixed(2)}€</span>
+                                    </div>
+                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${laborPct}%` }}></div>
+                                    </div>
+                                </div>
+
+                                {/* Economie */}
+                                <div>
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span className="flex items-center gap-2 text-slate-600 font-bold">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                            Economie
+                                        </span>
+                                        <span className="font-black text-slate-900">{economieCost.toFixed(2)}€</span>
+                                    </div>
+                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${economiePct}%` }}></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* COST INCIDENCE CARD */}
+                        {report?.costIncidence?.materialsIncidencePercent !== null ? (
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                            <Package className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-slate-900">{economia.worker?.name} {economia.worker?.surname}</h4>
-                                            <p className="text-xs text-slate-500">Operaio</p>
+                                            <h3 className="text-slate-500 font-bold text-sm leading-tight">
+                                                Incidenza materiali /<br />manodopera
+                                            </h3>
                                         </div>
-                                    </div>
-                                    <div className="mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="w-4 h-4 text-amber-600" />
-                                            <span className="text-2xl font-bold text-amber-600">{economia.hours}</span>
-                                            <span className="text-sm text-slate-500">{economia.hours === 1 ? 'ora' : 'ore'}</span>
-                                        </div>
-                                    </div>
-                                    <p className="text-slate-600 text-sm whitespace-pre-wrap mb-3">{economia.description}</p>
-                                    <div className="pt-3 border-t border-slate-50">
-                                        <span className="text-xs text-slate-500 font-medium">
-                                            {new Date(economia.date).toLocaleString('it-IT', {
-                                                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                                            })}
-                                        </span>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="bg-white rounded-3xl p-12 text-center shadow-sm">
-                            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Zap className="w-8 h-8 text-amber-400" />
+
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                                            Materiali
+                                        </span>
+                                        <span className="font-black text-slate-900 text-2xl">{report.costIncidence.materialsIncidencePercent.toFixed(1)}%</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                            Manodopera
+                                        </span>
+                                        <span className="font-black text-slate-900 text-2xl">{report.costIncidence.laborIncidencePercent.toFixed(1)}%</span>
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-2">Economie</h3>
-                            <p className="text-slate-500">Nessuna economia disponibile per questo cantiere.</p>
+                        ) : (
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
+                                        <Package className="w-5 h-5 text-slate-500" />
+                                    </div>
+                                    <h3 className="text-slate-700 font-bold text-sm">Incidenza materiali / manodopera</h3>
+                                </div>
+                                <p className="text-slate-600 text-sm">
+                                    Nessun dato di costo disponibile per calcolare l'incidenza.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* MARGIN CARD */}
+                        {report?.contractValue ? (
+                            <div className={`p-6 rounded-3xl shadow-sm border mb-6 relative overflow-hidden ${report.margin?.marginCurrentValue >= 0
+                                ? 'bg-white border-green-100'
+                                : 'bg-white border-red-100'
+                                }`}>
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${report.margin?.marginCurrentValue >= 0
+                                            ? 'bg-green-100 text-green-600'
+                                            : 'bg-red-100 text-red-600'
+                                            }`}>
+                                            <FileText className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-slate-500 font-bold text-sm leading-tight">
+                                                {report.status === 'completed' ? 'Margine finale' : 'Margine'}<br />cantiere
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full tracking-wide ${report.status === 'completed'
+                                        ? 'bg-blue-50 text-blue-600'
+                                        : 'bg-amber-50 text-amber-600'
+                                        }`}>
+                                        {report.status === 'completed' ? 'A CONSUNTIVO' : 'PROVVISORIO'}
+                                    </span>
+                                </div>
+
+                                <div className="mb-6">
+                                    <p className={`text-5xl font-black tracking-tight ${report.margin?.marginCurrentValue >= 0
+                                        ? 'text-green-600'
+                                        : 'text-red-600'
+                                        }`}>
+                                        {(report.margin?.marginCurrentValue || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        <span className="text-3xl text-slate-400 font-medium ml-1">€</span>
+                                    </p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                            {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
+                                        </span>
+                                        <span className="font-black text-slate-900">{(report.contractValue || 0).toFixed(2)}€</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                                            {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}
+                                        </span>
+                                        <span className="font-black text-slate-900">{totalCost.toFixed(2)}€</span>
+                                    </div>
+                                    {report.status !== 'completed' && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                                Costo su ricavo
+                                            </span>
+                                            <span className="font-black text-slate-900">{(report.margin?.costVsRevenuePercent || 0).toFixed(1)}%</span>
+                                        </div>
+                                    )}
+                                    {report.status === 'completed' && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                                Margine %
+                                            </span>
+                                            <span className="font-black text-slate-900">{(report.margin?.marginCurrentPercent || 0).toFixed(1)}%</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {report.status !== 'completed' && (
+                                    <p className="text-xs text-slate-500 italic mt-4">
+                                        Valore provvisorio basato sui costi registrati finora.
+                                    </p>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
+                                        <FileText className="w-5 h-5 text-slate-500" />
+                                    </div>
+                                    <h3 className="text-slate-700 font-bold text-sm">Margine cantiere</h3>
+                                </div>
+                                <p className="text-slate-600 text-sm mb-4">
+                                    Inserisci il prezzo pattuito per vedere il margine di questo cantiere.
+                                </p>
+                                <button
+                                    onClick={onBack}
+                                    className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                                >
+                                    Modifica cantiere →
+                                </button>
+                            </div>
+                        )}
+
+                        {/* SUMMARY GRID - NEW DESIGN */}
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                        <Clock className="w-5 h-5" />
+                                    </div>
+                                    <span className="text-green-500 text-xs font-bold bg-green-50 px-2 py-1 rounded-full">
+                                        <Users className="w-3 h-3 inline mr-1" />
+                                        Active
+                                    </span>
+                                </div>
+                                <h3 className="text-slate-500 font-medium text-sm mb-1">Ore Totali</h3>
+                                <p className="text-3xl font-black text-slate-900">
+                                    {report?.totalHours?.toFixed(2) || '0.00'} <span className="text-lg font-medium text-slate-400">h</span>
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                                        <Package className="w-5 h-5" />
+                                    </div>
+                                    <span className="text-purple-600 text-xs font-bold bg-purple-50 px-2 py-1 rounded-full">
+                                        +{report?.materials?.length || 0}
+                                    </span>
+                                </div>
+                                <h3 className="text-slate-500 font-medium text-sm mb-1">Materiali</h3>
+                                <p className="text-3xl font-black text-slate-900">
+                                    {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0) || 0} <span className="text-lg font-medium text-slate-400">pz</span>
+                                </p>
+                            </div>
                         </div>
-                    )}
-                </div>
-            )}
+
+                        {/* Accesso Rapido Header */}
+                        <h3 className="text-lg font-bold text-slate-900 mb-4">Accesso Rapido</h3>
+
+                        {/* INTERACTIVE CARDS GRID */}
+                        <div className="space-y-4">
+                            {/* EMPLOYEES CARD */}
+                            <div
+                                onClick={() => setShowEmployeesModal(true)}
+                                className="bg-white rounded-3xl border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
+                                        <Users className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-slate-900">Dettaglio Dipendenti</h3>
+                                        <p className="text-sm text-slate-500">{employeeHours.length} dipendenti attivi</p>
+                                    </div>
+                                </div>
+                                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
+                                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-orange-500" />
+                                </div>
+                            </div>
+
+                            {/* MATERIALS CARD */}
+                            <div
+                                onClick={handleOpenMaterialsModal}
+                                className="bg-white rounded-3xl border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-500">
+                                        <Package className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-slate-900">Dettaglio Materiali</h3>
+                                        <p className="text-sm text-slate-500">{report?.materials?.length || 0} tipi di materiali</p>
+                                    </div>
+                                </div>
+                                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-purple-50 group-hover:text-purple-500 transition-colors">
+                                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-purple-500" />
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )
+            }
+
+            {/* REPORT GIORNALIERO TAB */}
+            {
+                activeTab === 'report' && (
+                    <div className="space-y-4">
+                        {report?.dailyReports?.length > 0 ? (
+                            report.dailyReports.map((dailyReport) => (
+                                <div
+                                    key={dailyReport.id}
+                                    onClick={() => setSelectedNote({ ...dailyReport, content: dailyReport.activityType })}
+                                    className="bg-white rounded-3xl border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer group"
+                                >
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div>
+                                            <h4 className="font-bold text-slate-900">
+                                                {dailyReport.user?.firstName} {dailyReport.user?.lastName}
+                                            </h4>
+                                            <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                                                <span>{new Date(dailyReport.date).toLocaleDateString('it-IT')}</span>
+                                                <span>•</span>
+                                                <span>{new Date(dailyReport.date).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleDeleteReport(e, dailyReport.id)}
+                                            className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-100 md:opacity-0 group-hover:opacity-100"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <p className="text-slate-600 line-clamp-2">{dailyReport.activityType}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
+                                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                                <p className="text-slate-400 font-medium">Nessun report giornaliero disponibile</p>
+                            </div>
+                        )}
+                    </div>
+                )
+            }
+
+            {/* ECONOMIE TAB */}
+            {
+                activeTab === 'economie' && (
+                    <div className="space-y-4">
+                        {economie.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {economie.map((economia) => (
+                                    <div key={economia.id} className="bg-white p-6 rounded-3xl shadow-sm border border-amber-100 relative group">
+                                        <button
+                                            onClick={(e) => handleDeleteEconomia(e, economia.id)}
+                                            className="absolute top-4 right-4 p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 font-bold">
+                                                {economia.worker?.name?.charAt(0)}{economia.worker?.surname?.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900">{economia.worker?.name} {economia.worker?.surname}</h4>
+                                                <p className="text-xs text-slate-500">Operaio</p>
+                                            </div>
+                                        </div>
+                                        <div className="mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <Clock className="w-4 h-4 text-amber-600" />
+                                                <span className="text-2xl font-bold text-amber-600">{economia.hours}</span>
+                                                <span className="text-sm text-slate-500">{economia.hours === 1 ? 'ora' : 'ore'}</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-600 text-sm whitespace-pre-wrap mb-3">{economia.description}</p>
+                                        <div className="pt-3 border-t border-slate-50">
+                                            <span className="text-xs text-slate-500 font-medium">
+                                                {new Date(economia.date).toLocaleString('it-IT', {
+                                                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-3xl p-12 text-center shadow-sm">
+                                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Zap className="w-8 h-8 text-amber-400" />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900 mb-2">Economie</h3>
+                                <p className="text-slate-500">Nessuna economia disponibile per questo cantiere.</p>
+                            </div>
+                        )}
+                    </div>
+                )
+            }
 
             {/* NOTE TAB */}
-            {activeTab === 'note' && (
-                <div className="space-y-4">
-                    {notes.length > 0 ? (
-                        notes.map((note) => (
-                            <div
-                                key={note.id}
-                                onClick={() => setSelectedNote(note)}
-                                className="bg-white rounded-3xl border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer"
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <div>
-                                        <h4 className="font-bold text-slate-900">
-                                            {note.user?.firstName} {note.user?.lastName}
-                                        </h4>
-                                        <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                                            <span>{new Date(note.date).toLocaleDateString('it-IT')}</span>
-                                            <span>•</span>
-                                            <span>{new Date(note.date).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+            {
+                activeTab === 'note' && (
+                    <div className="space-y-4">
+                        {notes.length > 0 ? (
+                            notes.map((note) => (
+                                <div
+                                    key={note.id}
+                                    onClick={() => setSelectedNote(note)}
+                                    className="bg-white rounded-3xl border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer"
+                                >
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div>
+                                            <h4 className="font-bold text-slate-900">
+                                                {note.user?.firstName} {note.user?.lastName}
+                                            </h4>
+                                            <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                                                <span>{new Date(note.date).toLocaleDateString('it-IT')}</span>
+                                                <span>•</span>
+                                                <span>{new Date(note.date).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
                                         </div>
+                                        <button
+                                            onClick={(e) => handleDeleteNote(e, note.id)}
+                                            className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-100 md:opacity-0 group-hover:opacity-100"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={(e) => handleDeleteNote(e, note.id)}
-                                        className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-100 md:opacity-0 group-hover:opacity-100"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                    <p className="text-slate-600 line-clamp-2">{note.content}</p>
                                 </div>
-                                <p className="text-slate-600 line-clamp-2">{note.content}</p>
+                            ))
+                        ) : (
+                            <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
+                                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                                <p className="text-slate-400 font-medium">Nessuna nota disponibile</p>
                             </div>
-                        ))
-                    ) : (
-                        <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
-                            <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                            <p className="text-slate-400 font-medium">Nessuna nota disponibile</p>
-                        </div>
-                    )}
-                </div>
-            )}
+                        )}
+                    </div>
+                )
+            }
 
             {/* FOTO TAB */}
-            {activeTab === 'foto' && (
-                <div>
-                    {photos.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {photos.map((photo) => (
-                                <div
-                                    key={photo.id}
-                                    onClick={() => setSelectedPhoto(photo)}
-                                    className="bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-md transition-all cursor-pointer"
-                                >
-                                    <div className="aspect-video bg-slate-100 relative">
-                                        <img
-                                            src={photo.photoUrl}
-                                            alt={photo.caption || 'Foto cantiere'}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    <div className="p-4">
-                                        <h4 className="font-bold text-slate-900 text-sm mb-1">
-                                            {photo.user?.firstName} {photo.user?.lastName}
-                                        </h4>
-                                        <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
-                                            <span>{new Date(photo.createdAt).toLocaleDateString('it-IT')}</span>
-                                            <span>•</span>
-                                            <span>{new Date(photo.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+            {
+                activeTab === 'foto' && (
+                    <div>
+                        {photos.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {photos.map((photo) => (
+                                    <div
+                                        key={photo.id}
+                                        onClick={() => setSelectedPhoto(photo)}
+                                        className="bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-md transition-all cursor-pointer"
+                                    >
+                                        <div className="aspect-video bg-slate-100 relative">
+                                            <img
+                                                src={photo.photoUrl}
+                                                alt={photo.caption || 'Foto cantiere'}
+                                                className="w-full h-full object-cover"
+                                            />
                                         </div>
-                                        {photo.caption && (
-                                            <p className="text-slate-600 text-sm line-clamp-2">{photo.caption}</p>
-                                        )}
+                                        <div className="p-4">
+                                            <h4 className="font-bold text-slate-900 text-sm mb-1">
+                                                {photo.user?.firstName} {photo.user?.lastName}
+                                            </h4>
+                                            <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                                                <span>{new Date(photo.createdAt).toLocaleDateString('it-IT')}</span>
+                                                <span>•</span>
+                                                <span>{new Date(photo.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                            {photo.caption && (
+                                                <p className="text-slate-600 text-sm line-clamp-2">{photo.caption}</p>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
-                            <Camera className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                            <p className="text-slate-400 font-medium">Nessuna foto disponibile</p>
-                        </div>
-                    )}
-                </div>
-            )}
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
+                                <Camera className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                                <p className="text-slate-400 font-medium">Nessuna foto disponibile</p>
+                            </div>
+                        )}
+                    </div>
+                )
+            }
 
             {/* Note Detail Modal */}
-            {selectedNote && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedNote(null)}>
-                    <div className="bg-white rounded-3xl w-full max-w-2xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-xl font-bold text-slate-900">
-                                    {selectedNote.user?.firstName} {selectedNote.user?.lastName}
-                                </h3>
-                                <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                                    <span>{new Date(selectedNote.createdAt).toLocaleDateString('it-IT')}</span>
-                                    <span>•</span>
-                                    <span>{new Date(selectedNote.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+            {
+                selectedNote && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedNote(null)}>
+                        <div className="bg-white rounded-3xl w-full max-w-2xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                            <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-900">
+                                        {selectedNote.user?.firstName} {selectedNote.user?.lastName}
+                                    </h3>
+                                    <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                                        <span>{new Date(selectedNote.createdAt).toLocaleDateString('it-IT')}</span>
+                                        <span>•</span>
+                                        <span>{new Date(selectedNote.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
                                 </div>
+                                <button
+                                    onClick={() => setSelectedNote(null)}
+                                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                                >
+                                    <X className="w-6 h-6 text-slate-500" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setSelectedNote(null)}
-                                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-                            >
-                                <X className="w-6 h-6 text-slate-500" />
-                            </button>
-                        </div>
-                        <div className="p-6">
-                            <p className="text-slate-700 whitespace-pre-wrap">{selectedNote.content}</p>
+                            <div className="p-6">
+                                <p className="text-slate-700 whitespace-pre-wrap">{selectedNote.content}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Photo Detail Modal */}
-            {selectedPhoto && (
-                <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedPhoto(null)}>
-                    <div className="bg-white rounded-3xl w-full max-w-4xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-xl font-bold text-slate-900">
-                                    {selectedPhoto.user?.firstName} {selectedPhoto.user?.lastName}
-                                </h3>
-                                <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                                    <span>{new Date(selectedPhoto.createdAt).toLocaleDateString('it-IT')}</span>
-                                    <span>•</span>
-                                    <span>{new Date(selectedPhoto.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+            {
+                selectedPhoto && (
+                    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedPhoto(null)}>
+                        <div className="bg-white rounded-3xl w-full max-w-4xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                            <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-900">
+                                        {selectedPhoto.user?.firstName} {selectedPhoto.user?.lastName}
+                                    </h3>
+                                    <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                                        <span>{new Date(selectedPhoto.createdAt).toLocaleDateString('it-IT')}</span>
+                                        <span>•</span>
+                                        <span>{new Date(selectedPhoto.createdAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
                                 </div>
+                                <button
+                                    onClick={() => setSelectedPhoto(null)}
+                                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                                >
+                                    <X className="w-6 h-6 text-slate-500" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setSelectedPhoto(null)}
-                                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-                            >
-                                <X className="w-6 h-6 text-slate-500" />
-                            </button>
-                        </div>
-                        <div className="p-6">
-                            <img
-                                src={selectedPhoto.photoUrl}
-                                alt={selectedPhoto.caption || 'Foto cantiere'}
-                                className="w-full rounded-xl mb-4"
-                            />
-                            {selectedPhoto.caption && (
-                                <p className="text-slate-700">{selectedPhoto.caption}</p>
-                            )}
+                            <div className="p-6">
+                                <img
+                                    src={selectedPhoto.photoUrl}
+                                    alt={selectedPhoto.caption || 'Foto cantiere'}
+                                    className="w-full rounded-xl mb-4"
+                                />
+                                {selectedPhoto.caption && (
+                                    <p className="text-slate-700">{selectedPhoto.caption}</p>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Employees Detail Modal */}
-            {showEmployeesModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowEmployeesModal(false)}>
-                    <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                        <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between z-10">
-                            <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                                <Users className="w-6 h-6 text-blue-600" />
-                                Dettaglio Costi Dipendenti
-                            </h3>
-                            <button
-                                onClick={() => setShowEmployeesModal(false)}
-                                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-                            >
-                                <X className="w-6 h-6 text-slate-500" />
-                            </button>
-                        </div>
-                        <div className="p-6">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-slate-50 border-b border-slate-200">
-                                            <th className="text-left px-4 py-3 font-bold text-slate-700">Dipendente</th>
-                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Ore Totali</th>
-                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Orario</th>
-                                            <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Totale</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {employeeHours.map((emp) => (
-                                            <tr key={emp.id.id} className="border-b border-slate-100 hover:bg-slate-50">
-                                                <td className="px-4 py-3">
-                                                    <div className="font-bold text-slate-900">{emp.id.firstName} {emp.id.lastName}</div>
-                                                    <div className="text-xs text-slate-500">{emp.id.username}</div>
-                                                </td>
-                                                <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                    {emp.totalHours.toFixed(2)} h
-                                                </td>
-                                                <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                    {emp.id.hourlyCost ? `€ ${emp.id.hourlyCost.toFixed(2)}` : '-'}
-                                                </td>
-                                                <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
-                                                    € {((emp.totalHours || 0) * (emp.id.hourlyCost || 0)).toFixed(2)}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                    <tfoot className="bg-slate-50 font-bold">
-                                        <tr>
-                                            <td className="px-4 py-3 text-slate-900">TOTALE</td>
-                                            <td className="px-4 py-3 text-right text-slate-900">
-                                                {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(2)} h
-                                            </td>
-                                            <td className="px-4 py-3 text-right text-slate-900">-</td>
-                                            <td className="px-4 py-3 text-right text-green-600">
-                                                € {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toFixed(2)}
-                                            </td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+            {
+                showEmployeesModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowEmployeesModal(false)}>
+                        <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                            <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between z-10">
+                                <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                                    <Users className="w-6 h-6 text-blue-600" />
+                                    Dettaglio Costi Dipendenti
+                                </h3>
+                                <button
+                                    onClick={() => setShowEmployeesModal(false)}
+                                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                                >
+                                    <X className="w-6 h-6 text-slate-500" />
+                                </button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Materials Detail Modal */}
-            {showMaterialsModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowMaterialsModal(false)}>
-                    <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                        <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between z-10">
-                            <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                                <Package className="w-6 h-6 text-purple-600" />
-                                Gestione Materiali Cantiere
-                            </h3>
-                            <button
-                                onClick={() => setShowMaterialsModal(false)}
-                                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-                            >
-                                <X className="w-6 h-6 text-slate-500" />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-6">
-                            {/* Summary Table */}
-                            <div>
-                                <h4 className="text-lg font-bold text-slate-900 mb-3">Riepilogo Costi</h4>
+                            <div className="p-6">
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead>
                                             <tr className="bg-slate-50 border-b border-slate-200">
-                                                <th className="text-left px-4 py-3 font-bold text-slate-700">Materiale</th>
-                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Quantità</th>
-                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Prezzo Unit.</th>
+                                                <th className="text-left px-4 py-3 font-bold text-slate-700">Dipendente</th>
+                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Ore Totali</th>
+                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Orario</th>
                                                 <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Totale</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {report?.materials?.map((mat) => (
-                                                <tr key={mat.id} className="border-b border-slate-100 hover:bg-slate-50">
-                                                    <td className="px-4 py-3 font-bold text-slate-900">
-                                                        {mat.name}
+                                            {employeeHours.map((emp) => (
+                                                <tr key={emp.id.id} className="border-b border-slate-100 hover:bg-slate-50">
+                                                    <td className="px-4 py-3">
+                                                        <div className="font-bold text-slate-900">{emp.id.firstName} {emp.id.lastName}</div>
+                                                        <div className="text-xs text-slate-500">{emp.id.username}</div>
                                                     </td>
                                                     <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                        {mat.totalQuantity} {mat.unit}
+                                                        {emp.totalHours.toFixed(2)} h
                                                     </td>
                                                     <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                        {mat.unitPrice ? `€ ${mat.unitPrice.toFixed(2)}` : '-'}
+                                                        {emp.id.hourlyCost ? `€ ${emp.id.hourlyCost.toFixed(2)}` : '-'}
                                                     </td>
                                                     <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
-                                                        € {(mat.totalCost || 0).toFixed(2)}
+                                                        € {((emp.totalHours || 0) * (emp.id.hourlyCost || 0)).toFixed(2)}
                                                     </td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                         <tfoot className="bg-slate-50 font-bold">
                                             <tr>
-                                                <td className="px-4 py-3 text-slate-900" colSpan="3">TOTALE</td>
+                                                <td className="px-4 py-3 text-slate-900">TOTALE</td>
+                                                <td className="px-4 py-3 text-right text-slate-900">
+                                                    {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(2)} h
+                                                </td>
+                                                <td className="px-4 py-3 text-right text-slate-900">-</td>
                                                 <td className="px-4 py-3 text-right text-green-600">
-                                                    € {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toFixed(2)}
+                                                    € {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toFixed(2)}
                                                 </td>
                                             </tr>
                                         </tfoot>
                                     </table>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                )
+            }
 
-                            {/* Individual Usages with Delete */}
-                            <div>
-                                <h4 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                    Utilizzi Individuali
-                                    {loadingMaterials && <span className="text-sm text-slate-500 font-normal">Caricamento...</span>}
-                                </h4>
-                                {materialUsages.length === 0 && !loadingMaterials ? (
-                                    <p className="text-slate-500 text-center py-4">Nessun utilizzo materiale registrato</p>
-                                ) : (
-                                    <div className="space-y-2">
-                                        {materialUsages.map((usage) => (
-                                            <div key={usage.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                                <div className="flex-1">
-                                                    <div className="font-semibold text-slate-900">
-                                                        {usage.materialMaster?.displayName || usage.materialMaster?.display_name || 'Materiale sconosciuto'}
-                                                    </div>
-                                                    <div className="text-sm text-slate-600 flex flex-wrap gap-4 mt-1">
-                                                        <span>Qtà: <strong>{usage.numeroConfezioni || usage.numero_confezioni}</strong> {usage.materialMaster?.unit || 'pz'}</span>
-                                                        <span>Data: {new Date(usage.dataOra || usage.data_ora).toLocaleDateString('it-IT')}</span>
-                                                        {usage.user && (
-                                                            <span>Da: {usage.user.firstName} {usage.user.lastName}</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleDeleteMaterialUsage(usage.id)}
-                                                    className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
-                                                    title="Elimina utilizzo"
-                                                >
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        ))}
+            {/* Materials Detail Modal */}
+            {
+                showMaterialsModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowMaterialsModal(false)}>
+                        <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                            <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between z-10">
+                                <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                                    <Package className="w-6 h-6 text-purple-600" />
+                                    Gestione Materiali Cantiere
+                                </h3>
+                                <button
+                                    onClick={() => setShowMaterialsModal(false)}
+                                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                                >
+                                    <X className="w-6 h-6 text-slate-500" />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                {/* Summary Table */}
+                                <div>
+                                    <h4 className="text-lg font-bold text-slate-900 mb-3">Riepilogo Costi</h4>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="bg-slate-50 border-b border-slate-200">
+                                                    <th className="text-left px-4 py-3 font-bold text-slate-700">Materiale</th>
+                                                    <th className="text-right px-4 py-3 font-bold text-slate-700">Quantità</th>
+                                                    <th className="text-right px-4 py-3 font-bold text-slate-700">Prezzo Unit.</th>
+                                                    <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Totale</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {report?.materials?.map((mat) => (
+                                                    <tr key={mat.id} className="border-b border-slate-100 hover:bg-slate-50">
+                                                        <td className="px-4 py-3 font-bold text-slate-900">
+                                                            {mat.name}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right font-mono text-slate-700">
+                                                            {mat.totalQuantity} {mat.unit}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right font-mono text-slate-700">
+                                                            {mat.unitPrice ? `€ ${mat.unitPrice.toFixed(2)}` : '-'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
+                                                            € {(mat.totalCost || 0).toFixed(2)}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                            <tfoot className="bg-slate-50 font-bold">
+                                                <tr>
+                                                    <td className="px-4 py-3 text-slate-900" colSpan="3">TOTALE</td>
+                                                    <td className="px-4 py-3 text-right text-green-600">
+                                                        € {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toFixed(2)}
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
-                                )}
+                                </div>
+
+                                {/* Individual Usages with Delete */}
+                                <div>
+                                    <h4 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                        Utilizzi Individuali
+                                        {loadingMaterials && <span className="text-sm text-slate-500 font-normal">Caricamento...</span>}
+                                    </h4>
+                                    {materialUsages.length === 0 && !loadingMaterials ? (
+                                        <p className="text-slate-500 text-center py-4">Nessun utilizzo materiale registrato</p>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {materialUsages.map((usage) => (
+                                                <div key={usage.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                                    <div className="flex-1">
+                                                        <div className="font-semibold text-slate-900">
+                                                            {usage.materialMaster?.displayName || usage.materialMaster?.display_name || 'Materiale sconosciuto'}
+                                                        </div>
+                                                        <div className="text-sm text-slate-600 flex flex-wrap gap-4 mt-1">
+                                                            <span>Qtà: <strong>{usage.numeroConfezioni || usage.numero_confezioni}</strong> {usage.materialMaster?.unit || 'pz'}</span>
+                                                            <span>Data: {new Date(usage.dataOra || usage.data_ora).toLocaleDateString('it-IT')}</span>
+                                                            {usage.user && (
+                                                                <span>Da: {usage.user.firstName} {usage.user.lastName}</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleDeleteMaterialUsage(usage.id)}
+                                                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                                                        title="Elimina utilizzo"
+                                                    >
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 
@@ -1055,10 +1067,6 @@ export default function OwnerDashboard() {
                         <p className="text-slate-500 font-medium">Bentornato,</p>
                         <h1 className="text-3xl font-black text-slate-900">{user?.firstName}</h1>
                     </div>
-                    <button className="p-3 bg-white rounded-full shadow-sm border border-slate-100 relative">
-                        <Bell className="w-6 h-6 text-slate-600" />
-                        <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
                 </div>
 
                 {/* SEARCH - UPDATED */}
