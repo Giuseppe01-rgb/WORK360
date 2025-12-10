@@ -420,8 +420,10 @@ const updateAttendance = async (req, res) => {
         // Handle clockInTime string format from frontend (datetime-local input)
         if (clockInTime) {
             console.log('Setting clockIn to:', clockInTime);
+            // Add timezone to prevent UTC interpretation
+            const clockInWithTz = clockInTime.includes('+') ? clockInTime : clockInTime + ':00+01:00';
             updateData.clockIn = {
-                time: new Date(clockInTime),
+                time: new Date(clockInWithTz),
                 location: attendance.clockIn?.location || null
             };
         } else if (clockIn !== undefined) {
@@ -431,8 +433,10 @@ const updateAttendance = async (req, res) => {
         // Handle clockOutTime string format from frontend
         if (clockOutTime) {
             console.log('Setting clockOut to:', clockOutTime);
+            // Add timezone to prevent UTC interpretation
+            const clockOutWithTz = clockOutTime.includes('+') ? clockOutTime : clockOutTime + ':00+01:00';
             updateData.clockOut = {
-                time: new Date(clockOutTime),
+                time: new Date(clockOutWithTz),
                 location: attendance.clockOut?.location || null
             };
         } else if (clockOut !== undefined) {
