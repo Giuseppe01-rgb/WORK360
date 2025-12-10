@@ -251,17 +251,10 @@ export default function AttendanceList() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setShowBulkModal(true)}
-                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/30"
-                        >
-                            <Zap className="w-4 h-4" />
-                            Aggiunta Rapida
-                        </button>
-                        <button
-                            onClick={handleCreateAttendance}
                             className="px-4 py-2 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2"
                         >
                             <Plus className="w-4 h-4" />
-                            Aggiungi Presenza
+                            Aggiungi Presenze
                         </button>
                     </div>
                 </div>

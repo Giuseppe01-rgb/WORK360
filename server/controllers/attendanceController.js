@@ -265,8 +265,8 @@ const createManualAttendance = async (req, res) => {
         }
 
         // Build clockIn/clockOut JSONB
-        const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}`), location: null } : null;
-        const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}`), location: null } : null;
+        const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}:00+01:00`), location: null } : null;
+        const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}:00+01:00`), location: null } : null;
 
         // Calculate hours if both present
         let hours = totalHours || 0;
@@ -352,8 +352,8 @@ const bulkCreateAttendances = async (req, res) => {
                     continue;
                 }
 
-                const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}`), location: null } : null;
-                const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}`), location: null } : null;
+                const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}:00+01:00`), location: null } : null;
+                const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}:00+01:00`), location: null } : null;
 
                 let hours = totalHours || 0;
                 if (clockInData && clockOutData && !totalHours) {
