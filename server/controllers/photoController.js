@@ -2,32 +2,24 @@ const { Photo, ConstructionSite } = require('../models');
 const { getCompanyId, getUserId } = require('../utils/sequelizeHelpers');
 const { assertSiteBelongsToCompany } = require('../utils/security');
 const cloudinary = require('cloudinary').v2;
-const multer = require('multer');
-const path = require('path');
+const upload = require('../middleware/memoryUploadMiddleware');
 
-// Multer config (keep existing)
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, process.env.UPLOAD_PATH || './uploads');
-    },
-    filename: (req, file, cb) => {
-        cb(null, `photo-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
-
-const upload = multer({
-    storage,
-    limits: { fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5242880 },
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-        if (mimetype && extname) {
-            return cb(null, true);
-        }
-        cb(new Error('Solo immagini sono permesse (jpeg, jpg, png, gif)'));
-    }
-});
+// Helper to upload buffer to Cloudinary
+const uploadToCloudinary = (buffer, options = {}) => {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: options.folder || 'work360/photos',
+                resource_type: 'image'
+            },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            }
+        );
+        uploadStream.end(buffer);
+    });
+};
 
 const uploadPhoto = async (req, res, next) => {
     try {
@@ -42,20 +34,25 @@ const uploadPhoto = async (req, res, next) => {
             return res.status(400).json({ message: 'Nessun file caricato' });
         }
 
-        let photoPath = req.file.path;
-
-        // Cloudinary upload if configured
-        if (process.env.CLOUDINARY_CLOUD_NAME) {
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'work360/photos'
+        // Check if Cloudinary is configured
+        if (!process.env.CLOUDINARY_CLOUD_NAME) {
+            console.error('Cloudinary is not configured. CLOUDINARY_CLOUD_NAME is missing.');
+            return res.status(500).json({
+                message: 'Upload foto non disponibile. Contatta l\'amministratore per configurare il servizio di storage.'
             });
-            photoPath = result.secure_url;
         }
+
+        // Upload to Cloudinary from memory buffer
+        const result = await uploadToCloudinary(req.file.buffer, {
+            folder: 'work360/photos'
+        });
+
+        const photoPath = result.secure_url;
 
         const photo = await Photo.create({
             userId: getUserId(req),
-            siteId: siteId || null,
-            filename: req.file.filename,
+            siteId: siteId, // siteId is required - don't default to null
+            filename: req.file.originalname || `photo-${Date.now()}.jpg`,
             path: photoPath,
             type: type || 'progress',
             caption
@@ -63,6 +60,7 @@ const uploadPhoto = async (req, res, next) => {
 
         res.status(201).json(photo);
     } catch (error) {
+        console.error('Photo upload error:', error);
         next(error);
     }
 };
