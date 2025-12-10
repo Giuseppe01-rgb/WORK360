@@ -414,25 +414,31 @@ const updateAttendance = async (req, res) => {
 
         // Handle clockInTime string format from frontend (datetime-local input)
         if (clockInTime) {
+            console.log('Updating clockIn from:', attendance.clockIn, 'to new time:', clockInTime);
             const clockInDate = new Date(clockInTime);
             attendance.clockIn = {
                 time: clockInDate,
                 location: attendance.clockIn?.location || null
             };
+            attendance.changed('clockIn', true); // Force Sequelize to detect change
         } else if (clockIn !== undefined) {
             // Handle legacy object format
             attendance.clockIn = clockIn;
+            attendance.changed('clockIn', true);
         }
 
         // Handle clockOutTime string format from frontend
         if (clockOutTime) {
+            console.log('Updating clockOut from:', attendance.clockOut, 'to new time:', clockOutTime);
             const clockOutDate = new Date(clockOutTime);
             attendance.clockOut = {
                 time: clockOutDate,
                 location: attendance.clockOut?.location || null
             };
+            attendance.changed('clockOut', true); // Force Sequelize to detect change
         } else if (clockOut !== undefined) {
             attendance.clockOut = clockOut;
+            attendance.changed('clockOut', true);
         }
 
         if (notes !== undefined) attendance.notes = notes;
@@ -443,10 +449,12 @@ const updateAttendance = async (req, res) => {
             const end = new Date(attendance.clockOut.time);
             const hours = (end - start) / (1000 * 60 * 60);
             attendance.totalHours = parseFloat(hours.toFixed(2));
+            console.log('Recalculated totalHours:', attendance.totalHours);
         } else if (totalHours !== undefined) {
             attendance.totalHours = totalHours;
         }
 
+        console.log('Saving attendance with changes:', attendance.changed());
         await attendance.save();
 
         // Audit log
