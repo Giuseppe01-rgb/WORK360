@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import { attendanceAPI, siteAPI } from '../../utils/api';
+import { attendanceAPI, siteAPI, userAPI } from '../../utils/api';
 import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2, Zap, Download } from 'lucide-react';
 import { exportAttendanceReport } from '../../utils/excelExport';
 import AttendanceModal from '../../components/owner/AttendanceModal';
@@ -13,12 +13,14 @@ export default function AttendanceList() {
     const { showConfirm } = useConfirmModal();
     const [attendances, setAttendances] = useState([]);
     const [sites, setSites] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [showBulkModal, setShowBulkModal] = useState(false);
     const [editingAttendance, setEditingAttendance] = useState(null);
     const [filters, setFilters] = useState({
         siteId: '',
+        userId: '',
         startDate: '',
         endDate: '',
         status: 'all'
@@ -34,11 +36,16 @@ export default function AttendanceList() {
 
     const loadData = async () => {
         try {
-            const sitesResponse = await siteAPI.getAll();
+            const [sitesResponse, usersResponse] = await Promise.all([
+                siteAPI.getAll(),
+                userAPI.getAll()
+            ]);
             setSites(sitesResponse.data || []);
+            setUsers(usersResponse.data?.filter(u => u.role === 'worker') || []);
         } catch (error) {
-            console.error('Error loading sites:', error);
+            console.error('Error loading data:', error);
             setSites([]);
+            setUsers([]);
         } finally {
             setLoading(false);
         }
@@ -59,6 +66,11 @@ export default function AttendanceList() {
                 data = data.filter(att => !att.clockOut?.time);
             } else if (filters.status === 'completed') {
                 data = data.filter(att => att.clockOut?.time);
+            }
+
+            // Filter by user
+            if (filters.userId) {
+                data = data.filter(att => att.user?.id === filters.userId);
             }
 
             setAttendances(data);
@@ -161,7 +173,7 @@ export default function AttendanceList() {
                             <span className="hidden sm:inline">Esporta</span>
                         </button>
                         <button
-                            onClick={() => setFilters({ siteId: '', startDate: '', endDate: '', status: 'all' })}
+                            onClick={() => setFilters({ siteId: '', userId: '', startDate: '', endDate: '', status: 'all' })}
                             className="text-sm font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
                         >
                             <RefreshCcw className="w-4 h-4" />
@@ -170,7 +182,7 @@ export default function AttendanceList() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Cantiere</label>
                         <select
@@ -181,6 +193,22 @@ export default function AttendanceList() {
                             <option value="">Tutti i cantieri</option>
                             {sites.map(site => (
                                 <option key={site.id} value={site.id}>{site.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1">Operaio</label>
+                        <select
+                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            value={filters.userId}
+                            onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
+                        >
+                            <option value="">Tutti gli operai</option>
+                            {users.map(user => (
+                                <option key={user.id} value={user.id}>
+                                    {user.firstName} {user.lastName || user.username}
+                                </option>
                             ))}
                         </select>
                     </div>
