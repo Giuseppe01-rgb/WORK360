@@ -397,7 +397,7 @@ const updateAttendance = async (req, res) => {
     try {
         const { id } = req.params;
         const companyId = getCompanyId(req);
-        const { clockIn, clockOut, notes, totalHours } = req.body;
+        const { clockIn, clockOut, clockInTime, clockOutTime, notes, totalHours } = req.body;
 
         // Find the attendance and verify it belongs to company
         const attendance = await Attendance.findByPk(id, {
@@ -412,11 +412,40 @@ const updateAttendance = async (req, res) => {
             return res.status(403).json({ message: 'Non autorizzato a modificare questa presenza' });
         }
 
-        // Update fields
-        if (clockIn !== undefined) attendance.clockIn = clockIn;
-        if (clockOut !== undefined) attendance.clockOut = clockOut;
+        // Handle clockInTime string format from frontend (datetime-local input)
+        if (clockInTime) {
+            const clockInDate = new Date(clockInTime);
+            attendance.clockIn = {
+                time: clockInDate,
+                location: attendance.clockIn?.location || null
+            };
+        } else if (clockIn !== undefined) {
+            // Handle legacy object format
+            attendance.clockIn = clockIn;
+        }
+
+        // Handle clockOutTime string format from frontend
+        if (clockOutTime) {
+            const clockOutDate = new Date(clockOutTime);
+            attendance.clockOut = {
+                time: clockOutDate,
+                location: attendance.clockOut?.location || null
+            };
+        } else if (clockOut !== undefined) {
+            attendance.clockOut = clockOut;
+        }
+
         if (notes !== undefined) attendance.notes = notes;
-        if (totalHours !== undefined) attendance.totalHours = totalHours;
+
+        // Recalculate totalHours if both times are present
+        if (attendance.clockIn?.time && attendance.clockOut?.time) {
+            const start = new Date(attendance.clockIn.time);
+            const end = new Date(attendance.clockOut.time);
+            const hours = (end - start) / (1000 * 60 * 60);
+            attendance.totalHours = parseFloat(hours.toFixed(2));
+        } else if (totalHours !== undefined) {
+            attendance.totalHours = totalHours;
+        }
 
         await attendance.save();
 
