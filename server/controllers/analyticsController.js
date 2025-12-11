@@ -202,7 +202,7 @@ const getSiteReport = async (req, res, next) => {
             limit: 50
         });
 
-        // Get employee hours breakdown for this site
+        // Get employee hours breakdown for this site (completed attendances)
         const employeeHoursData = await sequelize.query(`
             SELECT 
                 u.id as user_id,
@@ -210,30 +210,51 @@ const getSiteReport = async (req, res, next) => {
                 u.last_name,
                 u.username,
                 u.hourly_cost,
-                SUM(a.total_hours) as total_hours,
-                COUNT(a.id) as total_days
+                COALESCE(SUM(CASE WHEN a.clock_out IS NOT NULL THEN a.total_hours ELSE 0 END), 0) as completed_hours,
+                COUNT(CASE WHEN a.clock_out IS NOT NULL THEN 1 END) as completed_days,
+                COUNT(CASE WHEN a.clock_out IS NULL THEN 1 END) as active_count,
+                MAX(CASE WHEN a.clock_out IS NULL THEN a.clock_in END) as active_clock_in
             FROM attendances a
             JOIN users u ON a.user_id = u.id
             WHERE a.site_id = :siteId
-              AND a.clock_out IS NOT NULL
             GROUP BY u.id, u.first_name, u.last_name, u.username, u.hourly_cost
-            ORDER BY total_hours DESC
+            ORDER BY completed_hours DESC
         `, {
             replacements: { siteId },
             type: sequelize.QueryTypes.SELECT
         });
 
-        const employeeHours = employeeHoursData.map(d => ({
-            id: {
-                id: d.user_id,
-                firstName: d.first_name,
-                lastName: d.last_name,
-                username: d.username,
-                hourlyCost: parseFloat(d.hourly_cost) || 0
-            },
-            totalHours: parseFloat(d.total_hours || 0),
-            totalDays: parseInt(d.total_days || 0)
-        }));
+        // Calculate employee hours including live hours for active attendances
+        const employeeHours = employeeHoursData.map(d => {
+            let liveHoursForEmployee = 0;
+            const isActive = parseInt(d.active_count) > 0;
+
+            if (isActive && d.active_clock_in) {
+                const clockInData = typeof d.active_clock_in === 'string'
+                    ? JSON.parse(d.active_clock_in)
+                    : d.active_clock_in;
+                const clockInTime = clockInData?.time ? new Date(clockInData.time) : null;
+                if (clockInTime) {
+                    const diffMs = now - clockInTime;
+                    if (diffMs > 0) {
+                        liveHoursForEmployee = diffMs / 3600000;
+                    }
+                }
+            }
+
+            return {
+                id: {
+                    id: d.user_id,
+                    firstName: d.first_name,
+                    lastName: d.last_name,
+                    username: d.username,
+                    hourlyCost: parseFloat(d.hourly_cost) || 0
+                },
+                totalHours: parseFloat(d.completed_hours || 0) + liveHoursForEmployee,
+                totalDays: parseInt(d.completed_days || 0) + (isActive ? 1 : 0),
+                isActive: isActive
+            };
+        });
 
         res.json({
             // Parse numeric fields from raw SQL results
