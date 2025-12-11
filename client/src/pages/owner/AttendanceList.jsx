@@ -81,7 +81,7 @@ export default function AttendanceList() {
     };
 
     const calculateDuration = (clockIn, clockOut) => {
-        if (!clockOut?.time) return 'In corso...';
+        if (!clockOut?.time) return null; // Will use LiveDuration component instead
 
         const start = new Date(clockIn.time);
         const end = new Date(clockOut.time);
@@ -90,6 +90,46 @@ export default function AttendanceList() {
         const diffMins = Math.floor((diffMs % 3600000) / 60000);
 
         return `${diffHrs}h ${diffMins}m`;
+    };
+
+    // Live duration component for in-progress attendances
+    const LiveDuration = ({ clockInTime }) => {
+        const [duration, setDuration] = useState('');
+        const [tick, setTick] = useState(0);
+
+        useEffect(() => {
+            const calculateLive = () => {
+                const start = new Date(clockInTime);
+                const now = new Date();
+                const diffMs = now - start;
+                if (diffMs < 0) {
+                    setDuration('0h 0m');
+                    return;
+                }
+                const diffHrs = Math.floor(diffMs / 3600000);
+                const diffMins = Math.floor((diffMs % 3600000) / 60000);
+                setDuration(`${diffHrs}h ${diffMins}m`);
+            };
+
+            calculateLive(); // Calculate immediately
+            const interval = setInterval(() => {
+                calculateLive();
+                setTick(t => t + 1); // Force re-render for animation
+            }, 60000); // Update every minute
+
+            return () => clearInterval(interval);
+        }, [clockInTime]);
+
+        return (
+            <span className="flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span className="text-blue-600 font-bold">{duration}</span>
+                <span className="text-xs text-blue-400">live</span>
+            </span>
+        );
     };
 
     const getTotalHours = () => {
@@ -389,9 +429,15 @@ export default function AttendanceList() {
                                     <div className="pl-0 md:pl-16 pt-4 border-t border-slate-50 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm text-slate-500">Durata:</span>
-                                            <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-sm">
-                                                {calculateDuration(attendance.clockIn, attendance.clockOut)}
-                                            </span>
+                                            {isCompleted ? (
+                                                <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-sm">
+                                                    {calculateDuration(attendance.clockIn, attendance.clockOut)}
+                                                </span>
+                                            ) : (
+                                                <span className="bg-blue-50 px-3 py-1 rounded-full text-sm">
+                                                    <LiveDuration clockInTime={clockInTime} />
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <button
