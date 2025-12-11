@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { protect, admin } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/authMiddleware');
 const { sequelize } = require('../config/database');
 const User = require('../models/User');
 const Company = require('../models/Company');
