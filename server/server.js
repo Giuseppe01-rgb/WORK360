@@ -220,6 +220,7 @@ app.use('/api/work-activities', require('./routes/workActivityRoutes'));
 app.use('/api/communication', require('./routes/communicationRoutes'));
 app.use('/api/economia', require('./routes/economiaRoutes'));
 app.use('/api/audit-logs', require('./routes/auditLogRoutes'));
+app.use('/api/backup', require('./routes/backupRoutes')); // Data backup/export endpoints
 
 // Colora Material Tracking System
 app.use('/api/coloura-materials', require('./routes/colouraMaterialRoutes'));
