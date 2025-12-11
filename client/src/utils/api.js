@@ -228,4 +228,38 @@ export const auditLogAPI = {
     getActions: () => api.get('/audit-logs/actions'),
 };
 
+// Backup / Export
+export const backupAPI = {
+    getStats: () => api.get('/backup/stats'),
+    exportAll: async () => {
+        const response = await api.get('/backup/export-all', {
+            responseType: 'blob'
+        });
+        // Create download link
+        const url = window.URL.createObjectURL(response.data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `work360_backup_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        return response;
+    },
+    exportAttendances: async () => {
+        const response = await api.get('/backup/export-attendances', {
+            responseType: 'blob'
+        });
+        const url = window.URL.createObjectURL(response.data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `work360_attendances_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        return response;
+    }
+};
+
 export default api;
