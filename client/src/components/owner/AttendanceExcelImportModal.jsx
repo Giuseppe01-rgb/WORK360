@@ -74,7 +74,7 @@ const AttendanceExcelImportModal = ({ onClose, onImport }) => {
                                     Importa Presenze da Excel
                                 </h3>
                                 <p className="text-sm text-slate-600">
-                                    Carica un file con Data, Dipendente e Ore
+                                    Carica un file con Data, Dipendente, Ore e Cantiere
                                 </p>
                             </div>
                         </div>
@@ -100,6 +100,7 @@ const AttendanceExcelImportModal = ({ onClose, onImport }) => {
                                     <li>• <strong>Data</strong> (formato: GG/MM/AAAA o AAAA-MM-GG)</li>
                                     <li>• <strong>Dipendente</strong> (nome e cognome o username)</li>
                                     <li>• <strong>Ore</strong> (numero di ore lavorate, es. 8)</li>
+                                    <li>• <strong>Cantiere</strong> (nome del cantiere)</li>
                                 </ul>
                                 <div className="mt-3 pt-3 border-t border-blue-200">
                                     <p className="text-xs text-blue-700">
@@ -179,7 +180,7 @@ const AttendanceExcelImportModal = ({ onClose, onImport }) => {
                                     <h4 className="font-bold text-green-900 mb-3">Anteprima presenze (prime 5)</h4>
                                     <div className="space-y-2">
                                         {preview.attendances.slice(0, 5).map((att, i) => (
-                                            <div key={i} className="bg-white rounded p-3 text-sm flex items-center gap-4">
+                                            <div key={i} className="bg-white rounded p-3 text-sm flex flex-wrap items-center gap-3">
                                                 <div className="flex items-center gap-2">
                                                     <User className="w-4 h-4 text-slate-400" />
                                                     <span className="font-bold text-slate-900">{att.employeeName}</span>
@@ -192,6 +193,9 @@ const AttendanceExcelImportModal = ({ onClose, onImport }) => {
                                                     <Clock className="w-4 h-4 text-slate-400" />
                                                     <span className="text-slate-600">{att.clockIn} - {att.clockOut}</span>
                                                     <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">{att.hours}h</span>
+                                                </div>
+                                                <div className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs">
+                                                    📍 {att.siteName}
                                                 </div>
                                             </div>
                                         ))}

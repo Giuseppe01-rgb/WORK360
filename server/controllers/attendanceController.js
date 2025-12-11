@@ -545,7 +545,7 @@ const deleteAttendance = async (req, res) => {
 // @route   POST /api/attendance/import-excel
 // @access  Private (Owner)
 const importFromExcel = async (req, res) => {
-    const { parseAttendanceExcel, mapRowToAttendance, validateAttendance, findEmployee, calculateClockTimes } = require('../utils/attendanceExcelParser');
+    const { parseAttendanceExcel, mapRowToAttendance, validateAttendance, findEmployee, findSite } = require('../utils/attendanceExcelParser');
     const { calculateWorkedHours } = require('../utils/workedHoursCalculator');
 
     try {
@@ -608,13 +608,32 @@ const importFromExcel = async (req, res) => {
                 continue;
             }
 
+            // Find site (from Excel or use default)
+            let site = null;
+            if (attendance.siteName) {
+                site = findSite(attendance.siteName, sites);
+                if (!site) {
+                    results.errors.push(`Riga ${i + 2}: Cantiere "${attendance.siteName}" non trovato`);
+                    results.stats.errorRows++;
+                    continue;
+                }
+            } else {
+                site = defaultSite;
+            }
+
+            if (!site) {
+                results.errors.push(`Riga ${i + 2}: Nessun cantiere specificato e nessun cantiere disponibile`);
+                results.stats.errorRows++;
+                continue;
+            }
+
             // Build attendance data
             const attendanceData = {
                 row: i + 2,
                 userId: employee.id,
                 employeeName: `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || employee.username,
-                siteId: defaultSite?.id,
-                siteName: defaultSite?.name || 'Non specificato',
+                siteId: site.id,
+                siteName: site.name,
                 date: attendance.date,
                 hours: attendance.hours,
                 clockIn: attendance.clockIn,

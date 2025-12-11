@@ -149,6 +149,7 @@ const mapRowToAttendance = (row) => {
     const dateRaw = findValue(row, ['Data', 'data', 'DATE', 'Date', 'Giorno']);
     const employeeRaw = findValue(row, ['Dipendente', 'dipendente', 'Nome', 'nome', 'Employee', 'Operaio', 'operaio', 'Lavoratore']);
     const hoursRaw = findValue(row, ['Ore', 'ore', 'Hours', 'hours', 'Orario', 'H', 'h']);
+    const siteRaw = findValue(row, ['Cantiere', 'cantiere', 'Site', 'site', 'Sito', 'sito', 'Luogo', 'luogo']);
 
     const date = parseDate(dateRaw);
     const hours = parseHours(hoursRaw);
@@ -157,10 +158,11 @@ const mapRowToAttendance = (row) => {
     return {
         date,
         employeeName: employeeRaw,
+        siteName: siteRaw,
         hours,
         clockIn,
         clockOut,
-        rawData: { dateRaw, employeeRaw, hoursRaw }
+        rawData: { dateRaw, employeeRaw, hoursRaw, siteRaw }
     };
 };
 
@@ -230,11 +232,36 @@ const findEmployee = (employeeName, users) => {
     return null;
 };
 
+/**
+ * Find site by name (fuzzy matching)
+ */
+const findSite = (siteName, sites) => {
+    if (!siteName) return null;
+
+    const searchName = siteName.toLowerCase().trim();
+
+    // Try exact match first
+    let match = sites.find(s => {
+        return (s.name || '').toLowerCase().trim() === searchName;
+    });
+    if (match) return match;
+
+    // Try partial match (site name contains search or vice versa)
+    match = sites.find(s => {
+        const name = (s.name || '').toLowerCase();
+        return name.includes(searchName) || searchName.includes(name);
+    });
+    if (match) return match;
+
+    return null;
+};
+
 module.exports = {
     parseAttendanceExcel,
     mapRowToAttendance,
     validateAttendance,
     findEmployee,
+    findSite,
     calculateClockTimes,
     parseDate,
     parseHours
