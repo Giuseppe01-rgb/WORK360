@@ -81,6 +81,15 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             }
         };
         loadDetails();
+
+        // Auto-refresh every 2 minutes for live data updates
+        const interval = setInterval(() => {
+            analyticsAPI.getSiteReport(site.id).then(rep => {
+                setReport(rep.data);
+            }).catch(err => console.error("Auto-refresh error:", err));
+        }, 120000); // 2 minutes
+
+        return () => clearInterval(interval);
     }, [site]);
 
     if (loading) {

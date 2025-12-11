@@ -129,8 +129,8 @@ const getSiteReport = async (req, res, next) => {
             raw: true
         });
 
-        // Get attendance summary
-        const attendance = await Attendance.findAll({
+        // Get attendance summary (completed attendances)
+        const completedAttendance = await Attendance.findAll({
             where: {
                 siteId,
                 clockOut: { [Op.ne]: null }
@@ -142,8 +142,30 @@ const getSiteReport = async (req, res, next) => {
             raw: true
         });
 
-        // Calculate costs
-        const totalHours = parseFloat(attendance[0]?.totalHours || 0);
+        // Get in-progress attendances (no clockOut) and calculate live hours
+        const inProgressAttendances = await Attendance.findAll({
+            where: {
+                siteId,
+                clockOut: null
+            },
+            attributes: ['id', 'clockIn', 'createdAt'],
+            raw: true
+        });
+
+        // Calculate live hours for in-progress attendances
+        let liveHours = 0;
+        const now = new Date();
+        inProgressAttendances.forEach(att => {
+            const clockInTime = att.clockIn?.time ? new Date(att.clockIn.time) : new Date(att.createdAt);
+            const diffMs = now - clockInTime;
+            if (diffMs > 0) {
+                liveHours += diffMs / 3600000; // Convert to hours
+            }
+        });
+
+        // Calculate costs - include both completed and live hours
+        const completedHours = parseFloat(completedAttendance[0]?.totalHours || 0);
+        const totalHours = completedHours + liveHours;
         const laborCost = totalHours * 25; // Default hourly rate
 
         // Calculate materials cost from material_usages
@@ -228,8 +250,11 @@ const getSiteReport = async (req, res, next) => {
                 totalQuantity: parseFloat(e.totalQuantity) || 0,
                 count: parseInt(e.count) || 0
             })),
-            attendance: attendance[0] || { totalHours: 0, totalDays: 0 },
+            attendance: completedAttendance[0] || { totalHours: 0, totalDays: 0 },
             totalHours,
+            liveHours: parseFloat(liveHours.toFixed(2)),
+            activeWorkers: inProgressAttendances.length, // Number of workers currently on site
+            hasLiveData: inProgressAttendances.length > 0,
             contractValue: contractValue || null,
             status: site?.status || 'active', // 'active' or 'completed'
             siteCost: {
