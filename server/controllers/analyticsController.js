@@ -202,7 +202,7 @@ const getSiteReport = async (req, res, next) => {
             limit: 50
         });
 
-        // Get employee hours breakdown for this site (completed attendances)
+        // Get employee hours breakdown for this site (completed attendances only)
         const employeeHoursData = await sequelize.query(`
             SELECT 
                 u.id as user_id,
@@ -212,8 +212,7 @@ const getSiteReport = async (req, res, next) => {
                 u.hourly_cost,
                 COALESCE(SUM(CASE WHEN a.clock_out IS NOT NULL THEN a.total_hours ELSE 0 END), 0) as completed_hours,
                 COUNT(CASE WHEN a.clock_out IS NOT NULL THEN 1 END) as completed_days,
-                COUNT(CASE WHEN a.clock_out IS NULL THEN 1 END) as active_count,
-                MAX(CASE WHEN a.clock_out IS NULL THEN a.clock_in END) as active_clock_in
+                COUNT(CASE WHEN a.clock_out IS NULL THEN 1 END) as active_count
             FROM attendances a
             JOIN users u ON a.user_id = u.id
             WHERE a.site_id = :siteId
@@ -224,23 +223,41 @@ const getSiteReport = async (req, res, next) => {
             type: sequelize.QueryTypes.SELECT
         });
 
+        // Get active attendances separately with their clockIn times
+        const activeAttendancesPerEmployee = await Attendance.findAll({
+            where: {
+                siteId,
+                clockOut: null
+            },
+            attributes: ['userId', 'clockIn', 'createdAt'],
+            raw: true
+        });
+
+        // Create a map of userId to their active clockIn times
+        const activeClockInsMap = {};
+        activeAttendancesPerEmployee.forEach(att => {
+            if (!activeClockInsMap[att.userId]) {
+                activeClockInsMap[att.userId] = [];
+            }
+            activeClockInsMap[att.userId].push(att.clockIn?.time || att.createdAt);
+        });
+
         // Calculate employee hours including live hours for active attendances
         const employeeHours = employeeHoursData.map(d => {
             let liveHoursForEmployee = 0;
             const isActive = parseInt(d.active_count) > 0;
 
-            if (isActive && d.active_clock_in) {
-                const clockInData = typeof d.active_clock_in === 'string'
-                    ? JSON.parse(d.active_clock_in)
-                    : d.active_clock_in;
-                const clockInTime = clockInData?.time ? new Date(clockInData.time) : null;
+            // Calculate live hours from active attendances
+            const activeClockIns = activeClockInsMap[d.user_id] || [];
+            activeClockIns.forEach(clockInTime => {
                 if (clockInTime) {
-                    const diffMs = now - clockInTime;
+                    const clockIn = new Date(clockInTime);
+                    const diffMs = now - clockIn;
                     if (diffMs > 0) {
-                        liveHoursForEmployee = diffMs / 3600000;
+                        liveHoursForEmployee += diffMs / 3600000;
                     }
                 }
-            }
+            });
 
             return {
                 id: {
