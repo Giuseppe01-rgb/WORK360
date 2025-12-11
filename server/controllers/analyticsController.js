@@ -15,22 +15,7 @@ const getHoursPerEmployee = async (req, res) => {
 
         const companyId = getCompanyId(req);
 
-        // Build where clause
-        const where = {
-            clockOut: { [Op.ne]: null } // Only completed attendances
-        };
-
-        if (siteId) {
-            where.siteId = siteId;
-        }
-
-        if (startDate && endDate) {
-            where['clockIn.time'] = {
-                [Op.between]: [new Date(startDate), new Date(endDate)]
-            };
-        }
-
-        // Get aggregated hours using raw SQL for performance
+        // Get aggregated hours including active attendances
         const hoursData = await sequelize.query(`
             SELECT 
                 u.id as user_id,
@@ -39,16 +24,15 @@ const getHoursPerEmployee = async (req, res) => {
                 u.username,
                 u.hourly_cost,
                 u.first_name || ' ' || u.last_name as employee,
-                SUM(a.total_hours) as total_hours,
-                COUNT(a.id) as total_days,
-                AVG(a.total_hours) as avg_hours_per_day
+                COALESCE(SUM(CASE WHEN a.clock_out IS NOT NULL THEN a.total_hours ELSE 0 END), 0) as total_hours,
+                COUNT(CASE WHEN a.clock_out IS NOT NULL THEN 1 END) as total_days,
+                COUNT(CASE WHEN a.clock_out IS NULL THEN 1 END) as active_count
             FROM attendances a
             JOIN users u ON a.user_id = u.id
             WHERE u.company_id = :companyId
-              AND a.clock_out IS NOT NULL
               ${siteId ? 'AND a.site_id = :siteId' : ''}
-              ${startDate ? 'AND (a.clock_in->>\'time\')::timestamp >= :startDate' : ''}
-              ${endDate ? 'AND (a.clock_in->>\'time\')::timestamp <= :endDate' : ''}
+              ${startDate ? "AND (a.clock_in->>'time')::timestamp >= :startDate" : ''}
+              ${endDate ? "AND (a.clock_in->>'time')::timestamp <= :endDate" : ''}
             GROUP BY u.id, u.first_name, u.last_name, u.username, u.hourly_cost
             ORDER BY total_hours DESC
         `, {
@@ -57,6 +41,34 @@ const getHoursPerEmployee = async (req, res) => {
         });
 
         console.log('DEBUG: hoursData found:', hoursData.length, 'records');
+
+        // Get active attendances to calculate live hours
+        const now = new Date();
+        const activeAttendances = await Attendance.findAll({
+            where: {
+                clockOut: null,
+                ...(siteId ? { siteId } : {})
+            },
+            include: [{
+                model: User,
+                as: 'user',
+                where: { companyId },
+                attributes: []
+            }],
+            attributes: ['userId', 'clockIn', 'createdAt'],
+            raw: true
+        });
+
+        // Create a map of userId to their live hours
+        const liveHoursMap = {};
+        activeAttendances.forEach(att => {
+            const clockInTime = att.clockIn?.time ? new Date(att.clockIn.time) : new Date(att.createdAt);
+            const diffMs = now - clockInTime;
+            if (diffMs > 0) {
+                const hours = diffMs / 3600000;
+                liveHoursMap[att.userId] = (liveHoursMap[att.userId] || 0) + hours;
+            }
+        });
 
         // Format response to match frontend expectations
         res.json(hoursData.map(d => ({
@@ -68,9 +80,12 @@ const getHoursPerEmployee = async (req, res) => {
                 hourlyCost: parseFloat(d.hourly_cost) || 0
             },
             employee: d.employee,
-            totalHours: parseFloat(d.total_hours || 0),
-            totalDays: parseInt(d.total_days || 0),
-            avgHoursPerDay: parseFloat(d.avg_hours_per_day || 0).toFixed(2)
+            totalHours: parseFloat(d.total_hours || 0) + (liveHoursMap[d.user_id] || 0),
+            totalDays: parseInt(d.total_days || 0) + (parseInt(d.active_count) > 0 ? 1 : 0),
+            avgHoursPerDay: parseFloat(d.total_hours || 0) > 0
+                ? (parseFloat(d.total_hours || 0) / parseInt(d.total_days || 1)).toFixed(2)
+                : '0.00',
+            isActive: parseInt(d.active_count) > 0
         })));
     } catch (error) {
         console.error('getHoursPerEmployee error:', error);
