@@ -137,7 +137,7 @@ const clockOut = async (req, res) => {
             targetType: 'attendance',
             targetId: attendance.id,
             ipAddress: req.ip,
-            meta: { siteId: attendance.siteId, totalHours }
+            meta: { siteId: attendance.siteId, totalHours: workedHours }
         });
 
         res.json(attendance);
