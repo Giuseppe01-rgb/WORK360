@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI, userAPI } from '../../utils/api';
-import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2, Zap, Download } from 'lucide-react';
+import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2, Zap, Download, FileSpreadsheet } from 'lucide-react';
 import { exportAttendanceReport } from '../../utils/excelExport';
 import AttendanceModal from '../../components/owner/AttendanceModal';
 import BulkAttendanceModal from '../../components/owner/BulkAttendanceModal';
+import AttendanceExcelImportModal from '../../components/owner/AttendanceExcelImportModal';
 import { useToast } from '../../context/ToastContext';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
 
@@ -17,6 +18,7 @@ export default function AttendanceList() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [showBulkModal, setShowBulkModal] = useState(false);
+    const [showExcelImportModal, setShowExcelImportModal] = useState(false);
     const [editingAttendance, setEditingAttendance] = useState(null);
     const [filters, setFilters] = useState({
         siteId: '',
@@ -325,6 +327,13 @@ export default function AttendanceList() {
                     <h3 className="text-lg font-bold text-slate-900">Lista Presenze</h3>
                     <div className="flex gap-2">
                         <button
+                            onClick={() => setShowExcelImportModal(true)}
+                            className="px-4 py-2 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors flex items-center gap-2"
+                        >
+                            <FileSpreadsheet className="w-4 h-4" />
+                            Importa Excel
+                        </button>
+                        <button
                             onClick={() => setShowBulkModal(true)}
                             className="px-4 py-2 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2"
                         >
@@ -490,6 +499,14 @@ export default function AttendanceList() {
                 <BulkAttendanceModal
                     onClose={() => setShowBulkModal(false)}
                     onSuccess={handleModalSuccess}
+                />
+            )}
+
+            {/* Excel Import Modal */}
+            {showExcelImportModal && (
+                <AttendanceExcelImportModal
+                    onClose={() => setShowExcelImportModal(false)}
+                    onImport={handleModalSuccess}
                 />
             )}
         </Layout>

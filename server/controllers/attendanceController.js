@@ -541,6 +541,144 @@ const deleteAttendance = async (req, res) => {
     }
 };
 
+// @desc    Import attendance from Excel file
+// @route   POST /api/attendance/import-excel
+// @access  Private (Owner)
+const importFromExcel = async (req, res) => {
+    const { parseAttendanceExcel, mapRowToAttendance, validateAttendance, findEmployee, calculateClockTimes } = require('../utils/attendanceExcelParser');
+    const { calculateWorkedHours } = require('../utils/workedHoursCalculator');
+
+    try {
+        const companyId = getCompanyId(req);
+        const preview = req.query.preview === 'true';
+
+        if (!req.file) {
+            return res.status(400).json({ message: 'File Excel richiesto' });
+        }
+
+        // Parse Excel file
+        const rows = parseAttendanceExcel(req.file.buffer);
+        console.log(`Parsed ${rows.length} rows from Excel`);
+
+        // Get all workers for this company
+        const workers = await User.findAll({
+            where: { companyId, role: 'worker' },
+            attributes: ['id', 'firstName', 'lastName', 'username']
+        });
+
+        // Get all sites for this company
+        const sites = await ConstructionSite.findAll({
+            where: { companyId },
+            attributes: ['id', 'name']
+        });
+
+        // Get default site (first active one) or null
+        const defaultSite = sites.length > 0 ? sites[0] : null;
+
+        const results = {
+            stats: {
+                totalRows: rows.length,
+                validAttendances: 0,
+                errorRows: 0,
+                duplicateRows: 0
+            },
+            attendances: [],
+            errors: [],
+            duplicates: []
+        };
+
+        // Process each row
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const attendance = mapRowToAttendance(row);
+
+            // Validate
+            const validationErrors = validateAttendance(attendance, i);
+            if (validationErrors.length > 0) {
+                results.errors.push(...validationErrors);
+                results.stats.errorRows++;
+                continue;
+            }
+
+            // Find employee
+            const employee = findEmployee(attendance.employeeName, workers);
+            if (!employee) {
+                results.errors.push(`Riga ${i + 2}: Dipendente "${attendance.employeeName}" non trovato`);
+                results.stats.errorRows++;
+                continue;
+            }
+
+            // Build attendance data
+            const attendanceData = {
+                row: i + 2,
+                userId: employee.id,
+                employeeName: `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || employee.username,
+                siteId: defaultSite?.id,
+                siteName: defaultSite?.name || 'Non specificato',
+                date: attendance.date,
+                hours: attendance.hours,
+                clockIn: attendance.clockIn,
+                clockOut: attendance.clockOut
+            };
+
+            results.attendances.push(attendanceData);
+            results.stats.validAttendances++;
+        }
+
+        // If preview mode, return stats without creating
+        if (preview) {
+            return res.json({
+                preview: true,
+                ...results
+            });
+        }
+
+        // Actually create attendances
+        let importedCount = 0;
+        const createErrors = [];
+
+        for (const att of results.attendances) {
+            try {
+                const clockInData = {
+                    time: new Date(`${att.date}T${att.clockIn}:00+01:00`),
+                    location: null
+                };
+                const clockOutData = {
+                    time: new Date(`${att.date}T${att.clockOut}:00+01:00`),
+                    location: null
+                };
+
+                // Calculate worked hours
+                const { workedHours } = calculateWorkedHours(clockInData.time, clockOutData.time);
+
+                await Attendance.create({
+                    userId: att.userId,
+                    siteId: att.siteId,
+                    clockIn: clockInData,
+                    clockOut: clockOutData,
+                    totalHours: workedHours,
+                    notes: `Importato da Excel - ${att.hours}h`
+                });
+
+                importedCount++;
+            } catch (err) {
+                createErrors.push({ row: att.row, error: err.message });
+            }
+        }
+
+        res.json({
+            preview: false,
+            importedCount,
+            stats: results.stats,
+            errors: [...results.errors, ...createErrors.map(e => `Riga ${e.row}: ${e.error}`)]
+        });
+
+    } catch (error) {
+        console.error('importFromExcel error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     clockIn,
     clockOut,
@@ -550,5 +688,6 @@ module.exports = {
     createManualAttendance,
     bulkCreateAttendances,
     updateAttendance,
-    deleteAttendance
+    deleteAttendance,
+    importFromExcel
 };

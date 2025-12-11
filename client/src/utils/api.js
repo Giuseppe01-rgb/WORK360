@@ -42,6 +42,13 @@ export const attendanceAPI = {
     getAll: (params) => api.get('/attendance/all', { params }),
     createManual: (data) => api.post('/attendance/manual', data),
     bulkCreate: (data) => api.post('/attendance/bulk', data),
+    importExcel: (file, preview = false) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return api.post(`/attendance/import-excel?preview=${preview}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
     update: (id, data) => api.put(`/attendance/${id}`, data),
     delete: (id) => api.delete(`/attendance/${id}`),
 };
