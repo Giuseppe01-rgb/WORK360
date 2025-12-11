@@ -560,10 +560,10 @@ const importFromExcel = async (req, res) => {
         const rows = parseAttendanceExcel(req.file.buffer);
         console.log(`Parsed ${rows.length} rows from Excel`);
 
-        // Get all workers for this company
+        // Get all users for this company (workers + owners)
         const workers = await User.findAll({
-            where: { companyId, role: 'worker' },
-            attributes: ['id', 'firstName', 'lastName', 'username']
+            where: { companyId },
+            attributes: ['id', 'firstName', 'lastName', 'username', 'role']
         });
 
         // Get all sites for this company
