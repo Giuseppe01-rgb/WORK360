@@ -142,6 +142,7 @@ export const siteAPI = {
     getOne: (id) => api.get(`/sites/${id}`),
     update: (id, data) => api.put(`/sites/${id}`, data),
     delete: (id) => api.delete(`/sites/${id}`),
+    recalculateCosts: (id) => api.post(`/sites/${id}/recalculate-costs`),
 };
 
 // Analytics

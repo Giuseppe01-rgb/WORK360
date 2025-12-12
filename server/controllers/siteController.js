@@ -310,4 +310,83 @@ const deleteSite = async (req, res) => {
     }
 };
 
-module.exports = { createSite, getSites, getSite, updateSite, deleteSite };
+// Recalculate labor costs for a site using current employee hourly rates
+// This is used when hourly rates were entered incorrectly and need to be fixed
+const recalculateCosts = async (req, res) => {
+    try {
+        const siteId = req.params.id;
+        const companyId = req.user.companyId || req.user.company?.id;
+
+        // Check if site exists and belongs to company
+        const site = await ConstructionSite.findOne({
+            where: {
+                id: siteId,
+                companyId: companyId
+            }
+        });
+
+        if (!site) {
+            return res.status(404).json({ message: 'Cantiere non trovato' });
+        }
+
+        // Get all attendances for this site with user info
+        const attendances = await Attendance.findAll({
+            where: { siteId },
+            include: [{
+                model: User,
+                as: 'user',
+                attributes: ['id', 'hourlyCost', 'firstName', 'lastName']
+            }]
+        });
+
+        let updatedCount = 0;
+        let totalOldCost = 0;
+        let totalNewCost = 0;
+
+        // Update each attendance with current user hourly rate
+        for (const attendance of attendances) {
+            const oldHourlyCost = parseFloat(attendance.hourlyCost) || 0;
+            const newHourlyCost = parseFloat(attendance.user?.hourlyCost) || 0;
+            const hours = parseFloat(attendance.totalHours) || 0;
+
+            totalOldCost += hours * oldHourlyCost;
+            totalNewCost += hours * newHourlyCost;
+
+            // Only update if rate has changed
+            if (oldHourlyCost !== newHourlyCost) {
+                await attendance.update({ hourlyCost: newHourlyCost });
+                updatedCount++;
+            }
+        }
+
+        // Audit log
+        await logAction({
+            userId: getUserId(req),
+            companyId,
+            action: 'SITE_COSTS_RECALCULATED',
+            targetType: 'site',
+            targetId: siteId,
+            ipAddress: req.ip,
+            meta: {
+                siteName: site.name,
+                attendancesUpdated: updatedCount,
+                oldTotalCost: totalOldCost.toFixed(2),
+                newTotalCost: totalNewCost.toFixed(2)
+            }
+        });
+
+        res.json({
+            message: `Costi ricalcolati per ${updatedCount} presenze`,
+            updatedCount,
+            totalAttendances: attendances.length,
+            oldTotalCost: parseFloat(totalOldCost.toFixed(2)),
+            newTotalCost: parseFloat(totalNewCost.toFixed(2)),
+            difference: parseFloat((totalNewCost - totalOldCost).toFixed(2))
+        });
+    } catch (error) {
+        console.error('Error recalculating costs:', error);
+        res.status(500).json({ message: 'Errore nel ricalcolo dei costi', error: error.message });
+    }
+};
+
+module.exports = { createSite, getSites, getSite, updateSite, deleteSite, recalculateCosts };

@@ -6,7 +6,7 @@ import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI,
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight,
-    FileText, Camera, Image, Zap, MoreVertical
+    FileText, Camera, Image, Zap, MoreVertical, RefreshCw
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack, showConfirm }) => {
@@ -24,6 +24,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     const [showEmployeesModal, setShowEmployeesModal] = useState(false);
     const [materialUsages, setMaterialUsages] = useState([]);
     const [loadingMaterials, setLoadingMaterials] = useState(false);
+    const [recalculating, setRecalculating] = useState(false);
 
     const loadMaterialUsages = async () => {
         setLoadingMaterials(true);
@@ -112,6 +113,30 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             setEconomie(economieData.data);
         } catch (error) {
             console.error('Error deleting economia:', error);
+        }
+    };
+
+    const handleRecalculateCosts = async () => {
+        const confirmed = await showConfirm({
+            title: 'Ricalcola costi',
+            message: 'Questa operazione aggiornerà i costi di tutte le presenze con le tariffe orarie attuali dei dipendenti. Continuare?',
+            confirmText: 'Ricalcola',
+            variant: 'warning'
+        });
+        if (!confirmed) return;
+
+        setRecalculating(true);
+        try {
+            const result = await siteAPI.recalculateCosts(site.id);
+            // Reload report to get updated costs
+            const rep = await analyticsAPI.getSiteReport(site.id);
+            setReport(rep.data);
+            alert(`✅ ${result.data.message}\n\nVecchio costo: €${result.data.oldTotalCost}\nNuovo costo: €${result.data.newTotalCost}\nDifferenza: €${result.data.difference}`);
+        } catch (error) {
+            console.error('Error recalculating costs:', error);
+            alert('Errore nel ricalcolo dei costi');
+        } finally {
+            setRecalculating(false);
         }
     };
 
@@ -238,9 +263,19 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <h3 className="text-slate-500 font-bold text-sm leading-tight">Costo Totale<br />Cantiere</h3>
                                     </div>
                                 </div>
-                                <span className="bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1 rounded-full tracking-wide">
-                                    IN TEMPO REALE
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1 rounded-full tracking-wide">
+                                        IN TEMPO REALE
+                                    </span>
+                                    <button
+                                        onClick={handleRecalculateCosts}
+                                        disabled={recalculating}
+                                        className="p-2 hover:bg-blue-50 rounded-full text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50"
+                                        title="Ricalcola costi con tariffe attuali"
+                                    >
+                                        <RefreshCw className={`w-4 h-4 ${recalculating ? 'animate-spin' : ''}`} />
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="mb-8">
