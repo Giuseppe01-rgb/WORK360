@@ -240,14 +240,12 @@ export default function Layout({ children, title, hideHeader = false }) {
             <aside className="hidden md:flex flex-col w-[280px] bg-white fixed h-full z-30 transition-all duration-300 shadow-xl shadow-slate-200/50 rounded-r-3xl my-4 ml-4 h-[calc(100vh-32px)]">
                 {/* Brand */}
                 <div className="h-24 flex items-center px-8">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-[#0F172A] rounded-2xl flex items-center justify-center shadow-lg shadow-slate-900/20">
-                            <span className="text-white font-black text-xs leading-tight text-center">WORK<br />360</span>
-                        </div>
-                        <div>
-                            <span className="block text-xl font-black tracking-tight text-slate-900">WORK360</span>
-                            <span className="block text-xs font-bold text-slate-400 tracking-widest uppercase">DASHBOARD</span>
-                        </div>
+                    <div className="flex items-center gap-3">
+                        <img
+                            src="/assets/logo-new.png"
+                            alt="WORK360"
+                            className="h-12 w-auto object-contain"
+                        />
                     </div>
                 </div>
 
@@ -311,10 +309,11 @@ export default function Layout({ children, title, hideHeader = false }) {
                 {/* Mobile Header */}
                 <header className="md:hidden bg-white border-b border-slate-200 sticky top-0 z-40 px-4 h-16 flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-[#0F172A] rounded-lg flex items-center justify-center">
-                            <span className="text-white font-black text-[8px] leading-tight text-center">WORK<br />360</span>
-                        </div>
-                        <span className="text-lg font-bold text-slate-900">WORK360</span>
+                        <img
+                            src="/assets/logo-new.png"
+                            alt="WORK360"
+                            className="h-10 w-auto object-contain"
+                        />
                     </div>
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -338,10 +337,11 @@ export default function Layout({ children, title, hideHeader = false }) {
                             <div className="p-6 flex flex-col h-full">
                                 <div className="flex justify-between items-center mb-8">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-[#0F172A] rounded-xl flex items-center justify-center shadow-lg shadow-slate-900/20">
-                                            <span className="text-white font-black text-[10px] leading-tight text-center">WORK<br />360</span>
-                                        </div>
-                                        <span className="text-xl font-black text-slate-900">WORK360</span>
+                                        <img
+                                            src="/assets/logo-new.png"
+                                            alt="WORK360"
+                                            className="h-10 w-auto object-contain"
+                                        />
                                     </div>
                                     <button
                                         onClick={() => setIsMobileMenuOpen(false)}
