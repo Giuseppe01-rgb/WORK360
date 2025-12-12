@@ -163,25 +163,49 @@ const getSiteReport = async (req, res, next) => {
                 siteId,
                 clockOut: null
             },
-            attributes: ['id', 'clockIn', 'createdAt'],
+            include: [{
+                model: User,
+                as: 'user',
+                attributes: ['id', 'hourlyCost']
+            }],
+            attributes: ['id', 'clockIn', 'createdAt', 'userId'],
             raw: true
         });
 
         // Calculate live hours for in-progress attendances
         let liveHours = 0;
+        let liveLaborCost = 0;
         const now = new Date();
         inProgressAttendances.forEach(att => {
             const clockInTime = att.clockIn?.time ? new Date(att.clockIn.time) : new Date(att.createdAt);
             const diffMs = now - clockInTime;
             if (diffMs > 0) {
-                liveHours += diffMs / 3600000; // Convert to hours
+                const hours = diffMs / 3600000; // Convert to hours
+                liveHours += hours;
+                const hourlyCost = parseFloat(att['user.hourlyCost']) || 0;
+                liveLaborCost += hours * hourlyCost;
             }
         });
 
-        // Calculate costs - include both completed and live hours
+        // Calculate labor cost using individual hourly rates (completed attendances)
+        const laborCostResult = await sequelize.query(`
+            SELECT 
+                SUM(a.total_hours * COALESCE(u.hourly_cost, 0)) as total_labor_cost
+            FROM attendances a
+            JOIN users u ON a.user_id = u.id
+            WHERE a.site_id = :siteId
+              AND a.clock_out IS NOT NULL
+        `, {
+            replacements: { siteId },
+            type: sequelize.QueryTypes.SELECT
+        });
+
+        const completedLaborCost = parseFloat(laborCostResult[0]?.total_labor_cost || 0);
+        const laborCost = completedLaborCost + liveLaborCost;
+
+        // Calculate total hours (completed + live)
         const completedHours = parseFloat(completedAttendance[0]?.totalHours || 0);
         const totalHours = completedHours + liveHours;
-        const laborCost = totalHours * 25; // Default hourly rate
 
         // Calculate materials cost from material_usages
         const materialUsages = await sequelize.query(`
