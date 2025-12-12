@@ -189,10 +189,6 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                 return sum + (mat.totalCost || 0);
                             }, 0) || 0;
 
-                            // Economie are revenue, not costs - calculate for display only
-                            const economieHours = economie.reduce((sum, e) => sum + e.hours, 0);
-                            const economieRevenue = economieHours * 30; // 30€/hour billable to client
-
                             // Total cost excludes economie (they add to revenue, not costs)
                             const totalCost = laborCost + totalMaterialCost;
 
@@ -212,12 +208,6 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                             <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                                             <span className="text-sm font-medium text-slate-700">Materiali: {totalMaterialCost.toFixed(2)}€</span>
                                         </div>
-                                        {economieRevenue > 0 && (
-                                            <div className="flex items-center gap-2 pt-2 border-t border-green-200 mt-2">
-                                                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                                                <span className="text-sm font-medium text-green-700">Economie (+ricavo): {economieRevenue.toFixed(2)}€</span>
-                                            </div>
-                                        )}
                                     </div>
                                 </>
                             );
@@ -226,77 +216,88 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
 
                     {/* Margin Card */}
                     {report?.contractValue ? (
-                        <div className={`border rounded-2xl p-6 md:p-8 ${report.margin?.marginCurrentValue >= 0
-                            ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'
-                            : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-100'
-                            }`}>
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${report.margin?.marginCurrentValue >= 0
-                                        ? 'bg-green-100'
-                                        : 'bg-red-100'
-                                        }`}>
-                                        <FileText className={`w-6 h-6 ${report.margin?.marginCurrentValue >= 0
-                                            ? 'text-green-600'
-                                            : 'text-red-600'
-                                            }`} />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-slate-900">
-                                        {report.status === 'completed' ? 'Margine finale' : 'Margine cantiere'}
-                                    </h3>
-                                </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${report.status === 'completed'
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : 'bg-amber-100 text-amber-700'
+                        (() => {
+                            // Calculate economie revenue for margin
+                            const economieHours = economie.reduce((sum, e) => sum + e.hours, 0);
+                            const economieRevenue = economieHours * 30;
+                            const totalRevenue = (report.contractValue || 0) + economieRevenue;
+                            const adjustedMargin = totalRevenue - (report.siteCost?.total || 0);
+
+                            return (
+                                <div className={`border rounded-2xl p-6 md:p-8 ${adjustedMargin >= 0
+                                    ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'
+                                    : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-100'
                                     }`}>
-                                    {report.status === 'completed' ? 'A CONSUNTIVO' : 'PROVVISORIO'}
-                                </span>
-                            </div>
-
-                            <div className={`text-5xl md:text-6xl font-black mb-4 ${report.margin?.marginCurrentValue >= 0
-                                ? 'text-green-600'
-                                : 'text-red-600'
-                                }`}>
-                                {report.margin?.marginCurrentValue?.toFixed(2) || '0.00'}€
-                            </div>
-
-                            <div className="space-y-2 mb-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                    <span className="text-sm font-medium text-slate-700">
-                                        {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}: {report.contractValue?.toFixed(2)}€
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                                    <span className="text-sm font-medium text-slate-700">
-                                        {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}: {report.siteCost?.total?.toFixed(2)}€
-                                    </span>
-                                </div>
-                                {report.status !== 'completed' && (
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                                        <span className="text-sm font-medium text-slate-700">
-                                            Costo su ricavo: {report.margin?.costVsRevenuePercent?.toFixed(1)}%
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${adjustedMargin >= 0
+                                                ? 'bg-green-100'
+                                                : 'bg-red-100'
+                                                }`}>
+                                                <FileText className={`w-6 h-6 ${adjustedMargin >= 0
+                                                    ? 'text-green-600'
+                                                    : 'text-red-600'
+                                                    }`} />
+                                            </div>
+                                            <h3 className="text-lg font-bold text-slate-900">
+                                                {report.status === 'completed' ? 'Margine finale' : 'Margine cantiere'}
+                                            </h3>
+                                        </div>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${report.status === 'completed'
+                                            ? 'bg-blue-100 text-blue-700'
+                                            : 'bg-amber-100 text-amber-700'
+                                            }`}>
+                                            {report.status === 'completed' ? 'A CONSUNTIVO' : 'PROVVISORIO'}
                                         </span>
                                     </div>
-                                )}
-                                {report.status === 'completed' && (
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                                        <span className="text-sm font-medium text-slate-700">
-                                            Margine %: {report.margin?.marginCurrentPercent?.toFixed(1)}%
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
 
-                            {report.status !== 'completed' && (
-                                <p className="text-xs text-slate-500 italic">
-                                    Valore provvisorio basato sui costi registrati finora.
-                                </p>
-                            )}
-                        </div>
+                                    <div className={`text-5xl md:text-6xl font-black mb-4 ${adjustedMargin >= 0
+                                        ? 'text-green-600'
+                                        : 'text-red-600'
+                                        }`}>
+                                        {adjustedMargin.toFixed(2)}€
+                                    </div>
+
+                                    <div className="space-y-2 mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                            <span className="text-sm font-medium text-slate-700">
+                                                {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
+                                                {economieRevenue > 0 && <span className="text-green-600"> + Economie (+{economieRevenue.toFixed(2)}€)</span>}: {totalRevenue.toFixed(2)}€
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                            <span className="text-sm font-medium text-slate-700">
+                                                {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}: {report.siteCost?.total?.toFixed(2)}€
+                                            </span>
+                                        </div>
+                                        {report.status !== 'completed' && (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                                                <span className="text-sm font-medium text-slate-700">
+                                                    Costo su ricavo: {(totalRevenue > 0 ? ((report.siteCost?.total || 0) / totalRevenue) * 100 : 0).toFixed(1)}%
+                                                </span>
+                                            </div>
+                                        )}
+                                        {report.status === 'completed' && (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                                                <span className="text-sm font-medium text-slate-700">
+                                                    Margine %: {(totalRevenue > 0 ? (adjustedMargin / totalRevenue) * 100 : 0).toFixed(1)}%
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {report.status !== 'completed' && (
+                                        <p className="text-xs text-slate-500 italic">
+                                            Valore provvisorio basato sui costi registrati finora.
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        })()
                     ) : (
                         <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-6 md:p-8">
                             <div className="flex items-center gap-3 mb-4">

@@ -314,19 +314,6 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${laborPct}%` }}></div>
                                     </div>
                                 </div>
-
-                                {/* Economie - Revenue section (not cost) */}
-                                {economieRevenue > 0 && (
-                                    <div className="pt-4 mt-2 border-t border-slate-200">
-                                        <div className="flex justify-between text-sm mb-2">
-                                            <span className="flex items-center gap-2 text-green-600 font-bold">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                                Economie (+ricavo)
-                                            </span>
-                                            <span className="font-black text-green-600">+{economieRevenue.toFixed(2)}€</span>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
@@ -406,13 +393,20 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 </div>
 
                                 <div className="mb-6">
-                                    <p className={`text-5xl font-black tracking-tight ${report.margin?.marginCurrentValue >= 0
-                                        ? 'text-green-600'
-                                        : 'text-red-600'
-                                        }`}>
-                                        {(report.margin?.marginCurrentValue || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                        <span className="text-3xl text-slate-400 font-medium ml-1">€</span>
-                                    </p>
+                                    {(() => {
+                                        // Calculate margin including economie as additional revenue
+                                        const totalRevenue = (report.contractValue || 0) + economieRevenue;
+                                        const adjustedMargin = totalRevenue - totalCost;
+                                        return (
+                                            <p className={`text-5xl font-black tracking-tight ${adjustedMargin >= 0
+                                                ? 'text-green-600'
+                                                : 'text-red-600'
+                                                }`}>
+                                                {adjustedMargin.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                <span className="text-3xl text-slate-400 font-medium ml-1">€</span>
+                                            </p>
+                                        );
+                                    })()}
                                 </div>
 
                                 <div className="space-y-4">
@@ -420,8 +414,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
                                             <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
                                             {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
+                                            {economieRevenue > 0 && <span className="text-green-600">+ Economie (+{economieRevenue.toFixed(2)}€)</span>}
                                         </span>
-                                        <span className="font-black text-slate-900">{(report.contractValue || 0).toFixed(2)}€</span>
+                                        <span className="font-black text-slate-900">{((report.contractValue || 0) + economieRevenue).toFixed(2)}€</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
