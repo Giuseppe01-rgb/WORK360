@@ -32,7 +32,7 @@ WorkActivity.init({
         allowNull: false,
         defaultValue: DataTypes.NOW
     },
-    activityType: DataTypes.STRING,
+    activityType: DataTypes.TEXT, // Changed from STRING to TEXT to allow longer descriptions
     description: DataTypes.TEXT,
     hours: DataTypes.DECIMAL(5, 2),
     notes: DataTypes.TEXT
