@@ -273,12 +273,12 @@ export default function AttendanceList() {
                     </div>
 
                     {/* Row 3: Date su stessa riga */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-1">Data Inizio</label>
                             <input
                                 type="date"
-                                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                className="w-full max-w-full block min-h-[50px] px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                 value={filters.startDate}
                                 onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
                             />
@@ -288,7 +288,7 @@ export default function AttendanceList() {
                             <label className="block text-sm font-semibold text-slate-700 mb-1">Data Fine</label>
                             <input
                                 type="date"
-                                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                className="w-full max-w-full block min-h-[50px] px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                 value={filters.endDate}
                                 onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                             />

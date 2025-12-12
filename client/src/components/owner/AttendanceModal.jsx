@@ -111,7 +111,7 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
                             Operaio *
                         </label>
                         <select
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            className="w-full max-w-full block min-h-[50px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                             value={formData.userId}
                             onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
                             required
@@ -136,7 +136,7 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
                             Cantiere *
                         </label>
                         <select
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            className="w-full max-w-full block min-h-[50px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                             value={formData.siteId}
                             onChange={(e) => setFormData({ ...formData, siteId: e.target.value })}
                             required
@@ -156,7 +156,7 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
                         </label>
                         <input
                             type="datetime-local"
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            className="w-full max-w-full block min-h-[50px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                             value={formData.clockInTime}
                             onChange={(e) => setFormData({ ...formData, clockInTime: e.target.value })}
                             required
@@ -171,7 +171,7 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
                         </label>
                         <input
                             type="datetime-local"
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                            className="w-full max-w-full block min-h-[50px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                             value={formData.clockOutTime}
                             onChange={(e) => setFormData({ ...formData, clockOutTime: e.target.value })}
                         />
@@ -201,7 +201,7 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
                             Note
                         </label>
                         <textarea
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[100px]"
+                            className="w-full max-w-full block min-h-[100px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                             placeholder="Note aggiuntive (opzionale)..."
                             value={formData.notes}
                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}

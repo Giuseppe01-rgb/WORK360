@@ -181,7 +181,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                         </div>
 
                         {(() => {
-                            // Calculate costs
+                            // Calculate costs (economie are NOT costs, they are additional revenue)
                             const totalHours = employeeHours.reduce((sum, emp) => sum + emp.totalHours, 0);
                             const laborCost = totalHours * 30; // 30€/hour for labor
 
@@ -189,10 +189,12 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                 return sum + (mat.totalCost || 0);
                             }, 0) || 0;
 
+                            // Economie are revenue, not costs - calculate for display only
                             const economieHours = economie.reduce((sum, e) => sum + e.hours, 0);
-                            const economieCost = economieHours * 30; // 30€/hour for economie
+                            const economieRevenue = economieHours * 30; // 30€/hour billable to client
 
-                            const totalCost = laborCost + totalMaterialCost + economieCost;
+                            // Total cost excludes economie (they add to revenue, not costs)
+                            const totalCost = laborCost + totalMaterialCost;
 
                             return (
                                 <>
@@ -210,10 +212,12 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                             <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                                             <span className="text-sm font-medium text-slate-700">Materiali: {totalMaterialCost.toFixed(2)}€</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                                            <span className="text-sm font-medium text-slate-700">Economie: {economieCost.toFixed(2)}€</span>
-                                        </div>
+                                        {economieRevenue > 0 && (
+                                            <div className="flex items-center gap-2 pt-2 border-t border-green-200 mt-2">
+                                                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                                                <span className="text-sm font-medium text-green-700">Economie (+ricavo): {economieRevenue.toFixed(2)}€</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </>
                             );

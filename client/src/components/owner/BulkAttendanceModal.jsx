@@ -36,7 +36,7 @@ function MultiSelect({ options, selected, onChange, placeholder }) {
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-left flex items-center justify-between"
+                className="w-full max-w-full block min-h-[50px] px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-slate-900 text-left flex items-center justify-between"
             >
                 <span className={selected.length === 0 ? 'text-slate-400' : 'text-slate-900 truncate'}>
                     {selected.length === 0 ? placeholder : `${selected.length} selezionati`}
@@ -56,8 +56,8 @@ function MultiSelect({ options, selected, onChange, placeholder }) {
                             className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer"
                         >
                             <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${selected.includes(option.id)
-                                    ? 'bg-slate-900 border-slate-900'
-                                    : 'border-slate-300'
+                                ? 'bg-slate-900 border-slate-900'
+                                : 'border-slate-300'
                                 }`}>
                                 {selected.includes(option.id) && <Check className="w-3 h-3 text-white" />}
                             </div>
@@ -223,10 +223,10 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
                                     {/* Cantiere */}
-                                    <div>
+                                    <div className="md:col-span-2">
                                         <label className="block text-xs font-semibold text-slate-600 mb-1">Cantiere</label>
                                         <select
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                            className="w-full max-w-full block min-h-[50px] px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                             value={entry.siteId}
                                             onChange={(e) => updateEntry(entry.id, 'siteId', e.target.value)}
                                         >
@@ -238,7 +238,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                                     </div>
 
                                     {/* Operai - Multi Select */}
-                                    <div>
+                                    <div className="md:col-span-2">
                                         <label className="block text-xs font-semibold text-slate-600 mb-1">
                                             Operai {entry.userIds.length > 0 && `(${entry.userIds.length})`}
                                         </label>
@@ -251,33 +251,33 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                                     </div>
 
                                     {/* Data */}
-                                    <div>
+                                    <div className="md:col-span-2">
                                         <label className="block text-xs font-semibold text-slate-600 mb-1">Data</label>
                                         <input
                                             type="date"
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                            className="w-full max-w-full block min-h-[50px] px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                             value={entry.date}
                                             onChange={(e) => updateEntry(entry.id, 'date', e.target.value)}
                                         />
                                     </div>
 
                                     {/* Entrata */}
-                                    <div>
+                                    <div className="md:col-span-3">
                                         <label className="block text-xs font-semibold text-slate-600 mb-1">Entrata</label>
                                         <input
                                             type="time"
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                            className="w-full max-w-full block min-h-[50px] px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                             value={entry.clockIn}
                                             onChange={(e) => updateEntry(entry.id, 'clockIn', e.target.value)}
                                         />
                                     </div>
 
                                     {/* Uscita */}
-                                    <div>
+                                    <div className="md:col-span-3">
                                         <label className="block text-xs font-semibold text-slate-600 mb-1">Uscita</label>
                                         <input
                                             type="time"
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                            className="w-full max-w-full block min-h-[50px] px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                             value={entry.clockOut}
                                             onChange={(e) => updateEntry(entry.id, 'clockOut', e.target.value)}
                                         />

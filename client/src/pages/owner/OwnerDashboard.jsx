@@ -191,17 +191,19 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
         );
     }
 
-    // Calculations for the cost card
+    // Calculations for the cost card (economie are NOT costs, they are additional revenue)
     const laborCost = report?.siteCost?.labor || 0;
     const materialCost = report?.siteCost?.materials || 0;
-    const economieCost = economie.reduce((sum, e) => sum + e.hours, 0) * 30;
-    const totalCost = laborCost + materialCost + economieCost;
+    // Economie are revenue, not costs - calculate for display only
+    const economieHours = economie.reduce((sum, e) => sum + e.hours, 0);
+    const economieRevenue = economieHours * 30; // 30€/hour billable to client
+    // Total cost excludes economie (they add to revenue, not costs)
+    const totalCost = laborCost + materialCost;
 
     // Calculate percentages for progress bars (avoid division by zero)
     const maxVal = totalCost > 0 ? totalCost : 1;
     const laborPct = (laborCost / maxVal) * 100;
     const materialPct = (materialCost / maxVal) * 100;
-    const economiePct = (economieCost / maxVal) * 100;
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 w-full max-w-full overflow-hidden pb-20">
@@ -313,19 +315,18 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     </div>
                                 </div>
 
-                                {/* Economie */}
-                                <div>
-                                    <div className="flex justify-between text-sm mb-2">
-                                        <span className="flex items-center gap-2 text-slate-600 font-bold">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                            Economie
-                                        </span>
-                                        <span className="font-black text-slate-900">{economieCost.toFixed(2)}€</span>
+                                {/* Economie - Revenue section (not cost) */}
+                                {economieRevenue > 0 && (
+                                    <div className="pt-4 mt-2 border-t border-slate-200">
+                                        <div className="flex justify-between text-sm mb-2">
+                                            <span className="flex items-center gap-2 text-green-600 font-bold">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                                Economie (+ricavo)
+                                            </span>
+                                            <span className="font-black text-green-600">+{economieRevenue.toFixed(2)}€</span>
+                                        </div>
                                     </div>
-                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${economiePct}%` }}></div>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 
@@ -1265,7 +1266,7 @@ export default function OwnerDashboard() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Data Inizio</label>
                                     <input
@@ -1273,7 +1274,7 @@ export default function OwnerDashboard() {
                                         required
                                         value={formData.startDate}
                                         onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all"
+                                        className="w-full max-w-full block min-h-[50px] bg-white appearance-none px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all text-base"
                                     />
                                 </div>
                                 <div>
@@ -1282,7 +1283,7 @@ export default function OwnerDashboard() {
                                         type="date"
                                         value={formData.endDate}
                                         onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all"
+                                        className="w-full max-w-full block min-h-[50px] bg-white appearance-none px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all text-base"
                                     />
                                 </div>
                             </div>

@@ -417,7 +417,7 @@ export default function EmployeeManagement() {
                                         type="date"
                                         value={formData.birthDate}
                                         onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                                        className="w-full max-w-full min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
+                                        className="w-full max-w-full block min-h-[50px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                     />
                                 </div>
 

@@ -1070,7 +1070,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 <div className="md:col-span-2">
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Cantiere *</label>
                                                     <select
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.site}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, site: e.target.value }))}
                                                         required
@@ -1086,7 +1086,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Numero SAL *</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.number}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, number: e.target.value }))}
                                                         placeholder="Es: SAL-001"
@@ -1098,7 +1098,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione *</label>
                                                     <input
                                                         type="date"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.date}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, date: e.target.value }))}
                                                         required
@@ -1109,7 +1109,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio *</label>
                                                     <input
                                                         type="date"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.periodStart}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, periodStart: e.target.value }))}
                                                         required
@@ -1120,7 +1120,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine *</label>
                                                     <input
                                                         type="date"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.periodEnd}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, periodEnd: e.target.value }))}
                                                         required
@@ -1137,7 +1137,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Nome/Ragione Sociale *</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.clientName}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, clientName: e.target.value }))}
                                                         placeholder="Nome committente"
@@ -1149,7 +1149,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">P.IVA / Codice Fiscale *</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.clientVatNumber}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, clientVatNumber: e.target.value }))}
                                                         placeholder="12345678901"
@@ -1161,7 +1161,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Codice Fiscale (se diverso)</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.clientFiscalCode}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, clientFiscalCode: e.target.value }))}
                                                         placeholder="RSSMRA80A01H501Z"
@@ -1172,7 +1172,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo *</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.clientAddress}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, clientAddress: e.target.value }))}
                                                         placeholder="Via Roma, 1 - 00100 Roma (RM)"
@@ -1186,7 +1186,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         <section>
                                             <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Descrizione Lavori</h3>
                                             <textarea
-                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[120px]"
+                                                className="w-full max-w-full block min-h-[120px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                 value={salFormData.workDescription}
                                                 onChange={(e) => setSalFormData(prev => ({ ...prev, workDescription: e.target.value }))}
                                                 placeholder="Descrivi dettagliatamente i lavori eseguiti nel periodo indicato..."
@@ -1203,7 +1203,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         style={{ width: '100%', boxSizing: 'border-box' }}
                                                         value={salFormData.contractValue === 0 ? '' : salFormData.contractValue}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, contractValue: parseFloat(e.target.value) || 0 }))}
@@ -1217,7 +1217,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         style={{ width: '100%', boxSizing: 'border-box' }}
                                                         value={salFormData.previousAmount === 0 ? '' : salFormData.previousAmount}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, previousAmount: parseFloat(e.target.value) || 0 }))}
@@ -1230,7 +1230,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         style={{ width: '100%', boxSizing: 'border-box' }}
                                                         value={salFormData.currentAmount === 0 ? '' : salFormData.currentAmount}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, currentAmount: parseFloat(e.target.value) || 0 }))}
@@ -1245,7 +1245,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                         <input
                                                             type="number"
                                                             step="0.01"
-                                                            className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-900 pr-10 cursor-not-allowed"
+                                                            className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-900 text-base pr-10 cursor-not-allowed appearance-none"
                                                             value={salFormData.completionPercentage}
                                                             readOnly
                                                             min="0"
@@ -1260,7 +1260,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <input
                                                         type="number"
                                                         step="0.01"
-                                                        className="w-full min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         style={{ width: '100%', boxSizing: 'border-box' }}
                                                         value={salFormData.penalties === 0 ? '' : salFormData.penalties}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, penalties: parseFloat(e.target.value) || 0 }))}
@@ -1271,7 +1271,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 <div>
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Aliquota IVA (%) *</label>
                                                     <select
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.vatRate}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, vatRate: parseFloat(e.target.value) }))}
                                                         required
@@ -1333,7 +1333,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Nome e Cognome</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.supervisorName}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, supervisorName: e.target.value }))}
                                                         placeholder="Mario Rossi"
@@ -1344,7 +1344,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Qualifica</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.supervisorQualification}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, supervisorQualification: e.target.value }))}
                                                         placeholder="Ingegnere, Architetto, Geometra..."
@@ -1361,7 +1361,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">CIG (Codice Identificativo Gara)</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.cig}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, cig: e.target.value }))}
                                                         placeholder="1234567890"
@@ -1372,7 +1372,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">CUP (Codice Unico Progetto)</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                                        className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.cup}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, cup: e.target.value }))}
                                                         placeholder="A12B34C56D78E90F123"
@@ -1385,7 +1385,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         <section>
                                             <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Note Aggiuntive</h3>
                                             <textarea
-                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[80px]"
+                                                className="w-full max-w-full block min-h-[80px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                 value={salFormData.notes}
                                                 onChange={(e) => setSalFormData(prev => ({ ...prev, notes: e.target.value }))}
                                                 placeholder="Note aggiuntive (eventuali varianti, annotazioni tecniche, etc.)"
