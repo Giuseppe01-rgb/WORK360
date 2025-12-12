@@ -928,7 +928,7 @@ export default function SiteManagement() {
                                             required
                                         />
                                     </div>
-                                    <div>
+                                    <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Data Inizio *</label>
                                         <input
                                             type="date"
@@ -938,7 +938,7 @@ export default function SiteManagement() {
                                             required
                                         />
                                     </div>
-                                    <div>
+                                    <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Data Fine (prevista)</label>
                                         <input
                                             type="date"
