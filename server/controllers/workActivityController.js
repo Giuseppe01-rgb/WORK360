@@ -7,7 +7,8 @@ const sequelize = require('../config/database');
 // Create a new work activity
 exports.create = async (req, res) => {
     try {
-        const { siteId, activityType, quantity, unit, notes, date } = req.body;
+        // Accept both old format (quantity/unit) and new format (description/hours)
+        const { siteId, activityType, quantity, unit, notes, date, description, hours } = req.body;
 
         const activityData = sanitizeAllDates({
             companyId: getCompanyId(req),
@@ -15,23 +16,26 @@ exports.create = async (req, res) => {
             userId: getUserId(req),
             date: date || new Date(),
             activityType,
-            quantity,
-            unit,
-            notes
+            // Use description if provided, otherwise create from activityType
+            description: description || activityType || '',
+            // Use hours if provided, otherwise use quantity as hours
+            hours: hours || quantity || 0,
+            notes: notes || ''
         });
 
         const activity = await WorkActivity.create(activityData);
         res.status(201).json(activity);
     } catch (error) {
         console.error('Error creating work activity:', error);
-        res.status(500).json({ message: 'Errore nella creazione dell\'attività' });
+        res.status(500).json({ message: 'Errore nella creazione dell\'attività', error: error.message });
     }
 };
 
 // Update an existing work activity
 exports.update = async (req, res) => {
     try {
-        const { activityType, quantity, unit, notes, date } = req.body;
+        // Accept both old format (quantity/unit) and new format (description/hours)
+        const { activityType, quantity, unit, notes, date, description, hours } = req.body;
         const activityId = req.params.id;
 
         const activity = await WorkActivity.findByPk(activityId);
@@ -50,11 +54,13 @@ exports.update = async (req, res) => {
             return res.status(403).json({ message: 'Non autorizzato a modificare questa attività' });
         }
 
-        // Build update data
+        // Build update data - map old fields to new
         const updateData = {};
         if (activityType !== undefined) updateData.activityType = activityType;
-        if (quantity !== undefined) updateData.quantity = quantity;
-        if (unit !== undefined) updateData.unit = unit;
+        if (description !== undefined) updateData.description = description;
+        else if (activityType !== undefined) updateData.description = activityType;
+        if (hours !== undefined) updateData.hours = hours;
+        else if (quantity !== undefined) updateData.hours = quantity;
         if (notes !== undefined) updateData.notes = notes;
         if (date !== undefined) updateData.date = date;
 
@@ -64,7 +70,7 @@ exports.update = async (req, res) => {
         res.json(activity);
     } catch (error) {
         console.error('Error updating work activity:', error);
-        res.status(500).json({ message: 'Errore nell\'aggiornamento dell\'attività' });
+        res.status(500).json({ message: 'Errore nell\'aggiornamento dell\'attività', error: error.message });
     }
 };
 
