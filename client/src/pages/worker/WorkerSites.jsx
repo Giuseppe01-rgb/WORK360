@@ -14,6 +14,7 @@ const SiteDetails = ({ site, onBack }) => {
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState('reports');
+    const [expandedReport, setExpandedReport] = useState(null); // For viewing full report
 
     const sections = [
         { id: 'reports', label: 'Rapporti giornalieri' },
@@ -110,7 +111,8 @@ const SiteDetails = ({ site, onBack }) => {
                             {reports.map((report) => (
                                 <div
                                     key={report.id}
-                                    className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+                                    onClick={() => setExpandedReport(expandedReport?.id === report.id ? null : report)}
+                                    className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 cursor-pointer hover:shadow-md hover:border-blue-200 transition-all"
                                 >
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
@@ -128,9 +130,16 @@ const SiteDetails = ({ site, onBack }) => {
                                         </span>
                                     </div>
 
-                                    <p className="text-slate-600 text-sm line-clamp-3 leading-relaxed whitespace-pre-wrap">
+                                    <p className={`text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ${expandedReport?.id === report.id ? '' : 'line-clamp-3'}`}>
                                         {report.activityType || report.description}
                                     </p>
+
+                                    {/* Show expand hint */}
+                                    {(report.activityType?.length > 150 || report.description?.length > 150) && (
+                                        <p className="text-xs text-blue-600 mt-2 font-medium">
+                                            {expandedReport?.id === report.id ? '▲ Clicca per chiudere' : '▼ Clicca per espandere'}
+                                        </p>
+                                    )}
                                 </div>
                             ))}
                         </div>
