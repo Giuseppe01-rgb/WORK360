@@ -47,9 +47,14 @@ const clockIn = async (req, res) => {
         const lat = latitude || 0;
         const lng = longitude || 0;
 
+        // Get user's current hourly cost to store with attendance
+        const user = await User.findByPk(getUserId(req), { attributes: ['hourlyCost'] });
+        const hourlyCost = parseFloat(user?.hourlyCost) || 0;
+
         const attendance = await Attendance.create({
             userId: getUserId(req),
             siteId: siteId,
+            hourlyCost: hourlyCost,
             clockIn: {
                 time: new Date(),
                 location: {
@@ -356,6 +361,10 @@ const bulkCreateAttendances = async (req, res) => {
                     continue;
                 }
 
+                // Get user's current hourly cost
+                const user = await User.findByPk(userId, { attributes: ['hourlyCost'] });
+                const hourlyCost = parseFloat(user?.hourlyCost) || 0;
+
                 const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}:00+01:00`), location: null } : null;
                 const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}:00+01:00`), location: null } : null;
 
@@ -366,11 +375,12 @@ const bulkCreateAttendances = async (req, res) => {
                     hours = workedHours;
                 }
 
-                console.log(`Creating attendance with hours: ${hours}`);
+                console.log(`Creating attendance with hours: ${hours}, hourlyCost: ${hourlyCost}`);
 
                 await Attendance.create({
                     userId,
                     siteId,
+                    hourlyCost,
                     clockIn: clockInData,
                     clockOut: clockOutData,
                     totalHours: hours,
@@ -670,9 +680,14 @@ const importFromExcel = async (req, res) => {
                 // Calculate worked hours
                 const { workedHours } = calculateWorkedHours(clockInData.time, clockOutData.time);
 
+                // Get user's current hourly cost
+                const user = await User.findByPk(att.userId, { attributes: ['hourlyCost'] });
+                const hourlyCost = parseFloat(user?.hourlyCost) || 0;
+
                 await Attendance.create({
                     userId: att.userId,
                     siteId: att.siteId,
+                    hourlyCost,
                     clockIn: clockInData,
                     clockOut: clockOutData,
                     totalHours: workedHours,

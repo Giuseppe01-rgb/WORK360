@@ -53,6 +53,12 @@ Attendance.init({
     },
     notes: {
         type: DataTypes.TEXT
+    },
+    // Hourly cost at the time of attendance (for historical accuracy)
+    hourlyCost: {
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: null,
+        field: 'hourly_cost'
     }
 }, {
     sequelize,

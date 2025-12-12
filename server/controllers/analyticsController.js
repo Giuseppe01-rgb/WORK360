@@ -188,9 +188,10 @@ const getSiteReport = async (req, res, next) => {
         });
 
         // Calculate labor cost using individual hourly rates (completed attendances)
+        // Uses attendance.hourly_cost if available (new records), falls back to user.hourly_cost (old records)
         const laborCostResult = await sequelize.query(`
             SELECT 
-                SUM(a.total_hours * COALESCE(u.hourly_cost, 0)) as total_labor_cost
+                SUM(a.total_hours * COALESCE(a.hourly_cost, u.hourly_cost, 0)) as total_labor_cost
             FROM attendances a
             JOIN users u ON a.user_id = u.id
             WHERE a.site_id = :siteId
