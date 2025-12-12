@@ -305,8 +305,31 @@ const PORT = process.env.PORT || 5001;
 
 // Sync database and start server
 sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
-    .then(() => {
+    .then(async () => {
         console.log('✅ Database synced successfully');
+
+        // Run one-time migrations
+        try {
+            // Ensure activity_type column is TEXT (not VARCHAR(255)) for long descriptions
+            await sequelize.query(`
+                DO $$ 
+                BEGIN 
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name = 'work_activities' 
+                        AND column_name = 'activity_type' 
+                        AND data_type = 'character varying'
+                    ) THEN
+                        ALTER TABLE work_activities ALTER COLUMN activity_type TYPE TEXT;
+                        RAISE NOTICE 'Migrated activity_type to TEXT';
+                    END IF;
+                END $$;
+            `);
+            console.log('✅ Migrations checked');
+        } catch (migrationError) {
+            console.error('[Migration] Error:', migrationError.message);
+            // Don't exit - let the app continue even if migration fails
+        }
 
         // Initialize notification scheduler after DB is ready
         try {
