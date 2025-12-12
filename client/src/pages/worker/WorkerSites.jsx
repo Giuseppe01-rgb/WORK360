@@ -115,10 +115,10 @@ const SiteDetails = ({ site, onBack }) => {
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
-                                                {report.employee?.firstName?.charAt(0)}{report.employee?.lastName?.charAt(0)}
+                                                {report.user?.firstName ? report.user.firstName.charAt(0) + report.user.lastName?.charAt(0) : (report.user?.username?.charAt(0).toUpperCase() || '?')}
                                             </div>
                                             <span className="font-semibold text-slate-900 text-sm">
-                                                {report.employee?.firstName} {report.employee?.lastName}
+                                                {report.user?.firstName ? `${report.user.firstName} ${report.user.lastName}` : (report.user?.username || 'Utente')}
                                             </span>
                                         </div>
                                         <span className="text-xs text-slate-500 font-medium">
@@ -156,10 +156,10 @@ const SiteDetails = ({ site, onBack }) => {
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xs">
-                                                {note.employee?.firstName?.charAt(0)}{note.employee?.lastName?.charAt(0)}
+                                                {note.user?.firstName ? note.user.firstName.charAt(0) + note.user.lastName?.charAt(0) : (note.user?.username?.charAt(0).toUpperCase() || '?')}
                                             </div>
                                             <span className="font-semibold text-slate-900 text-sm">
-                                                {note.employee?.firstName} {note.employee?.lastName}
+                                                {note.user?.firstName ? `${note.user.firstName} ${note.user.lastName}` : (note.user?.username || 'Utente')}
                                             </span>
                                         </div>
                                         <span className="text-xs text-slate-500 font-medium">

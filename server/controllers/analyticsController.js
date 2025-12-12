@@ -237,7 +237,7 @@ const getSiteReport = async (req, res, next) => {
         // Get daily reports from WorkActivity (work activities submitted by workers)
         const dailyReports = await WorkActivity.findAll({
             where: { siteId },
-            include: [{ model: User, as: 'user', attributes: ['firstName', 'lastName'] }],
+            include: [{ model: User, as: 'user', attributes: ['firstName', 'lastName', 'username'] }],
             order: [['date', 'DESC']],
             limit: 50
         });
@@ -362,7 +362,8 @@ const getSiteReport = async (req, res, next) => {
                 createdAt: r.createdAt,
                 user: r.user ? {
                     firstName: r.user.firstName,
-                    lastName: r.user.lastName
+                    lastName: r.user.lastName,
+                    username: r.user.username
                 } : null
             })),
             employeeHours,

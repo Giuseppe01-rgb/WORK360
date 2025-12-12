@@ -86,7 +86,7 @@ exports.getAll = async (req, res) => {
         const activities = await WorkActivity.findAll({
             where,
             include: [
-                { model: User, as: 'user', attributes: ['firstName', 'lastName'] },
+                { model: User, as: 'user', attributes: ['firstName', 'lastName', 'username'] },
                 { model: ConstructionSite, as: 'site', attributes: ['name'] }
             ],
             order: [['date', 'DESC']]

@@ -39,7 +39,7 @@ const getNotes = async (req, res, next) => {
             include: [{
                 model: User,
                 as: 'user',
-                attributes: ['id', 'firstName', 'lastName']
+                attributes: ['id', 'firstName', 'lastName', 'username']
             }],
             order: [['createdAt', 'DESC']]
         });

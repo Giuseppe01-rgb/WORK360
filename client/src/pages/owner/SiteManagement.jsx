@@ -414,10 +414,10 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
-                                                {dailyReport.user?.firstName?.charAt(0)}{dailyReport.user?.lastName?.charAt(0)}
+                                                {dailyReport.user?.firstName ? dailyReport.user.firstName.charAt(0) + dailyReport.user.lastName?.charAt(0) : dailyReport.user?.username?.charAt(0).toUpperCase()}
                                             </div>
                                             <span className="font-semibold text-slate-900 text-sm">
-                                                {dailyReport.user?.firstName} {dailyReport.user?.lastName}
+                                                {dailyReport.user?.firstName ? `${dailyReport.user.firstName} ${dailyReport.user.lastName}` : dailyReport.user?.username || 'Utente'}
                                             </span>
                                         </div>
                                         <span className="text-xs text-slate-500 font-medium">
@@ -466,10 +466,10 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xs">
-                                                {note.user?.firstName?.charAt(0)}{note.user?.lastName?.charAt(0)}
+                                                {note.user?.firstName ? note.user.firstName.charAt(0) + note.user.lastName?.charAt(0) : (note.user?.username?.charAt(0).toUpperCase() || '?')}
                                             </div>
                                             <span className="font-semibold text-slate-900 text-sm">
-                                                {note.user?.firstName} {note.user?.lastName}
+                                                {note.user?.firstName ? `${note.user.firstName} ${note.user.lastName}` : (note.user?.username || 'Utente')}
                                             </span>
                                         </div>
                                         <span className="text-xs text-slate-500 font-medium">
@@ -595,10 +595,12 @@ const ReportModal = ({ report, onClose }) => {
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
-                            {report.user?.firstName?.charAt(0)}{report.user?.lastName?.charAt(0)}
+                            {report.user?.firstName ? report.user.firstName.charAt(0) + report.user.lastName?.charAt(0) : report.user?.username?.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                            <h3 className="font-bold text-slate-900">{report.user?.firstName} {report.user?.lastName}</h3>
+                            <h3 className="font-bold text-slate-900">
+                                {report.user?.firstName ? `${report.user.firstName} ${report.user.lastName}` : report.user?.username || 'Utente'}
+                            </h3>
                             <p className="text-xs text-slate-500">
                                 {new Date(report.date).toLocaleDateString('it-IT', {
                                     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
