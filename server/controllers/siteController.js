@@ -36,6 +36,13 @@ const createSite = async (req, res) => {
             }
         });
 
+        // Sanitize contractValue: convert comma to point for Italian format, ensure valid number
+        if (siteData.contractValue !== undefined && siteData.contractValue !== null) {
+            let cleanValue = String(siteData.contractValue).replace(',', '.').replace(/[^0-9.]/g, '');
+            const parsed = parseFloat(cleanValue);
+            siteData.contractValue = !isNaN(parsed) && parsed > 0 ? parsed : null;
+        }
+
         console.log('Creating site with data:', siteData);
 
         const site = await ConstructionSite.create(siteData);
@@ -231,6 +238,13 @@ const updateSite = async (req, res) => {
                 delete updateData[key];
             }
         });
+
+        // Sanitize contractValue: convert comma to point for Italian format, ensure valid number
+        if (updateData.contractValue !== undefined && updateData.contractValue !== null) {
+            let cleanValue = String(updateData.contractValue).replace(',', '.').replace(/[^0-9.]/g, '');
+            const parsed = parseFloat(cleanValue);
+            updateData.contractValue = !isNaN(parsed) && parsed > 0 ? parsed : null;
+        }
 
         // Update site fields
         await site.update(updateData);
