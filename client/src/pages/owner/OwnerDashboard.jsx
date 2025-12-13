@@ -358,7 +358,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
                         {/* INCIDENCE CARD - Apple Health Style */}
                         {report?.costIncidence?.materialsIncidencePercent !== null ? (
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-6">
+                            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
                                         <Package className="w-5 h-5" />
@@ -386,7 +386,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
+                            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 mb-6">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
                                         <Package className="w-5 h-5 text-slate-500" />
@@ -405,7 +405,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                             const isValidContract = !isNaN(contractVal) && contractVal > 0;
                             return isValidContract;
                         })() ? (
-                            <div className={`p-6 rounded-3xl shadow-sm border mb-6 relative overflow-hidden ${report.margin?.marginCurrentValue >= 0
+                            <div className={`p-6 rounded-[2.5rem] shadow-sm border mb-6 relative overflow-hidden ${report.margin?.marginCurrentValue >= 0
                                 ? 'bg-white border-green-100'
                                 : 'bg-white border-red-100'
                                 }`}>
@@ -516,7 +516,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 )}
                             </div>
                         ) : (
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
+                            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 mb-6">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
                                         <FileText className="w-5 h-5 text-slate-500" />
@@ -538,7 +538,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         {/* SUMMARY GRID - APPLE HEALTH STYLE */}
                         <div className="grid grid-cols-2 gap-4 mb-6">
                             {/* Ore Totali Card */}
-                            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                            <div className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                                         <Clock className="w-4 h-4" />
@@ -552,7 +552,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                             </div>
 
                             {/* Materiali Card */}
-                            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                            <div className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
                                         <Package className="w-4 h-4" />
@@ -574,7 +574,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                             {/* EMPLOYEES CARD */}
                             <div
                                 onClick={() => setShowEmployeesModal(true)}
-                                className="bg-white rounded-3xl border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
+                                className="bg-white rounded-[2.5rem] border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
@@ -593,7 +593,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                             {/* MATERIALS CARD */}
                             <div
                                 onClick={handleOpenMaterialsModal}
-                                className="bg-white rounded-3xl border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
+                                className="bg-white rounded-[2.5rem] border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-500">
@@ -622,7 +622,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 <div
                                     key={dailyReport.id}
                                     onClick={() => setSelectedNote({ ...dailyReport, content: dailyReport.activityType })}
-                                    className="bg-white rounded-3xl border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer group"
+                                    className="bg-white rounded-[2.5rem] border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer group"
                                 >
                                     <div className="flex items-start justify-between mb-3">
                                         <div>
@@ -660,7 +660,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                 activeTab === 'economie' && (
                     <div className="space-y-4">
                         {/* Quick Add Button and Form */}
-                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-2xl border border-amber-100">
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-[2.5rem] border border-amber-100">
                             {!showBulkEconomieForm ? (
                                 <button
                                     onClick={() => setShowBulkEconomieForm(true)}
@@ -731,7 +731,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         {economie.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {economie.map((economia) => (
-                                    <div key={economia.id} className="bg-white p-6 rounded-3xl shadow-sm border border-amber-100 relative group">
+                                    <div key={economia.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-amber-100 relative group">
                                         <button
                                             onClick={(e) => handleDeleteEconomia(e, economia.id)}
                                             className="absolute top-4 right-4 p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
@@ -766,7 +766,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 ))}
                             </div>
                         ) : (
-                            <div className="bg-white rounded-3xl p-12 text-center shadow-sm">
+                            <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm">
                                 <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <Zap className="w-8 h-8 text-amber-400" />
                                 </div>
@@ -787,7 +787,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 <div
                                     key={note.id}
                                     onClick={() => setSelectedNote(note)}
-                                    className="bg-white rounded-3xl border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer"
+                                    className="bg-white rounded-[2.5rem] border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer"
                                 >
                                     <div className="flex items-start justify-between mb-3">
                                         <div>
@@ -815,8 +815,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                                 <p className="text-slate-400 font-medium">Nessuna nota disponibile</p>
                             </div>
-                        )}
-                    </div>
+                        )
+                        }
+                    </div >
                 )
             }
 
@@ -830,7 +831,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     <div
                                         key={photo.id}
                                         onClick={() => setSelectedPhoto(photo)}
-                                        className="bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-md transition-all cursor-pointer group relative"
+                                        className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden hover:shadow-md transition-all cursor-pointer group relative"
                                     >
                                         <button
                                             onClick={(e) => handleDeletePhoto(e, photo.id)}
@@ -866,8 +867,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 <Camera className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                                 <p className="text-slate-400 font-medium">Nessuna foto disponibile</p>
                             </div>
-                        )}
-                    </div>
+                        )
+                        }
+                    </div >
                 )
             }
 
@@ -875,7 +877,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {
                 selectedNote && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedNote(null)}>
-                        <div className="bg-white rounded-3xl w-full max-w-2xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-white rounded-[2.5rem] w-full max-w-2xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                             <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-bold text-slate-900">
@@ -941,123 +943,127 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             }
 
             {/* Employees Full-Screen View */}
-            {showEmployeesModal && (
-                <PortalModal onClose={() => setShowEmployeesModal(false)}>
-                    <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none">
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white pt-safe-header">
-                            <button
-                                onClick={() => setShowEmployeesModal(false)}
-                                className="flex items-center gap-2 text-blue-600 font-semibold"
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                                Indietro
-                            </button>
-                            <h1 className="text-lg font-bold text-slate-900">Dipendenti</h1>
-                            <div className="w-20"></div>
-                        </div>
-
-                        {/* Summary Header */}
-                        <div className="bg-slate-50 px-4 py-5 flex-shrink-0">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p className="text-slate-500 text-sm">Ore totali</p>
-                                    <p className="text-3xl font-bold text-slate-900">
-                                        {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(0)}
-                                        <span className="text-xl text-slate-400 ml-1">h</span>
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-slate-500 text-sm">Costo totale</p>
-                                    <p className="text-3xl font-bold text-green-600">
-                                        {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                        <span className="text-xl text-green-400 ml-1">€</span>
-                                    </p>
-                                </div>
+            {
+                showEmployeesModal && (
+                    <PortalModal onClose={() => setShowEmployeesModal(false)}>
+                        <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white pt-safe-header">
+                                <button
+                                    onClick={() => setShowEmployeesModal(false)}
+                                    className="flex items-center gap-2 text-blue-600 font-semibold"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                    Indietro
+                                </button>
+                                <h1 className="text-lg font-bold text-slate-900">Dipendenti</h1>
+                                <div className="w-20"></div>
                             </div>
-                            <p className="text-slate-400 text-sm mt-2">{employeeHours.length} dipendenti</p>
-                        </div>
 
-                        {/* Employee List */}
-                        <div className="flex-1 overflow-y-auto pb-safe-bottom">
-                            {employeeHours.map((emp, index) => (
-                                <div key={emp.id.id} className={`px-4 py-4 flex items-center justify-between ${index !== employeeHours.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                                    <div className="flex-1">
-                                        <p className="font-semibold text-slate-900">{emp.id.firstName} {emp.id.lastName}</p>
-                                        <p className="text-sm text-slate-400">{emp.totalHours.toFixed(0)}h × €{emp.id.hourlyCost?.toFixed(2) || '0'}</p>
+                            {/* Summary Header */}
+                            <div className="bg-slate-50 px-4 py-5 flex-shrink-0">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="text-slate-500 text-sm">Ore totali</p>
+                                        <p className="text-3xl font-bold text-slate-900">
+                                            {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(0)}
+                                            <span className="text-xl text-slate-400 ml-1">h</span>
+                                        </p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-bold text-green-600">
-                                            {((emp.totalHours || 0) * (emp.id.hourlyCost || 0)).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                        <p className="text-slate-500 text-sm">Costo totale</p>
+                                        <p className="text-3xl font-bold text-green-600">
+                                            {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                            <span className="text-xl text-green-400 ml-1">€</span>
                                         </p>
                                     </div>
                                 </div>
-                            ))}
+                                <p className="text-slate-400 text-sm mt-2">{employeeHours.length} dipendenti</p>
+                            </div>
+
+                            {/* Employee List */}
+                            <div className="flex-1 overflow-y-auto pb-safe-bottom">
+                                {employeeHours.map((emp, index) => (
+                                    <div key={emp.id.id} className={`px-4 py-4 flex items-center justify-between ${index !== employeeHours.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-slate-900">{emp.id.firstName} {emp.id.lastName}</p>
+                                            <p className="text-sm text-slate-400">{emp.totalHours.toFixed(0)}h × €{emp.id.hourlyCost?.toFixed(2) || '0'}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-lg font-bold text-green-600">
+                                                {((emp.totalHours || 0) * (emp.id.hourlyCost || 0)).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                </PortalModal>
-            )}
+                    </PortalModal>
+                )
+            }
 
 
             {/* Materials Full-Screen View */}
-            {showMaterialsModal && (
-                <PortalModal onClose={() => setShowMaterialsModal(false)}>
-                    <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none">
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white pt-safe-header">
-                            <button
-                                onClick={() => setShowMaterialsModal(false)}
-                                className="flex items-center gap-2 text-purple-600 font-semibold"
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                                Indietro
-                            </button>
-                            <h1 className="text-lg font-bold text-slate-900">Materiali</h1>
-                            <div className="w-20"></div>
-                        </div>
-
-                        {/* Summary Header */}
-                        <div className="bg-slate-50 px-4 py-5 flex-shrink-0">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <p className="text-slate-500 text-sm">Quantità totale</p>
-                                    <p className="text-3xl font-bold text-slate-900">
-                                        {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0) || 0}
-                                        <span className="text-xl text-slate-400 ml-1">pz</span>
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-slate-500 text-sm">Costo totale</p>
-                                    <p className="text-3xl font-bold text-green-600">
-                                        {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                        <span className="text-xl text-green-400 ml-1">€</span>
-                                    </p>
-                                </div>
+            {
+                showMaterialsModal && (
+                    <PortalModal onClose={() => setShowMaterialsModal(false)}>
+                        <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white pt-safe-header">
+                                <button
+                                    onClick={() => setShowMaterialsModal(false)}
+                                    className="flex items-center gap-2 text-purple-600 font-semibold"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                    Indietro
+                                </button>
+                                <h1 className="text-lg font-bold text-slate-900">Materiali</h1>
+                                <div className="w-20"></div>
                             </div>
-                            <p className="text-slate-400 text-sm mt-2">{report?.materials?.length || 0} tipologie</p>
-                        </div>
 
-                        {/* Materials List */}
-                        <div className="flex-1 overflow-y-auto pb-safe-bottom">
-                            {report?.materials?.map((mat, index) => (
-                                <div key={mat.id} className={`px-4 py-4 flex items-center justify-between ${index !== (report?.materials?.length || 0) - 1 ? 'border-b border-slate-100' : ''}`}>
-                                    <div className="flex-1">
-                                        <p className="font-semibold text-slate-900">{mat.name}</p>
-                                        <p className="text-sm text-slate-400">
-                                            {mat.totalQuantity} {mat.unit} × €{mat.unitPrice?.toFixed(2) || '0'}
+                            {/* Summary Header */}
+                            <div className="bg-slate-50 px-4 py-5 flex-shrink-0">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="text-slate-500 text-sm">Quantità totale</p>
+                                        <p className="text-3xl font-bold text-slate-900">
+                                            {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0) || 0}
+                                            <span className="text-xl text-slate-400 ml-1">pz</span>
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-bold text-green-600">
-                                            {(mat.totalCost || 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                        <p className="text-slate-500 text-sm">Costo totale</p>
+                                        <p className="text-3xl font-bold text-green-600">
+                                            {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                            <span className="text-xl text-green-400 ml-1">€</span>
                                         </p>
                                     </div>
                                 </div>
-                            ))}
+                                <p className="text-slate-400 text-sm mt-2">{report?.materials?.length || 0} tipologie</p>
+                            </div>
+
+                            {/* Materials List */}
+                            <div className="flex-1 overflow-y-auto pb-safe-bottom">
+                                {report?.materials?.map((mat, index) => (
+                                    <div key={mat.id} className={`px-4 py-4 flex items-center justify-between ${index !== (report?.materials?.length || 0) - 1 ? 'border-b border-slate-100' : ''}`}>
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-slate-900">{mat.name}</p>
+                                            <p className="text-sm text-slate-400">
+                                                {mat.totalQuantity} {mat.unit} × €{mat.unitPrice?.toFixed(2) || '0'}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-lg font-bold text-green-600">
+                                                {(mat.totalCost || 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                </PortalModal>
-            )}
+                    </PortalModal>
+                )
+            }
         </div >
     );
 };
