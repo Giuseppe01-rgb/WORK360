@@ -1295,38 +1295,49 @@ export default function OwnerDashboard() {
                 </div>
 
                 {/* STATUS FILTER TABS */}
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-1 px-1">
-                    {[
-                        { value: 'all', label: 'Tutti', color: 'slate' },
-                        { value: 'active', label: 'In Corso', color: 'green' },
-                        { value: 'completed', label: 'Completi', color: 'blue' },
-                        { value: 'planned', label: 'Pianificati', color: 'amber' },
-                        { value: 'suspended', label: 'Sospeso', color: 'red' }
-                    ].map(tab => {
-                        const count = tab.value === 'all'
-                            ? sites.length
-                            : sites.filter(s => s.status === tab.value).length;
-                        const isActive = statusFilter === tab.value;
-                        return (
-                            <button
-                                key={tab.value}
-                                onClick={() => setStatusFilter(tab.value)}
-                                className={`flex-shrink-0 px-4 py-2 rounded-xl font-bold text-sm transition-all ${isActive
+                <div className="relative mb-6">
+                    {/* Scroll fade indicator on the right */}
+                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-10 md:hidden" />
+
+                    <div className="flex gap-2 overflow-x-auto pb-2 pr-8 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
+                        {[
+                            { value: 'all', label: 'Tutti', color: 'slate' },
+                            { value: 'active', label: 'In Corso', color: 'green' },
+                            { value: 'completed', label: 'Completi', color: 'blue' },
+                            { value: 'planned', label: 'Pianificati', color: 'amber' },
+                            { value: 'suspended', label: 'Sospeso', color: 'red' }
+                        ].map(tab => {
+                            const count = tab.value === 'all'
+                                ? sites.length
+                                : sites.filter(s => s.status === tab.value).length;
+                            const isActive = statusFilter === tab.value;
+                            return (
+                                <button
+                                    key={tab.value}
+                                    onClick={() => setStatusFilter(tab.value)}
+                                    className={`flex-shrink-0 px-4 py-2 rounded-xl font-bold text-sm transition-all ${isActive
                                         ? `bg-${tab.color}-500 text-white shadow-lg shadow-${tab.color}-500/30`
                                         : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
-                                    }`}
-                                style={isActive ? {
-                                    backgroundColor: tab.color === 'slate' ? '#64748b' :
-                                        tab.color === 'green' ? '#22c55e' :
-                                            tab.color === 'blue' ? '#3b82f6' :
-                                                tab.color === 'amber' ? '#f59e0b' : '#ef4444',
-                                    color: 'white'
-                                } : {}}
-                            >
-                                {tab.label} <span className={`ml-1 ${isActive ? 'opacity-80' : 'text-slate-400'}`}>({count})</span>
-                            </button>
-                        );
-                    })}
+                                        }`}
+                                    style={{
+                                        scrollSnapAlign: 'start',
+                                        ...(isActive ? {
+                                            backgroundColor: tab.color === 'slate' ? '#64748b' :
+                                                tab.color === 'green' ? '#22c55e' :
+                                                    tab.color === 'blue' ? '#3b82f6' :
+                                                        tab.color === 'amber' ? '#f59e0b' : '#ef4444',
+                                            color: 'white'
+                                        } : {})
+                                    }}
+                                >
+                                    {tab.label} <span className={`ml-1 ${isActive ? 'opacity-80' : 'text-slate-400'}`}>({count})</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Scroll hint text - only on mobile */}
+                    <p className="text-xs text-slate-400 mt-1 md:hidden">← Scorri per altri filtri →</p>
                 </div>
 
                 {/* NEW SITE BUTTON - UPDATED */}
