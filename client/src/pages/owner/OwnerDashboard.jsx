@@ -300,7 +300,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                 activeTab === 'dati' && (
                     <>
                         {/* COSTO CANTIERE - NEW DESIGN */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
+                        <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
                             <div className="flex justify-between items-start mb-6">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
