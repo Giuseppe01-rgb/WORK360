@@ -18,6 +18,7 @@ const WorkActivity = require('./WorkActivity');
 const Document = require('./Document');
 const AuditLog = require('./AuditLog');
 const PushSubscription = require('./PushSubscription');
+const SiteAccounting = require('./SiteAccounting');
 
 // ========== ASSOCIATIONS ==========
 
@@ -102,6 +103,10 @@ Quote.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
 SAL.belongsTo(User, { foreignKey: 'ownerId', as: 'owner' });
 SAL.belongsTo(ConstructionSite, { foreignKey: 'siteId', as: 'site' });
 
+// SiteAccounting relationships
+SiteAccounting.belongsTo(User, { foreignKey: 'ownerId', as: 'owner' });
+SiteAccounting.belongsTo(ConstructionSite, { foreignKey: 'siteId', as: 'site' });
+
 // Supplier relationships
 Supplier.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
 
@@ -162,5 +167,6 @@ module.exports = {
     WorkActivity,
     Document,
     AuditLog,
-    PushSubscription
+    PushSubscription,
+    SiteAccounting
 };

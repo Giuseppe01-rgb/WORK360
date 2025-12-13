@@ -227,6 +227,7 @@ app.use('/api/coloura-materials', require('./routes/colouraMaterialRoutes'));
 app.use('/api/material-usage', require('./routes/materialUsageRoutes'));
 app.use('/api/reported-materials', require('./routes/reportedMaterialRoutes'));
 app.use('/api/fix-fk', require('./routes/fixMaterialFK')); // Temporary FK fix
+app.use('/api/site-accounting', require('./routes/siteAccountingRoutes'));
 
 // Push Notifications
 app.use('/api/push', require('./routes/push'));

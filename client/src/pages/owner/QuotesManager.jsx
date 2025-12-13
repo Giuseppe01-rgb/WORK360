@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import { quoteAPI, communicationAPI, salAPI, siteAPI } from '../../utils/api';
+import { quoteAPI, communicationAPI, salAPI, siteAPI, siteAccountingAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -55,6 +55,27 @@ export default function QuotesManager() {
     const [showSALSendModal, setShowSALSendModal] = useState(false);
     const [selectedSALId, setSelectedSALId] = useState(null);
     const [editingSALId, setEditingSALId] = useState(null);
+
+    // Contabilità Cantiere State
+    const [accountings, setAccountings] = useState([]);
+    const [showAccountingModal, setShowAccountingModal] = useState(false);
+    const [editingAccountingId, setEditingAccountingId] = useState(null);
+    const initialAccountingFormData = {
+        site: '',
+        number: '',
+        issueDate: new Date().toISOString().split('T')[0],
+        periodStart: '',
+        periodEnd: '',
+        client: {
+            name: '',
+            vatNumber: '',
+            fiscalCode: '',
+            address: ''
+        },
+        items: [{ description: '', unit: '', quantity: '', unitPrice: '', total: 0 }],
+        notes: ''
+    };
+    const [accountingFormData, setAccountingFormData] = useState(initialAccountingFormData);
 
 
 
@@ -122,6 +143,9 @@ export default function QuotesManager() {
         if (activeTab === 'sals') {
             loadSALData();
         }
+        if (activeTab === 'accounting') {
+            loadAccountingData();
+        }
     }, [activeTab]);
 
     // Force update function for real-time item total recalculation
@@ -170,6 +194,125 @@ export default function QuotesManager() {
             showError('Errore nel caricamento dei SAL');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadAccountingData = async () => {
+        try {
+            const [accountingsResp, sitesResp] = await Promise.all([
+                siteAccountingAPI.getAll(),
+                siteAPI.getAll()
+            ]);
+            setAccountings(Array.isArray(accountingsResp.data) ? accountingsResp.data : []);
+            setSites(Array.isArray(sitesResp.data) ? sitesResp.data : []);
+        } catch (error) {
+            console.error('Error loading accounting data:', error);
+            showError('Errore nel caricamento delle contabilità');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Contabilità Item handlers
+    const handleAccountingAddItem = () => {
+        setAccountingFormData(prev => ({
+            ...prev,
+            items: [...prev.items, { description: '', unit: '', quantity: '', unitPrice: '', total: 0 }]
+        }));
+    };
+
+    const handleAccountingRemoveItem = (index) => {
+        setAccountingFormData(prev => ({
+            ...prev,
+            items: prev.items.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleAccountingItemChange = (index, field, value) => {
+        setAccountingFormData(prev => {
+            const newItems = [...prev.items];
+            newItems[index][field] = value;
+
+            // Calculate total for this item
+            const qty = parseFloat(newItems[index].quantity) || 0;
+            const price = parseFloat(newItems[index].unitPrice) || 0;
+            newItems[index].total = qty * price;
+
+            return { ...prev, items: newItems };
+        });
+    };
+
+    const calculateAccountingTotal = () => {
+        return accountingFormData.items.reduce((sum, item) => sum + (item.total || 0), 0);
+    };
+
+    const handleAccountingSubmit = async (e) => {
+        e.preventDefault();
+        setSending(true);
+        try {
+            const dataToSave = {
+                site: accountingFormData.site || null,
+                number: accountingFormData.number,
+                issueDate: accountingFormData.issueDate || null,
+                periodStart: accountingFormData.periodStart || null,
+                periodEnd: accountingFormData.periodEnd || null,
+                client: accountingFormData.client,
+                items: accountingFormData.items,
+                notes: accountingFormData.notes
+            };
+
+            if (editingAccountingId) {
+                await siteAccountingAPI.update(editingAccountingId, dataToSave);
+                showSuccess('Contabilità aggiornata con successo');
+            } else {
+                await siteAccountingAPI.create(dataToSave);
+                showSuccess('Contabilità creata con successo');
+            }
+
+            setShowAccountingModal(false);
+            setEditingAccountingId(null);
+            setAccountingFormData(initialAccountingFormData);
+            loadAccountingData();
+        } catch (error) {
+            console.error('Error submitting accounting:', error);
+            showError(error.response?.data?.message || 'Errore nel salvataggio');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    const handleAccountingEdit = (accounting) => {
+        setAccountingFormData({
+            site: accounting.siteId || '',
+            number: accounting.number || '',
+            issueDate: accounting.issueDate ? accounting.issueDate.split('T')[0] : '',
+            periodStart: accounting.periodStart ? accounting.periodStart.split('T')[0] : '',
+            periodEnd: accounting.periodEnd ? accounting.periodEnd.split('T')[0] : '',
+            client: accounting.client || { name: '', vatNumber: '', fiscalCode: '', address: '' },
+            items: accounting.items?.length > 0 ? accounting.items : [{ description: '', unit: '', quantity: '', unitPrice: '', total: 0 }],
+            notes: accounting.notes || ''
+        });
+        setEditingAccountingId(accounting.id);
+        setShowAccountingModal(true);
+    };
+
+    const handleAccountingDelete = (accountingId) => {
+        setDeleteConfirm({ isOpen: true, id: accountingId, type: 'accounting' });
+    };
+
+    const downloadAccountingPDF = async (accountingId) => {
+        try {
+            const response = await siteAccountingAPI.downloadPDF(accountingId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `contabilita-${accountingId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
+            showError('Errore nel download del PDF');
         }
     };
 
@@ -459,6 +602,10 @@ ${user?.company?.name || 'Il team WORK360'}`;
                 await salAPI.delete(deleteConfirm.id);
                 loadSALData();
                 showSuccess('SAL eliminato con successo');
+            } else if (deleteConfirm.type === 'accounting') {
+                await siteAccountingAPI.delete(deleteConfirm.id);
+                loadAccountingData();
+                showSuccess('Contabilità eliminata con successo');
             }
         } catch (error) {
             console.error('Error deleting item:', error);
@@ -537,10 +684,10 @@ ${user?.company?.name || 'Il team WORK360'}`;
             {/* Tab Navigation */}
             <div className="mb-6">
                 <div className="border-b border-slate-200 mb-8">
-                    <div className="flex gap-8">
+                    <div className="flex gap-8 overflow-x-auto no-scrollbar">
                         <button
                             onClick={() => setActiveTab('quotes')}
-                            className={`pb-4 px-2 font-semibold transition-all ${activeTab === 'quotes'
+                            className={`pb-4 px-2 font-semibold transition-all whitespace-nowrap ${activeTab === 'quotes'
                                 ? 'text-slate-900 border-b-2 border-slate-900'
                                 : 'text-slate-400 hover:text-slate-600'
                                 }`}
@@ -549,56 +696,89 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         </button>
                         <button
                             onClick={() => setActiveTab('sals')}
-                            className={`pb-4 px-2 font-semibold transition-all ${activeTab === 'sals'
+                            className={`pb-4 px-2 font-semibold transition-all whitespace-nowrap ${activeTab === 'sals'
                                 ? 'text-slate-900 border-b-2 border-slate-900'
                                 : 'text-slate-400 hover:text-slate-600'
                                 }`}
                         >
                             SAL
                         </button>
+                        <button
+                            onClick={() => setActiveTab('accounting')}
+                            className={`pb-4 px-2 font-semibold transition-all whitespace-nowrap ${activeTab === 'accounting'
+                                ? 'text-slate-900 border-b-2 border-slate-900'
+                                : 'text-slate-400 hover:text-slate-600'
+                                }`}
+                        >
+                            Contabilità Cantiere
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {activeTab === 'quotes' ? (
-                <>
-                    <div className="mb-8 flex justify-between items-center">
-                        <div className="relative max-w-md w-full hidden md:block">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                            <input
-                                type="text"
-                                placeholder="Cerca preventivo..."
-                                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                            />
-                        </div>
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
-                        >
-                            <Plus className="w-5 h-5" />
-                            Crea Preventivo
-                        </button>
+            {activeTab === 'quotes' && (
+                <div className="mb-8 flex justify-between items-center">
+                    <div className="relative max-w-md w-full hidden md:block">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                        <input
+                            type="text"
+                            placeholder="Cerca preventivo..."
+                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                        />
                     </div>
-                </>) : (
-                <>
-                    <div className="mb-8 flex justify-between items-center">
-                        <div className="relative max-w-md w-full hidden md:block">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                            <input
-                                type="text"
-                                placeholder="Cerca SAL..."
-                                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                            />
-                        </div>
-                        <button
-                            onClick={() => setShowSALModal(true)}
-                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
-                        >
-                            <Plus className="w-5 h-5" />
-                            Crea SAL
-                        </button>
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
+                    >
+                        <Plus className="w-5 h-5" />
+                        Crea Preventivo
+                    </button>
+                </div>
+            )}
+
+            {activeTab === 'sals' && (
+                <div className="mb-8 flex justify-between items-center">
+                    <div className="relative max-w-md w-full hidden md:block">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                        <input
+                            type="text"
+                            placeholder="Cerca SAL..."
+                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                        />
                     </div>
-                </>)}
+                    <button
+                        onClick={() => setShowSALModal(true)}
+                        className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
+                    >
+                        <Plus className="w-5 h-5" />
+                        Crea SAL
+                    </button>
+                </div>
+            )}
+
+            {activeTab === 'accounting' && (
+                <div className="mb-8 flex justify-between items-center">
+                    <div className="relative max-w-md w-full hidden md:block">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                        <input
+                            type="text"
+                            placeholder="Cerca contabilità..."
+                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                        />
+                    </div>
+                    <button
+                        onClick={() => {
+                            setAccountingFormData(initialAccountingFormData);
+                            setEditingAccountingId(null);
+                            setShowAccountingModal(true);
+                        }}
+                        className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
+                    >
+                        <Plus className="w-5 h-5" />
+                        Crea Contabilità
+                    </button>
+                </div>
+            )}
 
             {/* Quotes or SAL Grid */}
             {activeTab === 'quotes' ? (
@@ -748,6 +928,86 @@ ${user?.company?.name || 'Il team WORK360'}`;
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Accounting Grid */}
+            {activeTab === 'accounting' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {accountings.length === 0 ? (
+                        <div className="col-span-full text-center py-12 text-slate-500">
+                            <Building2 className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                            <p>Nessuna contabilità creata</p>
+                            <p className="text-sm">Clicca "+ Crea Contabilità" per iniziare</p>
+                        </div>
+                    ) : (
+                        accountings.map(acc => (
+                            <div key={acc.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                                <div className="mb-6">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex items-center gap-2 text-slate-900 font-bold text-lg">
+                                            <Building2 className="w-5 h-5 text-slate-400" />
+                                            <span className="line-clamp-1">{acc.site?.name || 'Senza cantiere'}</span>
+                                        </div>
+                                        {acc.number && (
+                                            <span className="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded">
+                                                {acc.number}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 mb-4">
+                                        <div className="bg-slate-50 p-3 rounded-lg">
+                                            <div className="text-xs text-slate-500 mb-1 flex items-center gap-1">
+                                                <User className="w-3 h-3" /> Committente
+                                            </div>
+                                            <div className="text-sm font-semibold text-slate-900 line-clamp-1">
+                                                {acc.client?.name || '-'}
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-50 p-3 rounded-lg">
+                                            <div className="text-xs text-slate-500 mb-1 flex items-center gap-1">
+                                                <Euro className="w-3 h-3" /> Totale
+                                            </div>
+                                            <div className="text-lg font-bold text-slate-900">
+                                                € {(acc.total || 0).toFixed(2)}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {acc.issueDate && (
+                                        <p className="text-sm text-slate-500">
+                                            {new Date(acc.issueDate).toLocaleDateString('it-IT')}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex gap-2 pt-4 border-t border-slate-100">
+                                    <button
+                                        onClick={() => handleAccountingEdit(acc)}
+                                        className="flex-1 py-2 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 font-medium text-sm flex items-center justify-center gap-1 transition-colors"
+                                        title="Modifica"
+                                    >
+                                        <Edit className="w-4 h-4" /> Modifica
+                                    </button>
+                                    <button
+                                        onClick={() => downloadAccountingPDF(acc.id)}
+                                        className="py-2 px-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                                        title="Scarica PDF"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleAccountingDelete(acc.id)}
+                                        className="py-2 px-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                                        title="Elimina"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             )}
 
@@ -1457,8 +1717,286 @@ ${user?.company?.name || 'Il team WORK360'}`;
                             </div>
                         </div>
                     </div>
-                )
-            }
+                )}
+
+            {/* Contabilità Cantiere Modal */}
+            {showAccountingModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl relative">
+                        <button
+                            onClick={() => {
+                                setShowAccountingModal(false);
+                                setEditingAccountingId(null);
+                                setAccountingFormData(initialAccountingFormData);
+                            }}
+                            className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors z-10"
+                        >
+                            <X className="w-6 h-6 text-slate-500" />
+                        </button>
+
+                        <div className="p-6 md:p-8">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                                {editingAccountingId ? 'Modifica Contabilità' : 'Nuova Contabilità Cantiere'}
+                            </h2>
+                            <p className="text-slate-500 mb-8">Compila i dati per la contabilità del cantiere</p>
+
+                            <form onSubmit={handleAccountingSubmit} className="space-y-8">
+                                {/* Site and Number */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dati Generali</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Seleziona un cantiere</label>
+                                            <select
+                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                value={accountingFormData.site}
+                                                onChange={(e) => setAccountingFormData(prev => ({ ...prev, site: e.target.value }))}
+                                            >
+                                                <option value="">-- Nessun cantiere --</option>
+                                                {sites.map(site => (
+                                                    <option key={site.id} value={site.id}>{site.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Numero SAL</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                placeholder="Es. SAL-001"
+                                                value={accountingFormData.number}
+                                                onChange={(e) => setAccountingFormData(prev => ({ ...prev, number: e.target.value }))}
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Dates */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Date</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                value={accountingFormData.issueDate}
+                                                onChange={(e) => setAccountingFormData(prev => ({ ...prev, issueDate: e.target.value }))}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                value={accountingFormData.periodStart}
+                                                onChange={(e) => setAccountingFormData(prev => ({ ...prev, periodStart: e.target.value }))}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine</label>
+                                            <input
+                                                type="date"
+                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                value={accountingFormData.periodEnd}
+                                                onChange={(e) => setAccountingFormData(prev => ({ ...prev, periodEnd: e.target.value }))}
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Client Info */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dati Committente</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Nome Committente</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                placeholder="Nome o Ragione Sociale"
+                                                value={accountingFormData.client.name}
+                                                onChange={(e) => setAccountingFormData(prev => ({ ...prev, client: { ...prev.client, name: e.target.value } }))}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">P.IVA</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                placeholder="00000000000"
+                                                value={accountingFormData.client.vatNumber}
+                                                onChange={(e) => setAccountingFormData(prev => ({ ...prev, client: { ...prev.client, vatNumber: e.target.value } }))}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Codice Fiscale</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                placeholder="AAABBB00C00D000E"
+                                                value={accountingFormData.client.fiscalCode}
+                                                onChange={(e) => setAccountingFormData(prev => ({ ...prev, client: { ...prev.client, fiscalCode: e.target.value } }))}
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
+                                            <input
+                                                type="text"
+                                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                placeholder="Via, Città, CAP"
+                                                value={accountingFormData.client.address}
+                                                onChange={(e) => setAccountingFormData(prev => ({ ...prev, client: { ...prev.client, address: e.target.value } }))}
+                                            />
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Items */}
+                                <section>
+                                    <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                                        <h3 className="text-lg font-semibold text-slate-900">Voci Contabilità Cantiere</h3>
+                                        <button
+                                            type="button"
+                                            onClick={handleAccountingAddItem}
+                                            className="text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                                        >
+                                            <Plus className="w-4 h-4" /> Aggiungi Voce
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        {/* Table Header */}
+                                        <div className="hidden md:grid grid-cols-12 gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">
+                                            <div className="col-span-5">Descrizione</div>
+                                            <div className="col-span-2 text-center">U.M.</div>
+                                            <div className="col-span-2 text-center">Quantità</div>
+                                            <div className="col-span-2 text-center">Prezzo</div>
+                                            <div className="col-span-1"></div>
+                                        </div>
+
+                                        {/* Items */}
+                                        {accountingFormData.items.map((item, index) => (
+                                            <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-2 items-start bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                                <div className="md:col-span-5">
+                                                    <label className="block text-xs text-slate-500 mb-1 md:hidden">Descrizione</label>
+                                                    <textarea
+                                                        className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-900 focus:outline-none resize-y min-h-[60px]"
+                                                        placeholder="Descrizione lavoro..."
+                                                        value={item.description}
+                                                        onChange={(e) => handleAccountingItemChange(index, 'description', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-xs text-slate-500 mb-1 md:hidden">Unità di Misura</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-900 focus:outline-none text-center"
+                                                        placeholder="mq, ml, kg..."
+                                                        value={item.unit}
+                                                        onChange={(e) => handleAccountingItemChange(index, 'unit', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-xs text-slate-500 mb-1 md:hidden">Quantità</label>
+                                                    <input
+                                                        type="text"
+                                                        inputMode="decimal"
+                                                        className="w-full bg-white border border-slate-200 rounded px-2 py-2 text-center text-sm focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                        placeholder="0"
+                                                        value={item.quantity}
+                                                        onChange={(e) => handleAccountingItemChange(index, 'quantity', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-xs text-slate-500 mb-1 md:hidden">Prezzo €</label>
+                                                    <input
+                                                        type="text"
+                                                        inputMode="decimal"
+                                                        className="w-full bg-white border border-slate-200 rounded px-2 py-2 text-center text-sm focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                                                        placeholder="0.00"
+                                                        value={item.unitPrice}
+                                                        onChange={(e) => handleAccountingItemChange(index, 'unitPrice', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-1 flex items-center justify-between md:justify-center gap-2 pt-2 md:pt-0">
+                                                    <span className="text-sm font-bold text-slate-900 md:hidden">
+                                                        Totale: €{(item.total || 0).toFixed(2)}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleAccountingRemoveItem(index)}
+                                                        className="text-red-400 hover:text-red-600 transition-colors p-1"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                {/* Desktop total display */}
+                                                <div className="hidden md:block col-span-12 text-right text-sm font-semibold text-slate-700 pr-8">
+                                                    Totale voce: €{(item.total || 0).toFixed(2)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Grand Total */}
+                                    <div className="flex justify-end mt-6">
+                                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 min-w-[250px]">
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-bold text-slate-900">TOTALE</span>
+                                                <span className="text-2xl font-bold text-slate-900">€{calculateAccountingTotal().toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Notes */}
+                                <section>
+                                    <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Note</h3>
+                                    <textarea
+                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none h-24 resize-y"
+                                        placeholder="Eventuali note aggiuntive..."
+                                        value={accountingFormData.notes}
+                                        onChange={(e) => setAccountingFormData(prev => ({ ...prev, notes: e.target.value }))}
+                                    />
+                                </section>
+
+                                {/* Submit Button */}
+                                <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowAccountingModal(false);
+                                            setEditingAccountingId(null);
+                                            setAccountingFormData(initialAccountingFormData);
+                                        }}
+                                        className="px-6 py-2.5 text-slate-600 font-medium rounded-lg hover:bg-slate-100 transition-colors"
+                                    >
+                                        Annulla
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={sending}
+                                        className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2 disabled:opacity-50"
+                                    >
+                                        {sending ? (
+                                            <>
+                                                <Loader className="w-4 h-4 animate-spin" />
+                                                Salvataggio...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle className="w-4 h-4" />
+                                                {editingAccountingId ? 'Aggiorna' : 'Salva'}
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Confirm Delete Dialog */}
             <ConfirmDialog

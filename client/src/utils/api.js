@@ -192,6 +192,16 @@ export const salAPI = {
     downloadPDF: (id) => api.get(`/sals/${id}/pdf`, { responseType: 'blob' }),
 };
 
+// Site Accounting (Contabilità Cantiere)
+export const siteAccountingAPI = {
+    create: (data) => api.post('/site-accounting', data),
+    getAll: () => api.get('/site-accounting'),
+    getOne: (id) => api.get(`/site-accounting/${id}`),
+    update: (id, data) => api.put(`/site-accounting/${id}`, data),
+    delete: (id) => api.delete(`/site-accounting/${id}`),
+    downloadPDF: (id) => api.get(`/site-accounting/${id}/pdf`, { responseType: 'blob' }),
+};
+
 // User
 export const userAPI = {
     getProfile: () => api.get('/auth/me'),
