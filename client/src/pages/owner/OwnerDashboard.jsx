@@ -1123,6 +1123,15 @@ export default function OwnerDashboard() {
     const [notification, setNotification] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('active'); // 'all', 'active', 'completed', 'planned', 'suspended'
+    const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+    const filterTabsRef = React.useRef(null);
+
+    // Handle scroll to show/hide arrow indicator
+    const handleFilterScroll = (e) => {
+        const el = e.target;
+        const isAtEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10;
+        setShowScrollIndicator(!isAtEnd);
+    };
 
     const [formData, setFormData] = useState({
         name: '',
@@ -1296,14 +1305,21 @@ export default function OwnerDashboard() {
 
                 {/* STATUS FILTER TABS */}
                 <div className="relative mb-6">
-                    {/* Animated scroll indicator on the right - more visible */}
-                    <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-slate-100 via-slate-100/80 to-transparent pointer-events-none z-10 md:hidden flex items-center justify-end pr-1">
-                        <div className="animate-bounce-x">
-                            <ChevronRight className="w-5 h-5 text-slate-400" />
+                    {/* Animated scroll indicator on the right - hides when at end */}
+                    {showScrollIndicator && (
+                        <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-slate-100 via-slate-100/80 to-transparent pointer-events-none z-10 md:hidden flex items-center justify-end pr-1">
+                            <div className="animate-bounce-x">
+                                <ChevronRight className="w-5 h-5 text-slate-400" />
+                            </div>
                         </div>
-                    </div>
+                    )}
 
-                    <div className="flex gap-2 overflow-x-auto pb-2 pr-12 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
+                    <div
+                        ref={filterTabsRef}
+                        onScroll={handleFilterScroll}
+                        className="flex gap-2 overflow-x-auto pb-2 pr-12 scrollbar-hide"
+                        style={{ scrollSnapType: 'x mandatory' }}
+                    >
                         {[
                             { value: 'all', label: 'Tutti', color: 'slate' },
                             { value: 'active', label: 'In Corso', color: 'green' },
