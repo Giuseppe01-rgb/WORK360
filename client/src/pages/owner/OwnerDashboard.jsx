@@ -944,9 +944,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
             {/* Employees Full-Screen View */}
             {showEmployeesModal && (
-                <div className="fixed inset-0 bg-white z-50 flex flex-col">
+                <div className="fixed inset-0 bg-white z-[9999] flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
                     {/* Header */}
-                    <div className="flex items-center justify-between p-4 border-b border-slate-100">
+                    <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white">
                         <button
                             onClick={() => setShowEmployeesModal(false)}
                             className="flex items-center gap-2 text-blue-600 font-semibold"
@@ -998,11 +998,12 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                 </div>
             )}
 
+
             {/* Materials Full-Screen View */}
             {showMaterialsModal && (
-                <div className="fixed inset-0 bg-white z-50 flex flex-col">
+                <div className="fixed inset-0 bg-white z-[9999] flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
                     {/* Header */}
-                    <div className="flex items-center justify-between p-4 border-b border-slate-100">
+                    <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white">
                         <button
                             onClick={() => setShowMaterialsModal(false)}
                             className="flex items-center gap-2 text-purple-600 font-semibold"
