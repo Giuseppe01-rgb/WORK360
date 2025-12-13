@@ -943,8 +943,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             }
 
             {/* Employees Full-Screen View */}
+            {/* Employees Full-Screen View */}
             {showEmployeesModal && (
-                <div className="fixed inset-0 bg-white z-[9999] flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+                <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white">
                         <button
@@ -1001,7 +1002,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
             {/* Materials Full-Screen View */}
             {showMaterialsModal && (
-                <div className="fixed inset-0 bg-white z-[9999] flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+                <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white">
                         <button
