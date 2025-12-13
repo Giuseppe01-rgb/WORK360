@@ -945,8 +945,8 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {/* Employees Detail Modal - Apple Health Style */}
             {
                 showEmployeesModal && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50" onClick={() => setShowEmployeesModal(false)}>
-                        <div className="bg-slate-50 rounded-t-3xl md:rounded-3xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50 p-4" onClick={() => setShowEmployeesModal(false)}>
+                        <div className="bg-slate-50 rounded-[2rem] md:rounded-[2rem] w-full max-w-lg max-h-[80vh] overflow-hidden shadow-2xl mb-4" onClick={(e) => e.stopPropagation()}>
                             {/* Header */}
                             <div className="bg-white border-b border-slate-100 p-5 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -1023,8 +1023,8 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {/* Materials Detail Modal - Apple Health Style */}
             {
                 showMaterialsModal && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50" onClick={() => setShowMaterialsModal(false)}>
-                        <div className="bg-slate-50 rounded-t-3xl md:rounded-3xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50 p-4" onClick={() => setShowMaterialsModal(false)}>
+                        <div className="bg-slate-50 rounded-[2rem] md:rounded-[2rem] w-full max-w-lg max-h-[80vh] overflow-hidden shadow-2xl mb-4" onClick={(e) => e.stopPropagation()}>
                             {/* Header */}
                             <div className="bg-white border-b border-slate-100 p-5 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
