@@ -3,7 +3,7 @@ import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
-import { Plus, Users, Clock, ArrowRight, X, ChevronRight, Package, MapPin, Calendar, Edit, Trash2, Eye, ArrowLeft, RefreshCw, Smartphone, Monitor } from 'lucide-react';
+import { Plus, Users, Clock, ArrowRight, X, ChevronRight, Package, MapPin, Calendar, Edit, Trash2, Eye, ArrowLeft, RefreshCw, Smartphone, Monitor, Search } from 'lucide-react';
 import PortalModal from '../../components/PortalModal';
 
 const SiteDetails = ({ site, onBack, showConfirm }) => {
