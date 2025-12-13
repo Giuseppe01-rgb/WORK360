@@ -6,7 +6,7 @@ import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI,
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight,
-    FileText, Camera, Image, Zap, MoreVertical, RefreshCw
+    FileText, Camera, Image, Zap, MoreVertical, RefreshCw, Eye
 } from 'lucide-react';
 
 const SiteDetails = ({ site, onBack, showConfirm }) => {
@@ -1291,29 +1291,15 @@ export default function OwnerDashboard() {
                     />
                 </div>
 
-                {/* STATUS FILTER TABS */}
-                <div className="relative mb-6">
-                    {/* Animated scroll indicator on the right - hides when at end */}
-                    {showScrollIndicator && (
-                        <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-slate-100 via-slate-100/80 to-transparent pointer-events-none z-10 md:hidden flex items-center justify-end pr-1">
-                            <div className="animate-bounce-x">
-                                <ChevronRight className="w-5 h-5 text-slate-400" />
-                            </div>
-                        </div>
-                    )}
-
-                    <div
-                        ref={filterTabsRef}
-                        onScroll={handleFilterScroll}
-                        className="flex gap-2 overflow-x-auto pb-2 pr-12 scrollbar-hide"
-                        style={{ scrollSnapType: 'x mandatory' }}
-                    >
+                {/* STATUS FILTER TABS - iOS SEGMENTED CONTROL STYLE */}
+                <div className="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                    <div className="flex gap-1 overflow-x-auto scrollbar-hide">
                         {[
-                            { value: 'all', label: 'Tutti', color: 'slate' },
-                            { value: 'active', label: 'In Corso', color: 'green' },
-                            { value: 'completed', label: 'Completi', color: 'blue' },
-                            { value: 'planned', label: 'Pianificati', color: 'amber' },
-                            { value: 'suspended', label: 'Sospeso', color: 'red' }
+                            { value: 'all', label: 'Tutti', icon: '📋' },
+                            { value: 'active', label: 'Attivi', icon: '🟢' },
+                            { value: 'completed', label: 'Completi', icon: '✅' },
+                            { value: 'planned', label: 'Pianificati', icon: '📅' },
+                            { value: 'suspended', label: 'Sospesi', icon: '⏸️' }
                         ].map(tab => {
                             const count = tab.value === 'all'
                                 ? sites.length
@@ -1323,38 +1309,32 @@ export default function OwnerDashboard() {
                                 <button
                                     key={tab.value}
                                     onClick={() => setStatusFilter(tab.value)}
-                                    className={`flex-shrink-0 px-4 py-2 rounded-xl font-bold text-sm transition-all ${isActive
-                                        ? `bg-${tab.color}-500 text-white shadow-lg shadow-${tab.color}-500/30`
-                                        : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                                    className={`flex-1 min-w-[70px] px-3 py-2.5 rounded-xl font-semibold text-sm transition-all ${isActive
+                                        ? 'bg-slate-900 text-white shadow-lg'
+                                        : 'text-slate-500 hover:bg-slate-50'
                                         }`}
-                                    style={{
-                                        scrollSnapAlign: 'start',
-                                        ...(isActive ? {
-                                            backgroundColor: tab.color === 'slate' ? '#64748b' :
-                                                tab.color === 'green' ? '#22c55e' :
-                                                    tab.color === 'blue' ? '#3b82f6' :
-                                                        tab.color === 'amber' ? '#f59e0b' : '#ef4444',
-                                            color: 'white'
-                                        } : {})
-                                    }}
                                 >
-                                    {tab.label} <span className={`ml-1 ${isActive ? 'opacity-80' : 'text-slate-400'}`}>({count})</span>
+                                    <span className="block text-center">
+                                        <span className="text-xs">{tab.icon}</span>
+                                        <span className={`block text-xs mt-0.5 ${isActive ? 'text-white' : 'text-slate-600'}`}>{tab.label}</span>
+                                        <span className={`block text-[10px] ${isActive ? 'text-slate-300' : 'text-slate-400'}`}>{count}</span>
+                                    </span>
                                 </button>
                             );
                         })}
                     </div>
                 </div>
 
-                {/* NEW SITE BUTTON - UPDATED */}
+                {/* NEW SITE BUTTON */}
                 <button
                     onClick={() => setShowModal(true)}
-                    className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-4 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/40 flex items-center justify-center gap-2 mb-8 transition-all active:scale-95 hover:shadow-2xl hover:shadow-blue-500/50"
+                    className="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold text-lg shadow-xl flex items-center justify-center gap-2 mb-6 transition-all active:scale-95 hover:bg-slate-800"
                 >
-                    <Plus className="w-6 h-6" />
+                    <Plus className="w-5 h-5" />
                     Nuovo Cantiere
                 </button>
 
-                {/* SITES LIST - APPLE HEALTH / TRADE REPUBLIC STYLE */}
+                {/* SITES LIST - CLEAN MODERN STYLE */}
                 <div>
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-slate-900 text-lg">
@@ -1363,35 +1343,34 @@ export default function OwnerDashboard() {
                                     statusFilter === 'completed' ? 'Cantieri completati' :
                                         statusFilter === 'planned' ? 'Cantieri pianificati' : 'Cantieri sospesi'}
                         </h3>
-                        <span className="text-slate-500 text-sm font-medium">{filteredSites.length} risultati</span>
+                        <span className="text-slate-400 text-sm">{filteredSites.length} risultati</span>
                     </div>
 
                     {filteredSites.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-500">
-                            <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                                <Building2 className="w-12 h-12 text-slate-400" />
+                        <div className="flex flex-col items-center justify-center py-20 text-center">
+                            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                                <Building2 className="w-10 h-10 text-slate-300" />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">Nessun cantiere trovato</h3>
-                            <p className="text-slate-500 max-w-xs mx-auto">
-                                Non ci sono cantieri che corrispondono ai filtri selezionati.
+                            <h3 className="text-lg font-bold text-slate-900 mb-1">Nessun cantiere</h3>
+                            <p className="text-slate-500 text-sm">
+                                Non ci sono cantieri con questo filtro.
                             </p>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {filteredSites.map((site) => {
                                 // Status config
                                 const statusConfig = {
-                                    active: { label: 'In corso', bgClass: 'bg-green-500', textClass: 'text-green-600', dotClass: 'bg-green-500', lightBg: 'bg-green-50' },
-                                    completed: { label: 'Completato', bgClass: 'bg-blue-500', textClass: 'text-blue-600', dotClass: 'bg-blue-500', lightBg: 'bg-blue-50' },
-                                    planned: { label: 'Pianificato', bgClass: 'bg-amber-500', textClass: 'text-amber-600', dotClass: 'bg-amber-500', lightBg: 'bg-amber-50' },
-                                    suspended: { label: 'Sospeso', bgClass: 'bg-red-500', textClass: 'text-red-600', dotClass: 'bg-red-500', lightBg: 'bg-red-50' }
-                                }[site.status] || { label: 'Sconosciuto', bgClass: 'bg-slate-500', textClass: 'text-slate-600', dotClass: 'bg-slate-500', lightBg: 'bg-slate-50' };
+                                    active: { label: 'In corso', color: 'green', bg: 'bg-green-100', text: 'text-green-700' },
+                                    completed: { label: 'Completato', color: 'blue', bg: 'bg-blue-100', text: 'text-blue-700' },
+                                    planned: { label: 'Pianificato', color: 'amber', bg: 'bg-amber-100', text: 'text-amber-700' },
+                                    suspended: { label: 'Sospeso', color: 'red', bg: 'bg-red-100', text: 'text-red-700' }
+                                }[site.status] || { label: 'Sconosciuto', color: 'slate', bg: 'bg-slate-100', text: 'text-slate-700' };
 
                                 // Calculate days since start
                                 const startDate = new Date(site.startDate);
                                 const today = new Date();
                                 const daysDiff = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-                                const daysLabel = daysDiff >= 0 ? `${daysDiff} giorni` : `tra ${Math.abs(daysDiff)} giorni`;
 
                                 // Has contract value
                                 const hasContract = parseFloat(site.contractValue) > 0;
@@ -1400,102 +1379,92 @@ export default function OwnerDashboard() {
                                 return (
                                     <div
                                         key={site.id}
-                                        onClick={() => setSelectedSite(site)}
-                                        className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 active:scale-[0.98] transition-all cursor-pointer group hover:shadow-lg hover:border-slate-200"
+                                        className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden active:scale-[0.99] transition-all"
                                     >
-                                        {/* Status Bar - Apple Health inspired color bar */}
-                                        <div className={`h-1 ${statusConfig.bgClass}`}></div>
-
-                                        <div className="p-5">
-                                            {/* Header - Name + Actions */}
-                                            <div className="flex items-start justify-between mb-4">
+                                        {/* Main Tappable Area */}
+                                        <div
+                                            onClick={() => setSelectedSite(site)}
+                                            className="p-4 cursor-pointer"
+                                        >
+                                            {/* Top Row: Name + Status Badge */}
+                                            <div className="flex items-start justify-between gap-3 mb-3">
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className={`w-2 h-2 rounded-full ${statusConfig.dotClass} animate-pulse`}></span>
-                                                        <span className={`text-xs font-bold ${statusConfig.textClass}`}>
-                                                            {statusConfig.label}
-                                                        </span>
-                                                    </div>
-                                                    <h3 className="font-black text-slate-900 text-lg leading-tight truncate">
+                                                    <h3 className="font-bold text-slate-900 text-base leading-snug truncate">
                                                         {site.name}
                                                     </h3>
-                                                    <div className="flex items-center gap-1 text-slate-400 text-sm mt-1">
-                                                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                                                    <div className="flex items-center gap-1.5 text-slate-400 text-sm mt-0.5">
+                                                        <MapPin className="w-3 h-3 flex-shrink-0" />
                                                         <span className="truncate">{site.address}</span>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={(e) => handleEdit(e, site)}
-                                                        className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-colors"
-                                                        title="Modifica"
-                                                    >
-                                                        <Edit className="w-4 h-4" />
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => handleDelete(e, site.id)}
-                                                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                                                        title="Elimina"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
+                                                <span className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold ${statusConfig.bg} ${statusConfig.text}`}>
+                                                    {statusConfig.label}
+                                                </span>
                                             </div>
 
-                                            {/* Metrics Row - Trade Republic inspired */}
-                                            <div className="grid grid-cols-3 gap-3 mb-4">
+                                            {/* Metrics Row */}
+                                            <div className="flex items-center gap-4 text-sm">
                                                 {/* Start Date */}
-                                                <div className="bg-slate-50 rounded-2xl p-3 text-center">
-                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Inizio</p>
-                                                    <p className="text-slate-900 font-bold text-sm">
-                                                        {startDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}
-                                                    </p>
+                                                <div className="flex items-center gap-1.5 text-slate-500">
+                                                    <Calendar className="w-3.5 h-3.5" />
+                                                    <span>{startDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: '2-digit' })}</span>
                                                 </div>
 
                                                 {/* Duration */}
-                                                <div className="bg-slate-50 rounded-2xl p-3 text-center">
-                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Durata</p>
-                                                    <p className="text-slate-900 font-bold text-sm">
-                                                        {daysDiff >= 0 ? daysDiff : 0} <span className="text-slate-400 font-normal text-xs">gg</span>
-                                                    </p>
+                                                <div className="flex items-center gap-1.5 text-slate-500">
+                                                    <Clock className="w-3.5 h-3.5" />
+                                                    <span>{daysDiff >= 0 ? daysDiff : 0} gg</span>
                                                 </div>
 
-                                                {/* Contract Value or Placeholder */}
-                                                <div className={`rounded-2xl p-3 text-center ${hasContract ? 'bg-gradient-to-br from-purple-50 to-indigo-50' : 'bg-slate-50'}`}>
-                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Valore</p>
-                                                    {hasContract ? (
-                                                        <p className="text-purple-600 font-bold text-sm">
+                                                {/* Contract Value */}
+                                                {hasContract && (
+                                                    <div className="flex items-center gap-1.5 text-purple-600 font-semibold">
+                                                        <span>
                                                             {contractValue >= 1000000
-                                                                ? `${(contractValue / 1000000).toFixed(1)}M`
+                                                                ? `${(contractValue / 1000000).toFixed(1)}M€`
                                                                 : contractValue >= 1000
-                                                                    ? `${(contractValue / 1000).toFixed(0)}k`
-                                                                    : contractValue.toFixed(0)
+                                                                    ? `${(contractValue / 1000).toFixed(0)}k€`
+                                                                    : `${contractValue.toFixed(0)}€`
                                                             }
-                                                            <span className="text-purple-400 font-normal text-xs">€</span>
-                                                        </p>
-                                                    ) : (
-                                                        <p className="text-slate-400 font-medium text-sm">—</p>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Footer - CTA */}
-                                            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                                                <div className="flex items-center gap-2">
-                                                    {site.assignedWorkers?.length > 0 && (
-                                                        <div className="flex items-center gap-1 text-xs text-slate-500">
-                                                            <Users className="w-3.5 h-3.5" />
-                                                            <span>{site.assignedWorkers.length}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-purple-600">
-                                                    <span className="text-sm font-bold">Apri dettagli</span>
-                                                    <div className="w-7 h-7 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                                                        <ChevronRight className="w-4 h-4" />
+                                                        </span>
                                                     </div>
-                                                </div>
+                                                )}
+
+                                                {/* Workers Count */}
+                                                {site.assignedWorkers?.length > 0 && (
+                                                    <div className="flex items-center gap-1 text-slate-500">
+                                                        <Users className="w-3.5 h-3.5" />
+                                                        <span>{site.assignedWorkers.length}</span>
+                                                    </div>
+                                                )}
                                             </div>
+                                        </div>
+
+                                        {/* Action Bar - Always Visible */}
+                                        <div className="flex border-t border-slate-100">
+                                            <button
+                                                onClick={() => setSelectedSite(site)}
+                                                className="flex-1 flex items-center justify-center gap-2 py-3 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                                Dettagli
+                                            </button>
+                                            <div className="w-px bg-slate-100"></div>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleEdit(e, site); }}
+                                                className="flex-1 flex items-center justify-center gap-2 py-3 text-blue-600 hover:bg-blue-50 transition-colors text-sm font-medium"
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                                Modifica
+                                            </button>
+                                            <div className="w-px bg-slate-100"></div>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(e, site.id); }}
+                                                className="flex-1 flex items-center justify-center gap-2 py-3 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                Elimina
+                                            </button>
                                         </div>
                                     </div>
                                 );
