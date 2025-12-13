@@ -9,6 +9,7 @@ router.post('/', protect, requireWorker, validateEconomiaCreate, economiaControl
 
 // Owner routes
 router.get('/site/:siteId', protect, requireOwner, economiaController.getEconomiesBySite);
+router.post('/bulk', protect, requireOwner, economiaController.createBulkEconomia); // Quick bulk entry
 router.delete('/:id', protect, requireOwner, economiaController.deleteEconomia);
 
 module.exports = router;

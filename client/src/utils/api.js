@@ -218,6 +218,7 @@ export const communicationAPI = {
 // Economia (Overtime Hours)
 export const economiaAPI = {
     create: (data) => api.post('/economia', data),
+    createBulk: (data) => api.post('/economia/bulk', data), // Quick bulk entry
     getBySite: (siteId) => api.get(`/economia/site/${siteId}`),
     delete: (id) => api.delete(`/economia/${id}`),
 };

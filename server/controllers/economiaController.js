@@ -94,3 +94,50 @@ exports.deleteEconomia = async (req, res, next) => {
         next(error); // Pass to global error handler
     }
 };
+
+// Create bulk economia (owner only) - Quick entry for multiple hours
+exports.createBulkEconomia = async (req, res, next) => {
+    try {
+        const { siteId, hours, description } = req.body;
+        const companyId = getCompanyId(req);
+        const userId = getUserId(req);
+
+        // Validate required fields
+        if (!siteId) {
+            return res.status(400).json({ message: 'Campo cantiere obbligatorio' });
+        }
+        if (!hours || hours <= 0) {
+            return res.status(400).json({ message: 'Le ore devono essere maggiori di zero' });
+        }
+        if (!description || description.trim().length < 5) {
+            return res.status(400).json({ message: 'La descrizione deve contenere almeno 5 caratteri' });
+        }
+
+        // SECURITY: Verify site exists and belongs to user's company
+        await assertSiteBelongsToCompany(siteId, companyId);
+
+        // Create single economia with all the hours (bulk entry)
+        const economia = await Economia.create({
+            workerId: userId, // Owner creates it, so use owner's ID
+            siteId,
+            hours: parseFloat(hours),
+            description: description.trim()
+        });
+
+        // Reload with associations
+        await economia.reload({
+            include: [
+                { model: User, as: 'worker', attributes: ['firstName', 'lastName'] },
+                { model: ConstructionSite, as: 'site', attributes: ['name'] }
+            ]
+        });
+
+        res.status(201).json({
+            success: true,
+            data: economia,
+            message: `${hours} ore di economie aggiunte con successo`
+        });
+    } catch (error) {
+        next(error); // Pass to global error handler
+    }
+};

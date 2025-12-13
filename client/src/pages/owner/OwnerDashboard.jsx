@@ -26,6 +26,11 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     const [loadingMaterials, setLoadingMaterials] = useState(false);
     const [recalculating, setRecalculating] = useState(false);
 
+    // Bulk economie form state
+    const [showBulkEconomieForm, setShowBulkEconomieForm] = useState(false);
+    const [bulkEconomieForm, setBulkEconomieForm] = useState({ hours: '', description: '' });
+    const [loadingBulkEconomie, setLoadingBulkEconomie] = useState(false);
+
     const loadMaterialUsages = async () => {
         setLoadingMaterials(true);
         try {
@@ -137,6 +142,42 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             alert('Errore nel ricalcolo dei costi');
         } finally {
             setRecalculating(false);
+        }
+    };
+
+    // Handle bulk economie submission
+    const handleBulkEconomieSubmit = async (e) => {
+        e.preventDefault();
+        if (!bulkEconomieForm.hours || parseFloat(bulkEconomieForm.hours) <= 0) {
+            alert('Inserisci un numero di ore valido');
+            return;
+        }
+        if (!bulkEconomieForm.description || bulkEconomieForm.description.trim().length < 5) {
+            alert('La descrizione deve contenere almeno 5 caratteri');
+            return;
+        }
+
+        setLoadingBulkEconomie(true);
+        try {
+            await economiaAPI.createBulk({
+                siteId: site.id,
+                hours: parseFloat(bulkEconomieForm.hours),
+                description: bulkEconomieForm.description.trim()
+            });
+            // Refresh economie list
+            const economieData = await economiaAPI.getBySite(site.id);
+            setEconomie(economieData.data || []);
+            // Refresh report for updated totals
+            const rep = await analyticsAPI.getSiteReport(site.id);
+            setReport(rep.data);
+            // Reset form
+            setBulkEconomieForm({ hours: '', description: '' });
+            setShowBulkEconomieForm(false);
+        } catch (error) {
+            console.error('Error creating bulk economia:', error);
+            alert(error.response?.data?.message || 'Errore nell\'aggiunta delle economie');
+        } finally {
+            setLoadingBulkEconomie(false);
         }
     };
 
@@ -612,6 +653,75 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {
                 activeTab === 'economie' && (
                     <div className="space-y-4">
+                        {/* Quick Add Button and Form */}
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-2xl border border-amber-100">
+                            {!showBulkEconomieForm ? (
+                                <button
+                                    onClick={() => setShowBulkEconomieForm(true)}
+                                    className="flex items-center gap-2 px-4 py-3 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition-colors shadow-sm"
+                                >
+                                    <Plus className="w-5 h-5" />
+                                    Aggiungi ore economie velocemente
+                                </button>
+                            ) : (
+                                <form onSubmit={handleBulkEconomieSubmit} className="space-y-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h4 className="font-bold text-slate-900">Inserimento rapido economie</h4>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowBulkEconomieForm(false);
+                                                setBulkEconomieForm({ hours: '', description: '' });
+                                            }}
+                                            className="p-1 hover:bg-amber-200 rounded-lg text-slate-500"
+                                        >
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Ore totali</label>
+                                            <input
+                                                type="number"
+                                                step="0.5"
+                                                min="0.5"
+                                                value={bulkEconomieForm.hours}
+                                                onChange={(e) => setBulkEconomieForm({ ...bulkEconomieForm, hours: e.target.value })}
+                                                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-lg font-bold"
+                                                placeholder="es. 200"
+                                                required
+                                            />
+                                            <p className="text-xs text-slate-500 mt-1">= {((parseFloat(bulkEconomieForm.hours) || 0) * 30).toFixed(2)}€ di valore</p>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Descrizione</label>
+                                            <input
+                                                type="text"
+                                                value={bulkEconomieForm.description}
+                                                onChange={(e) => setBulkEconomieForm({ ...bulkEconomieForm, description: e.target.value })}
+                                                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none"
+                                                placeholder="es. Economie pregresse da contratto"
+                                                required
+                                                minLength={5}
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={loadingBulkEconomie}
+                                        className="w-full bg-amber-500 text-white py-3 rounded-xl font-bold hover:bg-amber-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {loadingBulkEconomie ? (
+                                            <><RefreshCw className="w-5 h-5 animate-spin" /> Salvataggio...</>
+                                        ) : (
+                                            <><Plus className="w-5 h-5" /> Aggiungi {bulkEconomieForm.hours || 0} ore</>
+                                        )}
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+
+                        {/* Economie List */}
                         {economie.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {economie.map((economia) => (
