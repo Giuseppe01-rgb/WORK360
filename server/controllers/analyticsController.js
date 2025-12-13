@@ -229,7 +229,10 @@ const getSiteReport = async (req, res, next) => {
         const laborIncidencePercent = totalCost > 0 ? (laborCost / totalCost) * 100 : 0;
 
         // Get contractValue and calculate margin
+        // DEBUG: Log the raw contractValue from database
+        console.log('[Analytics] Raw contractValue from DB:', site?.contractValue, 'Type:', typeof site?.contractValue);
         const contractValue = parseFloat(site?.contractValue) || 0;
+        console.log('[Analytics] Parsed contractValue:', contractValue);
         const marginCurrentValue = contractValue - totalCost;
         const marginCurrentPercent = contractValue > 0 ? (marginCurrentValue / contractValue) * 100 : 0;
         const costVsRevenuePercent = contractValue > 0 ? (totalCost / contractValue) * 100 : 0;
