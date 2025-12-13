@@ -309,7 +309,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <span className="font-bold text-lg">$</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-slate-500 font-bold text-sm leading-tight">Costo Totale<br />Cantiere</h3>
+                                        <h3 className="text-slate-500 font-bold text-sm">Costo Totale Cantiere</h3>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -327,73 +327,63 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 </div>
                             </div>
 
-                            <div className="mb-8">
-                                <p className="text-5xl font-black text-slate-900 tracking-tight">
-                                    {totalCost.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<span className="text-3xl text-slate-400 font-medium ml-1">€</span>
+                            {/* Apple Health Style - Main Value */}
+                            <div className="mb-6">
+                                <p className="text-4xl font-black text-slate-900 tracking-tight">
+                                    {totalCost.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    <span className="text-2xl text-slate-400 font-medium ml-1">€</span>
                                 </p>
                             </div>
 
-                            <div className="space-y-6">
+                            {/* Apple Health Style - Breakdown */}
+                            <div className="space-y-4">
                                 {/* Materiali */}
-                                <div>
-                                    <div className="flex justify-between text-sm mb-2">
-                                        <span className="flex items-center gap-2 text-slate-600 font-bold">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                                            Materiali
-                                        </span>
-                                        <span className="font-black text-slate-900">{materialCost.toFixed(2)}€</span>
-                                    </div>
-                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-purple-500 rounded-full transition-all duration-500" style={{ width: `${materialPct}%` }}></div>
-                                    </div>
+                                <div className="border-b border-slate-100 pb-4">
+                                    <p className="text-slate-500 text-sm font-medium mb-1">Materiali</p>
+                                    <p className="text-xl font-bold text-purple-600">
+                                        {materialCost.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        <span className="text-base text-purple-400 ml-1">€</span>
+                                        <span className="text-sm text-slate-400 ml-2">({materialPct.toFixed(0)}%)</span>
+                                    </p>
                                 </div>
-
                                 {/* Manodopera */}
                                 <div>
-                                    <div className="flex justify-between text-sm mb-2">
-                                        <span className="flex items-center gap-2 text-slate-600 font-bold">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                                            Manodopera
-                                        </span>
-                                        <span className="font-black text-slate-900">{laborCost.toFixed(2)}€</span>
-                                    </div>
-                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${laborPct}%` }}></div>
-                                    </div>
+                                    <p className="text-slate-500 text-sm font-medium mb-1">Manodopera</p>
+                                    <p className="text-xl font-bold text-blue-600">
+                                        {laborCost.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        <span className="text-base text-blue-400 ml-1">€</span>
+                                        <span className="text-sm text-slate-400 ml-2">({laborPct.toFixed(0)}%)</span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* COST INCIDENCE CARD */}
+                        {/* INCIDENCE CARD - Apple Health Style */}
                         {report?.costIncidence?.materialsIncidencePercent !== null ? (
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                            <Package className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-slate-500 font-bold text-sm leading-tight">
-                                                Incidenza materiali /<br />manodopera
-                                            </h3>
-                                        </div>
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-6">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                                        <Package className="w-5 h-5" />
                                     </div>
+                                    <h3 className="text-slate-500 font-bold text-sm">Incidenza Costi</h3>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                                            Materiali
-                                        </span>
-                                        <span className="font-black text-slate-900 text-2xl">{report.costIncidence.materialsIncidencePercent.toFixed(1)}%</span>
+                                    {/* Materiali % */}
+                                    <div className="border-b border-slate-100 pb-4">
+                                        <p className="text-slate-500 text-sm font-medium mb-1">Materiali</p>
+                                        <p className="text-2xl font-bold text-purple-600">
+                                            {report.costIncidence.materialsIncidencePercent.toFixed(1)}
+                                            <span className="text-lg text-purple-400 ml-1">%</span>
+                                        </p>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                                            Manodopera
-                                        </span>
-                                        <span className="font-black text-slate-900 text-2xl">{report.costIncidence.laborIncidencePercent.toFixed(1)}%</span>
+                                    {/* Manodopera % */}
+                                    <div>
+                                        <p className="text-slate-500 text-sm font-medium mb-1">Manodopera</p>
+                                        <p className="text-2xl font-bold text-blue-600">
+                                            {report.costIncidence.laborIncidencePercent.toFixed(1)}
+                                            <span className="text-lg text-blue-400 ml-1">%</span>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -952,66 +942,75 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                 )
             }
 
-            {/* Employees Detail Modal */}
+            {/* Employees Detail Modal - Apple Health Style */}
             {
                 showEmployeesModal && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowEmployeesModal(false)}>
-                        <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                            <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between z-10">
-                                <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                                    <Users className="w-6 h-6 text-blue-600" />
-                                    Dettaglio Costi Dipendenti
-                                </h3>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50" onClick={() => setShowEmployeesModal(false)}>
+                        <div className="bg-slate-50 rounded-t-3xl md:rounded-3xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                            {/* Header */}
+                            <div className="bg-white border-b border-slate-100 p-5 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                        <Users className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900">Dipendenti</h3>
+                                        <p className="text-sm text-slate-500">{employeeHours.length} persone</p>
+                                    </div>
+                                </div>
                                 <button
                                     onClick={() => setShowEmployeesModal(false)}
                                     className="p-2 hover:bg-slate-100 rounded-full transition-colors"
                                 >
-                                    <X className="w-6 h-6 text-slate-500" />
+                                    <X className="w-5 h-5 text-slate-400" />
                                 </button>
                             </div>
-                            <div className="p-6">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead>
-                                            <tr className="bg-slate-50 border-b border-slate-200">
-                                                <th className="text-left px-4 py-3 font-bold text-slate-700">Dipendente</th>
-                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Ore Totali</th>
-                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Orario</th>
-                                                <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Totale</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {employeeHours.map((emp) => (
-                                                <tr key={emp.id.id} className="border-b border-slate-100 hover:bg-slate-50">
-                                                    <td className="px-4 py-3">
-                                                        <div className="font-bold text-slate-900">{emp.id.firstName} {emp.id.lastName}</div>
-                                                        <div className="text-xs text-slate-500">{emp.id.username}</div>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                        {emp.totalHours.toFixed(2)} h
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                        {emp.id.hourlyCost ? `€ ${emp.id.hourlyCost.toFixed(2)}` : '-'}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
-                                                        € {((emp.totalHours || 0) * (emp.id.hourlyCost || 0)).toFixed(2)}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                        <tfoot className="bg-slate-50 font-bold">
-                                            <tr>
-                                                <td className="px-4 py-3 text-slate-900">TOTALE</td>
-                                                <td className="px-4 py-3 text-right text-slate-900">
-                                                    {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(2)} h
-                                                </td>
-                                                <td className="px-4 py-3 text-right text-slate-900">-</td>
-                                                <td className="px-4 py-3 text-right text-green-600">
-                                                    € {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toFixed(2)}
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
+
+                            {/* Employee Cards List */}
+                            <div className="p-4 overflow-y-auto max-h-[60vh] space-y-3">
+                                {employeeHours.map((emp) => (
+                                    <div key={emp.id.id} className="bg-white p-4 rounded-2xl shadow-sm">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <p className="font-bold text-slate-900">{emp.id.firstName} {emp.id.lastName}</p>
+                                                <p className="text-xs text-slate-400">{emp.id.username}</p>
+                                            </div>
+                                            <span className="text-sm font-medium text-slate-500">
+                                                €{emp.id.hourlyCost?.toFixed(2) || '0'}/h
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                                            <div>
+                                                <p className="text-slate-500 text-xs mb-1">Ore lavorate</p>
+                                                <p className="text-lg font-bold text-blue-600">{emp.totalHours.toFixed(0)} <span className="text-sm text-blue-400">h</span></p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-slate-500 text-xs mb-1">Costo totale</p>
+                                                <p className="text-lg font-bold text-green-600">
+                                                    {((emp.totalHours || 0) * (emp.id.hourlyCost || 0)).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    <span className="text-sm text-green-400 ml-1">€</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Footer Summary */}
+                            <div className="bg-white border-t border-slate-200 p-4">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="text-slate-500 text-sm">Ore totali</p>
+                                        <p className="text-xl font-bold text-slate-900">
+                                            {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(0)} h
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-slate-500 text-sm">Costo manodopera</p>
+                                        <p className="text-xl font-bold text-green-600">
+                                            {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1019,102 +1018,78 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                 )
             }
 
-            {/* Materials Detail Modal */}
+            {/* Materials Detail Modal - Apple Health Style */}
             {
                 showMaterialsModal && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowMaterialsModal(false)}>
-                        <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                            <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between z-10">
-                                <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                                    <Package className="w-6 h-6 text-purple-600" />
-                                    Gestione Materiali Cantiere
-                                </h3>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50" onClick={() => setShowMaterialsModal(false)}>
+                        <div className="bg-slate-50 rounded-t-3xl md:rounded-3xl w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                            {/* Header */}
+                            <div className="bg-white border-b border-slate-100 p-5 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                        <Package className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900">Materiali</h3>
+                                        <p className="text-sm text-slate-500">{report?.materials?.length || 0} tipologie</p>
+                                    </div>
+                                </div>
                                 <button
                                     onClick={() => setShowMaterialsModal(false)}
                                     className="p-2 hover:bg-slate-100 rounded-full transition-colors"
                                 >
-                                    <X className="w-6 h-6 text-slate-500" />
+                                    <X className="w-5 h-5 text-slate-400" />
                                 </button>
                             </div>
-                            <div className="p-6 space-y-6">
-                                {/* Summary Table */}
-                                <div>
-                                    <h4 className="text-lg font-bold text-slate-900 mb-3">Riepilogo Costi</h4>
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead>
-                                                <tr className="bg-slate-50 border-b border-slate-200">
-                                                    <th className="text-left px-4 py-3 font-bold text-slate-700">Materiale</th>
-                                                    <th className="text-right px-4 py-3 font-bold text-slate-700">Quantità</th>
-                                                    <th className="text-right px-4 py-3 font-bold text-slate-700">Prezzo Unit.</th>
-                                                    <th className="text-right px-4 py-3 font-bold text-slate-700">Costo Totale</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {report?.materials?.map((mat) => (
-                                                    <tr key={mat.id} className="border-b border-slate-100 hover:bg-slate-50">
-                                                        <td className="px-4 py-3 font-bold text-slate-900">
-                                                            {mat.name}
-                                                        </td>
-                                                        <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                            {mat.totalQuantity} {mat.unit}
-                                                        </td>
-                                                        <td className="px-4 py-3 text-right font-mono text-slate-700">
-                                                            {mat.unitPrice ? `€ ${mat.unitPrice.toFixed(2)}` : '-'}
-                                                        </td>
-                                                        <td className="px-4 py-3 text-right font-bold text-green-600 font-mono">
-                                                            € {(mat.totalCost || 0).toFixed(2)}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                            <tfoot className="bg-slate-50 font-bold">
-                                                <tr>
-                                                    <td className="px-4 py-3 text-slate-900" colSpan="3">TOTALE</td>
-                                                    <td className="px-4 py-3 text-right text-green-600">
-                                                        € {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toFixed(2)}
-                                                    </td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
 
-                                {/* Individual Usages with Delete */}
-                                <div>
-                                    <h4 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-                                        Utilizzi Individuali
-                                        {loadingMaterials && <span className="text-sm text-slate-500 font-normal">Caricamento...</span>}
-                                    </h4>
-                                    {materialUsages.length === 0 && !loadingMaterials ? (
-                                        <p className="text-slate-500 text-center py-4">Nessun utilizzo materiale registrato</p>
-                                    ) : (
-                                        <div className="space-y-2">
-                                            {materialUsages.map((usage) => (
-                                                <div key={usage.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                                    <div className="flex-1">
-                                                        <div className="font-semibold text-slate-900">
-                                                            {usage.materialMaster?.displayName || usage.materialMaster?.display_name || 'Materiale sconosciuto'}
-                                                        </div>
-                                                        <div className="text-sm text-slate-600 flex flex-wrap gap-4 mt-1">
-                                                            <span>Qtà: <strong>{usage.numeroConfezioni || usage.numero_confezioni}</strong> {usage.materialMaster?.unit || 'pz'}</span>
-                                                            <span>Data: {new Date(usage.dataOra || usage.data_ora).toLocaleDateString('it-IT')}</span>
-                                                            {usage.user && (
-                                                                <span>Da: {usage.user.firstName} {usage.user.lastName}</span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => handleDeleteMaterialUsage(usage.id)}
-                                                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
-                                                        title="Elimina utilizzo"
-                                                    >
-                                                        <Trash2 className="w-5 h-5" />
-                                                    </button>
-                                                </div>
-                                            ))}
+                            {/* Materials Cards List */}
+                            <div className="p-4 overflow-y-auto max-h-[60vh] space-y-3">
+                                {report?.materials?.map((mat) => (
+                                    <div key={mat.id} className="bg-white p-4 rounded-2xl shadow-sm">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <p className="font-bold text-slate-900 leading-tight">{mat.name}</p>
+                                            <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+                                                {mat.unit}
+                                            </span>
                                         </div>
-                                    )}
+                                        <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                                            <div>
+                                                <p className="text-slate-500 text-xs mb-1">Quantità</p>
+                                                <p className="text-lg font-bold text-purple-600">{mat.totalQuantity}</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-slate-500 text-xs mb-1">Prezzo unit.</p>
+                                                <p className="text-sm font-medium text-slate-600">
+                                                    {mat.unitPrice ? `€${mat.unitPrice.toFixed(2)}` : '-'}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-slate-500 text-xs mb-1">Totale</p>
+                                                <p className="text-lg font-bold text-green-600">
+                                                    {(mat.totalCost || 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    <span className="text-sm text-green-400 ml-1">€</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Footer Summary */}
+                            <div className="bg-white border-t border-slate-200 p-4">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="text-slate-500 text-sm">Materiali totali</p>
+                                        <p className="text-xl font-bold text-slate-900">
+                                            {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0)} pz
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-slate-500 text-sm">Costo materiali</p>
+                                        <p className="text-xl font-bold text-green-600">
+                                            {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
