@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Building2, MapPin, ArrowLeft, FileText, Camera, Calendar, Clock, User, Loader2, Search
+    Building2, MapPin, ArrowLeft, FileText, Camera, Calendar, Clock, User, Loader2, Search, ChevronRight
 } from 'lucide-react';
 import { siteAPI, workActivityAPI, noteAPI, photoAPI } from '../../utils/api';
 import Layout from '../../components/Layout';
@@ -308,10 +308,14 @@ export default function WorkerSites() {
 
             {/* STATUS FILTER TABS */}
             <div className="relative mb-6">
-                {/* Scroll fade indicator on the right */}
-                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-10 md:hidden" />
+                {/* Animated scroll indicator on the right - more visible */}
+                <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-slate-100 via-slate-100/80 to-transparent pointer-events-none z-10 md:hidden flex items-center justify-end pr-1">
+                    <div className="animate-bounce-x">
+                        <ChevronRight className="w-5 h-5 text-slate-400" />
+                    </div>
+                </div>
 
-                <div className="flex gap-2 overflow-x-auto pb-2 pr-8 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
+                <div className="flex gap-2 overflow-x-auto pb-2 pr-12 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
                     {[
                         { value: 'all', label: 'Tutti', color: 'slate' },
                         { value: 'active', label: 'In Corso', color: 'green' },
@@ -347,9 +351,6 @@ export default function WorkerSites() {
                         );
                     })}
                 </div>
-
-                {/* Scroll hint text - only on mobile */}
-                <p className="text-xs text-slate-400 mt-1 md:hidden">← Scorri per altri filtri →</p>
             </div>
 
             {/* Sites List */}
