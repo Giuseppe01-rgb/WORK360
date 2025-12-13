@@ -1295,15 +1295,18 @@ export default function OwnerDashboard() {
                     />
                 </div>
 
-                {/* STATUS FILTER TABS */}
+                {/* STATUS FILTER TABS - Clean & Scrollable */}
                 <div className="relative mb-6">
-                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {/* Fade gradient to indicate scrollability */}
+                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-100 to-transparent pointer-events-none z-10 md:hidden"></div>
+
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
                         {[
-                            { value: 'all', label: 'Tutti', color: 'slate' },
-                            { value: 'active', label: 'In Corso', color: 'green' },
-                            { value: 'completed', label: 'Completi', color: 'blue' },
-                            { value: 'planned', label: 'Pianificati', color: 'amber' },
-                            { value: 'suspended', label: 'Sospeso', color: 'red' }
+                            { value: 'all', label: 'Tutti' },
+                            { value: 'active', label: 'In corso' },
+                            { value: 'completed', label: 'Completati' },
+                            { value: 'planned', label: 'Pianificati' },
+                            { value: 'suspended', label: 'Sospesi' }
                         ].map(tab => {
                             const count = tab.value === 'all'
                                 ? sites.length
@@ -1313,18 +1316,15 @@ export default function OwnerDashboard() {
                                 <button
                                     key={tab.value}
                                     onClick={() => setStatusFilter(tab.value)}
-                                    className={`flex-shrink-0 px-4 py-2 rounded-xl font-bold text-sm transition-all ${isActive
-                                        ? 'text-white shadow-lg'
-                                        : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                                    className={`flex-shrink-0 px-4 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${isActive
+                                        ? 'bg-slate-900 text-white'
+                                        : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
                                         }`}
-                                    style={isActive ? {
-                                        backgroundColor: tab.color === 'slate' ? '#64748b' :
-                                            tab.color === 'green' ? '#22c55e' :
-                                                tab.color === 'blue' ? '#3b82f6' :
-                                                    tab.color === 'amber' ? '#f59e0b' : '#ef4444'
-                                    } : {}}
                                 >
-                                    {tab.label} <span className={`ml-1 ${isActive ? 'opacity-80' : 'text-slate-400'}`}>({count})</span>
+                                    {tab.label}
+                                    <span className={`ml-1.5 ${isActive ? 'text-slate-400' : 'text-slate-400'}`}>
+                                        {count}
+                                    </span>
                                 </button>
                             );
                         })}
