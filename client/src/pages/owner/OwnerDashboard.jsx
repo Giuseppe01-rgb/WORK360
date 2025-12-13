@@ -464,34 +464,50 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     })()}
                                 </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                {/* Apple Health Style Metrics */}
+                                <div className="space-y-5">
+                                    {/* Prezzo pattuito */}
+                                    <div className="border-b border-slate-100 pb-4">
+                                        <p className="text-slate-500 text-sm font-medium mb-1">
                                             {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
-                                            {economieRevenue > 0 && <span className="text-green-600 ml-1">+ Economie (+{economieRevenue.toFixed(2)}€)</span>}
-                                        </span>
-                                        <span className="font-black text-slate-900">
-                                            {(() => {
-                                                const val = parseFloat(report.contractValue) || 0;
-                                                return (val + economieRevenue).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
-                                            })()}
-                                        </span>
+                                        </p>
+                                        <p className="text-2xl font-bold text-slate-900">
+                                            {(parseFloat(report.contractValue) || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            <span className="text-lg text-slate-400 ml-1">€</span>
+                                        </p>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+
+                                    {/* Economie - only show if > 0 */}
+                                    {economieRevenue > 0 && (
+                                        <div className="border-b border-slate-100 pb-4">
+                                            <p className="text-slate-500 text-sm font-medium mb-1">Economie</p>
+                                            <p className="text-2xl font-bold text-green-600">
+                                                +{economieRevenue.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                <span className="text-lg text-green-400 ml-1">€</span>
+                                            </p>
+                                            <p className="text-xs text-slate-400 mt-1">{economieHours.toFixed(1)} ore × 30€/h</p>
+                                        </div>
+                                    )}
+
+                                    {/* Costi maturati */}
+                                    <div className="border-b border-slate-100 pb-4">
+                                        <p className="text-slate-500 text-sm font-medium mb-1">
                                             {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}
-                                        </span>
-                                        <span className="font-black text-slate-900">{totalCost.toFixed(2)}€</span>
+                                        </p>
+                                        <p className="text-2xl font-bold text-slate-900">
+                                            {totalCost.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            <span className="text-lg text-slate-400 ml-1">€</span>
+                                        </p>
                                     </div>
+
+                                    {/* Costo su ricavo */}
                                     {report.status !== 'completed' && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                                Costo su ricavo
-                                            </span>
-                                            <span className="font-black text-slate-900">{(report.margin?.costVsRevenuePercent || 0).toFixed(1)}%</span>
+                                        <div>
+                                            <p className="text-slate-500 text-sm font-medium mb-1">Costo su ricavo</p>
+                                            <p className="text-2xl font-bold text-slate-900">
+                                                {(report.margin?.costVsRevenuePercent || 0).toFixed(1)}
+                                                <span className="text-lg text-slate-400 ml-1">%</span>
+                                            </p>
                                         </div>
                                     )}
                                     {report.status === 'completed' && (
@@ -531,36 +547,33 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                             </div>
                         )}
 
-                        {/* SUMMARY GRID - NEW DESIGN */}
+                        {/* SUMMARY GRID - APPLE HEALTH STYLE */}
                         <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                                        <Clock className="w-5 h-5" />
+                            {/* Ore Totali Card */}
+                            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                        <Clock className="w-4 h-4" />
                                     </div>
-                                    <span className="text-green-500 text-xs font-bold bg-green-50 px-2 py-1 rounded-full">
-                                        <Users className="w-3 h-3 inline mr-1" />
-                                        Active
-                                    </span>
+                                    <h3 className="text-blue-600 font-semibold text-sm">Ore Totali</h3>
                                 </div>
-                                <h3 className="text-slate-500 font-medium text-sm mb-1">Ore Totali</h3>
-                                <p className="text-3xl font-black text-slate-900">
-                                    {report?.totalHours?.toFixed(2) || '0.00'} <span className="text-lg font-medium text-slate-400">h</span>
+                                <p className="text-2xl font-black text-slate-900 whitespace-nowrap">
+                                    {report?.totalHours?.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || '0'}
+                                    <span className="text-base font-medium text-slate-400 ml-1">h</span>
                                 </p>
                             </div>
 
-                            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-                                        <Package className="w-5 h-5" />
+                            {/* Materiali Card */}
+                            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                                        <Package className="w-4 h-4" />
                                     </div>
-                                    <span className="text-purple-600 text-xs font-bold bg-purple-50 px-2 py-1 rounded-full">
-                                        +{report?.materials?.length || 0}
-                                    </span>
+                                    <h3 className="text-purple-600 font-semibold text-sm">Materiali</h3>
                                 </div>
-                                <h3 className="text-slate-500 font-medium text-sm mb-1">Materiali</h3>
-                                <p className="text-3xl font-black text-slate-900">
-                                    {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0) || 0} <span className="text-lg font-medium text-slate-400">pz</span>
+                                <p className="text-2xl font-black text-slate-900 whitespace-nowrap">
+                                    {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0)?.toLocaleString('it-IT') || 0}
+                                    <span className="text-base font-medium text-slate-400 ml-1">pz</span>
                                 </p>
                             </div>
                         </div>
