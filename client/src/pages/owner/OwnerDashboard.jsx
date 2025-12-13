@@ -1340,7 +1340,7 @@ export default function OwnerDashboard() {
                                 const contractValue = parseFloat(site.contractValue) || 0;
 
                                 return (
-                                    <div key={site.id} className="bg-white rounded-[1.5rem] p-5 border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-300 relative group overflow-hidden" onClick={() => setSelectedSite(site)}>
+                                    <div key={site.id} className="bg-white rounded-[2rem] p-5 border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-300 relative group overflow-hidden" onClick={() => setSelectedSite(site)}>
                                         <div className="flex justify-between items-start mb-5">
                                             <div className="flex gap-4">
                                                 <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:bg-blue-50 transition-colors">
@@ -1397,7 +1397,10 @@ export default function OwnerDashboard() {
                                         {/* Footer - Status Badge + CTA */}
                                         <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                                             <div className="flex items-center gap-3">
-                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${statusConfig.bgClass.replace('bg-', 'bg-opacity-10 bg-').replace('text-', 'border-').replace('text-green-700', 'border-green-200 text-green-700').replace('text-amber-700', 'border-amber-200 text-amber-700').replace('text-blue-700', 'border-blue-200 text-blue-700').replace('text-red-700', 'border-red-200 text-red-700').replace('text-slate-700', 'border-slate-200 text-slate-600')}`}>
+                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${site.status === 'active'
+                                                        ? 'bg-green-50 border-green-200 text-green-700'
+                                                        : statusConfig.bgClass.replace('bg-', 'bg-opacity-10 bg-').replace('text-', 'border-').replace('text-amber-700', 'border-amber-200 text-amber-700').replace('text-blue-700', 'border-blue-200 text-blue-700').replace('text-red-700', 'border-red-200 text-red-700').replace('text-slate-700', 'border-slate-200 text-slate-600')
+                                                    }`}>
                                                     {statusConfig.label}
                                                 </span>
                                                 {site.assignedWorkers?.length > 0 && (
