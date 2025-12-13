@@ -73,7 +73,7 @@ export default function AnalyticsDashboard() {
     return (
         <Layout title="Analisi Dati">
             {/* Filter */}
-            <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
+            <div className="bg-white rounded-[2.5rem] p-6 mb-8 shadow-sm">
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-center gap-4 flex-1 min-w-[250px]">
                         <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
@@ -108,29 +108,29 @@ export default function AnalyticsDashboard() {
 
             {/* Company-Wide Cost Card */}
             {analytics?.companyCosts && (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full -mr-10 -mt-10 opacity-50"></div>
                     <div className="relative z-10">
                         <h3 className="text-lg font-bold text-slate-500 mb-2 flex items-center gap-2">
-                            <span className="p-2 bg-green-100 rounded-lg text-green-600">
+                            <span className="p-2 bg-green-100 rounded-2xl text-green-600">
                                 <BarChart3 className="w-5 h-5" />
                             </span>
                             Costo Totale Azienda
                         </h3>
-                        <div className="flex items-baseline gap-2">
-                            <p className="text-4xl md:text-5xl font-black text-slate-900">
-                                {analytics.companyCosts.total.toFixed(2)}€
+                        <div className="flex items-baseline gap-2 mb-4">
+                            <p className="text-5xl font-black text-slate-900 tracking-tight">
+                                {analytics.companyCosts.total.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                <span className="text-3xl text-slate-400 font-medium ml-1">€</span>
                             </p>
-                            <span className="text-sm text-slate-500 font-medium">tutti i cantieri</span>
                         </div>
                         <div className="flex gap-6 mt-4 text-sm">
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                <span className="text-slate-600">Manodopera: <strong>{analytics.companyCosts.labor.toFixed(2)}€</strong></span>
+                                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                                <span className="text-slate-600">Manodopera: <strong className="text-slate-900">{analytics.companyCosts.labor.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€</strong></span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                                <span className="text-slate-600">Materiali: <strong>{analytics.companyCosts.materials.toFixed(2)}€</strong></span>
+                                <span className="w-3 h-3 rounded-full bg-purple-500"></span>
+                                <span className="text-slate-600">Materiali: <strong className="text-slate-900">{analytics.companyCosts.materials.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€</strong></span>
                             </div>
                         </div>
                     </div>
@@ -139,7 +139,7 @@ export default function AnalyticsDashboard() {
 
             {/* Company-Wide Cost Incidence Card */}
             {analytics?.companyCostIncidence?.materialsIncidencePercent !== null ? (
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mb-6">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6">
                     <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
@@ -171,7 +171,7 @@ export default function AnalyticsDashboard() {
                     </div>
                 </div>
             ) : (
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 mb-6">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
                             <Package className="w-5 h-5 text-slate-500" />
@@ -186,7 +186,7 @@ export default function AnalyticsDashboard() {
 
             {/* Company-Wide Margin Card */}
             {analytics?.companyMargin?.totalContractValue ? (
-                <div className={`p-6 rounded-3xl shadow-sm border mb-6 relative overflow-hidden ${analytics.companyMargin.marginValue >= 0
+                <div className={`p-6 rounded-[2.5rem] shadow-sm border mb-6 relative overflow-hidden ${analytics.companyMargin.marginValue >= 0
                     ? 'bg-white border-green-100'
                     : 'bg-white border-red-100'
                     }`}>
@@ -251,7 +251,7 @@ export default function AnalyticsDashboard() {
                     </p>
                 </div>
             ) : (
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-6">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 mb-6">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center">
                             <FileText className="w-5 h-5 text-slate-500" />
@@ -273,9 +273,9 @@ export default function AnalyticsDashboard() {
 
             {/* Main Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-2xl shadow-sm">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                        <div className="p-2 bg-blue-50 rounded-2xl text-blue-600">
                             <Building2 className="w-5 h-5" />
                         </div>
                         <span className="text-sm font-medium text-slate-500">Cantieri Attivi</span>
@@ -285,9 +285,9 @@ export default function AnalyticsDashboard() {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-green-50 rounded-lg text-green-600">
+                        <div className="p-2 bg-green-50 rounded-2xl text-green-600">
                             <Users className="w-5 h-5" />
                         </div>
                         <span className="text-sm font-medium text-slate-500">Dipendenti Totali</span>
@@ -297,9 +297,9 @@ export default function AnalyticsDashboard() {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                        <div className="p-2 bg-purple-50 rounded-2xl text-purple-600">
                             <Clock className="w-5 h-5" />
                         </div>
                         <span className="text-sm font-medium text-slate-500">Ore Questo Mese</span>
@@ -312,7 +312,7 @@ export default function AnalyticsDashboard() {
 
             {/* Weekly Hours */}
             {analytics?.weeklyHours && (
-                <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
+                <div className="bg-white rounded-[2.5rem] p-6 mb-8 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                         <Calendar className="w-5 h-5 text-slate-400" />
                         Ore Settimanali
@@ -346,7 +346,7 @@ export default function AnalyticsDashboard() {
             )}
 
             {/* Site Statistics */}
-            <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
+            <div className="bg-white rounded-[2.5rem] p-6 mb-8 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-slate-400" />
                     Statistiche per Cantiere
@@ -361,7 +361,7 @@ export default function AnalyticsDashboard() {
                         {siteStats.map(stat => (
                             <div
                                 key={stat.site.id}
-                                className="bg-slate-50 p-6 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors"
+                                className="bg-slate-50 p-6 rounded-[2rem] border border-slate-200 hover:border-slate-300 transition-colors"
                             >
                                 <div className="flex justify-between items-center mb-6">
                                     <h4 className="font-bold text-lg text-slate-900 flex items-center gap-2">
@@ -405,9 +405,9 @@ export default function AnalyticsDashboard() {
                                                 {stat.marginPercent != null ? `${stat.marginPercent.toFixed(1)}%` : '—'}
                                             </div>
                                             <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${stat.marginStatus === 'high' ? 'bg-green-100 text-green-700' :
-                                                    stat.marginStatus === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                                                        stat.marginStatus === 'low' ? 'bg-red-100 text-red-700' :
-                                                            'bg-slate-100 text-slate-500'
+                                                stat.marginStatus === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                                    stat.marginStatus === 'low' ? 'bg-red-100 text-red-700' :
+                                                        'bg-slate-100 text-slate-500'
                                                 }`}>
                                                 {stat.marginStatus === 'high' ? 'Buono' :
                                                     stat.marginStatus === 'medium' ? 'Medio' :
@@ -447,7 +447,7 @@ export default function AnalyticsDashboard() {
 
             {/* Material Summary */}
             {analytics?.materialSummary && analytics.materialSummary.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 shadow-sm">
+                <div className="bg-white rounded-[2.5rem] p-6 shadow-sm">
                     <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                         <Package className="w-5 h-5 text-slate-400" />
                         Riepilogo Materiali
