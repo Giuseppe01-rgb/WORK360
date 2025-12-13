@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Building2, MapPin, ArrowLeft, FileText, Camera, Calendar, Clock, User, Loader2
+    Building2, MapPin, ArrowLeft, FileText, Camera, Calendar, Clock, User, Loader2, Search
 } from 'lucide-react';
 import { siteAPI, workActivityAPI, noteAPI, photoAPI } from '../../utils/api';
 import Layout from '../../components/Layout';
@@ -243,6 +243,8 @@ export default function WorkerSites() {
     const [sites, setSites] = useState([]);
     const [selectedSite, setSelectedSite] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('active'); // 'all', 'active', 'completed', 'planned', 'suspended'
     const { showError } = useToast();
 
     useEffect(() => {
@@ -260,6 +262,14 @@ export default function WorkerSites() {
             setLoading(false);
         }
     };
+
+    // Filter sites by status and search term
+    const filteredSites = sites.filter(site => {
+        const matchesStatus = statusFilter === 'all' || site.status === statusFilter;
+        const matchesSearch = site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (site.address || '').toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesStatus && matchesSearch;
+    });
 
     if (selectedSite) {
         return (
@@ -284,18 +294,76 @@ export default function WorkerSites() {
 
     return (
         <Layout title="Cantieri">
-            {/* Sites List - Same UI as Owner */}
+            {/* SEARCH BAR */}
+            <div className="relative mb-4">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                    type="text"
+                    placeholder="Cerca cantiere..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-white pl-12 pr-4 py-4 rounded-2xl border-none shadow-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+            </div>
+
+            {/* STATUS FILTER TABS */}
+            <div className="relative mb-6">
+                {/* Scroll fade indicator on the right */}
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-10 md:hidden" />
+
+                <div className="flex gap-2 overflow-x-auto pb-2 pr-8 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
+                    {[
+                        { value: 'all', label: 'Tutti', color: 'slate' },
+                        { value: 'active', label: 'In Corso', color: 'green' },
+                        { value: 'completed', label: 'Completi', color: 'blue' },
+                        { value: 'planned', label: 'Pianificati', color: 'amber' },
+                        { value: 'suspended', label: 'Sospeso', color: 'red' }
+                    ].map(tab => {
+                        const count = tab.value === 'all'
+                            ? sites.length
+                            : sites.filter(s => s.status === tab.value).length;
+                        const isActive = statusFilter === tab.value;
+                        return (
+                            <button
+                                key={tab.value}
+                                onClick={() => setStatusFilter(tab.value)}
+                                className={`flex-shrink-0 px-4 py-2 rounded-xl font-bold text-sm transition-all ${isActive
+                                    ? `bg-${tab.color}-500 text-white shadow-lg shadow-${tab.color}-500/30`
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                                    }`}
+                                style={{
+                                    scrollSnapAlign: 'start',
+                                    ...(isActive ? {
+                                        backgroundColor: tab.color === 'slate' ? '#64748b' :
+                                            tab.color === 'green' ? '#22c55e' :
+                                                tab.color === 'blue' ? '#3b82f6' :
+                                                    tab.color === 'amber' ? '#f59e0b' : '#ef4444',
+                                        color: 'white'
+                                    } : {})
+                                }}
+                            >
+                                {tab.label} <span className={`ml-1 ${isActive ? 'opacity-80' : 'text-slate-400'}`}>({count})</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Scroll hint text - only on mobile */}
+                <p className="text-xs text-slate-400 mt-1 md:hidden">← Scorri per altri filtri →</p>
+            </div>
+
+            {/* Sites List */}
             <div className="grid gap-4">
-                {sites.length === 0 ? (
+                {filteredSites.length === 0 ? (
                     <div className="bg-white rounded-2xl p-12 text-center shadow-sm">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Building2 className="w-8 h-8 text-slate-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-2">Cantieri</h3>
-                        <p className="text-slate-500">Nessun cantiere disponibile.</p>
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">Nessun cantiere trovato</h3>
+                        <p className="text-slate-500">Nessun cantiere corrisponde ai filtri selezionati.</p>
                     </div>
                 ) : (
-                    sites.map(site => (
+                    filteredSites.map(site => (
                         <div
                             key={site.id}
                             onClick={() => setSelectedSite(site)}
