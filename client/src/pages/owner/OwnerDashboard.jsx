@@ -1333,7 +1333,7 @@ export default function OwnerDashboard() {
                                 // Calculate days since start
                                 const startDate = new Date(site.startDate);
                                 const today = new Date();
-                                const daysDiff = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+                                const durationDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
 
                                 // Has contract value
                                 const hasContract = parseFloat(site.contractValue) > 0;
