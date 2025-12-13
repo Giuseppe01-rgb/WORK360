@@ -220,85 +220,106 @@ export default function EmployeeManagement() {
                         <p className="text-slate-500">Gestisci il tuo team</p>
                     </div>
 
-                    <div className="grid gap-4">
+                    <div className="space-y-3">
                         {employees.map(employee => (
                             <div
                                 key={employee.id}
-                                onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
-                                className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group relative"
+                                className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
                             >
-                                <ChevronRight className="absolute top-6 right-6 w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors" />
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pr-8">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center">
-                                            <User className="w-7 h-7 text-slate-600" />
+                                {/* Main Content - Tappable */}
+                                <div
+                                    onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
+                                    className="p-4 cursor-pointer"
+                                >
+                                    <div className="flex items-start gap-4">
+                                        {/* Avatar */}
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${employee.role === 'owner'
+                                                ? 'bg-purple-100 text-purple-600'
+                                                : 'bg-blue-100 text-blue-600'
+                                            }`}>
+                                            <span className="text-lg font-bold">
+                                                {employee.firstName?.charAt(0)}{employee.lastName?.charAt(0)}
+                                            </span>
                                         </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-slate-900">
-                                                {employee.firstName} {employee.lastName}
-                                            </h3>
-                                            <div className="flex flex-wrap gap-3 mt-1 text-sm text-slate-500">
+
+                                        {/* Info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <h3 className="font-bold text-slate-900 truncate">
+                                                    {employee.firstName} {employee.lastName}
+                                                </h3>
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${employee.role === 'owner'
+                                                        ? 'bg-purple-100 text-purple-700'
+                                                        : 'bg-blue-100 text-blue-700'
+                                                    }`}>
+                                                    {employee.role === 'owner' ? 'Titolare' : 'Operaio'}
+                                                </span>
+                                            </div>
+
+                                            {/* Contact Info Row */}
+                                            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
                                                 {employee.email && (
-                                                    <span className="flex items-center gap-1">
-                                                        <Mail className="w-4 h-4" />
-                                                        {employee.email}
+                                                    <span className="flex items-center gap-1 truncate">
+                                                        <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                                                        <span className="truncate max-w-[150px]">{employee.email}</span>
                                                     </span>
                                                 )}
                                                 {employee.phone && (
                                                     <span className="flex items-center gap-1">
-                                                        <Phone className="w-4 h-4" />
+                                                        <Phone className="w-3.5 h-3.5 flex-shrink-0" />
                                                         {employee.phone}
+                                                    </span>
+                                                )}
+                                                {employee.hourlyCost > 0 && (
+                                                    <span className="font-semibold text-green-600">
+                                                        €{employee.hourlyCost.toFixed(2)}/h
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${employee.role === 'owner'
-                                            ? 'bg-purple-100 text-purple-700'
-                                            : 'bg-blue-100 text-blue-700'
-                                            }`}>
-                                            {employee.role === 'owner' ? 'Titolare' : 'Operaio'}
-                                        </span>
-
-                                        {employee.id !== user.id && (
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={(e) => handleSendWelcomeEmail(employee, e)}
-                                                    className={`p-2 rounded-lg transition-colors ${employee.email
-                                                        ? 'hover:bg-green-50 text-green-500 hover:text-green-700'
-                                                        : 'text-slate-300 cursor-not-allowed'}`}
-                                                    title={employee.email ? 'Invia Email di Benvenuto' : 'Aggiungi email per inviare'}
-                                                    disabled={!employee.email}
-                                                >
-                                                    <Send className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); handleResetPassword(employee, e); }}
-                                                    className="p-2 hover:bg-blue-50 rounded-lg text-blue-500 hover:text-blue-700 transition-colors"
-                                                    title="Reset Password"
-                                                >
-                                                    <Key className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
-                                                    className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition-colors"
-                                                    title="Modifica"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); handleDelete(employee.id); }}
-                                                    className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
-                                                    title="Elimina"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
                                 </div>
+
+                                {/* Action Bar - Always Visible */}
+                                {employee.id !== user.id && (
+                                    <div className="flex border-t border-slate-100">
+                                        <button
+                                            onClick={(e) => handleSendWelcomeEmail(employee, e)}
+                                            disabled={!employee.email}
+                                            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${employee.email
+                                                    ? 'text-green-600 hover:bg-green-50'
+                                                    : 'text-slate-300 cursor-not-allowed'
+                                                }`}
+                                        >
+                                            <Send className="w-4 h-4" />
+                                            Email
+                                        </button>
+                                        <div className="w-px bg-slate-100"></div>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleResetPassword(employee, e); }}
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 text-blue-600 hover:bg-blue-50 transition-colors text-sm font-medium"
+                                        >
+                                            <Key className="w-4 h-4" />
+                                            Password
+                                        </button>
+                                        <div className="w-px bg-slate-100"></div>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleEdit(employee); }}
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-medium"
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                            Modifica
+                                        </button>
+                                        <div className="w-px bg-slate-100"></div>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(employee.id); }}
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                            Elimina
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
