@@ -996,20 +996,22 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 ))}
                             </div>
 
-                            {/* Footer Summary */}
-                            <div className="bg-white border-t border-slate-200 p-4">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <p className="text-slate-500 text-sm">Ore totali</p>
-                                        <p className="text-xl font-bold text-slate-900">
-                                            {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(0)} h
-                                        </p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-slate-500 text-sm">Costo manodopera</p>
-                                        <p className="text-xl font-bold text-green-600">
-                                            {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
-                                        </p>
+                            {/* Footer Summary - Floating Island */}
+                            <div className="p-4 pb-6">
+                                <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-4">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <p className="text-slate-500 text-sm">Ore totali</p>
+                                            <p className="text-xl font-bold text-slate-900">
+                                                {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(0)} h
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-slate-500 text-sm">Costo manodopera</p>
+                                            <p className="text-xl font-bold text-green-600">
+                                                {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1075,20 +1077,22 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 ))}
                             </div>
 
-                            {/* Footer Summary */}
-                            <div className="bg-white border-t border-slate-200 p-4">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <p className="text-slate-500 text-sm">Materiali totali</p>
-                                        <p className="text-xl font-bold text-slate-900">
-                                            {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0)} pz
-                                        </p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-slate-500 text-sm">Costo materiali</p>
-                                        <p className="text-xl font-bold text-green-600">
-                                            {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
-                                        </p>
+                            {/* Footer Summary - Floating Island */}
+                            <div className="p-4 pb-6">
+                                <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-4">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <p className="text-slate-500 text-sm">Materiali totali</p>
+                                            <p className="text-xl font-bold text-slate-900">
+                                                {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0)} pz
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-slate-500 text-sm">Costo materiali</p>
+                                            <p className="text-xl font-bold text-green-600">
+                                                {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
