@@ -221,7 +221,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                     })() ? (
                         (() => {
                             // Calculate economie revenue for margin
-                            const economieHours = economie.reduce((sum, e) => sum + e.hours, 0);
+                            // IMPORTANT: Parse hours as float to avoid string concatenation
+                            const economieHours = (economie || []).reduce((sum, e) => sum + (parseFloat(e.hours) || 0), 0);
                             const economieRevenue = economieHours * 30;
                             // Ensure contractValue is a valid number
                             const contractVal = parseFloat(report.contractValue) || 0;

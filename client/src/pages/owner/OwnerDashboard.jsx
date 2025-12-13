@@ -192,10 +192,11 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     }
 
     // Calculations for the cost card (economie are NOT costs, they are additional revenue)
-    const laborCost = report?.siteCost?.labor || 0;
-    const materialCost = report?.siteCost?.materials || 0;
+    const laborCost = parseFloat(report?.siteCost?.labor) || 0;
+    const materialCost = parseFloat(report?.siteCost?.materials) || 0;
     // Economie are revenue, not costs - calculate for display only
-    const economieHours = economie.reduce((sum, e) => sum + e.hours, 0);
+    // IMPORTANT: Parse hours as float to avoid string concatenation issues
+    const economieHours = (economie || []).reduce((sum, e) => sum + (parseFloat(e.hours) || 0), 0);
     const economieRevenue = economieHours * 30; // 30€/hour billable to client
     // Total cost excludes economie (they add to revenue, not costs)
     const totalCost = laborCost + materialCost;
