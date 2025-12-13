@@ -5,6 +5,7 @@ import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
 import { Plus, Users, Clock, ArrowRight, X, ChevronRight, Package, MapPin, Calendar, Edit, Trash2, Eye, ArrowLeft, RefreshCw, Smartphone, Monitor, Search, Building2, CheckCircle, AlertCircle, FileText, Camera, Zap } from 'lucide-react';
 import PortalModal from '../../components/PortalModal';
+import SquircleCard from '../../components/SquircleCard';
 
 const SiteDetails = ({ site, onBack, showConfirm }) => {
     const [activeTab, setActiveTab] = useState('dati');
@@ -1340,82 +1341,84 @@ export default function OwnerDashboard() {
                                 const contractValue = parseFloat(site.contractValue) || 0;
 
                                 return (
-                                    <div key={site.id} className="bg-white rounded-[2rem] p-5 border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-300 relative group overflow-hidden" onClick={() => setSelectedSite(site)}>
-                                        <div className="flex justify-between items-start mb-5">
-                                            <div className="flex gap-4">
-                                                <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:bg-blue-50 transition-colors">
-                                                    <Building2 className="w-6 h-6" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 line-clamp-2 pr-2">
-                                                        {site.name}
-                                                    </h3>
-                                                    <div className="flex items-center gap-1.5 text-slate-500 text-sm">
-                                                        <MapPin className="w-3.5 h-3.5" />
-                                                        <span className="truncate max-w-[180px]">{site.address}</span>
+                                    <SquircleCard key={site.id} onClick={() => setSelectedSite(site)}>
+                                        <div className="p-5">
+                                            <div className="flex justify-between items-start mb-5">
+                                                <div className="flex gap-4">
+                                                    <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:bg-blue-50 transition-colors">
+                                                        <Building2 className="w-6 h-6" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 line-clamp-2 pr-2">
+                                                            {site.name}
+                                                        </h3>
+                                                        <div className="flex items-center gap-1.5 text-slate-500 text-sm">
+                                                            <MapPin className="w-3.5 h-3.5" />
+                                                            <span className="truncate max-w-[180px]">{site.address}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                                                <button onClick={(e) => handleEdit(e, site)} className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button onClick={(e) => handleDelete(e, site.id)} className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Metrics Row */}
-                                        <div className="grid grid-cols-3 gap-3 mb-5">
-                                            <div className="bg-slate-50/80 rounded-2xl p-3 text-center">
-                                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Inizio</p>
-                                                <p className="text-slate-900 font-bold text-sm">
-                                                    {new Date(site.startDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }).replace('.', '')}
-                                                </p>
+                                                <div className="flex gap-1" onClick={e => e.stopPropagation()}>
+                                                    <button onClick={(e) => handleEdit(e, site)} className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={(e) => handleDelete(e, site.id)} className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
 
-                                            <div className="bg-slate-50/80 rounded-2xl p-3 text-center">
-                                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Durata</p>
-                                                <p className="text-slate-900 font-bold text-sm">
-                                                    {durationDays > 0 ? `${durationDays} gg` : '-'}
-                                                </p>
-                                            </div>
-
-                                            <div className={`rounded-2xl p-3 text-center ${hasContract ? 'bg-indigo-50/50' : 'bg-slate-50/80'}`}>
-                                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Valore</p>
-                                                {hasContract ? (
-                                                    <p className="text-slate-900 font-bold text-sm whitespace-nowrap">
-                                                        € {contractValue.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                            {/* Metrics Row */}
+                                            <div className="grid grid-cols-3 gap-3 mb-5">
+                                                <div className="bg-slate-50/80 rounded-2xl p-3 text-center">
+                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Inizio</p>
+                                                    <p className="text-slate-900 font-bold text-sm">
+                                                        {new Date(site.startDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }).replace('.', '')}
                                                     </p>
-                                                ) : (
-                                                    <p className="text-slate-400 font-medium text-sm">—</p>
-                                                )}
-                                            </div>
-                                        </div>
+                                                </div>
 
-                                        {/* Footer - Status Badge + CTA */}
-                                        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                                            <div className="flex items-center gap-3">
-                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${site.status === 'active'
+                                                <div className="bg-slate-50/80 rounded-2xl p-3 text-center">
+                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Durata</p>
+                                                    <p className="text-slate-900 font-bold text-sm">
+                                                        {durationDays > 0 ? `${durationDays} gg` : '-'}
+                                                    </p>
+                                                </div>
+
+                                                <div className={`rounded-2xl p-3 text-center ${hasContract ? 'bg-indigo-50/50' : 'bg-slate-50/80'}`}>
+                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Valore</p>
+                                                    {hasContract ? (
+                                                        <p className="text-slate-900 font-bold text-sm whitespace-nowrap">
+                                                            € {contractValue.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                        </p>
+                                                    ) : (
+                                                        <p className="text-slate-400 font-medium text-sm">—</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Footer - Status Badge + CTA */}
+                                            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${site.status === 'active'
                                                         ? 'bg-green-50 border-green-200 text-green-700'
                                                         : statusConfig.bgClass.replace('bg-', 'bg-opacity-10 bg-').replace('text-', 'border-').replace('text-amber-700', 'border-amber-200 text-amber-700').replace('text-blue-700', 'border-blue-200 text-blue-700').replace('text-red-700', 'border-red-200 text-red-700').replace('text-slate-700', 'border-slate-200 text-slate-600')
-                                                    }`}>
-                                                    {statusConfig.label}
-                                                </span>
-                                                {site.assignedWorkers?.length > 0 && (
-                                                    <div className="flex items-center gap-1 text-xs text-slate-400">
-                                                        <Users className="w-3.5 h-3.5" />
-                                                        <span>{site.assignedWorkers.length}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-1 text-slate-400 group-hover:text-blue-600 transition-colors">
-                                                <span className="text-xs font-semibold">Dettagli</span>
-                                                <ChevronRight className="w-4 h-4" />
+                                                        }`}>
+                                                        {statusConfig.label}
+                                                    </span>
+                                                    {site.assignedWorkers?.length > 0 && (
+                                                        <div className="flex items-center gap-1 text-xs text-slate-400">
+                                                            <Users className="w-3.5 h-3.5" />
+                                                            <span>{site.assignedWorkers.length}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-1 text-slate-400 group-hover:text-blue-600 transition-colors">
+                                                    <span className="text-xs font-semibold">Dettagli</span>
+                                                    <ChevronRight className="w-4 h-4" />
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </SquircleCard>
                                 );
                             })}
                         </div>
