@@ -109,29 +109,47 @@ export default function AnalyticsDashboard() {
             {/* Company-Wide Cost Card */}
             {analytics?.companyCosts && (
                 <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full -mr-10 -mt-10 opacity-50"></div>
-                    <div className="relative z-10">
-                        <h3 className="text-lg font-bold text-slate-500 mb-2 flex items-center gap-2">
-                            <span className="p-2 bg-green-100 rounded-2xl text-green-600">
-                                <BarChart3 className="w-5 h-5" />
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                <span className="font-bold text-lg">$</span>
+                            </div>
+                            <div>
+                                <h3 className="text-slate-500 font-bold text-sm">Costo Totale Azienda</h3>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1 rounded-full tracking-wide">
+                                IN TEMPO REALE
                             </span>
-                            Costo Totale Azienda
-                        </h3>
-                        <div className="flex items-baseline gap-2 mb-4">
-                            <p className="text-5xl font-black text-slate-900 tracking-tight">
-                                {analytics.companyCosts.total.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                <span className="text-3xl text-slate-400 font-medium ml-1">€</span>
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <p className="text-4xl font-black text-slate-900 tracking-tight">
+                            {analytics.companyCosts.total.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            <span className="text-2xl text-slate-400 font-medium ml-1">€</span>
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* Materiali */}
+                        <div className="border-b border-slate-100 pb-4">
+                            <p className="text-slate-500 text-sm font-medium mb-1">Materiali</p>
+                            <p className="text-xl font-bold text-purple-600">
+                                {analytics.companyCosts.materials.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                <span className="text-base text-purple-400 ml-1">€</span>
+                                <span className="text-sm text-slate-400 ml-2">({analytics.companyCostIncidence.materialsIncidencePercent.toFixed(0)}%)</span>
                             </p>
                         </div>
-                        <div className="flex gap-6 mt-4 text-sm">
-                            <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                                <span className="text-slate-600">Manodopera: <strong className="text-slate-900">{analytics.companyCosts.labor.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€</strong></span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full bg-purple-500"></span>
-                                <span className="text-slate-600">Materiali: <strong className="text-slate-900">{analytics.companyCosts.materials.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€</strong></span>
-                            </div>
+                        {/* Manodopera */}
+                        <div>
+                            <p className="text-slate-500 text-sm font-medium mb-1">Manodopera</p>
+                            <p className="text-xl font-bold text-blue-600">
+                                {analytics.companyCosts.labor.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                <span className="text-base text-blue-400 ml-1">€</span>
+                                <span className="text-sm text-slate-400 ml-2">({analytics.companyCostIncidence.laborIncidencePercent.toFixed(0)}%)</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -154,19 +172,21 @@ export default function AnalyticsDashboard() {
                     </div>
 
                     <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                                Materiali
-                            </span>
-                            <span className="font-black text-slate-900 text-2xl">{analytics.companyCostIncidence.materialsIncidencePercent.toFixed(1)}%</span>
+                        {/* Materiali % */}
+                        <div className="border-b border-slate-100 pb-4">
+                            <p className="text-slate-500 text-sm font-medium mb-1">Materiali</p>
+                            <p className="text-2xl font-bold text-purple-600">
+                                {analytics.companyCostIncidence.materialsIncidencePercent.toFixed(1)}
+                                <span className="text-lg text-purple-400 ml-1">%</span>
+                            </p>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                                Manodopera
-                            </span>
-                            <span className="font-black text-slate-900 text-2xl">{analytics.companyCostIncidence.laborIncidencePercent.toFixed(1)}%</span>
+                        {/* Manodopera % */}
+                        <div>
+                            <p className="text-slate-500 text-sm font-medium mb-1">Manodopera</p>
+                            <p className="text-2xl font-bold text-blue-600">
+                                {analytics.companyCostIncidence.laborIncidencePercent.toFixed(1)}
+                                <span className="text-lg text-blue-400 ml-1">%</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -222,27 +242,32 @@ export default function AnalyticsDashboard() {
                         </p>
                     </div>
 
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                                Fatturato previsto
-                            </span>
-                            <span className="font-black text-slate-900">{(analytics.companyMargin.totalContractValue || 0).toFixed(2)}€</span>
+                    <div className="space-y-5">
+                        {/* Prezzo pattuito */}
+                        <div className="border-b border-slate-100 pb-4">
+                            <p className="text-slate-500 text-sm font-medium mb-1">Fatturato previsto</p>
+                            <p className="text-2xl font-bold text-slate-900">
+                                {(analytics.companyMargin.totalContractValue || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                <span className="text-lg text-slate-400 ml-1">€</span>
+                            </p>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                                Costi totali
-                            </span>
-                            <span className="font-black text-slate-900">{analytics.companyCosts.total.toFixed(2)}€</span>
+
+                        {/* Costi totali */}
+                        <div className="border-b border-slate-100 pb-4">
+                            <p className="text-slate-500 text-sm font-medium mb-1">Costi totali</p>
+                            <p className="text-2xl font-bold text-slate-900">
+                                {analytics.companyCosts.total.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                <span className="text-lg text-slate-400 ml-1">€</span>
+                            </p>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                Costo su ricavo
-                            </span>
-                            <span className="font-black text-slate-900">{(analytics.companyMargin.costVsRevenuePercent || 0).toFixed(1)}%</span>
+
+                        {/* Costo su ricavo */}
+                        <div>
+                            <p className="text-slate-500 text-sm font-medium mb-1">Costo su ricavo</p>
+                            <p className="text-2xl font-bold text-slate-900">
+                                {(analytics.companyMargin.costVsRevenuePercent || 0).toFixed(1)}
+                                <span className="text-lg text-slate-400 ml-1">%</span>
+                            </p>
                         </div>
                     </div>
 
