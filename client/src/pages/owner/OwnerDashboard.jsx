@@ -423,6 +423,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
                                             <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
                                             {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
+                                            {economieRevenue > 0 && <span className="text-green-600 ml-1">+ Economie (+{economieRevenue.toFixed(2)}€)</span>}
                                         </span>
                                         <span className="font-black text-slate-900">
                                             {(() => {
