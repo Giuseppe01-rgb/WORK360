@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
@@ -1124,7 +1124,7 @@ export default function OwnerDashboard() {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('active'); // 'all', 'active', 'completed', 'planned', 'suspended'
     const [showScrollIndicator, setShowScrollIndicator] = useState(true);
-    const filterTabsRef = React.useRef(null);
+    const filterTabsRef = useRef(null);
 
     // Handle scroll to show/hide arrow indicator
     const handleFilterScroll = (e) => {
