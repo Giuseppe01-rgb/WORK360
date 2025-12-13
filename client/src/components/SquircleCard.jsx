@@ -4,7 +4,7 @@ const SquircleCard = ({ children, className = '', onClick }) => {
     return (
         <div
             onClick={onClick}
-            className={`bg-white rounded-[5rem] border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-300 relative group overflow-hidden ${className}`}
+            className={`bg-white rounded-[2.5rem] border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-300 relative group overflow-hidden ${className}`}
         >
             {/* Content */}
             <div className="relative h-full w-full">
