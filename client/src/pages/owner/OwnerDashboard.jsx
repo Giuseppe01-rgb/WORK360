@@ -1354,76 +1354,152 @@ export default function OwnerDashboard() {
                     Nuovo Cantiere
                 </button>
 
-                {/* SITES LIST - UPDATED */}
+                {/* SITES LIST - APPLE HEALTH / TRADE REPUBLIC STYLE */}
                 <div>
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-slate-900 text-lg">Cantieri attivi</h3>
-                        <button className="text-blue-600 font-bold text-sm">Vedi tutti</button>
+                        <h3 className="font-bold text-slate-900 text-lg">
+                            {statusFilter === 'all' ? 'Tutti i cantieri' :
+                                statusFilter === 'active' ? 'Cantieri attivi' :
+                                    statusFilter === 'completed' ? 'Cantieri completati' :
+                                        statusFilter === 'planned' ? 'Cantieri pianificati' : 'Cantieri sospesi'}
+                        </h3>
+                        <span className="text-slate-500 text-sm font-medium">{filteredSites.length} risultati</span>
                     </div>
 
                     {filteredSites.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-500">
-                            <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                                <Building2 className="w-12 h-12 text-slate-300" />
+                            <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                                <Building2 className="w-12 h-12 text-slate-400" />
                             </div>
                             <h3 className="text-xl font-bold text-slate-900 mb-2">Nessun cantiere trovato</h3>
                             <p className="text-slate-500 max-w-xs mx-auto">
-                                Non ci sono cantieri che corrispondono alla tua ricerca.
+                                Non ci sono cantieri che corrispondono ai filtri selezionati.
                             </p>
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {filteredSites.map((site) => (
-                                <div
-                                    key={site.id}
-                                    onClick={() => setSelectedSite(site)}
-                                    className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 relative group active:scale-[0.98] transition-all cursor-pointer"
-                                >
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-600">
-                                                <Building2 className="w-7 h-7" />
+                            {filteredSites.map((site) => {
+                                // Status config
+                                const statusConfig = {
+                                    active: { label: 'In corso', bgClass: 'bg-green-500', textClass: 'text-green-600', dotClass: 'bg-green-500', lightBg: 'bg-green-50' },
+                                    completed: { label: 'Completato', bgClass: 'bg-blue-500', textClass: 'text-blue-600', dotClass: 'bg-blue-500', lightBg: 'bg-blue-50' },
+                                    planned: { label: 'Pianificato', bgClass: 'bg-amber-500', textClass: 'text-amber-600', dotClass: 'bg-amber-500', lightBg: 'bg-amber-50' },
+                                    suspended: { label: 'Sospeso', bgClass: 'bg-red-500', textClass: 'text-red-600', dotClass: 'bg-red-500', lightBg: 'bg-red-50' }
+                                }[site.status] || { label: 'Sconosciuto', bgClass: 'bg-slate-500', textClass: 'text-slate-600', dotClass: 'bg-slate-500', lightBg: 'bg-slate-50' };
+
+                                // Calculate days since start
+                                const startDate = new Date(site.startDate);
+                                const today = new Date();
+                                const daysDiff = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+                                const daysLabel = daysDiff >= 0 ? `${daysDiff} giorni` : `tra ${Math.abs(daysDiff)} giorni`;
+
+                                // Has contract value
+                                const hasContract = parseFloat(site.contractValue) > 0;
+                                const contractValue = parseFloat(site.contractValue) || 0;
+
+                                return (
+                                    <div
+                                        key={site.id}
+                                        onClick={() => setSelectedSite(site)}
+                                        className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 active:scale-[0.98] transition-all cursor-pointer group hover:shadow-lg hover:border-slate-200"
+                                    >
+                                        {/* Status Bar - Apple Health inspired color bar */}
+                                        <div className={`h-1 ${statusConfig.bgClass}`}></div>
+
+                                        <div className="p-5">
+                                            {/* Header - Name + Actions */}
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className={`w-2 h-2 rounded-full ${statusConfig.dotClass} animate-pulse`}></span>
+                                                        <span className={`text-xs font-bold ${statusConfig.textClass}`}>
+                                                            {statusConfig.label}
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="font-black text-slate-900 text-lg leading-tight truncate">
+                                                        {site.name}
+                                                    </h3>
+                                                    <div className="flex items-center gap-1 text-slate-400 text-sm mt-1">
+                                                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                                                        <span className="truncate">{site.address}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={(e) => handleEdit(e, site)}
+                                                        className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-colors"
+                                                        title="Modifica"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDelete(e, site.id)}
+                                                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                                                        title="Elimina"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-slate-900 text-lg">{site.name}</h3>
-                                                <div className="flex items-center gap-1 text-slate-500 text-sm">
-                                                    <MapPin className="w-3.5 h-3.5" />
-                                                    <span>{site.address}</span>
+
+                                            {/* Metrics Row - Trade Republic inspired */}
+                                            <div className="grid grid-cols-3 gap-3 mb-4">
+                                                {/* Start Date */}
+                                                <div className="bg-slate-50 rounded-2xl p-3 text-center">
+                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Inizio</p>
+                                                    <p className="text-slate-900 font-bold text-sm">
+                                                        {startDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}
+                                                    </p>
+                                                </div>
+
+                                                {/* Duration */}
+                                                <div className="bg-slate-50 rounded-2xl p-3 text-center">
+                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Durata</p>
+                                                    <p className="text-slate-900 font-bold text-sm">
+                                                        {daysDiff >= 0 ? daysDiff : 0} <span className="text-slate-400 font-normal text-xs">gg</span>
+                                                    </p>
+                                                </div>
+
+                                                {/* Contract Value or Placeholder */}
+                                                <div className={`rounded-2xl p-3 text-center ${hasContract ? 'bg-gradient-to-br from-purple-50 to-indigo-50' : 'bg-slate-50'}`}>
+                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Valore</p>
+                                                    {hasContract ? (
+                                                        <p className="text-purple-600 font-bold text-sm">
+                                                            {contractValue >= 1000000
+                                                                ? `${(contractValue / 1000000).toFixed(1)}M`
+                                                                : contractValue >= 1000
+                                                                    ? `${(contractValue / 1000).toFixed(0)}k`
+                                                                    : contractValue.toFixed(0)
+                                                            }
+                                                            <span className="text-purple-400 font-normal text-xs">€</span>
+                                                        </p>
+                                                    ) : (
+                                                        <p className="text-slate-400 font-medium text-sm">—</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Footer - CTA */}
+                                            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                                                <div className="flex items-center gap-2">
+                                                    {site.assignedWorkers?.length > 0 && (
+                                                        <div className="flex items-center gap-1 text-xs text-slate-500">
+                                                            <Users className="w-3.5 h-3.5" />
+                                                            <span>{site.assignedWorkers.length}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2 text-purple-600">
+                                                    <span className="text-sm font-bold">Apri dettagli</span>
+                                                    <div className="w-7 h-7 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                                                        <ChevronRight className="w-4 h-4" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex gap-1">
-                                            <button onClick={(e) => handleEdit(e, site)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Modifica">
-                                                <Edit className="w-5 h-5" />
-                                            </button>
-                                            <button onClick={(e) => handleDelete(e, site.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Elimina">
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
-                                        </div>
                                     </div>
-
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg">
-                                            <Calendar className="w-4 h-4 text-slate-400" />
-                                            <span className="text-sm font-medium text-slate-600">
-                                                {new Date(site.startDate).toLocaleDateString('it-IT')}
-                                            </span>
-                                        </div>
-                                        <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide ${site.status === 'active' ? 'bg-green-100 text-green-700' :
-                                            site.status === 'completed' ? 'bg-blue-100 text-blue-700' :
-                                                'bg-amber-100 text-amber-700'
-                                            }`}>
-                                            {site.status === 'active' ? 'IN CORSO' :
-                                                site.status === 'completed' ? 'COMPLETATO' : 'PIANIFICATO'}
-                                        </span>
-                                    </div>
-
-                                    <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                                        <span className="text-slate-500 font-bold text-sm">Vedi dettagli</span>
-                                        <ChevronRight className="w-5 h-5 text-slate-400" />
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>
