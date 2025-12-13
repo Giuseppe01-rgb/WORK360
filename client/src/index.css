@@ -59,7 +59,8 @@
   }
 
   /* Prevent horizontal overflow globally */
-  html, body {
+  html,
+  body {
     overflow-x: hidden;
     max-width: 100vw;
   }
@@ -101,9 +102,12 @@
 
 /* Horizontal bounce animation for scroll indicator */
 @keyframes bounce-x {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0);
   }
+
   50% {
     transform: translateX(4px);
   }
@@ -118,6 +122,23 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+@layer utilities {
+
+  /* Safe area utilities */
+  .pt-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .pt-safe-header {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+  }
+
+  .pb-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

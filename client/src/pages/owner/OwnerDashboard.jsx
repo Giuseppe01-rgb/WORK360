@@ -3,11 +3,8 @@ import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
-import {
-    Building2, MapPin, Calendar, Clock, Package, Users,
-    Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search, ChevronRight,
-    FileText, Camera, Image, Zap, MoreVertical, RefreshCw, Eye
-} from 'lucide-react';
+import { Plus, Users, Clock, ArrowRight, X, ChevronRight, Package, MapPin, Calendar, Edit, Trash2, Eye, ArrowLeft, RefreshCw, Smartphone, Monitor } from 'lucide-react';
+import PortalModal from '../../components/PortalModal';
 
 const SiteDetails = ({ site, onBack, showConfirm }) => {
     const [activeTab, setActiveTab] = useState('dati');
@@ -943,121 +940,122 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             }
 
             {/* Employees Full-Screen View */}
-            {/* Employees Full-Screen View */}
-            {/* Employees Full-Screen View */}
             {showEmployeesModal && (
-                <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none">
-                    {/* Header */}
-                    <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
-                        <button
-                            onClick={() => setShowEmployeesModal(false)}
-                            className="flex items-center gap-2 text-blue-600 font-semibold"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                            Indietro
-                        </button>
-                        <h1 className="text-lg font-bold text-slate-900">Dipendenti</h1>
-                        <div className="w-20"></div>
-                    </div>
-
-                    {/* Summary Header */}
-                    <div className="bg-slate-50 px-4 py-5">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <p className="text-slate-500 text-sm">Ore totali</p>
-                                <p className="text-3xl font-bold text-slate-900">
-                                    {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(0)}
-                                    <span className="text-xl text-slate-400 ml-1">h</span>
-                                </p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-slate-500 text-sm">Costo totale</p>
-                                <p className="text-3xl font-bold text-green-600">
-                                    {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                    <span className="text-xl text-green-400 ml-1">€</span>
-                                </p>
-                            </div>
+                <PortalModal onClose={() => setShowEmployeesModal(false)}>
+                    <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white pt-safe-header">
+                            <button
+                                onClick={() => setShowEmployeesModal(false)}
+                                className="flex items-center gap-2 text-blue-600 font-semibold"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                                Indietro
+                            </button>
+                            <h1 className="text-lg font-bold text-slate-900">Dipendenti</h1>
+                            <div className="w-20"></div>
                         </div>
-                        <p className="text-slate-400 text-sm mt-2">{employeeHours.length} dipendenti</p>
-                    </div>
 
-                    {/* Employee List */}
-                    <div className="flex-1 overflow-y-auto">
-                        {employeeHours.map((emp, index) => (
-                            <div key={emp.id.id} className={`px-4 py-4 flex items-center justify-between ${index !== employeeHours.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                                <div className="flex-1">
-                                    <p className="font-semibold text-slate-900">{emp.id.firstName} {emp.id.lastName}</p>
-                                    <p className="text-sm text-slate-400">{emp.totalHours.toFixed(0)}h × €{emp.id.hourlyCost?.toFixed(2) || '0'}</p>
+                        {/* Summary Header */}
+                        <div className="bg-slate-50 px-4 py-5 flex-shrink-0">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="text-slate-500 text-sm">Ore totali</p>
+                                    <p className="text-3xl font-bold text-slate-900">
+                                        {employeeHours.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(0)}
+                                        <span className="text-xl text-slate-400 ml-1">h</span>
+                                    </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-lg font-bold text-green-600">
-                                        {((emp.totalHours || 0) * (emp.id.hourlyCost || 0)).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                    <p className="text-slate-500 text-sm">Costo totale</p>
+                                    <p className="text-3xl font-bold text-green-600">
+                                        {employeeHours.reduce((acc, curr) => acc + (curr.totalHours * (curr.id.hourlyCost || 0)), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                        <span className="text-xl text-green-400 ml-1">€</span>
                                     </p>
                                 </div>
                             </div>
-                        ))}
+                            <p className="text-slate-400 text-sm mt-2">{employeeHours.length} dipendenti</p>
+                        </div>
+
+                        {/* Employee List */}
+                        <div className="flex-1 overflow-y-auto pb-safe-bottom">
+                            {employeeHours.map((emp, index) => (
+                                <div key={emp.id.id} className={`px-4 py-4 flex items-center justify-between ${index !== employeeHours.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                                    <div className="flex-1">
+                                        <p className="font-semibold text-slate-900">{emp.id.firstName} {emp.id.lastName}</p>
+                                        <p className="text-sm text-slate-400">{emp.totalHours.toFixed(0)}h × €{emp.id.hourlyCost?.toFixed(2) || '0'}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-lg font-bold text-green-600">
+                                            {((emp.totalHours || 0) * (emp.id.hourlyCost || 0)).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                </PortalModal>
             )}
 
 
             {/* Materials Full-Screen View */}
-            {/* Materials Full-Screen View */}
             {showMaterialsModal && (
-                <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none">
-                    {/* Header */}
-                    <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}>
-                        <button
-                            onClick={() => setShowMaterialsModal(false)}
-                            className="flex items-center gap-2 text-purple-600 font-semibold"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                            Indietro
-                        </button>
-                        <h1 className="text-lg font-bold text-slate-900">Materiali</h1>
-                        <div className="w-20"></div>
-                    </div>
-
-                    {/* Summary Header */}
-                    <div className="bg-slate-50 px-4 py-5">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <p className="text-slate-500 text-sm">Quantità totale</p>
-                                <p className="text-3xl font-bold text-slate-900">
-                                    {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0) || 0}
-                                    <span className="text-xl text-slate-400 ml-1">pz</span>
-                                </p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-slate-500 text-sm">Costo totale</p>
-                                <p className="text-3xl font-bold text-green-600">
-                                    {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                    <span className="text-xl text-green-400 ml-1">€</span>
-                                </p>
-                            </div>
+                <PortalModal onClose={() => setShowMaterialsModal(false)}>
+                    <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white pt-safe-header">
+                            <button
+                                onClick={() => setShowMaterialsModal(false)}
+                                className="flex items-center gap-2 text-purple-600 font-semibold"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                                Indietro
+                            </button>
+                            <h1 className="text-lg font-bold text-slate-900">Materiali</h1>
+                            <div className="w-20"></div>
                         </div>
-                        <p className="text-slate-400 text-sm mt-2">{report?.materials?.length || 0} tipologie</p>
-                    </div>
 
-                    {/* Materials List */}
-                    <div className="flex-1 overflow-y-auto">
-                        {report?.materials?.map((mat, index) => (
-                            <div key={mat.id} className={`px-4 py-4 flex items-center justify-between ${index !== (report?.materials?.length || 0) - 1 ? 'border-b border-slate-100' : ''}`}>
-                                <div className="flex-1">
-                                    <p className="font-semibold text-slate-900">{mat.name}</p>
-                                    <p className="text-sm text-slate-400">
-                                        {mat.totalQuantity} {mat.unit} × €{mat.unitPrice?.toFixed(2) || '0'}
+                        {/* Summary Header */}
+                        <div className="bg-slate-50 px-4 py-5 flex-shrink-0">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="text-slate-500 text-sm">Quantità totale</p>
+                                    <p className="text-3xl font-bold text-slate-900">
+                                        {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0) || 0}
+                                        <span className="text-xl text-slate-400 ml-1">pz</span>
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-lg font-bold text-green-600">
-                                        {(mat.totalCost || 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                    <p className="text-slate-500 text-sm">Costo totale</p>
+                                    <p className="text-3xl font-bold text-green-600">
+                                        {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                        <span className="text-xl text-green-400 ml-1">€</span>
                                     </p>
                                 </div>
                             </div>
-                        ))}
+                            <p className="text-slate-400 text-sm mt-2">{report?.materials?.length || 0} tipologie</p>
+                        </div>
+
+                        {/* Materials List */}
+                        <div className="flex-1 overflow-y-auto pb-safe-bottom">
+                            {report?.materials?.map((mat, index) => (
+                                <div key={mat.id} className={`px-4 py-4 flex items-center justify-between ${index !== (report?.materials?.length || 0) - 1 ? 'border-b border-slate-100' : ''}`}>
+                                    <div className="flex-1">
+                                        <p className="font-semibold text-slate-900">{mat.name}</p>
+                                        <p className="text-sm text-slate-400">
+                                            {mat.totalQuantity} {mat.unit} × €{mat.unitPrice?.toFixed(2) || '0'}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-lg font-bold text-green-600">
+                                            {(mat.totalCost || 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                </PortalModal>
             )}
         </div >
     );
