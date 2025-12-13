@@ -971,7 +971,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 <Euro className="w-3 h-3" /> Totale
                                             </div>
                                             <div className="text-lg font-bold text-slate-900">
-                                                € {(acc.total || 0).toFixed(2)}
+                                                € {parseFloat(acc.total || 0).toFixed(2)}
                                             </div>
                                         </div>
                                     </div>
