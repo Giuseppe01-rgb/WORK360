@@ -234,8 +234,8 @@ export default function EmployeeManagement() {
                                     <div className="flex items-start gap-4">
                                         {/* Avatar */}
                                         <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${employee.role === 'owner'
-                                                ? 'bg-purple-100 text-purple-600'
-                                                : 'bg-blue-100 text-blue-600'
+                                            ? 'bg-purple-100 text-purple-600'
+                                            : 'bg-blue-100 text-blue-600'
                                             }`}>
                                             <span className="text-lg font-bold">
                                                 {employee.firstName?.charAt(0)}{employee.lastName?.charAt(0)}
@@ -249,8 +249,8 @@ export default function EmployeeManagement() {
                                                     {employee.firstName} {employee.lastName}
                                                 </h3>
                                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${employee.role === 'owner'
-                                                        ? 'bg-purple-100 text-purple-700'
-                                                        : 'bg-blue-100 text-blue-700'
+                                                    ? 'bg-purple-100 text-purple-700'
+                                                    : 'bg-blue-100 text-blue-700'
                                                     }`}>
                                                     {employee.role === 'owner' ? 'Titolare' : 'Operaio'}
                                                 </span>
@@ -270,9 +270,9 @@ export default function EmployeeManagement() {
                                                         {employee.phone}
                                                     </span>
                                                 )}
-                                                {employee.hourlyCost > 0 && (
+                                                {parseFloat(employee.hourlyCost) > 0 && (
                                                     <span className="font-semibold text-green-600">
-                                                        €{employee.hourlyCost.toFixed(2)}/h
+                                                        €{parseFloat(employee.hourlyCost).toFixed(2)}/h
                                                     </span>
                                                 )}
                                             </div>
@@ -287,8 +287,8 @@ export default function EmployeeManagement() {
                                             onClick={(e) => handleSendWelcomeEmail(employee, e)}
                                             disabled={!employee.email}
                                             className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${employee.email
-                                                    ? 'text-green-600 hover:bg-green-50'
-                                                    : 'text-slate-300 cursor-not-allowed'
+                                                ? 'text-green-600 hover:bg-green-50'
+                                                : 'text-slate-300 cursor-not-allowed'
                                                 }`}
                                         >
                                             <Send className="w-4 h-4" />
