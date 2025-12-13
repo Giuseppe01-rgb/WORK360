@@ -325,6 +325,23 @@ sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
                     END IF;
                 END $$;
             `);
+
+            // Ensure economias.hours is DECIMAL(10,2) for bulk entries (not DECIMAL(4,1))
+            await sequelize.query(`
+                DO $$ 
+                BEGIN 
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name = 'economias' 
+                        AND column_name = 'hours' 
+                        AND numeric_precision = 4
+                    ) THEN
+                        ALTER TABLE economias ALTER COLUMN hours TYPE DECIMAL(10,2);
+                        RAISE NOTICE 'Migrated economias.hours to DECIMAL(10,2)';
+                    END IF;
+                END $$;
+            `);
+
             console.log('✅ Migrations checked');
         } catch (migrationError) {
             console.error('[Migration] Error:', migrationError.message);

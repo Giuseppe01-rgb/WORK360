@@ -22,18 +22,18 @@ Economia.init({
         references: { model: 'construction_sites', key: 'id' }
     },
     hours: {
-        type: DataTypes.DECIMAL(4, 1),
+        type: DataTypes.DECIMAL(10, 2), // Support large bulk values (up to 99999999.99)
         allowNull: false,
         validate: {
             min: 0.5,
-            max: 24
+            max: 100000 // Support bulk entries
         }
     },
     description: {
         type: DataTypes.STRING(1000),
         allowNull: false,
         validate: {
-            len: [10, 1000]
+            len: [5, 1000] // Reduced from 10 to 5 for bulk entries
         }
     },
     date: {

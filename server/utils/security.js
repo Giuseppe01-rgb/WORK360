@@ -48,14 +48,21 @@ async function assertEconomiaBelongsToCompany(economiaId, companyId) {
         throw new SecurityError(400, 'ID economia mancante');
     }
 
-    const economia = await Economia.findById(economiaId).populate('site');
+    // Use Sequelize findByPk with include for site
+    const economia = await Economia.findByPk(economiaId, {
+        include: [{
+            model: ConstructionSite,
+            as: 'site',
+            attributes: ['id', 'companyId']
+        }]
+    });
 
     if (!economia) {
         throw new SecurityError(404, 'Economia non trovata');
     }
 
     // Check if site exists and belongs to company
-    if (!economia.site || economia.site.company.toString() !== companyId.toString()) {
+    if (!economia.site || economia.site.companyId !== companyId) {
         throw new SecurityError(404, 'Economia non trovata');
     }
 
