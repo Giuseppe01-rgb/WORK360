@@ -271,9 +271,9 @@ exports.downloadSiteAccountingPDF = async (req, res) => {
 
                 doc.text(item.description || '', 50, yPos, { width: colWidths.desc });
                 doc.text(item.unit || '', 250, yPos);
-                doc.text((item.quantity || 0).toString(), 300, yPos);
-                doc.text(`€ ${(item.unitPrice || 0).toFixed(2)}`, 360, yPos);
-                doc.text(`€ ${(item.total || 0).toFixed(2)}`, 430, yPos);
+                doc.text(parseFloat(item.quantity || 0).toString(), 300, yPos);
+                doc.text(`€ ${parseFloat(item.unitPrice || 0).toFixed(2)}`, 360, yPos);
+                doc.text(`€ ${parseFloat(item.total || 0).toFixed(2)}`, 430, yPos);
 
                 yPos += rowHeight;
             });
@@ -284,7 +284,7 @@ exports.downloadSiteAccountingPDF = async (req, res) => {
 
             doc.font('Helvetica-Bold').fontSize(12);
             doc.text('TOTALE:', 360, yPos);
-            doc.text(`€ ${(accounting.total || 0).toFixed(2)}`, 430, yPos);
+            doc.text(`€ ${parseFloat(accounting.total || 0).toFixed(2)}`, 430, yPos);
         }
 
         // Notes
