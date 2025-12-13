@@ -215,7 +215,10 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                     </div>
 
                     {/* Margin Card */}
-                    {report?.contractValue ? (
+                    {(() => {
+                        const contractVal = parseFloat(report?.contractValue);
+                        return !isNaN(contractVal) && contractVal > 0;
+                    })() ? (
                         (() => {
                             // Calculate economie revenue for margin
                             const economieHours = economie.reduce((sum, e) => sum + e.hours, 0);

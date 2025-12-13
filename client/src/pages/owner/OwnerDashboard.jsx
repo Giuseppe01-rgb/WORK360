@@ -365,7 +365,11 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         )}
 
                         {/* MARGIN CARD */}
-                        {report?.contractValue ? (
+                        {(() => {
+                            const contractVal = parseFloat(report?.contractValue);
+                            const isValidContract = !isNaN(contractVal) && contractVal > 0;
+                            return isValidContract;
+                        })() ? (
                             <div className={`p-6 rounded-3xl shadow-sm border mb-6 relative overflow-hidden ${report.margin?.marginCurrentValue >= 0
                                 ? 'bg-white border-green-100'
                                 : 'bg-white border-red-100'
@@ -418,9 +422,13 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
                                             <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
                                             {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
-                                            {economieRevenue > 0 && <span className="text-green-600">+ Economie (+{economieRevenue.toFixed(2)}€)</span>}
                                         </span>
-                                        <span className="font-black text-slate-900">{((parseFloat(report.contractValue) || 0) + economieRevenue).toFixed(2)}€</span>
+                                        <span className="font-black text-slate-900">
+                                            {(() => {
+                                                const val = parseFloat(report.contractValue) || 0;
+                                                return (val + economieRevenue).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
+                                            })()}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
