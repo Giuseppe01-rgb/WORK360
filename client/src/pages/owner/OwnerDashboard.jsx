@@ -115,9 +115,14 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
         try {
             await economiaAPI.delete(economiaId);
             const economieData = await economiaAPI.getBySite(site.id);
-            setEconomie(economieData.data);
+            setEconomie(economieData.data || []);
+            // Refresh report to update totals
+            const rep = await analyticsAPI.getSiteReport(site.id);
+            setReport(rep.data);
+            alert('✅ Economia eliminata con successo');
         } catch (error) {
             console.error('Error deleting economia:', error);
+            alert('❌ Errore nell\'eliminazione dell\'economia: ' + (error.response?.data?.message || error.message));
         }
     };
 
@@ -1150,6 +1155,24 @@ export default function OwnerDashboard() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate contractValue if provided
+        if (formData.contractValue) {
+            const contractVal = parseFloat(formData.contractValue);
+            if (isNaN(contractVal)) {
+                showNotification('error', 'Prezzo pattuito non valido: inserisci un numero');
+                return;
+            }
+            if (contractVal > 9999999999) {
+                showNotification('error', 'Prezzo pattuito troppo alto: massimo 9.999.999.999€');
+                return;
+            }
+            if (contractVal < 0) {
+                showNotification('error', 'Prezzo pattuito non può essere negativo');
+                return;
+            }
+        }
+
         try {
             if (editingSite) {
                 await siteAPI.update(editingSite.id, formData);
@@ -1161,7 +1184,13 @@ export default function OwnerDashboard() {
             resetForm();
             loadSites();
         } catch (error) {
-            showNotification('error', error.message || 'Errore nell\'operazione');
+            console.error('Site creation/update error:', error);
+            // Get the most specific error message available
+            const errorMsg = error.response?.data?.message
+                || error.response?.data?.error
+                || error.message
+                || 'Errore sconosciuto';
+            showNotification('error', `Errore nella ${editingSite ? 'modifica' : 'creazione'} del cantiere: ${errorMsg}`);
         }
     };
 
