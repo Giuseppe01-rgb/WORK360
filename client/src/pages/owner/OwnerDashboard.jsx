@@ -1122,6 +1122,7 @@ export default function OwnerDashboard() {
     const [selectedSite, setSelectedSite] = useState(null);
     const [notification, setNotification] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('active'); // 'all', 'active', 'completed', 'planned', 'suspended'
 
     const [formData, setFormData] = useState({
         name: '',
@@ -1235,10 +1236,14 @@ export default function OwnerDashboard() {
         setShowModal(false);
     };
 
-    const filteredSites = sites.filter(site =>
-        site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        site.address.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredSites = sites.filter(site => {
+        // Status filter
+        const matchesStatus = statusFilter === 'all' || site.status === statusFilter;
+        // Search filter
+        const matchesSearch = site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            site.address.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesStatus && matchesSearch;
+    });
 
     if (loading) {
         return (
@@ -1287,6 +1292,41 @@ export default function OwnerDashboard() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-white pl-12 pr-4 py-4 rounded-2xl border-none shadow-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
+                </div>
+
+                {/* STATUS FILTER TABS */}
+                <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-1 px-1">
+                    {[
+                        { value: 'all', label: 'Tutti', color: 'slate' },
+                        { value: 'active', label: 'In Corso', color: 'green' },
+                        { value: 'completed', label: 'Completi', color: 'blue' },
+                        { value: 'planned', label: 'Pianificati', color: 'amber' },
+                        { value: 'suspended', label: 'Sospeso', color: 'red' }
+                    ].map(tab => {
+                        const count = tab.value === 'all'
+                            ? sites.length
+                            : sites.filter(s => s.status === tab.value).length;
+                        const isActive = statusFilter === tab.value;
+                        return (
+                            <button
+                                key={tab.value}
+                                onClick={() => setStatusFilter(tab.value)}
+                                className={`flex-shrink-0 px-4 py-2 rounded-xl font-bold text-sm transition-all ${isActive
+                                        ? `bg-${tab.color}-500 text-white shadow-lg shadow-${tab.color}-500/30`
+                                        : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                                    }`}
+                                style={isActive ? {
+                                    backgroundColor: tab.color === 'slate' ? '#64748b' :
+                                        tab.color === 'green' ? '#22c55e' :
+                                            tab.color === 'blue' ? '#3b82f6' :
+                                                tab.color === 'amber' ? '#f59e0b' : '#ef4444',
+                                    color: 'white'
+                                } : {}}
+                            >
+                                {tab.label} <span className={`ml-1 ${isActive ? 'opacity-80' : 'text-slate-400'}`}>({count})</span>
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* NEW SITE BUTTON - UPDATED */}
