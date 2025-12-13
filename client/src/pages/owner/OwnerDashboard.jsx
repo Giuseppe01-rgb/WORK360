@@ -395,14 +395,18 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 <div className="mb-6">
                                     {(() => {
                                         // Calculate margin including economie as additional revenue
-                                        const totalRevenue = (report.contractValue || 0) + economieRevenue;
+                                        // Ensure contractValue is a valid number
+                                        const contractVal = parseFloat(report.contractValue) || 0;
+                                        const totalRevenue = contractVal + economieRevenue;
                                         const adjustedMargin = totalRevenue - totalCost;
+                                        // Check for NaN and fallback to 0
+                                        const displayMargin = isNaN(adjustedMargin) ? 0 : adjustedMargin;
                                         return (
-                                            <p className={`text-5xl font-black tracking-tight ${adjustedMargin >= 0
+                                            <p className={`text-5xl font-black tracking-tight ${displayMargin >= 0
                                                 ? 'text-green-600'
                                                 : 'text-red-600'
                                                 }`}>
-                                                {adjustedMargin.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                {displayMargin.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 <span className="text-3xl text-slate-400 font-medium ml-1">€</span>
                                             </p>
                                         );
@@ -416,7 +420,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                             {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
                                             {economieRevenue > 0 && <span className="text-green-600">+ Economie (+{economieRevenue.toFixed(2)}€)</span>}
                                         </span>
-                                        <span className="font-black text-slate-900">{((report.contractValue || 0) + economieRevenue).toFixed(2)}€</span>
+                                        <span className="font-black text-slate-900">{((parseFloat(report.contractValue) || 0) + economieRevenue).toFixed(2)}€</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
@@ -1300,11 +1304,15 @@ export default function OwnerDashboard() {
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Prezzo pattuito (€ IVA esclusa)</label>
                                 <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
+                                    type="text"
+                                    inputMode="decimal"
+                                    pattern="[0-9]*\.?[0-9]*"
                                     value={formData.contractValue}
-                                    onChange={(e) => setFormData({ ...formData, contractValue: e.target.value })}
+                                    onChange={(e) => {
+                                        // Allow only numbers and decimal point
+                                        const val = e.target.value.replace(/[^0-9.]/g, '');
+                                        setFormData({ ...formData, contractValue: val });
+                                    }}
                                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all"
                                     placeholder="0.00"
                                 />

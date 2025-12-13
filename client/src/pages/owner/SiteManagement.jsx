@@ -220,21 +220,26 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             // Calculate economie revenue for margin
                             const economieHours = economie.reduce((sum, e) => sum + e.hours, 0);
                             const economieRevenue = economieHours * 30;
-                            const totalRevenue = (report.contractValue || 0) + economieRevenue;
-                            const adjustedMargin = totalRevenue - (report.siteCost?.total || 0);
+                            // Ensure contractValue is a valid number
+                            const contractVal = parseFloat(report.contractValue) || 0;
+                            const totalRevenue = contractVal + economieRevenue;
+                            const adjustedMargin = totalRevenue - (parseFloat(report.siteCost?.total) || 0);
+                            // Check for NaN and fallback to 0
+                            const displayMargin = isNaN(adjustedMargin) ? 0 : adjustedMargin;
+                            const displayRevenue = isNaN(totalRevenue) ? 0 : totalRevenue;
 
                             return (
-                                <div className={`border rounded-2xl p-6 md:p-8 ${adjustedMargin >= 0
+                                <div className={`border rounded-2xl p-6 md:p-8 ${displayMargin >= 0
                                     ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'
                                     : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-100'
                                     }`}>
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${adjustedMargin >= 0
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${displayMargin >= 0
                                                 ? 'bg-green-100'
                                                 : 'bg-red-100'
                                                 }`}>
-                                                <FileText className={`w-6 h-6 ${adjustedMargin >= 0
+                                                <FileText className={`w-6 h-6 ${displayMargin >= 0
                                                     ? 'text-green-600'
                                                     : 'text-red-600'
                                                     }`} />
@@ -251,11 +256,11 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                         </span>
                                     </div>
 
-                                    <div className={`text-5xl md:text-6xl font-black mb-4 ${adjustedMargin >= 0
+                                    <div className={`text-5xl md:text-6xl font-black mb-4 ${displayMargin >= 0
                                         ? 'text-green-600'
                                         : 'text-red-600'
                                         }`}>
-                                        {adjustedMargin.toFixed(2)}€
+                                        {displayMargin.toFixed(2)}€
                                     </div>
 
                                     <div className="space-y-2 mb-4">
@@ -263,20 +268,20 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                             <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                                             <span className="text-sm font-medium text-slate-700">
                                                 {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
-                                                {economieRevenue > 0 && <span className="text-green-600"> + Economie (+{economieRevenue.toFixed(2)}€)</span>}: {totalRevenue.toFixed(2)}€
+                                                {economieRevenue > 0 && <span className="text-green-600"> + Economie (+{economieRevenue.toFixed(2)}€)</span>}: {displayRevenue.toFixed(2)}€
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                                             <span className="text-sm font-medium text-slate-700">
-                                                {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}: {report.siteCost?.total?.toFixed(2)}€
+                                                {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}: {(parseFloat(report.siteCost?.total) || 0).toFixed(2)}€
                                             </span>
                                         </div>
                                         {report.status !== 'completed' && (
                                             <div className="flex items-center gap-2">
                                                 <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
                                                 <span className="text-sm font-medium text-slate-700">
-                                                    Costo su ricavo: {(totalRevenue > 0 ? ((report.siteCost?.total || 0) / totalRevenue) * 100 : 0).toFixed(1)}%
+                                                    Costo su ricavo: {(displayRevenue > 0 ? ((parseFloat(report.siteCost?.total) || 0) / displayRevenue) * 100 : 0).toFixed(1)}%
                                                 </span>
                                             </div>
                                         )}
@@ -978,13 +983,17 @@ export default function SiteManagement() {
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Prezzo pattuito (€ IVA esclusa)</label>
                                         <input
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
+                                            type="text"
+                                            inputMode="decimal"
+                                            pattern="[0-9]*\.?[0-9]*"
                                             placeholder="0.00"
                                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                             value={formData.contractValue}
-                                            onChange={(e) => setFormData({ ...formData, contractValue: e.target.value })}
+                                            onChange={(e) => {
+                                                // Allow only numbers and decimal point
+                                                const val = e.target.value.replace(/[^0-9.]/g, '');
+                                                setFormData({ ...formData, contractValue: val });
+                                            }}
                                         />
                                     </div>
                                 </div>
