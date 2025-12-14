@@ -149,10 +149,9 @@ input[type="number"],
 select {
   max-width: 100%;
   width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
   box-sizing: border-box;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
 }
 
 /* Ensure modals don't overflow */
