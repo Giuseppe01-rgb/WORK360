@@ -451,7 +451,7 @@ export default function MaterialsCatalog() {
             </div>
 
             {/* Materials List - Desktop Table */}
-            <div className="hidden md:block bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div className="hidden md:block bg-white rounded-[2.5rem] shadow-sm overflow-hidden">
                 <table className="w-full">
                     <thead>
                         <tr className="bg-slate-50 border-b border-slate-200">
@@ -543,7 +543,7 @@ export default function MaterialsCatalog() {
             {/* Materials List - Mobile Cards */}
             <div className="md:hidden space-y-4">
                 {filteredMaterials.length === 0 ? (
-                    <div className="bg-white rounded-2xl p-12 text-center">
+                    <div className="bg-white rounded-[2.5rem] p-12 text-center">
                         <Package className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                         <p className="text-slate-500">
                             {searchTerm || activeFilter !== 'all'
@@ -556,7 +556,7 @@ export default function MaterialsCatalog() {
                     </div>
                 ) : (
                     filteredMaterials.map((material) => (
-                        <div key={material.id} className="bg-white rounded-2xl p-6 shadow-sm">
+                        <div key={material.id} className="bg-white rounded-[2.5rem] p-6 shadow-sm">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
@@ -608,7 +608,7 @@ export default function MaterialsCatalog() {
             {/* Add Material Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowAddModal(false)}>
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-slate-900">Aggiungi Materiale</h2>
@@ -721,7 +721,7 @@ export default function MaterialsCatalog() {
             {/* Edit Material Modal */}
             {showEditModal && selectedMaterial && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowEditModal(false)}>
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-slate-900">Modifica Materiale</h2>
@@ -829,7 +829,7 @@ export default function MaterialsCatalog() {
             {/* Delete All Confirmation Modal */}
             {showDeleteAllConfirm && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl p-6">
                         <div className="flex flex-col items-center text-center">
                             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                                 <AlertCircle className="w-8 h-8 text-red-600" />
@@ -861,7 +861,7 @@ export default function MaterialsCatalog() {
             {/* Unified Invoice Modal - Upload and Review in one modal */}
             {showInvoiceModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className={`bg-white rounded-2xl shadow-2xl ${invoiceModalStep === 'review' ? 'w-full max-w-6xl max-h-[90vh] flex flex-col' : 'w-full max-w-2xl'}`}>
+                    <div className={`bg-white rounded-[2.5rem] shadow-2xl ${invoiceModalStep === 'review' ? 'w-full max-w-6xl max-h-[90vh] flex flex-col' : 'w-full max-w-2xl'}`}>
                         {/* STEP 1: Upload */}
                         {invoiceModalStep === 'upload' && (
                             <div key="upload-step" className="h-full flex flex-col">
@@ -1113,7 +1113,7 @@ export default function MaterialsCatalog() {
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && selectedMaterial && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 text-center">
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl p-6 text-center">
                         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <AlertCircle className="w-8 h-8 text-red-600" />
                         </div>

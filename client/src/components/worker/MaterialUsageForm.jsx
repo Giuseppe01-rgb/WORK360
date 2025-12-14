@@ -34,7 +34,7 @@ const MaterialUsageForm = ({ material, siteId, onConfirm, onCancel, editMode = f
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-in zoom-in slide-in-from-bottom-4 duration-300">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md animate-in zoom-in slide-in-from-bottom-4 duration-300">
                 <div className="p-6">
                     {/* Success/Edit Icon */}
                     <div className="flex items-center justify-center mb-4">

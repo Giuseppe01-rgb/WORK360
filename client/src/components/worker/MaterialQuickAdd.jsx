@@ -185,7 +185,7 @@ const MaterialQuickAdd = ({ selectedSite, onSuccess }) => {
             {/* Material Found - Confirmation */}
             {step === 'found' && scannedMaterial && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md">
                         <div className="p-6">
                             <div className="flex items-center justify-center mb-4">
                                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
@@ -258,7 +258,7 @@ const MaterialQuickAdd = ({ selectedSite, onSuccess }) => {
             {/* Material Not Found - Choose Action */}
             {step === 'notfound' && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md p-6">
                         <h3 className="text-xl font-bold text-center text-slate-900 mb-3">
                             Non troviamo questo materiale
                         </h3>

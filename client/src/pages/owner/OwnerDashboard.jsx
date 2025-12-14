@@ -647,7 +647,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 </div>
                             ))
                         ) : (
-                            <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
+                            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-12 text-center">
                                 <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                                 <p className="text-slate-400 font-medium">Nessun report giornaliero disponibile</p>
                             </div>
@@ -812,7 +812,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 </div>
                             ))
                         ) : (
-                            <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
+                            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-12 text-center">
                                 <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                                 <p className="text-slate-400 font-medium">Nessuna nota disponibile</p>
                             </div>
@@ -864,7 +864,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 ))}
                             </div>
                         ) : (
-                            <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center">
+                            <div className="bg-white rounded-[2.5rem] border border-slate-100 p-12 text-center">
                                 <Camera className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                                 <p className="text-slate-400 font-medium">Nessuna foto disponibile</p>
                             </div>
@@ -909,7 +909,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {
                 selectedPhoto && (
                     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedPhoto(null)}>
-                        <div className="bg-white rounded-3xl w-full max-w-4xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-white rounded-[2.5rem] w-full max-w-4xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                             <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-bold text-slate-900">
@@ -1256,7 +1256,7 @@ export default function OwnerDashboard() {
                         placeholder="Cerca cantiere..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-white pl-12 pr-4 py-4 rounded-2xl border-none shadow-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-full bg-white pl-12 pr-4 py-4 rounded-[2.5rem] border-none shadow-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                 </div>
 
@@ -1441,7 +1441,7 @@ export default function OwnerDashboard() {
             {/* Modal Nuovo/Modifica Cantiere */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4" onClick={resetForm}>
-                    <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-bold text-slate-900">
                                 {editingSite ? 'Modifica Cantiere' : 'Nuovo Cantiere'}

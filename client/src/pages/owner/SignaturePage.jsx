@@ -111,7 +111,7 @@ export default function SignaturePage() {
             )}
 
             <div className="max-w-3xl mx-auto space-y-8">
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                <div className="bg-white rounded-[2.5rem] border border-slate-200 p-6 md:p-8 shadow-sm">
                     <div className="mb-6">
                         <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 mb-2">
                             <PenTool className="w-6 h-6 text-slate-900" />
@@ -199,7 +199,7 @@ export default function SignaturePage() {
                 </div>
 
                 {signature && (
-                    <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-[2.5rem] border border-slate-200 p-6 md:p-8 shadow-sm">
                         <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                             <CheckCircle className="w-5 h-5 text-green-500" />
                             Firma Attuale

@@ -113,7 +113,7 @@ export default function ActivityLogPage() {
 
                 {/* Filters Panel */}
                 {showFilters && (
-                    <div className="bg-white rounded-2xl border border-slate-100 p-4 space-y-4">
+                    <div className="bg-white rounded-[2.5rem] border border-slate-100 p-4 space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Da</label>
@@ -165,14 +165,14 @@ export default function ActivityLogPage() {
                 )}
 
                 {/* Stats */}
-                <div className="bg-white rounded-2xl border border-slate-100 p-4">
+                <div className="bg-white rounded-[2.5rem] border border-slate-100 p-4">
                     <p className="text-slate-600">
                         <span className="font-bold text-slate-900">{total}</span> attività registrate
                     </p>
                 </div>
 
                 {/* Activity List */}
-                <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
+                <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
                     {loading ? (
                         <div className="p-12 text-center">
                             <div className="w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>

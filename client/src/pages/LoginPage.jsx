@@ -69,7 +69,7 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-accent p-4 font-sans">
-            <div className="bg-white rounded-3xl p-8 md:p-12 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div className="bg-white rounded-[2.5rem] p-8 md:p-12 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-300">
 
                 {/* Circular Logo */}
                 <div className="mb-8 relative w-24 h-24 mx-auto flex items-center justify-center">

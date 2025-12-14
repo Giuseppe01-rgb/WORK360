@@ -333,7 +333,7 @@ export default function EmployeeManagement() {
             {/* Create/Edit Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowModal(false)}>
-                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
                         <button
                             onClick={resetForm}
                             className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors"
@@ -471,7 +471,7 @@ export default function EmployeeManagement() {
             {/* Credentials Modal */}
             {generatedCredentials && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative animate-in zoom-in duration-200">
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl relative animate-in zoom-in duration-200">
                         <div className="p-6 md:p-8">
                             <div className="text-center mb-6">
                                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">

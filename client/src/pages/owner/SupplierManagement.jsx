@@ -152,7 +152,7 @@ export default function SupplierManagement() {
 
             {/* Recommendations Section */}
             {recommendations.length > 0 && (
-                <div className="bg-blue-50 rounded-2xl p-6 mb-8">
+                <div className="bg-blue-50 rounded-[2.5rem] p-6 mb-8">
                     <h3 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-blue-600" />
                         Raccomandazioni Intelligenti
@@ -184,7 +184,7 @@ export default function SupplierManagement() {
 
             {/* Form */}
             {showForm && (
-                <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg animate-in fade-in slide-in-from-top-4">
+                <div className="bg-white rounded-[2.5rem] p-6 mb-8 shadow-lg animate-in fade-in slide-in-from-top-4">
                     <h2 className="text-xl font-bold text-slate-900 mb-6">
                         {editingSupplier ? 'Modifica Fornitore' : 'Nuovo Fornitore'}
                     </h2>
@@ -312,7 +312,7 @@ export default function SupplierManagement() {
             {/* Suppliers List */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {suppliers.length === 0 ? (
-                    <div className="col-span-full p-12 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    <div className="col-span-full p-12 text-center bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
                         <Truck className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                         <h3 className="text-lg font-medium text-slate-900 mb-2">Nessun fornitore presente</h3>
                         <p className="text-slate-500 mb-6">Aggiungi il tuo primo fornitore per iniziare a tracciare i contatti.</p>
@@ -326,7 +326,7 @@ export default function SupplierManagement() {
                     </div>
                 ) : (
                     suppliers.map(supplier => (
-                        <div key={supplier.id} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+                        <div key={supplier.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-shadow group">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">

@@ -195,7 +195,7 @@ export default function AttendanceList() {
     return (
         <Layout title="Registro Presenze">
             {/* Filters */}
-            <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
+            <div className="bg-white rounded-[2.5rem] p-6 mb-8 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                         <Filter className="w-5 h-5 text-slate-400" />
@@ -303,21 +303,21 @@ export default function AttendanceList() {
 
             {/* Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-2xl shadow-sm">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm">
                     <div className="text-sm font-medium text-slate-500 mb-1">Presenze Totali</div>
                     <div className="text-3xl font-bold text-slate-900">
                         {attendances.length}
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm">
                     <div className="text-sm font-medium text-slate-500 mb-1">In Corso</div>
                     <div className="text-3xl font-bold text-blue-600">
                         {attendances.filter(att => !att.clockOut?.time).length}
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm">
                     <div className="text-sm font-medium text-slate-500 mb-1">Ore Totali</div>
                     <div className="text-3xl font-bold text-slate-900">
                         {getTotalHours()}<span className="text-lg font-normal text-slate-500 ml-1">h</span>
@@ -348,7 +348,7 @@ export default function AttendanceList() {
                 </div>
 
                 {attendances.length === 0 ? (
-                    <div className="bg-white rounded-2xl p-12 text-center shadow-sm">
+                    <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Clock className="w-8 h-8 text-slate-400" />
                         </div>
@@ -490,7 +490,7 @@ export default function AttendanceList() {
                     />
 
                     {/* Sheet */}
-                    <div className="relative bg-white rounded-t-3xl sm:rounded-2xl w-full max-w-md mx-auto max-h-[85vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom duration-300">
+                    <div className="relative bg-white rounded-t-3xl sm:rounded-[2.5rem] w-full max-w-md mx-auto max-h-[85vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom duration-300">
                         {/* Header */}
                         <div className="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 border-b border-slate-100">
                             <div className="flex items-center justify-between">

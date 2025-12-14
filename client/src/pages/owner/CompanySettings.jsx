@@ -195,7 +195,7 @@ export default function CompanySettings() {
     return (
         <Layout title="Impostazioni Azienda">
             <div className="max-w-4xl mx-auto">
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
                     <div className="p-6 md:p-8 border-b border-slate-100">
                         <h2 className="text-xl font-bold text-slate-900">Dati Aziendali e Carta Intestata</h2>
                         <p className="text-slate-500 mt-1">Questi dati verranno utilizzati automaticamente nei preventivi e documenti.</p>
@@ -207,7 +207,7 @@ export default function CompanySettings() {
                             <div className="w-full md:w-1/3">
                                 <label className="block text-sm font-medium text-slate-700 mb-2">Logo Aziendale</label>
                                 <div className="relative group cursor-pointer">
-                                    <div className={`w-40 h-40 rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden bg-slate-50 transition-colors ${logoPreview ? 'border-slate-200' : 'border-slate-300 hover:border-[#5D5FEF]'}`}>
+                                    <div className={`w-40 h-40 rounded-[2.5rem] border-2 border-dashed flex items-center justify-center overflow-hidden bg-slate-50 transition-colors ${logoPreview ? 'border-slate-200' : 'border-slate-300 hover:border-[#5D5FEF]'}`}>
                                         {logoPreview ? (
                                             <img src={logoPreview} alt="Logo preview" className="w-full h-full object-contain p-2" />
                                         ) : (
@@ -456,7 +456,7 @@ export default function CompanySettings() {
                         </div>
 
                         {/* Email Configuration Section */}
-                        <div className="bg-white rounded-2xl shadow-sm p-8 mb-6">
+                        <div className="bg-white rounded-[2.5rem] shadow-sm p-8 mb-6">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="p-3 bg-blue-100 rounded-xl">
                                     <Mail className="w-6 h-6 text-blue-600" />

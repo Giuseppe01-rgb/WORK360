@@ -13,7 +13,7 @@ export default function MaterialCart({
     }
 
     return (
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 mb-6 border-2 border-amber-200 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-[2.5rem] p-6 mb-6 border-2 border-amber-200 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">

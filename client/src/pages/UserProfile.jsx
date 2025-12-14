@@ -80,7 +80,7 @@ export default function UserProfile() {
         <Layout title="Profilo Utente">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* User Info Card */}
-                <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                <div className="bg-white rounded-[2.5rem] shadow-sm p-6 border border-slate-100">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-16 h-16 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full flex items-center justify-center text-white">
                             <User className="w-8 h-8" />
@@ -148,7 +148,7 @@ export default function UserProfile() {
                 </div>
 
                 {/* Password Change Card */}
-                <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                <div className="bg-white rounded-[2.5rem] shadow-sm p-6 border border-slate-100">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                             <Lock className="w-5 h-5 text-blue-600" />

@@ -172,7 +172,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             {activeSection === 'data' && (
                 <div className="space-y-6 md:space-y-8">
                     {/* Cost Summary Card */}
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-6 md:p-8">
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-[2.5rem] p-6 md:p-8">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                                 <Users className="w-6 h-6 text-green-600" />
@@ -233,7 +233,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             const displayRevenue = isNaN(totalRevenue) ? 0 : totalRevenue;
 
                             return (
-                                <div className={`border rounded-2xl p-6 md:p-8 ${displayMargin >= 0
+                                <div className={`border rounded-[2.5rem] p-6 md:p-8 ${displayMargin >= 0
                                     ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'
                                     : 'bg-gradient-to-br from-red-50 to-rose-50 border-red-100'
                                     }`}>
@@ -308,7 +308,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             );
                         })()
                     ) : (
-                        <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-6 md:p-8">
+                        <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-[2.5rem] p-6 md:p-8">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center">
                                     <FileText className="w-6 h-6 text-slate-500" />
@@ -399,7 +399,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                     </div>
 
                     <div className="mt-6">
-                        <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm inline-block min-w-[250px]">
+                        <div className="bg-white p-4 md:p-6 rounded-[2.5rem] shadow-sm inline-block min-w-[250px]">
                             <h3 className="text-lg font-bold text-slate-900 mb-2">Costo Cantiere</h3>
                             <p className="text-3xl md:text-4xl font-bold text-slate-900 mb-1">
                                 {report?.siteCost?.total?.toFixed(2) || '0,00'}€
@@ -418,7 +418,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                 <div
                                     key={dailyReport.id}
                                     onClick={() => setSelectedReport(dailyReport)}
-                                    className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer border border-slate-100 group"
+                                    className="bg-white p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all cursor-pointer border border-slate-100 group"
                                 >
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
@@ -454,7 +454,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm animate-in fade-in duration-200">
                             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Calendar className="w-8 h-8 text-slate-400" />
                             </div>
@@ -471,7 +471,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                     {notes.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {notes.map((note) => (
-                                <div key={note.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <div key={note.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xs">
@@ -510,7 +510,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm animate-in fade-in duration-200">
                             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <FileText className="w-8 h-8 text-slate-400" />
                             </div>
@@ -527,7 +527,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                     {economie.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {economie.map((economia) => (
-                                <div key={economia.id} className="bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
+                                <div key={economia.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-amber-100">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
@@ -567,7 +567,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm animate-in fade-in duration-200">
                             <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Zap className="w-8 h-8 text-amber-400" />
                             </div>
@@ -580,7 +580,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
 
             {/* Content - Foto */}
             {activeSection === 'photos' && (
-                <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm animate-in fade-in duration-200">
                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Camera className="w-8 h-8 text-slate-400" />
                     </div>
@@ -600,7 +600,7 @@ const ReportModal = ({ report, onClose }) => {
     if (!report) return null;
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl relative animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl relative animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
@@ -819,7 +819,7 @@ export default function SiteManagement() {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-2xl shadow-sm flex items-center justify-between">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-sm font-semibold text-slate-500 mb-1">Tutti i Cantieri</p>
                         <p className="text-3xl font-bold text-slate-900">{totalSites}</p>
@@ -828,7 +828,7 @@ export default function SiteManagement() {
                         <Building2 className="w-6 h-6" />
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl shadow-sm flex items-center justify-between">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-sm font-semibold text-slate-500 mb-1">In Corso</p>
                         <p className="text-3xl font-bold text-orange-600">{activeSites}</p>
@@ -837,7 +837,7 @@ export default function SiteManagement() {
                         <Clock className="w-6 h-6" />
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl shadow-sm flex items-center justify-between">
+                <div className="bg-white p-6 rounded-[2.5rem] shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-sm font-semibold text-slate-500 mb-1">Archiviati</p>
                         <p className="text-3xl font-bold text-green-600">{archivedSites}</p>
@@ -854,7 +854,7 @@ export default function SiteManagement() {
                     <div
                         key={site.id}
                         onClick={() => setSelectedSite(site)}
-                        className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                        className="bg-white p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all cursor-pointer group"
                     >
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
@@ -908,7 +908,7 @@ export default function SiteManagement() {
             {/* Create/Edit Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl relative">
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl relative">
                         <button
                             onClick={resetForm}
                             className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors"

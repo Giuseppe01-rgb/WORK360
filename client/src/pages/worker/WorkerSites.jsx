@@ -112,7 +112,7 @@ const SiteDetails = ({ site, onBack }) => {
                                 <div
                                     key={report.id}
                                     onClick={() => setExpandedReport(expandedReport?.id === report.id ? null : report)}
-                                    className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 cursor-pointer hover:shadow-md hover:border-blue-200 transition-all"
+                                    className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 cursor-pointer hover:shadow-md hover:border-blue-200 transition-all"
                                 >
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
@@ -144,7 +144,7 @@ const SiteDetails = ({ site, onBack }) => {
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm animate-in fade-in duration-200">
                             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Calendar className="w-8 h-8 text-slate-400" />
                             </div>
@@ -161,7 +161,7 @@ const SiteDetails = ({ site, onBack }) => {
                     {notes.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {notes.map((note) => (
-                                <div key={note.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <div key={note.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
                                             <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xs">
@@ -182,7 +182,7 @@ const SiteDetails = ({ site, onBack }) => {
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm animate-in fade-in duration-200">
                             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <FileText className="w-8 h-8 text-slate-400" />
                             </div>
@@ -225,7 +225,7 @@ const SiteDetails = ({ site, onBack }) => {
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white rounded-2xl p-12 text-center shadow-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm animate-in fade-in duration-200">
                             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Camera className="w-8 h-8 text-slate-400" />
                             </div>
@@ -310,7 +310,7 @@ export default function WorkerSites() {
                     placeholder="Cerca cantiere..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-white pl-12 pr-4 py-4 rounded-2xl border-none shadow-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full bg-white pl-12 pr-4 py-4 rounded-[2.5rem] border-none shadow-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
                 />
             </div>
 
@@ -370,7 +370,7 @@ export default function WorkerSites() {
             {/* Sites List */}
             <div className="grid gap-4">
                 {filteredSites.length === 0 ? (
-                    <div className="bg-white rounded-2xl p-12 text-center shadow-sm">
+                    <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Building2 className="w-8 h-8 text-slate-400" />
                         </div>
@@ -382,7 +382,7 @@ export default function WorkerSites() {
                         <div
                             key={site.id}
                             onClick={() => setSelectedSite(site)}
-                            className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                            className="bg-white p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all cursor-pointer group"
                         >
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div>

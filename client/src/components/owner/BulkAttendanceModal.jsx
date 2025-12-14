@@ -199,7 +199,7 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="bg-slate-900 p-6 flex items-center justify-between text-white">
                     <div>

@@ -85,7 +85,7 @@ export default function OnboardingPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-accent p-4 font-sans">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 w-full max-w-md animate-in fade-in zoom-in duration-500">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-12 w-full max-w-md animate-in fade-in zoom-in duration-500">
 
                 {/* Circular Logo */}
                 <div className="mb-6 relative w-20 h-20 mx-auto flex items-center justify-center">

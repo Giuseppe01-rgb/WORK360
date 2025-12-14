@@ -25,7 +25,7 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message, confirmText
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 duration-200">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 duration-200">
                 {/* Icon */}
                 <div className="flex justify-center mb-6">
                     <div className={`w-16 h-16 rounded-full bg-${type === 'danger' ? 'red' : type === 'warning' ? 'orange' : 'blue'}-50 flex items-center justify-center`}>

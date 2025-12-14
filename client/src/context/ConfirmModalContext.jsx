@@ -120,7 +120,7 @@ export const ConfirmModalProvider = ({ children }) => {
 
                     {/* Modal Content */}
                     <div
-                        className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 fade-in duration-200"
+                        className="relative bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 fade-in duration-200"
                         onClick={e => e.stopPropagation()}
                     >
                         {/* Close button */}

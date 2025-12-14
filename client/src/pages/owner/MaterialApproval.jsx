@@ -151,7 +151,7 @@ const MaterialApproval = () => {
                 ) : (
                     <div className="grid grid-cols-1 gap-4">
                         {reportedMaterials.map(report => (
-                            <div key={report.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                            <div key={report.id} className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                 {/* Mobile: Stack vertically, Desktop: Side by side */}
                                 <div className="flex flex-col md:flex-row">
                                     {/* Photo Section */}
@@ -357,7 +357,7 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="p-6 border-b border-slate-200 sticky top-0 bg-white z-10">
                     <div className="flex items-center justify-between">
                         <h3 className="text-xl font-bold">Crea Nuovo Materiale</h3>
@@ -503,7 +503,7 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div className="p-6 border-b border-slate-200">
                     <div className="flex items-center justify-between">
                         <h3 className="text-xl font-bold">Collega a Materiale Esistente</h3>

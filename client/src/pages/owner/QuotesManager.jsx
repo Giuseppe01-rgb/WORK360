@@ -784,7 +784,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             {activeTab === 'quotes' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {quotes.map(quote => (
-                        <div key={quote.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                        <div key={quote.id} className="bg-white rounded-[2.5rem] p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                             <div className="mb-6">
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
@@ -843,7 +843,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {sals.map(sal => (
-                        <div key={sal.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                        <div key={sal.id} className="bg-white rounded-[2.5rem] p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                             <div className="mb-6">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-2 text-slate-900 font-bold text-lg">
@@ -942,7 +942,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         </div>
                     ) : (
                         accountings.map(acc => (
-                            <div key={acc.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                            <div key={acc.id} className="bg-white rounded-[2.5rem] p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                                 <div className="mb-6">
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-2 text-slate-900 font-bold text-lg">
@@ -1016,7 +1016,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             {
                 showModal && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl relative">
+                        <div className="bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl relative">
                             <button
                                 onClick={resetForm}
                                 className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors"
@@ -1272,7 +1272,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             {
                 showSendModal && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl text-center">
+                        <div className="bg-white rounded-[2.5rem] w-full max-w-md p-6 shadow-xl text-center">
                             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <CheckCircle className="w-8 h-8 text-green-600" />
                             </div>
@@ -1310,7 +1310,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             {
                 showSALModal && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl relative">
+                        <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl relative">
                             <button
                                 onClick={() => setShowSALModal(false)}
                                 className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors"
@@ -1681,7 +1681,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             {
                 showSALSendModal && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl text-center">
+                        <div className="bg-white rounded-[2.5rem] w-full max-w-md p-6 shadow-xl text-center">
                             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Mail className="w-8 h-8 text-blue-600" />
                             </div>
@@ -1722,7 +1722,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
             {/* Contabilità Cantiere Modal */}
             {showAccountingModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl relative">
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl relative">
                         <button
                             onClick={() => {
                                 setShowAccountingModal(false);

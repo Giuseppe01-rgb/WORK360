@@ -577,7 +577,7 @@ export default function WorkerDashboard() {
                 {/* Geo Help Modal */}
                 {showGeoHelp && (
                     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+                        <div className="bg-white rounded-[2.5rem] p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200">
                             <div className="flex flex-col items-center text-center">
                                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                                     <MapPin className="w-8 h-8 text-red-600" />
@@ -624,7 +624,7 @@ export default function WorkerDashboard() {
 
                 {/* ATTENDANCE TAB */}
                 {activeTab === 'attendance' && (
-                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm">
                         <div className="mb-8">
                             <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 mb-2">
                                 <Clock className="w-6 h-6 text-slate-900" />
@@ -703,7 +703,7 @@ export default function WorkerDashboard() {
 
                 {/* MATERIALS TAB */}
                 {activeTab === 'materials' && (
-                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                                 <Package className="w-6 h-6" />
@@ -815,7 +815,7 @@ export default function WorkerDashboard() {
 
                 {/* NOTES TAB */}
                 {activeTab === 'notes' && (
-                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm">
                         <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <FileText className="w-6 h-6" />
                             Note di Lavoro
@@ -863,7 +863,7 @@ export default function WorkerDashboard() {
 
                 {/* PHOTOS TAB */}
                 {activeTab === 'photos' && (
-                    <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                    <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm">
                         <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <Camera className="w-6 h-6" />
                             Carica Foto
@@ -930,7 +930,7 @@ export default function WorkerDashboard() {
                 {activeTab === 'daily-report' && (
                     <div className="space-y-6">
                         {/* Activity List & Entry in Report Tab */}
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                        <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                                     <Package className="w-6 h-6 text-slate-900" />
@@ -1106,7 +1106,7 @@ export default function WorkerDashboard() {
                         </div>
 
                         {/* Report Text Area */}
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm">
+                        <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm">
                             <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                                 <FileText className="w-6 h-6 text-slate-900" />
                                 Note Aggiuntive Report
@@ -1168,7 +1168,7 @@ export default function WorkerDashboard() {
             {/* New Material Form Modal */}
             {showNewMaterialForm && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md p-6">
                         <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                             <Scan className="w-6 h-6 text-blue-600" />
                             Nuovo Materiale da Barcode
@@ -1229,7 +1229,7 @@ export default function WorkerDashboard() {
             {/* Material Confirmation Modal (Existing Material) */}
             {scannedMaterial && !showNewMaterialForm && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md p-6">
                         <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                             <Package className="w-6 h-6 text-green-600" />
                             Materiale Trovato
