@@ -142,3 +142,20 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* Fix for date/select/number inputs overflowing on iOS */
+input[type="date"],
+input[type="number"],
+select {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Ensure modals don't overflow */
+.overflow-y-auto {
+  overflow-x: hidden;
+}
