@@ -395,7 +395,7 @@ export default function Layout({ children, title, hideHeader = false }) {
                 <main className="flex-1 p-4 sm:p-8 lg:p-10 w-full max-w-[100vw] overflow-x-hidden bg-[#f1f5f9]">
                     {/* Top Bar (Desktop only - Contextual) */}
                     {!hideHeader && (
-                        <div className="hidden md:flex items-center justify-between mb-10">
+                        <div className="hidden md:flex items-center justify-between mb-10 sticky top-0 z-30 bg-[#f1f5f9] py-4 -mt-4 -mx-10 px-10">
                             <div>
                                 <h1 className="text-3xl font-black text-slate-900 tracking-tight">{title}</h1>
                                 <p className="text-sm text-slate-500 mt-1 font-medium">Benvenuto in WORK360</p>
