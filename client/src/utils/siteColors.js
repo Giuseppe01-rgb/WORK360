@@ -21,18 +21,26 @@ export const siteColorPalette = [
 
 /**
  * Get a consistent color for a site based on its ID or name
+ * Uses improved DJB2 hash for better distribution
  * @param {string|number} identifier - Site ID or name to generate color from
  * @returns {object} Color object with bg, text, iconBg, and name properties
  */
 export const getSiteColor = (identifier) => {
     if (!identifier) return siteColorPalette[0];
 
-    // Generate consistent hash from identifier
     const str = String(identifier);
-    let hash = 0;
+
+    // DJB2 hash algorithm - better distribution for sequential numbers
+    let hash = 5381;
     for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
     }
+
+    // Add extra mixing for numeric IDs
+    hash = Math.abs(hash);
+    hash = ((hash >> 16) ^ hash) * 0x45d9f3b;
+    hash = ((hash >> 16) ^ hash) * 0x45d9f3b;
+    hash = (hash >> 16) ^ hash;
 
     return siteColorPalette[Math.abs(hash) % siteColorPalette.length];
 };
