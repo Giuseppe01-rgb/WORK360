@@ -8,6 +8,7 @@ import BulkAttendanceModal from '../../components/owner/BulkAttendanceModal';
 import AttendanceExcelImportModal from '../../components/owner/AttendanceExcelImportModal';
 import { useToast } from '../../context/ToastContext';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
+import { getSiteColor } from '../../utils/siteColors';
 
 export default function AttendanceList() {
     const { showSuccess, showError } = useToast();
@@ -29,26 +30,7 @@ export default function AttendanceList() {
         status: 'all'
     });
 
-    // Generate consistent avatar color based on name
-    const avatarColors = [
-        { bg: 'bg-blue-500', text: 'text-white' },
-        { bg: 'bg-purple-500', text: 'text-white' },
-        { bg: 'bg-green-500', text: 'text-white' },
-        { bg: 'bg-orange-500', text: 'text-white' },
-        { bg: 'bg-pink-500', text: 'text-white' },
-        { bg: 'bg-cyan-500', text: 'text-white' },
-        { bg: 'bg-indigo-500', text: 'text-white' },
-        { bg: 'bg-teal-500', text: 'text-white' },
-    ];
-
-    const getAvatarColor = (name) => {
-        if (!name) return avatarColors[0];
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) {
-            hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        return avatarColors[Math.abs(hash) % avatarColors.length];
-    };
+    // Get site color - now based on site ID for consistency with site cards
 
     useEffect(() => {
         loadData();
@@ -381,10 +363,11 @@ export default function AttendanceList() {
                                 attendance?.user?.username ||
                                 'Utente';
                             const siteName = attendance?.site?.name || 'Cantiere N/S';
+                            const siteId = attendance?.site?.id;
                             const isCompleted = !!(attendance?.clockOut?.time);
                             const clockInTime = attendance?.clockIn?.time;
                             const clockOutTime = attendance?.clockOut?.time;
-                            const avatarColor = getAvatarColor(userName);
+                            const siteColor = getSiteColor(siteId);
                             const userInitial = userName.charAt(0).toUpperCase();
 
                             // Format time only (HH:MM)
@@ -415,7 +398,7 @@ export default function AttendanceList() {
                                     <div className="p-5 pb-4">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2.5">
-                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${avatarColor.bg} ${avatarColor.text} font-bold text-sm`}>
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${siteColor.bg} ${siteColor.text} font-bold text-sm`}>
                                                     {userInitial}
                                                 </div>
                                                 <div>
@@ -528,18 +511,19 @@ export default function AttendanceList() {
                                 const userName = att?.user?.firstName || att?.user?.username || 'Utente';
                                 const userLastName = att?.user?.lastName || '';
                                 const siteName = att?.site?.name || 'Cantiere N/S';
+                                const siteId = att?.site?.id;
                                 const isCompleted = !!(att?.clockOut?.time);
                                 const clockInTime = att?.clockIn?.time;
                                 const clockOutTime = att?.clockOut?.time;
                                 const clockInCoords = att?.clockIn?.location?.coordinates;
                                 const clockOutCoords = att?.clockOut?.location?.coordinates;
-                                const avatarColor = getAvatarColor(userName);
+                                const siteColor = getSiteColor(siteId);
 
                                 return (
                                     <>
                                         {/* User Info */}
                                         <div className="flex items-center gap-4 mb-6">
-                                            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${avatarColor.bg} ${avatarColor.text} font-bold text-2xl`}>
+                                            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${siteColor.bg} ${siteColor.text} font-bold text-2xl`}>
                                                 {userName.charAt(0).toUpperCase()}
                                             </div>
                                             <div>

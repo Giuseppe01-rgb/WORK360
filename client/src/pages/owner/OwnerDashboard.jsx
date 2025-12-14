@@ -6,6 +6,7 @@ import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI,
 import { Plus, Users, Clock, ArrowRight, X, ChevronRight, Package, MapPin, Calendar, Edit, Trash2, Eye, ArrowLeft, RefreshCw, Smartphone, Monitor, Search, Building2, CheckCircle, AlertCircle, FileText, Camera, Zap } from 'lucide-react';
 import PortalModal from '../../components/PortalModal';
 import SquircleCard from '../../components/SquircleCard';
+import { getSiteColor } from '../../utils/siteColors';
 
 const SiteDetails = ({ site, onBack, showConfirm }) => {
     const [activeTab, setActiveTab] = useState('dati');
@@ -1351,9 +1352,14 @@ export default function OwnerDashboard() {
                                         <div className="p-5">
                                             <div className="flex justify-between items-start mb-5">
                                                 <div className="flex gap-4">
-                                                    <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:bg-blue-50 transition-colors">
-                                                        <Building2 className="w-6 h-6" />
-                                                    </div>
+                                                    {(() => {
+                                                        const siteColor = getSiteColor(site.id);
+                                                        return (
+                                                            <div className={`flex-shrink-0 w-12 h-12 rounded-2xl ${siteColor.iconBg} flex items-center justify-center ${siteColor.text} group-hover:scale-105 transition-transform`}>
+                                                                <Building2 className="w-6 h-6" />
+                                                            </div>
+                                                        );
+                                                    })()}
                                                     <div>
                                                         <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 line-clamp-2 pr-2">
                                                             {site.name}
