@@ -1735,7 +1735,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         </button>
 
                         <div className="p-6 md:p-8">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2 pr-10">
                                 {editingAccountingId ? 'Modifica Contabilità' : 'Nuova Contabilità Cantiere'}
                             </h2>
                             <p className="text-slate-500 mb-8">Compila i dati per la contabilità del cantiere</p>
@@ -1774,12 +1774,12 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                 {/* Dates */}
                                 <section>
                                     <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Date</h3>
-                                    <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione</label>
                                             <input
                                                 type="date"
-                                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none text-base"
+                                                className="w-full max-w-full block box-border px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none text-base"
                                                 value={accountingFormData.issueDate}
                                                 onChange={(e) => setAccountingFormData(prev => ({ ...prev, issueDate: e.target.value }))}
                                             />
@@ -1788,7 +1788,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio</label>
                                             <input
                                                 type="date"
-                                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none text-base"
+                                                className="w-full max-w-full block box-border px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none text-base"
                                                 value={accountingFormData.periodStart}
                                                 onChange={(e) => setAccountingFormData(prev => ({ ...prev, periodStart: e.target.value }))}
                                             />
@@ -1797,7 +1797,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine</label>
                                             <input
                                                 type="date"
-                                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none text-base"
+                                                className="w-full max-w-full block box-border px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none text-base"
                                                 value={accountingFormData.periodEnd}
                                                 onChange={(e) => setAccountingFormData(prev => ({ ...prev, periodEnd: e.target.value }))}
                                             />
