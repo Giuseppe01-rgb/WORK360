@@ -306,8 +306,8 @@ export default function Layout({ children, title, hideHeader = false }) {
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col md:pl-[312px] min-h-screen transition-all duration-300">
                 <Tutorial />
-                {/* Mobile Header */}
-                <header className="md:hidden bg-white border-b border-slate-200 sticky top-0 z-40 px-4 h-16 flex items-center justify-between shadow-sm">
+                {/* Mobile Header - Fixed at top */}
+                <header className="md:hidden bg-white border-b border-slate-200 fixed top-0 left-0 right-0 z-40 px-4 h-16 flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
                         <img
                             src="/assets/logo-new.png"
@@ -392,7 +392,7 @@ export default function Layout({ children, title, hideHeader = false }) {
                 )}
 
                 {/* Main Content Area */}
-                <main className="flex-1 p-4 sm:p-8 lg:p-10 w-full max-w-[100vw] overflow-x-hidden bg-[#f1f5f9]">
+                <main className="flex-1 p-4 pt-20 md:pt-4 sm:p-8 lg:p-10 w-full max-w-[100vw] overflow-x-hidden bg-[#f1f5f9]">
                     {/* Top Bar (Desktop only - Contextual) */}
                     {!hideHeader && (
                         <div className="hidden md:flex items-center justify-between mb-10 sticky top-0 z-30 bg-[#f1f5f9] py-4 -mt-4 -mx-10 px-10">
