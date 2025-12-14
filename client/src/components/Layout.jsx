@@ -235,7 +235,7 @@ export default function Layout({ children, title, hideHeader = false }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#e2e8f0] flex font-sans">
+        <div className="min-h-screen bg-[#f1f5f9] flex font-sans">
             {/* Sidebar (Desktop) */}
             <aside className="hidden md:flex flex-col w-[280px] bg-white fixed h-full z-30 transition-all duration-300 shadow-xl shadow-slate-200/50 rounded-r-3xl my-4 ml-4 h-[calc(100vh-32px)]">
                 {/* Brand */}
@@ -279,7 +279,7 @@ export default function Layout({ children, title, hideHeader = false }) {
 
                 {/* User Profile (Bottom Sidebar) */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-white rounded-b-3xl z-20">
-                    <div className="bg-[#e2e8f0] p-4 rounded-2xl flex items-center gap-3 border border-slate-100 hover:border-purple-100 transition-colors group cursor-pointer">
+                    <div className="bg-[#f1f5f9] p-4 rounded-2xl flex items-center gap-3 border border-slate-100 hover:border-purple-100 transition-colors group cursor-pointer">
                         <div className="w-10 h-10 bg-[#F3E8FF] rounded-full flex items-center justify-center text-[#8B5CF6] font-bold text-sm border-2 border-white shadow-sm">
                             {user?.firstName?.charAt(0) || 'U'}
                             {user?.lastName?.charAt(0) || 'D'}
@@ -392,7 +392,7 @@ export default function Layout({ children, title, hideHeader = false }) {
                 )}
 
                 {/* Main Content Area */}
-                <main className="flex-1 p-4 sm:p-8 lg:p-10 w-full max-w-[100vw] overflow-x-hidden bg-[#e2e8f0]">
+                <main className="flex-1 p-4 sm:p-8 lg:p-10 w-full max-w-[100vw] overflow-x-hidden bg-[#f1f5f9]">
                     {/* Top Bar (Desktop only - Contextual) */}
                     {!hideHeader && (
                         <div className="hidden md:flex items-center justify-between mb-10">
