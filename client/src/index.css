@@ -52,8 +52,8 @@
 /* Removed failing @apply rules */
 @layer base {
   body {
-    background-color: #f1f5f9;
-    /* slate-100 - darker for better card contrast */
+    background-color: #e2e8f0;
+    /* slate-200 - darker for better card contrast */
     color: #0f172a;
     /* slate-900 */
   }
