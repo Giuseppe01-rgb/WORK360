@@ -224,13 +224,13 @@ export default function EmployeeManagement() {
                         {employees.map(employee => (
                             <div
                                 key={employee.id}
-                                className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md"
+                                className="bg-white rounded-[2.5rem] p-5 shadow-sm border border-slate-100 transition-all hover:shadow-md"
                             >
                                 {/* Header: Avatar + Name + Role */}
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl font-bold ${employee.role === 'owner'
-                                            ? 'bg-purple-100 text-purple-600'
-                                            : 'bg-blue-100 text-blue-600'
+                                        ? 'bg-purple-100 text-purple-600'
+                                        : 'bg-blue-100 text-blue-600'
                                         }`}>
                                         {employee.firstName?.charAt(0)}{employee.lastName?.charAt(0)}
                                     </div>
@@ -240,8 +240,8 @@ export default function EmployeeManagement() {
                                                 {employee.firstName} {employee.lastName}
                                             </h3>
                                             <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${employee.role === 'owner'
-                                                    ? 'bg-purple-100 text-purple-700'
-                                                    : 'bg-blue-100 text-blue-700'
+                                                ? 'bg-purple-100 text-purple-700'
+                                                : 'bg-blue-100 text-blue-700'
                                                 }`}>
                                                 {employee.role === 'owner' ? 'Titolare' : 'Operaio'}
                                             </span>
