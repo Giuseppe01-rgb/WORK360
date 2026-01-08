@@ -22,6 +22,8 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     const [showMaterialsModal, setShowMaterialsModal] = useState(false);
     const [showEmployeesModal, setShowEmployeesModal] = useState(false);
     const [materialUsages, setMaterialUsages] = useState([]);
+    const [selectedMaterial, setSelectedMaterial] = useState(null);
+    const [editingMaterial, setEditingMaterial] = useState(null);
     const [loadingMaterials, setLoadingMaterials] = useState(false);
     const [recalculating, setRecalculating] = useState(false);
 
@@ -63,6 +65,20 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             setReport(rep.data);
         } catch (error) {
             console.error('Error deleting material usage:', error);
+        }
+    };
+
+    const handleSaveMaterial = async (usageId, updatedData) => {
+        try {
+            await materialUsageAPI.update(usageId, updatedData);
+            await loadMaterialUsages();
+            // Refresh report to update totals
+            const rep = await analyticsAPI.getSiteReport(site.id);
+            setReport(rep.data);
+            setEditingMaterial(null);
+            setSelectedMaterial(null);
+        } catch (error) {
+            console.error('Error updating material usage:', error);
         }
     };
 
@@ -1007,12 +1023,12 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {/* Materials Full-Screen View */}
             {
                 showMaterialsModal && (
-                    <PortalModal onClose={() => setShowMaterialsModal(false)}>
+                    <PortalModal onClose={() => { setShowMaterialsModal(false); setSelectedMaterial(null); setEditingMaterial(null); }}>
                         <div className="fixed inset-0 h-[100dvh] w-screen bg-white z-[9999] flex flex-col overscroll-none touch-none">
                             {/* Header */}
                             <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white pt-safe-header">
                                 <button
-                                    onClick={() => setShowMaterialsModal(false)}
+                                    onClick={() => { setShowMaterialsModal(false); setSelectedMaterial(null); setEditingMaterial(null); }}
                                     className="flex items-center gap-2 text-purple-600 font-semibold"
                                 >
                                     <ArrowLeft className="w-5 h-5" />
@@ -1028,40 +1044,200 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     <div>
                                         <p className="text-slate-500 text-sm">Quantità totale</p>
                                         <p className="text-3xl font-bold text-slate-900">
-                                            {report?.materials?.reduce((acc, curr) => acc + curr.totalQuantity, 0) || 0}
+                                            {materialUsages.reduce((acc, curr) => acc + (curr.numeroConfezioni || 0), 0)}
                                             <span className="text-xl text-slate-400 ml-1">pz</span>
                                         </p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-slate-500 text-sm">Costo totale</p>
                                         <p className="text-3xl font-bold text-green-600">
-                                            {report?.materials?.reduce((acc, curr) => acc + (curr.totalCost || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                            {materialUsages.reduce((acc, curr) => {
+                                                const material = curr.materialMaster || curr.material;
+                                                const price = parseFloat(material?.prezzo) || 0;
+                                                return acc + (price * (curr.numeroConfezioni || 0));
+                                            }, 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                             <span className="text-xl text-green-400 ml-1">€</span>
                                         </p>
                                     </div>
                                 </div>
-                                <p className="text-slate-400 text-sm mt-2">{report?.materials?.length || 0} tipologie</p>
+                                <p className="text-slate-400 text-sm mt-2">{materialUsages.length} utilizzi</p>
                             </div>
 
                             {/* Materials List */}
                             <div className="flex-1 overflow-y-auto pb-safe-bottom">
-                                {report?.materials?.map((mat, index) => (
-                                    <div key={mat.id} className={`px-4 py-4 flex items-center justify-between ${index !== (report?.materials?.length || 0) - 1 ? 'border-b border-slate-100' : ''}`}>
-                                        <div className="flex-1">
-                                            <p className="font-semibold text-slate-900">{mat.name}</p>
-                                            <p className="text-sm text-slate-400">
-                                                {mat.totalQuantity} {mat.unit} × €{mat.unitPrice?.toFixed(2) || '0'}
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-lg font-bold text-green-600">
-                                                {(mat.totalCost || 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
-                                            </p>
-                                        </div>
+                                {loadingMaterials ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <RefreshCw className="w-8 h-8 text-slate-300 animate-spin" />
                                     </div>
-                                ))}
+                                ) : materialUsages.length > 0 ? (
+                                    materialUsages.map((usage, index) => {
+                                        const material = usage.materialMaster || usage.material;
+                                        const materialName = material?.nome_prodotto || material?.display_name || 'Materiale';
+                                        const unitPrice = parseFloat(material?.prezzo) || 0;
+                                        const totalCost = unitPrice * (usage.numeroConfezioni || 0);
+
+                                        return (
+                                            <div
+                                                key={usage.id}
+                                                onClick={() => setSelectedMaterial(usage)}
+                                                className={`px-4 py-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors ${index !== materialUsages.length - 1 ? 'border-b border-slate-100' : ''}`}
+                                            >
+                                                <div className="flex-1">
+                                                    <p className="font-semibold text-slate-900">{materialName}</p>
+                                                    <p className="text-sm text-slate-400">
+                                                        {usage.numeroConfezioni} {material?.um || 'conf'} × €{unitPrice.toFixed(2)}
+                                                    </p>
+                                                    <p className="text-xs text-slate-300 mt-1">
+                                                        {new Date(usage.dataOra).toLocaleDateString('it-IT')} • {usage.user?.firstName} {usage.user?.lastName}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-lg font-bold text-green-600">
+                                                        {totalCost.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €
+                                                    </p>
+                                                    <ChevronRight className="w-5 h-5 text-slate-300" />
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-12">
+                                        <Package className="w-12 h-12 text-slate-300 mb-3" />
+                                        <p className="text-slate-400">Nessun materiale registrato</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
+
+                        {/* Material Detail Modal */}
+                        {selectedMaterial && !editingMaterial && (
+                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center z-[10000]" onClick={() => setSelectedMaterial(null)}>
+                                <div className="bg-white rounded-t-[2.5rem] w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
+                                    <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-2"></div>
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-bold text-slate-900 mb-4">
+                                            {(selectedMaterial.materialMaster || selectedMaterial.material)?.nome_prodotto || 'Materiale'}
+                                        </h3>
+
+                                        <div className="grid grid-cols-2 gap-4 mb-6">
+                                            <div className="bg-slate-50 p-4 rounded-2xl">
+                                                <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Quantità</p>
+                                                <p className="text-2xl font-bold text-slate-900">
+                                                    {selectedMaterial.numeroConfezioni}
+                                                    <span className="text-sm text-slate-400 ml-1">
+                                                        {(selectedMaterial.materialMaster || selectedMaterial.material)?.um || 'conf'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div className="bg-slate-50 p-4 rounded-2xl">
+                                                <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Prezzo Unit.</p>
+                                                <p className="text-2xl font-bold text-slate-900">
+                                                    €{(parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0).toFixed(2)}
+                                                </p>
+                                            </div>
+                                            <div className="bg-green-50 p-4 rounded-2xl col-span-2">
+                                                <p className="text-xs text-green-600 uppercase tracking-wide mb-1">Totale</p>
+                                                <p className="text-3xl font-bold text-green-600">
+                                                    €{((parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0) * selectedMaterial.numeroConfezioni).toFixed(2)}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-sm text-slate-500 mb-6">
+                                            <p>Registrato il {new Date(selectedMaterial.dataOra).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                                            <p>da {selectedMaterial.user?.firstName} {selectedMaterial.user?.lastName}</p>
+                                            {selectedMaterial.note && <p className="mt-2 italic">"{selectedMaterial.note}"</p>}
+                                        </div>
+
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setEditingMaterial(selectedMaterial)}
+                                                className="flex-1 py-4 px-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <Edit className="w-5 h-5" />
+                                                Modifica
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    handleDeleteMaterialUsage(selectedMaterial.id);
+                                                    setSelectedMaterial(null);
+                                                }}
+                                                className="py-4 px-6 bg-red-50 text-red-600 font-bold rounded-2xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Material Edit Modal */}
+                        {editingMaterial && (
+                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10001] p-4" onClick={() => setEditingMaterial(null)}>
+                                <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+                                    <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                                        <h3 className="text-lg font-bold text-slate-900">Modifica Materiale</h3>
+                                        <button onClick={() => setEditingMaterial(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                                            <X className="w-5 h-5 text-slate-400" />
+                                        </button>
+                                    </div>
+                                    <form onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const formData = new FormData(e.target);
+                                        handleSaveMaterial(editingMaterial.id, {
+                                            numeroConfezioni: parseInt(formData.get('quantity')),
+                                            note: formData.get('note')
+                                        });
+                                    }} className="p-6 space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Materiale</label>
+                                            <input
+                                                type="text"
+                                                value={(editingMaterial.materialMaster || editingMaterial.material)?.nome_prodotto || 'Materiale'}
+                                                disabled
+                                                className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità</label>
+                                            <input
+                                                type="number"
+                                                name="quantity"
+                                                defaultValue={editingMaterial.numeroConfezioni}
+                                                min="1"
+                                                required
+                                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Note</label>
+                                            <textarea
+                                                name="note"
+                                                defaultValue={editingMaterial.note || ''}
+                                                rows="2"
+                                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+                                            />
+                                        </div>
+                                        <div className="flex gap-3 pt-4">
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingMaterial(null)}
+                                                className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                                            >
+                                                Annulla
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all"
+                                            >
+                                                Salva
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
                     </PortalModal>
                 )
             }
