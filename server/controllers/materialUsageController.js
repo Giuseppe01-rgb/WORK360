@@ -205,6 +205,66 @@ const getUsageHistory = async (req, res) => {
     }
 };
 
+// Update material usage
+const updateUsage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { materialId, numeroConfezioni, note } = req.body;
+
+        const companyId = getCompanyId(req);
+        if (!companyId) {
+            return res.status(400).json({ message: 'Utente non associato ad alcuna azienda' });
+        }
+
+        const usage = await MaterialUsage.findOne({
+            where: {
+                id,
+                companyId
+            }
+        });
+
+        if (!usage) {
+            return res.status(404).json({ message: 'Utilizzo materiale non trovato' });
+        }
+
+        // Check authorization - only owner can edit any, workers can only edit their own
+        if (usage.userId !== getUserId(req) && req.user.role !== 'owner') {
+            return res.status(403).json({ message: 'Non autorizzato a modificare questo record' });
+        }
+
+        // Build update object
+        const updateData = {};
+        if (materialId !== undefined) {
+            // Verify new material exists
+            const material = await MaterialMaster.findOne({
+                where: { id: materialId, companyId }
+            });
+            if (!material) {
+                return res.status(404).json({ message: 'Materiale non trovato nel catalogo' });
+            }
+            updateData.materialId = materialId;
+        }
+        if (numeroConfezioni !== undefined) updateData.numeroConfezioni = numeroConfezioni;
+        if (note !== undefined) updateData.note = note;
+
+        await usage.update(updateData);
+
+        // Reload with associations
+        const updatedUsage = await MaterialUsage.findByPk(usage.id, {
+            include: [
+                { model: MaterialMaster, as: 'materialMaster' },
+                { model: User, as: 'user', attributes: ['firstName', 'lastName'] },
+                { model: ConstructionSite, as: 'site', attributes: ['name'] }
+            ]
+        });
+
+        res.json(updatedUsage);
+    } catch (error) {
+        console.error('Update Usage Error:', error);
+        res.status(500).json({ message: 'Errore nella modifica', error: error.message });
+    }
+};
+
 // Delete material usage
 const deleteUsage = async (req, res) => {
     try {
@@ -245,5 +305,6 @@ module.exports = {
     getTodayUsage,
     getMostUsedBySite,
     getUsageHistory,
+    updateUsage,
     deleteUsage
 };

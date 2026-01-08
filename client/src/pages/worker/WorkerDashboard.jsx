@@ -202,7 +202,15 @@ export default function WorkerDashboard() {
         showInfo('⏳ Sto registrando l\'entrata...');
 
         try {
-            const location = await getLocation();
+            // Try to get location, but proceed even if it fails
+            let location = { latitude: null, longitude: null };
+            try {
+                location = await getLocation();
+            } catch (geoError) {
+                console.warn('Geolocation failed, proceeding without location:', geoError.message);
+                showInfo('⚠️ Posizione non rilevata, timbratura in corso...');
+            }
+
             const response = await attendanceAPI.clockIn({
                 siteId: selectedSite,
                 ...location
@@ -225,7 +233,15 @@ export default function WorkerDashboard() {
         showInfo('⏳ Sto registrando l\'uscita...');
 
         try {
-            const location = await getLocation();
+            // Try to get location, but proceed even if it fails
+            let location = { latitude: null, longitude: null };
+            try {
+                location = await getLocation();
+            } catch (geoError) {
+                console.warn('Geolocation failed, proceeding without location:', geoError.message);
+                showInfo('⚠️ Posizione non rilevata, timbratura in corso...');
+            }
+
             await attendanceAPI.clockOut({
                 attendanceId: activeAttendance.id,
                 ...location

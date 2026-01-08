@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
-import { siteAPI, analyticsAPI, workActivityAPI, noteAPI, economiaAPI } from '../../utils/api';
+import { siteAPI, analyticsAPI, workActivityAPI, noteAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
     Edit, Trash2, Plus, X, ArrowLeft, CheckCircle, AlertCircle, Search,
@@ -15,6 +15,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     const [employeeHours, setEmployeeHours] = useState([]);
     const [notes, setNotes] = useState([]);
     const [economie, setEconomie] = useState([]);
+    const [materialUsages, setMaterialUsages] = useState([]);
+    const [editingMaterial, setEditingMaterial] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState('data');
     const [selectedReport, setSelectedReport] = useState(null);
@@ -61,19 +63,54 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
         }
     };
 
+    const handleDeleteMaterial = async (usageId) => {
+        const confirmed = await showConfirm({
+            title: 'Elimina materiale',
+            message: 'Sei sicuro di voler eliminare questo utilizzo materiale?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
+        try {
+            await materialUsageAPI.delete(usageId);
+            setMaterialUsages(prev => prev.filter(m => m.id !== usageId));
+            // Refresh report data for updated totals
+            const rep = await analyticsAPI.getSiteReport(site.id);
+            setReport(rep.data);
+        } catch (error) {
+            console.error('Error deleting material usage:', error);
+        }
+    };
+
+    const handleSaveMaterial = async (usageId, updatedData) => {
+        try {
+            await materialUsageAPI.update(usageId, updatedData);
+            const materialsData = await materialUsageAPI.getBySite(site.id);
+            setMaterialUsages(materialsData.data || []);
+            // Refresh report data for updated totals
+            const rep = await analyticsAPI.getSiteReport(site.id);
+            setReport(rep.data);
+            setEditingMaterial(null);
+        } catch (error) {
+            console.error('Error updating material usage:', error);
+        }
+    };
+
     useEffect(() => {
         const loadDetails = async () => {
             try {
-                const [rep, hours, notesData, economieData] = await Promise.all([
+                const [rep, hours, notesData, economieData, materialsData] = await Promise.all([
                     analyticsAPI.getSiteReport(site.id),
                     analyticsAPI.getHoursPerEmployee({ siteId: site.id }),
                     noteAPI.getAll({ siteId: site.id }),
-                    economiaAPI.getBySite(site.id)
+                    economiaAPI.getBySite(site.id),
+                    materialUsageAPI.getBySite(site.id)
                 ]);
                 setReport(rep.data);
                 setEmployeeHours(hours.data);
                 setNotes(notesData.data);
                 setEconomie(economieData.data);
+                setMaterialUsages(materialsData.data || []);
             } catch (err) {
                 console.error("Error loading site details:", err);
             } finally {
@@ -383,14 +420,42 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                 <Package className="w-5 h-5 text-slate-400" />
                                 Materiali Utilizzati
                             </h3>
-                            {report?.materials?.length > 0 ? (
-                                <div className="space-y-3 overflow-x-auto">
-                                    {report.materials.map((mat) => (
-                                        <div key={mat.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg min-w-[200px]">
-                                            <span className="font-medium text-slate-700 truncate mr-2">{mat.id}</span>
-                                            <span className="font-bold text-slate-900 whitespace-nowrap">{mat.totalQuantity} {mat.unit}</span>
-                                        </div>
-                                    ))}
+                            {materialUsages.length > 0 ? (
+                                <div className="space-y-3 overflow-x-auto max-h-[400px] overflow-y-auto">
+                                    {materialUsages.map((usage) => {
+                                        const material = usage.materialMaster || usage.material;
+                                        const materialName = material?.nome_prodotto || material?.display_name || 'Materiale';
+                                        const totalCost = material?.prezzo ? (usage.numeroConfezioni * parseFloat(material.prezzo)).toFixed(2) : null;
+
+                                        return (
+                                            <div key={usage.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg min-w-[200px] group">
+                                                <div className="flex-1 min-w-0">
+                                                    <span className="font-medium text-slate-700 truncate block">{materialName}</span>
+                                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                                        <span>{usage.numeroConfezioni} conf.</span>
+                                                        {totalCost && <span className="text-green-600 font-semibold">€{totalCost}</span>}
+                                                        <span>• {new Date(usage.dataOra).toLocaleDateString('it-IT')}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => setEditingMaterial(usage)}
+                                                        className="p-1.5 hover:bg-blue-100 rounded-lg text-blue-500 hover:text-blue-700 transition-colors"
+                                                        title="Modifica"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteMaterial(usage.id)}
+                                                        className="p-1.5 hover:bg-red-100 rounded-lg text-red-400 hover:text-red-600 transition-colors"
+                                                        title="Elimina"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <p className="text-slate-400 italic">Nessun materiale registrato.</p>
@@ -591,6 +656,73 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             {/* Report Modal */}
             {selectedReport && (
                 <ReportModal report={selectedReport} onClose={() => setSelectedReport(null)} />
+            )}
+
+            {/* Material Edit Modal */}
+            {editingMaterial && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={() => setEditingMaterial(null)}>
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl relative animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                            <h3 className="text-lg font-bold text-slate-900">Modifica Materiale</h3>
+                            <button onClick={() => setEditingMaterial(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                                <X className="w-5 h-5 text-slate-400" />
+                            </button>
+                        </div>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const formData = new FormData(e.target);
+                            handleSaveMaterial(editingMaterial.id, {
+                                numeroConfezioni: parseInt(formData.get('quantity')),
+                                note: formData.get('note')
+                            });
+                        }} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Materiale</label>
+                                <input
+                                    type="text"
+                                    value={(editingMaterial.materialMaster || editingMaterial.material)?.nome_prodotto || 'Materiale'}
+                                    disabled
+                                    className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità (confezioni)</label>
+                                <input
+                                    type="number"
+                                    name="quantity"
+                                    defaultValue={editingMaterial.numeroConfezioni}
+                                    min="1"
+                                    required
+                                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Note</label>
+                                <textarea
+                                    name="note"
+                                    defaultValue={editingMaterial.note || ''}
+                                    rows="2"
+                                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+                                />
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingMaterial(null)}
+                                    className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                                >
+                                    Annulla
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all"
+                                >
+                                    Salva
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
         </div>
     );

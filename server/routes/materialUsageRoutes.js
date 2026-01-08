@@ -7,6 +7,7 @@ const {
     getTodayUsage,
     getMostUsedBySite,
     getUsageHistory,
+    updateUsage,
     deleteUsage
 } = require('../controllers/materialUsageController');
 
@@ -24,6 +25,9 @@ router.post('/', validateMaterialUsage, recordUsage);
 
 // Get usage history
 router.get('/', getUsageHistory);
+
+// Update usage
+router.put('/:id', updateUsage);
 
 // Delete usage
 router.delete('/:id', deleteUsage);
