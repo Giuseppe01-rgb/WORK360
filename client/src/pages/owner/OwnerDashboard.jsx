@@ -1053,7 +1053,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <p className="text-3xl font-bold text-green-600">
                                             {materialUsages.reduce((acc, curr) => {
                                                 const material = curr.materialMaster || curr.material;
-                                                const price = parseFloat(material?.prezzo) || 0;
+                                                const price = parseFloat(material?.price) || parseFloat(material?.prezzo) || 0;
                                                 return acc + (price * (curr.numeroConfezioni || 0));
                                             }, 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                             <span className="text-xl text-green-400 ml-1">€</span>
@@ -1072,8 +1072,8 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 ) : materialUsages.length > 0 ? (
                                     materialUsages.map((usage, index) => {
                                         const material = usage.materialMaster || usage.material;
-                                        const materialName = material?.nome_prodotto || material?.display_name || 'Materiale';
-                                        const unitPrice = parseFloat(material?.prezzo) || 0;
+                                        const materialName = material?.displayName || material?.nome_prodotto || 'Materiale';
+                                        const unitPrice = parseFloat(material?.price) || parseFloat(material?.prezzo) || 0;
                                         const totalCost = unitPrice * (usage.numeroConfezioni || 0);
 
                                         return (
@@ -1085,7 +1085,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                                 <div className="flex-1">
                                                     <p className="font-semibold text-slate-900">{materialName}</p>
                                                     <p className="text-sm text-slate-400">
-                                                        {usage.numeroConfezioni} {material?.um || 'conf'} × €{unitPrice.toFixed(2)}
+                                                        {usage.numeroConfezioni} {material?.unit || 'conf'} × €{unitPrice.toFixed(2)}
                                                     </p>
                                                     <p className="text-xs text-slate-300 mt-1">
                                                         {new Date(usage.dataOra).toLocaleDateString('it-IT')} • {usage.user?.firstName} {usage.user?.lastName}
@@ -1113,10 +1113,18 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         {selectedMaterial && !editingMaterial && (
                             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center z-[10000]" onClick={() => setSelectedMaterial(null)}>
                                 <div className="bg-white rounded-t-[2.5rem] w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
-                                    <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-2"></div>
-                                    <div className="p-6">
+                                    <div className="flex items-center justify-between px-6 pt-4 pb-2">
+                                        <div className="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+                                        <button
+                                            onClick={() => setSelectedMaterial(null)}
+                                            className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                                        >
+                                            <X className="w-5 h-5 text-slate-400" />
+                                        </button>
+                                    </div>
+                                    <div className="p-6 pt-2">
                                         <h3 className="text-xl font-bold text-slate-900 mb-4">
-                                            {(selectedMaterial.materialMaster || selectedMaterial.material)?.nome_prodotto || 'Materiale'}
+                                            {(selectedMaterial.materialMaster || selectedMaterial.material)?.displayName || (selectedMaterial.materialMaster || selectedMaterial.material)?.nome_prodotto || 'Materiale'}
                                         </h3>
 
                                         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -1125,20 +1133,20 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                                 <p className="text-2xl font-bold text-slate-900">
                                                     {selectedMaterial.numeroConfezioni}
                                                     <span className="text-sm text-slate-400 ml-1">
-                                                        {(selectedMaterial.materialMaster || selectedMaterial.material)?.um || 'conf'}
+                                                        {(selectedMaterial.materialMaster || selectedMaterial.material)?.unit || 'conf'}
                                                     </span>
                                                 </p>
                                             </div>
                                             <div className="bg-slate-50 p-4 rounded-2xl">
                                                 <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Prezzo Unit.</p>
                                                 <p className="text-2xl font-bold text-slate-900">
-                                                    €{(parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0).toFixed(2)}
+                                                    €{(parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.price) || parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0).toFixed(2)}
                                                 </p>
                                             </div>
                                             <div className="bg-green-50 p-4 rounded-2xl col-span-2">
                                                 <p className="text-xs text-green-600 uppercase tracking-wide mb-1">Totale</p>
                                                 <p className="text-3xl font-bold text-green-600">
-                                                    €{((parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0) * selectedMaterial.numeroConfezioni).toFixed(2)}
+                                                    €{((parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.price) || parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0) * selectedMaterial.numeroConfezioni).toFixed(2)}
                                                 </p>
                                             </div>
                                         </div>
@@ -1194,7 +1202,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Materiale</label>
                                             <input
                                                 type="text"
-                                                value={(editingMaterial.materialMaster || editingMaterial.material)?.nome_prodotto || 'Materiale'}
+                                                value={(editingMaterial.materialMaster || editingMaterial.material)?.displayName || (editingMaterial.materialMaster || editingMaterial.material)?.nome_prodotto || 'Materiale'}
                                                 disabled
                                                 className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"
                                             />
