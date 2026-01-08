@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
-import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
+import { siteAPI, analyticsAPI, noteAPI, photoAPI, workActivityAPI, economiaAPI, materialUsageAPI, colouraMaterialAPI } from '../../utils/api';
 import { Plus, Users, Clock, ArrowRight, X, ChevronRight, Package, MapPin, Calendar, Edit, Trash2, Eye, ArrowLeft, RefreshCw, Smartphone, Monitor, Search, Building2, CheckCircle, AlertCircle, FileText, Camera, Zap } from 'lucide-react';
 import PortalModal from '../../components/PortalModal';
 import SquircleCard from '../../components/SquircleCard';
@@ -24,6 +24,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     const [materialUsages, setMaterialUsages] = useState([]);
     const [selectedMaterial, setSelectedMaterial] = useState(null);
     const [editingMaterial, setEditingMaterial] = useState(null);
+    const [catalogMaterials, setCatalogMaterials] = useState([]);
+    const [catalogSearch, setCatalogSearch] = useState('');
+    const [showMaterialSelector, setShowMaterialSelector] = useState(false);
+    const [newSelectedMaterial, setNewSelectedMaterial] = useState(null);
     const [loadingMaterials, setLoadingMaterials] = useState(false);
     const [recalculating, setRecalculating] = useState(false);
 
@@ -47,6 +51,16 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     const handleOpenMaterialsModal = () => {
         setShowMaterialsModal(true);
         loadMaterialUsages();
+    };
+
+    const loadCatalogMaterials = async () => {
+        try {
+            const response = await colouraMaterialAPI.getAll();
+            setCatalogMaterials(Array.isArray(response.data) ? response.data : []);
+        } catch (error) {
+            console.error('Error loading catalog:', error);
+            setCatalogMaterials([]);
+        }
     };
 
     const handleDeleteMaterialUsage = async (usageId) => {
@@ -77,6 +91,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             setReport(rep.data);
             setEditingMaterial(null);
             setSelectedMaterial(null);
+            setNewSelectedMaterial(null);
+            setShowMaterialSelector(false);
+            setCatalogSearch('');
         } catch (error) {
             console.error('Error updating material usage:', error);
         }
@@ -1182,30 +1199,110 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
                         {/* Material Edit Modal */}
                         {editingMaterial && (
-                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10001] p-4" onClick={() => setEditingMaterial(null)}>
-                                <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
-                                    <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10001] p-4" onClick={() => { setEditingMaterial(null); setShowMaterialSelector(false); setNewSelectedMaterial(null); setCatalogSearch(''); }}>
+                                <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                                    <div className="p-6 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
                                         <h3 className="text-lg font-bold text-slate-900">Modifica Materiale</h3>
-                                        <button onClick={() => setEditingMaterial(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                                        <button onClick={() => { setEditingMaterial(null); setShowMaterialSelector(false); setNewSelectedMaterial(null); setCatalogSearch(''); }} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                                             <X className="w-5 h-5 text-slate-400" />
                                         </button>
                                     </div>
                                     <form onSubmit={(e) => {
                                         e.preventDefault();
                                         const formData = new FormData(e.target);
-                                        handleSaveMaterial(editingMaterial.id, {
+                                        const updateData = {
                                             numeroConfezioni: parseInt(formData.get('quantity')),
                                             note: formData.get('note')
-                                        });
-                                    }} className="p-6 space-y-4">
+                                        };
+                                        // Include new materialId if user selected a different material
+                                        if (newSelectedMaterial) {
+                                            updateData.materialId = newSelectedMaterial.id;
+                                        }
+                                        handleSaveMaterial(editingMaterial.id, updateData);
+                                    }} className="p-6 space-y-4 overflow-y-auto flex-1">
+                                        {/* Material Selector Section */}
                                         <div>
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Materiale</label>
-                                            <input
-                                                type="text"
-                                                value={(editingMaterial.materialMaster || editingMaterial.material)?.displayName || (editingMaterial.materialMaster || editingMaterial.material)?.nome_prodotto || 'Materiale'}
-                                                disabled
-                                                className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"
-                                            />
+                                            {showMaterialSelector ? (
+                                                <div className="space-y-2">
+                                                    {/* Search Input */}
+                                                    <div className="relative">
+                                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                                        <input
+                                                            type="text"
+                                                            value={catalogSearch}
+                                                            onChange={(e) => setCatalogSearch(e.target.value)}
+                                                            placeholder="Cerca materiale..."
+                                                            className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                                            autoFocus
+                                                        />
+                                                    </div>
+                                                    {/* Material List */}
+                                                    <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-xl">
+                                                        {catalogMaterials
+                                                            .filter(m => {
+                                                                const query = catalogSearch.toLowerCase();
+                                                                return m.nome_prodotto?.toLowerCase().includes(query) ||
+                                                                    m.marca?.toLowerCase().includes(query) ||
+                                                                    m.categoria?.toLowerCase().includes(query);
+                                                            })
+                                                            .slice(0, 20)
+                                                            .map(material => (
+                                                                <button
+                                                                    key={material.id}
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setNewSelectedMaterial(material);
+                                                                        setShowMaterialSelector(false);
+                                                                        setCatalogSearch('');
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-slate-100 last:border-b-0 transition-colors"
+                                                                >
+                                                                    <p className="font-medium text-slate-900">{material.nome_prodotto}</p>
+                                                                    <p className="text-xs text-slate-400">{material.marca} • {material.categoria}</p>
+                                                                </button>
+                                                            ))}
+                                                        {catalogMaterials.filter(m => {
+                                                            const query = catalogSearch.toLowerCase();
+                                                            return m.nome_prodotto?.toLowerCase().includes(query) ||
+                                                                m.marca?.toLowerCase().includes(query);
+                                                        }).length === 0 && (
+                                                                <p className="text-center py-4 text-slate-400 text-sm">Nessun materiale trovato</p>
+                                                            )}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setShowMaterialSelector(false); setCatalogSearch(''); }}
+                                                        className="w-full py-2 text-sm text-slate-500 hover:text-slate-700"
+                                                    >
+                                                        Annulla
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-2">
+                                                    <div className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                                        <p className="font-medium text-slate-900">
+                                                            {newSelectedMaterial?.nome_prodotto || (editingMaterial.materialMaster || editingMaterial.material)?.displayName || (editingMaterial.materialMaster || editingMaterial.material)?.nome_prodotto || 'Materiale'}
+                                                        </p>
+                                                        {(newSelectedMaterial || editingMaterial.materialMaster || editingMaterial.material) && (
+                                                            <p className="text-xs text-slate-400">
+                                                                {newSelectedMaterial?.marca || (editingMaterial.materialMaster || editingMaterial.material)?.family || ''}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            loadCatalogMaterials();
+                                                            setShowMaterialSelector(true);
+                                                        }}
+                                                        className="px-4 py-3 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors flex items-center gap-1"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                        Cambia
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità</label>
@@ -1230,7 +1327,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <div className="flex gap-3 pt-4">
                                             <button
                                                 type="button"
-                                                onClick={() => setEditingMaterial(null)}
+                                                onClick={() => { setEditingMaterial(null); setShowMaterialSelector(false); setNewSelectedMaterial(null); setCatalogSearch(''); }}
                                                 className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
                                             >
                                                 Annulla
