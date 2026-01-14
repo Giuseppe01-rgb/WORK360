@@ -231,7 +231,10 @@ export const economiaAPI = {
     create: (data) => api.post('/economia', data),
     createBulk: (data) => api.post('/economia/bulk', data), // Quick bulk entry
     getBySite: (siteId) => api.get(`/economia/site/${siteId}`),
+    getMyEconomie: (params) => api.get('/economia/my', { params }),
+    update: (id, data) => api.put(`/economia/${id}`, data),
     delete: (id) => api.delete(`/economia/${id}`),
+    deleteMyEconomia: (id) => api.delete(`/economia/my/${id}`),
 };
 
 // Company

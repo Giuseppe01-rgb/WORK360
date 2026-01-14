@@ -2,17 +2,22 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { siteAPI, economiaAPI } from '../../utils/api';
 import Layout from '../../components/Layout';
-import { Plus, Minus, Clock } from 'lucide-react';
+import { Plus, Minus, Clock, Trash2, Pencil, X, Loader2 } from 'lucide-react';
 
 const EconomiaForm = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const { showSuccess, showError } = useToast();
+    const { showSuccess, showError, showInfo } = useToast();
+    const { showConfirm } = useConfirmModal();
 
     const [sites, setSites] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingEconomie, setLoadingEconomie] = useState(true);
+    const [myEconomie, setMyEconomie] = useState([]);
+    const [editingEconomia, setEditingEconomia] = useState(null);
     const [formData, setFormData] = useState({
         site: '',
         hours: 1,
@@ -21,6 +26,7 @@ const EconomiaForm = () => {
 
     useEffect(() => {
         loadSites();
+        loadMyEconomie();
     }, []);
 
     const loadSites = async () => {
@@ -33,6 +39,19 @@ const EconomiaForm = () => {
         } catch (error) {
             console.error('Error loading sites:', error);
             showError('Errore nel caricamento dei cantieri');
+        }
+    };
+
+    const loadMyEconomie = async () => {
+        setLoadingEconomie(true);
+        try {
+            const res = await economiaAPI.getMyEconomie();
+            setMyEconomie(res.data);
+        } catch (error) {
+            console.error('Error loading my economie:', error);
+            showError('Errore nel caricamento delle economie');
+        } finally {
+            setLoadingEconomie(false);
         }
     };
 
@@ -68,22 +87,95 @@ const EconomiaForm = () => {
 
         setLoading(true);
         try {
-            await economiaAPI.create(formData);
-            showSuccess('✅ Ore extra registrate con successo!');
+            if (editingEconomia) {
+                // Update existing
+                await economiaAPI.update(editingEconomia.id, {
+                    siteId: formData.site,
+                    hours: formData.hours,
+                    description: formData.description
+                });
+                showSuccess('✅ Economia aggiornata con successo!');
+                setEditingEconomia(null);
+            } else {
+                // Create new
+                await economiaAPI.create(formData);
+                showSuccess('✅ Ore extra registrate con successo!');
+            }
+
+            // Reset form
             setFormData({
                 site: sites.length > 0 ? sites[0].id : '',
                 hours: 1,
                 description: ''
             });
+
+            // Reload list
+            loadMyEconomie();
         } catch (error) {
-            console.error('Error creating economia:', error);
+            console.error('Error saving economia:', error);
             showError(error.response?.data?.message || 'Errore nel salvataggio delle ore extra');
         } finally {
             setLoading(false);
         }
     };
 
-    if (sites.length === 0) {
+    const handleEditEconomia = (economia) => {
+        setEditingEconomia(economia);
+        setFormData({
+            site: economia.siteId,
+            hours: parseFloat(economia.hours),
+            description: economia.description
+        });
+        // Scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingEconomia(null);
+        setFormData({
+            site: sites.length > 0 ? sites[0].id : '',
+            hours: 1,
+            description: ''
+        });
+    };
+
+    const handleDeleteEconomia = async (economia) => {
+        const confirmed = await showConfirm({
+            title: 'Elimina Economia',
+            message: `Sei sicuro di voler eliminare questa economia di ${economia.hours} ore?`,
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+
+        if (!confirmed) return;
+
+        try {
+            await economiaAPI.deleteMyEconomia(economia.id);
+            showSuccess('✅ Economia eliminata con successo');
+            loadMyEconomie();
+
+            // If we were editing this one, cancel edit
+            if (editingEconomia?.id === economia.id) {
+                handleCancelEdit();
+            }
+        } catch (error) {
+            console.error('Error deleting economia:', error);
+            showError(error.response?.data?.message || 'Errore nell\'eliminazione');
+        }
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('it-IT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    if (sites.length === 0 && !loadingEconomie) {
         return (
             <Layout title="Economie">
                 <div className="max-w-2xl mx-auto p-6">
@@ -97,18 +189,42 @@ const EconomiaForm = () => {
 
     return (
         <Layout title="Economie - Ore Extra">
-            <div className="max-w-2xl mx-auto p-4 md:p-6">
+            <div className="max-w-2xl mx-auto p-4 md:p-6 space-y-6">
+                {/* Form Card */}
                 <div className="bg-white rounded-[2.5rem] shadow-lg border border-slate-200 overflow-hidden">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-6">
                         <div className="flex items-center gap-3">
                             <Clock className="w-8 h-8" />
                             <div>
-                                <h2 className="text-2xl font-bold">Ore Extra</h2>
-                                <p className="text-amber-50 text-sm">Registra le ore di economia</p>
+                                <h2 className="text-2xl font-bold">
+                                    {editingEconomia ? 'Modifica Economia' : 'Ore Extra'}
+                                </h2>
+                                <p className="text-amber-50 text-sm">
+                                    {editingEconomia ? 'Modifica le ore di economia' : 'Registra le ore di economia'}
+                                </p>
                             </div>
                         </div>
                     </div>
+
+                    {/* Editing Banner */}
+                    {editingEconomia && (
+                        <div className="bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Pencil className="w-5 h-5 text-blue-600" />
+                                <span className="text-blue-800 font-medium">
+                                    Stai modificando un'economia esistente
+                                </span>
+                            </div>
+                            <button
+                                onClick={handleCancelEdit}
+                                className="px-3 py-1.5 bg-blue-100 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-1"
+                            >
+                                <X className="w-4 h-4" />
+                                Annulla
+                            </button>
+                        </div>
+                    )}
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -196,22 +312,118 @@ const EconomiaForm = () => {
                             </div>
                         </div>
 
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            disabled={loading || formData.description.trim().length < 10}
-                            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-orange-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                        >
-                            {loading ? (
-                                <div className="flex items-center justify-center gap-2">
-                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    Salvataggio...
-                                </div>
-                            ) : (
-                                '✓ Aggiungi Ore'
+                        {/* Submit Buttons */}
+                        <div className="flex gap-3">
+                            {editingEconomia && (
+                                <button
+                                    type="button"
+                                    onClick={handleCancelEdit}
+                                    className="flex-1 py-4 bg-slate-100 text-slate-700 rounded-xl font-semibold text-lg hover:bg-slate-200 transition-all"
+                                >
+                                    Annulla
+                                </button>
                             )}
-                        </button>
+                            <button
+                                type="submit"
+                                disabled={loading || formData.description.trim().length < 10}
+                                className={`${editingEconomia ? 'flex-1' : 'w-full'} bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-orange-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl`}
+                            >
+                                {loading ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        Salvataggio...
+                                    </div>
+                                ) : editingEconomia ? (
+                                    '✓ Salva Modifiche'
+                                ) : (
+                                    '✓ Aggiungi Ore'
+                                )}
+                            </button>
+                        </div>
                     </form>
+                </div>
+
+                {/* Economie List Card */}
+                <div className="bg-white rounded-[2.5rem] shadow-lg border border-slate-200 overflow-hidden">
+                    <div className="p-6 border-b border-slate-100">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <Clock className="w-6 h-6 text-amber-500" />
+                                Le Tue Economie
+                            </h3>
+                            <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                                {myEconomie.length} registrate
+                            </span>
+                        </div>
+                        <p className="text-sm text-slate-500 mt-1">
+                            Ultime 30 giorni
+                        </p>
+                    </div>
+
+                    <div className="p-6">
+                        {loadingEconomie ? (
+                            <div className="flex items-center justify-center py-8">
+                                <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+                            </div>
+                        ) : myEconomie.length === 0 ? (
+                            <div className="text-center py-8">
+                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Clock className="w-8 h-8 text-slate-400" />
+                                </div>
+                                <p className="text-slate-500">Nessuna economia registrata</p>
+                                <p className="text-sm text-slate-400 mt-1">
+                                    Usa il form sopra per aggiungere le tue ore extra
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {myEconomie.map((economia) => (
+                                    <div
+                                        key={economia.id}
+                                        className={`p-4 rounded-xl border transition-all ${editingEconomia?.id === economia.id
+                                                ? 'bg-blue-50 border-blue-200'
+                                                : 'bg-slate-50 border-slate-100 hover:border-slate-200'
+                                            }`}
+                                    >
+                                        <div className="flex justify-between items-start gap-4">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="bg-amber-100 text-amber-700 text-sm font-bold px-2 py-0.5 rounded">
+                                                        {parseFloat(economia.hours).toFixed(1)} ore
+                                                    </span>
+                                                    <span className="text-xs text-slate-500">
+                                                        {formatDate(economia.date)}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm font-medium text-slate-700 mb-1">
+                                                    {economia.site?.name || 'Cantiere sconosciuto'}
+                                                </p>
+                                                <p className="text-sm text-slate-600 line-clamp-2">
+                                                    {economia.description}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-1 flex-shrink-0">
+                                                <button
+                                                    onClick={() => handleEditEconomia(economia)}
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Modifica"
+                                                >
+                                                    <Pencil className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteEconomia(economia)}
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Elimina"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </Layout>
