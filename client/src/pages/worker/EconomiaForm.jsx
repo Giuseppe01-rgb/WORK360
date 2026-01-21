@@ -15,6 +15,7 @@ const EconomiaForm = () => {
 
     const [sites, setSites] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingSites, setLoadingSites] = useState(true);
     const [loadingEconomie, setLoadingEconomie] = useState(true);
     const [myEconomie, setMyEconomie] = useState([]);
     const [editingEconomia, setEditingEconomia] = useState(null);
@@ -30,6 +31,7 @@ const EconomiaForm = () => {
     }, []);
 
     const loadSites = async () => {
+        setLoadingSites(true);
         try {
             const res = await siteAPI.getAll();
             setSites(res.data);
@@ -39,6 +41,8 @@ const EconomiaForm = () => {
         } catch (error) {
             console.error('Error loading sites:', error);
             showError('Errore nel caricamento dei cantieri');
+        } finally {
+            setLoadingSites(false);
         }
     };
 
@@ -175,7 +179,7 @@ const EconomiaForm = () => {
         });
     };
 
-    if (sites.length === 0 && !loadingEconomie) {
+    if (sites.length === 0 && !loadingSites) {
         return (
             <Layout title="Economie">
                 <div className="max-w-2xl mx-auto p-6">
@@ -381,8 +385,8 @@ const EconomiaForm = () => {
                                     <div
                                         key={economia.id}
                                         className={`p-4 rounded-xl border transition-all ${editingEconomia?.id === economia.id
-                                                ? 'bg-blue-50 border-blue-200'
-                                                : 'bg-slate-50 border-slate-100 hover:border-slate-200'
+                                            ? 'bg-blue-50 border-blue-200'
+                                            : 'bg-slate-50 border-slate-100 hover:border-slate-200'
                                             }`}
                                     >
                                         <div className="flex justify-between items-start gap-4">
