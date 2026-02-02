@@ -47,7 +47,7 @@ export default function AttendanceList() {
                 userAPI.getAll()
             ]);
             setSites(sitesResponse.data || []);
-            setUsers(usersResponse.data?.filter(u => u.role === 'worker') || []);
+            setUsers(usersResponse.data?.filter(u => u.role === 'worker' || u.role === 'owner') || []);
         } catch (error) {
             console.error('Error loading data:', error);
             setSites([]);
