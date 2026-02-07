@@ -227,7 +227,7 @@ export default function OwnerDashboard() {
                                         }`}
                                 >
                                     {tab.label}
-                                    <span className={`ml-1.5 ${isActive ? 'text-slate-400' : 'text-slate-400'}`}>
+                                    <span className={`ml-1.5 ${isActive ? 'text-white/60' : 'text-slate-400'}`}>
                                         {count}
                                     </span>
                                 </button>

@@ -54,7 +54,7 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
         const newTotal = Object.values(rebalanced).reduce((sum, p) => sum + p, 0);
         const diff = 100 - newTotal;
         if (Math.abs(diff) > 0) {
-            const maxId = Object.entries(rebalanced).reduce((a, b) => b[1] > a[1] ? b : a)[0];
+            const maxId = Object.entries(rebalanced).reduce((a, b) => b[1] > a[1] ? b : a, ['', 0])[0];
             rebalanced[maxId] = parseFloat((rebalanced[maxId] + diff).toFixed(1));
         }
 
