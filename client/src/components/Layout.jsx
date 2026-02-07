@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { siteAPI, reportedMaterialAPI } from '../utils/api';
@@ -187,8 +188,8 @@ export default function Layout({ children, title, hideHeader = false }) {
                                     to={sublink.path}
                                     onClick={() => isMobile && setIsMobileMenuOpen(false)}
                                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isSubActive
-                                            ? 'text-[#8B5CF6] font-bold bg-purple-50'
-                                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'
+                                        ? 'text-[#8B5CF6] font-bold bg-purple-50'
+                                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'
                                         }`}
                                 >
                                     <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-[#8B5CF6]' : 'bg-slate-300'}`}></span>
@@ -200,6 +201,18 @@ export default function Layout({ children, title, hideHeader = false }) {
                 )}
             </div>
         );
+    };
+
+    NavItemWithSubmenu.propTypes = {
+        link: PropTypes.shape({
+            icon: PropTypes.elementType.isRequired,
+            label: PropTypes.string.isRequired,
+            submenu: PropTypes.arrayOf(PropTypes.shape({
+                path: PropTypes.string.isRequired,
+                label: PropTypes.string.isRequired
+            })).isRequired
+        }).isRequired,
+        isMobile: PropTypes.bool
     };
 
     // Component for regular nav links
@@ -234,6 +247,17 @@ export default function Layout({ children, title, hideHeader = false }) {
                 {isActive && <div className="w-1.5 h-1.5 bg-white rounded-full shadow-sm"></div>}
             </Link>
         );
+    };
+
+    NavItemLink.propTypes = {
+        link: PropTypes.shape({
+            icon: PropTypes.elementType.isRequired,
+            label: PropTypes.string.isRequired,
+            path: PropTypes.string.isRequired,
+            badge: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            subtitle: PropTypes.string
+        }).isRequired,
+        isMobile: PropTypes.bool
     };
 
     // Simplified NavItem that delegates to the appropriate component
@@ -443,3 +467,9 @@ export default function Layout({ children, title, hideHeader = false }) {
         </div >
     );
 }
+
+Layout.propTypes = {
+    children: PropTypes.node.isRequired,
+    title: PropTypes.string,
+    hideHeader: PropTypes.bool
+};

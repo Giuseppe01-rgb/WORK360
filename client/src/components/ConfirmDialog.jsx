@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Conferma', cancelText = 'Annulla', type = 'danger' }) => {
     if (!isOpen) return null;
@@ -62,4 +63,16 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message, confirmText
     );
 };
 
+ConfirmDialog.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onConfirm: PropTypes.func.isRequired,
+    title: PropTypes.string.isRequired,
+    message: PropTypes.string.isRequired,
+    confirmText: PropTypes.string,
+    cancelText: PropTypes.string,
+    type: PropTypes.oneOf(['danger', 'warning', 'info'])
+};
+
 export default ConfirmDialog;
+
