@@ -267,6 +267,21 @@ export default function Layout({ children, title, hideHeader = false }) {
             : <NavItemLink link={link} isMobile={isMobile} />;
     };
 
+    NavItem.propTypes = {
+        link: PropTypes.shape({
+            icon: PropTypes.elementType.isRequired,
+            label: PropTypes.string.isRequired,
+            path: PropTypes.string,
+            badge: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            subtitle: PropTypes.string,
+            submenu: PropTypes.arrayOf(PropTypes.shape({
+                path: PropTypes.string.isRequired,
+                label: PropTypes.string.isRequired
+            }))
+        }).isRequired,
+        isMobile: PropTypes.bool
+    };
+
 
     return (
         <div className="min-h-screen bg-[#f1f5f9] flex font-sans">
@@ -362,8 +377,12 @@ export default function Layout({ children, title, hideHeader = false }) {
                     <div className="md:hidden fixed inset-0 z-50 flex">
                         {/* Backdrop */}
                         <div
+                            role="button"
+                            tabIndex={0}
+                            aria-label="Close menu"
                             className="fixed inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200"
                             onClick={() => setIsMobileMenuOpen(false)}
+                            onKeyDown={(e) => e.key === 'Escape' && setIsMobileMenuOpen(false)}
                         ></div>
 
                         {/* Slide-over Panel */}
