@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Layout from '../../components/Layout';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
 import { siteAPI, analyticsAPI, workActivityAPI, noteAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
@@ -739,6 +740,13 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     );
 };
 
+SiteDetails.propTypes = {
+    site: PropTypes.object.isRequired,
+    onBack: PropTypes.func.isRequired,
+    onDelete: PropTypes.func,
+    showConfirm: PropTypes.func
+};
+
 const ReportModal = ({ report, onClose }) => {
     if (!report) return null;
     return (
@@ -777,6 +785,11 @@ const ReportModal = ({ report, onClose }) => {
             </div>
         </div>
     );
+};
+
+ReportModal.propTypes = {
+    report: PropTypes.object,
+    onClose: PropTypes.func.isRequired
 };
 
 export default function SiteManagement() {

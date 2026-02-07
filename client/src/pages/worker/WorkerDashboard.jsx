@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI, workActivityAPI, materialMasterAPI, materialUsageAPI, reportedMaterialAPI } from '../../utils/api';
@@ -156,6 +157,14 @@ export default function WorkerDashboard() {
             </div>
         </div>
     );
+
+    CustomSelect.propTypes = {
+        value: PropTypes.string,
+        onChange: PropTypes.func.isRequired,
+        options: PropTypes.array.isRequired,
+        placeholder: PropTypes.string,
+        disabled: PropTypes.bool
+    };
 
     const getLocation = () => {
         return new Promise((resolve, reject) => {

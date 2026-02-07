@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Layout from '../../components/Layout';
 import { quoteAPI, communicationAPI, salAPI, siteAPI, siteAccountingAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -48,6 +49,11 @@ class DebugErrorBoundary extends React.Component {
         return this.props.children;
     }
 }
+
+DebugErrorBoundary.propTypes = {
+    data: PropTypes.any,
+    children: PropTypes.node
+};
 
 export default function QuotesManager() {
     const { user } = useAuth();

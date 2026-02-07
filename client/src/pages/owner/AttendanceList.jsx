@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Layout from '../../components/Layout';
 import { attendanceAPI, siteAPI, userAPI } from '../../utils/api';
 import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2, Zap, Download, FileSpreadsheet, ChevronRight, X } from 'lucide-react';
@@ -136,6 +137,10 @@ export default function AttendanceList() {
                 <span className="text-xs text-blue-400">live</span>
             </span>
         );
+    };
+
+    LiveDuration.propTypes = {
+        clockInTime: PropTypes.string.isRequired
     };
 
     const getTotalHours = () => {

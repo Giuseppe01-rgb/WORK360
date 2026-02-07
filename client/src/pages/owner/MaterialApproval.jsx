@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { CheckCircle, X, Link as LinkIcon, XCircle, Image, Package, AlertCircle, Loader2 } from 'lucide-react';
 import Layout from '../../components/Layout';
 import { reportedMaterialAPI, colouraMaterialAPI } from '../../utils/api';
@@ -486,6 +487,12 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
     );
 };
 
+ApproveModal.propTypes = {
+    report: PropTypes.object.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onSuccess: PropTypes.func.isRequired
+};
+
 // Link Modal Component
 const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
     const { showSuccess, showError } = useToast();
@@ -609,6 +616,13 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
             </div>
         </div>
     );
+};
+
+LinkModal.propTypes = {
+    report: PropTypes.object.isRequired,
+    catalogMaterials: PropTypes.array.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onSuccess: PropTypes.func.isRequired
 };
 
 export default MaterialApproval;

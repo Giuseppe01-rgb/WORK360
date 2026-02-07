@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Layout from '../../components/Layout';
 import { companyAPI, userAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -653,3 +654,7 @@ function Users({ className }) {
         </svg>
     );
 }
+
+Users.propTypes = {
+    className: PropTypes.string
+};

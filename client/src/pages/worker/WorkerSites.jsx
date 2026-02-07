@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import {
     Building2, MapPin, ArrowLeft, FileText, Camera, Calendar, Clock, User, Loader2, Search, ChevronRight
@@ -274,6 +275,11 @@ const SiteDetails = ({ site, onBack }) => {
             )}
         </div>
     );
+};
+
+SiteDetails.propTypes = {
+    site: PropTypes.object.isRequired,
+    onBack: PropTypes.func.isRequired
 };
 
 export default function WorkerSites() {
