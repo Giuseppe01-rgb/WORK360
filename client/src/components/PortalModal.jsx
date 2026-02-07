@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import PropTypes from 'prop-types';
 
 const PortalModal = ({ children, onClose }) => {
     const [mounted, setMounted] = useState(false);
@@ -33,4 +34,10 @@ const PortalModal = ({ children, onClose }) => {
     );
 };
 
+PortalModal.propTypes = {
+    children: PropTypes.node.isRequired,
+    onClose: PropTypes.func
+};
+
 export default PortalModal;
+

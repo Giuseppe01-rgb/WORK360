@@ -1,5 +1,6 @@
 import { X, CheckCircle, XCircle, AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const Toast = ({ type = 'info', message, onClose, duration = 5000 }) => {
     useEffect(() => {
@@ -12,7 +13,7 @@ const Toast = ({ type = 'info', message, onClose, duration = 5000 }) => {
     }, [duration, onClose]);
 
     // Check if this is a loading/progress toast
-    const isLoading = type === 'info' && (message.includes('Sto ') || message.includes('⏳'));
+    const isLoading = type === 'info' && typeof message === 'string' && (message.includes('Sto ') || message.includes('⏳'));
 
     const typeConfig = {
         success: {
@@ -63,4 +64,12 @@ const Toast = ({ type = 'info', message, onClose, duration = 5000 }) => {
     );
 };
 
+Toast.propTypes = {
+    type: PropTypes.oneOf(['success', 'error', 'warning', 'info']),
+    message: PropTypes.string.isRequired,
+    onClose: PropTypes.func.isRequired,
+    duration: PropTypes.number
+};
+
 export default Toast;
+

@@ -48,10 +48,19 @@ function MultiSelect({ options, selected, onChange, placeholder }) {
                     {options.map(option => (
                         <div
                             key={option.id}
+                            role="option"
+                            aria-selected={selected.includes(option.id)}
+                            tabIndex={0}
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 toggleOption(option.id);
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    toggleOption(option.id);
+                                }
                             }}
                             className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer"
                         >
@@ -224,8 +233,9 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
                                     {/* Cantiere */}
                                     <div className="md:col-span-2">
-                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Cantiere</label>
+                                        <label htmlFor={`site-${entry.id}`} className="block text-xs font-semibold text-slate-600 mb-1">Cantiere</label>
                                         <select
+                                            id={`site-${entry.id}`}
                                             className="w-full max-w-full block min-h-[50px] px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                             value={entry.siteId}
                                             onChange={(e) => updateEntry(entry.id, 'siteId', e.target.value)}
@@ -252,8 +262,9 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
 
                                     {/* Data */}
                                     <div className="md:col-span-2">
-                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Data</label>
+                                        <label htmlFor={`date-${entry.id}`} className="block text-xs font-semibold text-slate-600 mb-1">Data</label>
                                         <input
+                                            id={`date-${entry.id}`}
                                             type="date"
                                             className="w-full max-w-full block min-h-[50px] px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                             value={entry.date}
@@ -263,8 +274,9 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
 
                                     {/* Entrata */}
                                     <div className="md:col-span-3">
-                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Entrata</label>
+                                        <label htmlFor={`clockin-${entry.id}`} className="block text-xs font-semibold text-slate-600 mb-1">Entrata</label>
                                         <input
+                                            id={`clockin-${entry.id}`}
                                             type="time"
                                             className="w-full max-w-full block min-h-[50px] px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                             value={entry.clockIn}
@@ -274,8 +286,9 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
 
                                     {/* Uscita */}
                                     <div className="md:col-span-3">
-                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Uscita</label>
+                                        <label htmlFor={`clockout-${entry.id}`} className="block text-xs font-semibold text-slate-600 mb-1">Uscita</label>
                                         <input
+                                            id={`clockout-${entry.id}`}
                                             type="time"
                                             className="w-full max-w-full block min-h-[50px] px-3 py-2 bg-white border border-slate-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                             value={entry.clockOut}

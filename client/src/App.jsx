@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { ConfirmModalProvider } from './context/ConfirmModalContext';
@@ -43,6 +44,11 @@ const ProtectedRoute = ({ children, requireOwner = false }) => {
   }
 
   return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  requireOwner: PropTypes.bool
 };
 
 function AppRoutes() {

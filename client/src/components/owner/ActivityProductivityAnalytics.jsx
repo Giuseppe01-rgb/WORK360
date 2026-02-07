@@ -63,8 +63,9 @@ const ActivityProductivityAnalytics = () => {
             <div className="bg-white rounded-xl p-4 shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Raggruppa per</label>
+                        <label htmlFor="groupBy" className="block text-sm font-semibold text-slate-700 mb-2">Raggruppa per</label>
                         <select
+                            id="groupBy"
                             value={filter.groupBy}
                             onChange={(e) => setFilter({ ...filter, groupBy: e.target.value })}
                             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg"
@@ -75,8 +76,9 @@ const ActivityProductivityAnalytics = () => {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Data Inizio</label>
+                        <label htmlFor="startDate" className="block text-sm font-semibold text-slate-700 mb-2">Data Inizio</label>
                         <input
+                            id="startDate"
                             type="date"
                             value={filter.startDate}
                             onChange={(e) => setFilter({ ...filter, startDate: e.target.value })}
@@ -84,8 +86,9 @@ const ActivityProductivityAnalytics = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Data Fine</label>
+                        <label htmlFor="endDate" className="block text-sm font-semibold text-slate-700 mb-2">Data Fine</label>
                         <input
+                            id="endDate"
                             type="date"
                             value={filter.endDate}
                             onChange={(e) => setFilter({ ...filter, endDate: e.target.value })}

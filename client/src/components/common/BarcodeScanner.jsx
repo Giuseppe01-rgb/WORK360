@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { X, Camera, AlertCircle } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 const BarcodeScanner = ({ onScan, onClose }) => {
     const scannerRef = useRef(null);
@@ -140,4 +141,10 @@ const BarcodeScanner = ({ onScan, onClose }) => {
     );
 };
 
+BarcodeScanner.propTypes = {
+    onScan: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired
+};
+
 export default BarcodeScanner;
+

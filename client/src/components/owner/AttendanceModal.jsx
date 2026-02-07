@@ -197,10 +197,11 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
 
                     {/* Notes */}
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        <label htmlFor="attendance-notes" className="block text-sm font-semibold text-slate-700 mb-2">
                             Note
                         </label>
                         <textarea
+                            id="attendance-notes"
                             className="w-full max-w-full block min-h-[100px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                             placeholder="Note aggiuntive (opzionale)..."
                             value={formData.notes}

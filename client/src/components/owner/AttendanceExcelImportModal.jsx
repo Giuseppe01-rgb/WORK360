@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Upload, X, FileSpreadsheet, CheckCircle, AlertTriangle, AlertCircle, Clock, User, Calendar } from 'lucide-react';
 import { attendanceAPI } from '../../utils/api';
+import PropTypes from 'prop-types';
 
 const AttendanceExcelImportModal = ({ onClose, onImport }) => {
     const [file, setFile] = useState(null);
@@ -112,7 +113,10 @@ const AttendanceExcelImportModal = ({ onClose, onImport }) => {
 
                             {/* Upload Area */}
                             <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => fileInputRef.current?.click()}
+                                onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
                                 className="border-2 border-dashed border-slate-300 rounded-xl p-12 text-center cursor-pointer hover:bg-slate-50 transition-colors"
                             >
                                 <Upload className="w-16 h-16 text-slate-400 mx-auto mb-4" />
@@ -261,4 +265,10 @@ const AttendanceExcelImportModal = ({ onClose, onImport }) => {
     );
 };
 
+AttendanceExcelImportModal.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    onImport: PropTypes.func.isRequired
+};
+
 export default AttendanceExcelImportModal;
+
