@@ -47,8 +47,8 @@ function calculateWorkedHours(clockIn, clockOut) {
     workedHours = Math.max(0, workedHours);
 
     return {
-        presenceHours: parseFloat(presenceHours.toFixed(2)),
-        workedHours: parseFloat(workedHours.toFixed(2)),
+        presenceHours: Number.parseFloat(presenceHours.toFixed(2)),
+        workedHours: Number.parseFloat(workedHours.toFixed(2)),
         lunchBreakApplied
     };
 }
@@ -61,7 +61,7 @@ function calculateWorkedHours(clockIn, clockOut) {
  * @returns {Object} { presenceHours, workedHours, lunchBreakApplied }
  */
 function recalculateWorkedHoursFromTotal(totalHours) {
-    const presenceHours = parseFloat(totalHours) || 0;
+    const presenceHours = Number.parseFloat(totalHours) || 0;
 
     if (presenceHours <= 0) {
         return { presenceHours: 0, workedHours: 0, lunchBreakApplied: false };
@@ -81,8 +81,8 @@ function recalculateWorkedHoursFromTotal(totalHours) {
     }
 
     return {
-        presenceHours: parseFloat(presenceHours.toFixed(2)),
-        workedHours: parseFloat(Math.max(0, workedHours).toFixed(2)),
+        presenceHours: Number.parseFloat(presenceHours.toFixed(2)),
+        workedHours: Number.parseFloat(Math.max(0, workedHours).toFixed(2)),
         lunchBreakApplied
     };
 }

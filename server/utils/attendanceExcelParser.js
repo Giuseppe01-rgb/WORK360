@@ -90,8 +90,8 @@ const parseDate = (dateRaw) => {
     }
 
     // Try parsing Excel serial date number
-    const serialDate = parseFloat(str);
-    if (!isNaN(serialDate) && serialDate > 40000 && serialDate < 60000) {
+    const serialDate = Number.parseFloat(str);
+    if (!Number.isNaN(serialDate) && serialDate > 40000 && serialDate < 60000) {
         // Excel serial date (days since 1900-01-01)
         const excelEpoch = new Date(1899, 11, 30); // Excel epoch
         const date = new Date(excelEpoch.getTime() + serialDate * 86400000);
@@ -118,8 +118,8 @@ const parseHours = (hoursRaw) => {
     // Handle Italian decimal format (comma as decimal)
     str = str.replace(',', '.');
 
-    const val = parseFloat(str);
-    return isNaN(val) ? null : val;
+    const val = Number.parseFloat(str);
+    return Number.isNaN(val) ? null : val;
 };
 
 /**

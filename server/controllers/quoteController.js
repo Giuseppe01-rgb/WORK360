@@ -102,15 +102,15 @@ const getQuotes = async (req, res) => {
             const quote = q.toJSON();
             return {
                 ...quote,
-                total: parseFloat(quote.total) || 0,
-                subtotal: parseFloat(quote.subtotal) || 0,
-                vatAmount: parseFloat(quote.vatAmount) || 0,
-                vatRate: parseFloat(quote.vatRate) || 22,
+                total: Number.parseFloat(quote.total) || 0,
+                subtotal: Number.parseFloat(quote.subtotal) || 0,
+                vatAmount: Number.parseFloat(quote.vatAmount) || 0,
+                vatRate: Number.parseFloat(quote.vatRate) || 22,
                 items: (quote.items || []).map(item => ({
                     ...item,
-                    quantity: parseFloat(item.quantity) || 0,
-                    unitPrice: parseFloat(item.unitPrice) || 0,
-                    total: parseFloat(item.total) || 0
+                    quantity: Number.parseFloat(item.quantity) || 0,
+                    unitPrice: Number.parseFloat(item.unitPrice) || 0,
+                    total: Number.parseFloat(item.total) || 0
                 }))
             };
         });

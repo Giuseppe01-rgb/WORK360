@@ -116,8 +116,8 @@ const generateQuotePDFBuffer = (quote, company, user) => {
 
             doc.text(item.description, itemX, y, { width: descWidth });
             doc.text(item.quantity, qtyX, y, { width: 40, align: 'center' });
-            doc.text(`€ ${parseFloat(item.unitPrice || 0).toFixed(2)}`, priceX, y, { width: 60, align: 'right' });
-            doc.text(`€ ${parseFloat(item.total || 0).toFixed(2)}`, totalX, y, { width: 90, align: 'right' });
+            doc.text(`€ ${Number.parseFloat(item.unitPrice || 0).toFixed(2)}`, priceX, y, { width: 60, align: 'right' });
+            doc.text(`€ ${Number.parseFloat(item.total || 0).toFixed(2)}`, totalX, y, { width: 90, align: 'right' });
 
             y += Math.max(descHeight, 15) + 10;
         });
@@ -134,13 +134,13 @@ const generateQuotePDFBuffer = (quote, company, user) => {
 
         // Subtotal
         doc.text('Imponibile:', totalsX, y, { width: 90, align: 'right' });
-        doc.text(`€ ${parseFloat(quote.subtotal || 0).toFixed(2)}`, valuesX, y, { width: 90, align: 'right' });
+        doc.text(`€ ${Number.parseFloat(quote.subtotal || 0).toFixed(2)}`, valuesX, y, { width: 90, align: 'right' });
         y += 15;
 
         // Safety Costs (if any)
-        if (parseFloat(quote.safetyCosts || 0) > 0) {
+        if (Number.parseFloat(quote.safetyCosts || 0) > 0) {
             doc.text('Oneri Sicurezza:', totalsX, y, { width: 90, align: 'right' });
-            doc.text(`€ ${parseFloat(quote.safetyCosts || 0).toFixed(2)}`, valuesX, y, { width: 90, align: 'right' });
+            doc.text(`€ ${Number.parseFloat(quote.safetyCosts || 0).toFixed(2)}`, valuesX, y, { width: 90, align: 'right' });
             doc.fontSize(8).fillColor('#64748B').text('(non soggetti a ribasso)', totalsX, y + 10, { width: 90, align: 'right' });
             doc.fontSize(10).fillColor('#334155');
             y += 25;
@@ -152,7 +152,7 @@ const generateQuotePDFBuffer = (quote, company, user) => {
             doc.text('€ 0.00', valuesX, y, { width: 90, align: 'right' });
         } else {
             doc.text(`IVA (${quote.vatRate}%):`, totalsX, y, { width: 90, align: 'right' });
-            doc.text(`€ ${parseFloat(quote.vatAmount || 0).toFixed(2)}`, valuesX, y, { width: 90, align: 'right' });
+            doc.text(`€ ${Number.parseFloat(quote.vatAmount || 0).toFixed(2)}`, valuesX, y, { width: 90, align: 'right' });
         }
         y += 20;
 
@@ -160,7 +160,7 @@ const generateQuotePDFBuffer = (quote, company, user) => {
         doc.rect(totalsX, y - 5, 200, 25).fill('#F1F5F9');
         doc.fillColor('#0F172A').font('Helvetica-Bold').fontSize(12);
         doc.text('TOTALE:', totalsX + 10, y + 2);
-        doc.text(`€ ${parseFloat(quote.total || 0).toFixed(2)}`, valuesX, y + 2, { width: 80, align: 'right' });
+        doc.text(`€ ${Number.parseFloat(quote.total || 0).toFixed(2)}`, valuesX, y + 2, { width: 80, align: 'right' });
 
         y += 40;
 

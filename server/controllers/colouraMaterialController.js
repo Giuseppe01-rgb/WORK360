@@ -25,7 +25,7 @@ const getAllMaterials = async (req, res) => {
             marca: m.spec || '',
             nome_prodotto: m.displayName,
             quantita: m.unit,
-            prezzo: m.price ? parseFloat(m.price) : null,
+            prezzo: m.price ? Number.parseFloat(m.price) : null,
             fornitore: m.supplier || '',
             categoria: m.family,
             attivo: true
@@ -68,7 +68,7 @@ const searchMaterials = async (req, res) => {
             marca: m.spec || '',
             nome_prodotto: m.displayName,
             quantita: m.unit,
-            prezzo: m.price ? parseFloat(m.price) : null,
+            prezzo: m.price ? Number.parseFloat(m.price) : null,
             fornitore: m.supplier || '',
             categoria: m.family,
             attivo: true
@@ -103,7 +103,7 @@ const getMaterialByCode = async (req, res) => {
                 marca: material.spec || '',
                 nome_prodotto: material.displayName,
                 quantita: material.unit,
-                prezzo: material.price ? parseFloat(material.price) : null,
+                prezzo: material.price ? Number.parseFloat(material.price) : null,
                 fornitore: material.supplier || '',
                 categoria: material.family,
                 attivo: true
@@ -148,7 +148,7 @@ const createMaterial = async (req, res) => {
             marca: material.spec,
             nome_prodotto: material.displayName,
             quantita: material.unit,
-            prezzo: material.price ? parseFloat(material.price) : null,
+            prezzo: material.price ? Number.parseFloat(material.price) : null,
             fornitore: material.supplier,
             categoria: material.family,
             attivo: true
@@ -196,7 +196,7 @@ const updateMaterial = async (req, res) => {
             marca: material.spec,
             nome_prodotto: material.displayName,
             quantita: material.unit,
-            prezzo: material.price ? parseFloat(material.price) : null,
+            prezzo: material.price ? Number.parseFloat(material.price) : null,
             fornitore: material.supplier,
             categoria: material.family,
             attivo: true

@@ -39,8 +39,8 @@ const createSite = async (req, res) => {
         // Sanitize contractValue: convert comma to point for Italian format, ensure valid number
         if (siteData.contractValue !== undefined && siteData.contractValue !== null) {
             let cleanValue = String(siteData.contractValue).replace(',', '.').replace(/[^0-9.]/g, '');
-            const parsed = parseFloat(cleanValue);
-            siteData.contractValue = !isNaN(parsed) && parsed > 0 ? parsed : null;
+            const parsed = Number.parseFloat(cleanValue);
+            siteData.contractValue = !Number.isNaN(parsed) && parsed > 0 ? parsed : null;
         }
 
         console.log('Creating site with data:', siteData);
@@ -170,25 +170,25 @@ const getSite = async (req, res) => {
         // Calculate totals
         const materialsCost = 0; // Materials don't have price in model
         const laborCost = attendances.reduce((sum, att) => {
-            const hours = parseFloat(att.totalHours || 0);
-            const hourlyRate = parseFloat(att.user?.hourlyCost || 0);
+            const hours = Number.parseFloat(att.totalHours || 0);
+            const hourlyRate = Number.parseFloat(att.user?.hourlyCost || 0);
             return sum + (hours * hourlyRate);
         }, 0);
         const equipmentCost = 0; // Equipment doesn't have cost in model
         const totalCost = materialsCost + laborCost + equipmentCost;
 
-        const contractValue = parseFloat(site.contractValue || 0);
+        const contractValue = Number.parseFloat(site.contractValue || 0);
         const costIncidence = contractValue > 0 ? (totalCost / contractValue) * 100 : 0;
 
         // Enhanced response with analytics at ROOT level
         const siteWithAnalytics = {
             ...site.toJSON(),
             // Analytics fields at ROOT level for frontend compatibility
-            totalCost: parseFloat(totalCost.toFixed(2)),
-            materialsCost: parseFloat(materialsCost.toFixed(2)),
-            laborCost: parseFloat(laborCost.toFixed(2)),
-            equipmentCost: parseFloat(equipmentCost.toFixed(2)),
-            costIncidence: parseFloat(costIncidence.toFixed(2)),
+            totalCost: Number.parseFloat(totalCost.toFixed(2)),
+            materialsCost: Number.parseFloat(materialsCost.toFixed(2)),
+            laborCost: Number.parseFloat(laborCost.toFixed(2)),
+            equipmentCost: Number.parseFloat(equipmentCost.toFixed(2)),
+            costIncidence: Number.parseFloat(costIncidence.toFixed(2)),
             materialsCount: materials.length,
             equipmentCount: equipment.length,
             attendanceCount: attendances.length
@@ -242,8 +242,8 @@ const updateSite = async (req, res) => {
         // Sanitize contractValue: convert comma to point for Italian format, ensure valid number
         if (updateData.contractValue !== undefined && updateData.contractValue !== null) {
             let cleanValue = String(updateData.contractValue).replace(',', '.').replace(/[^0-9.]/g, '');
-            const parsed = parseFloat(cleanValue);
-            updateData.contractValue = !isNaN(parsed) && parsed > 0 ? parsed : null;
+            const parsed = Number.parseFloat(cleanValue);
+            updateData.contractValue = !Number.isNaN(parsed) && parsed > 0 ? parsed : null;
         }
 
         // Update site fields
@@ -359,9 +359,9 @@ const recalculateCosts = async (req, res) => {
 
         // Update each attendance with current user hourly rate
         for (const attendance of attendances) {
-            const oldHourlyCost = parseFloat(attendance.hourlyCost) || 0;
-            const newHourlyCost = parseFloat(attendance.user?.hourlyCost) || 0;
-            const hours = parseFloat(attendance.totalHours) || 0;
+            const oldHourlyCost = Number.parseFloat(attendance.hourlyCost) || 0;
+            const newHourlyCost = Number.parseFloat(attendance.user?.hourlyCost) || 0;
+            const hours = Number.parseFloat(attendance.totalHours) || 0;
 
             totalOldCost += hours * oldHourlyCost;
             totalNewCost += hours * newHourlyCost;
@@ -393,9 +393,9 @@ const recalculateCosts = async (req, res) => {
             message: `Costi ricalcolati per ${updatedCount} presenze`,
             updatedCount,
             totalAttendances: attendances.length,
-            oldTotalCost: parseFloat(totalOldCost.toFixed(2)),
-            newTotalCost: parseFloat(totalNewCost.toFixed(2)),
-            difference: parseFloat((totalNewCost - totalOldCost).toFixed(2))
+            oldTotalCost: Number.parseFloat(totalOldCost.toFixed(2)),
+            newTotalCost: Number.parseFloat(totalNewCost.toFixed(2)),
+            difference: Number.parseFloat((totalNewCost - totalOldCost).toFixed(2))
         });
     } catch (error) {
         console.error('Error recalculating costs:', error);

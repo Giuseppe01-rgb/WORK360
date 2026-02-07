@@ -13,7 +13,7 @@ const clockIn = async (req, res) => {
         const { siteId, latitude, longitude, address } = req.body;
 
         // Validate coordinates if provided
-        if ((latitude && isNaN(parseFloat(latitude))) || (longitude && isNaN(parseFloat(longitude)))) {
+        if ((latitude && Number.isNaN(Number.parseFloat(latitude))) || (longitude && Number.isNaN(Number.parseFloat(longitude)))) {
             return res.status(400).json({ message: 'Coordinate GPS non valide' });
         }
 
@@ -49,7 +49,7 @@ const clockIn = async (req, res) => {
 
         // Get user's current hourly cost to store with attendance
         const user = await User.findByPk(getUserId(req), { attributes: ['hourlyCost'] });
-        const hourlyCost = parseFloat(user?.hourlyCost) || 0;
+        const hourlyCost = Number.parseFloat(user?.hourlyCost) || 0;
 
         const attendance = await Attendance.create({
             userId: getUserId(req),
@@ -92,7 +92,7 @@ const clockOut = async (req, res) => {
         const { attendanceId, latitude, longitude, address } = req.body;
 
         // Validate coordinates if provided
-        if ((latitude && isNaN(parseFloat(latitude))) || (longitude && isNaN(parseFloat(longitude)))) {
+        if ((latitude && Number.isNaN(Number.parseFloat(latitude))) || (longitude && Number.isNaN(Number.parseFloat(longitude)))) {
             return res.status(400).json({ message: 'Coordinate GPS non valide' });
         }
 
@@ -340,7 +340,7 @@ const processSingleAttendance = async (att, companyId) => {
 
     // Get user's current hourly cost
     const user = await User.findByPk(userId, { attributes: ['hourlyCost'] });
-    const hourlyCost = parseFloat(user?.hourlyCost) || 0;
+    const hourlyCost = Number.parseFloat(user?.hourlyCost) || 0;
 
     const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}:00+01:00`), location: null } : null;
     const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}:00+01:00`), location: null } : null;
@@ -683,7 +683,7 @@ const importFromExcel = async (req, res) => {
 
                 // Get user's current hourly cost
                 const user = await User.findByPk(att.userId, { attributes: ['hourlyCost'] });
-                const hourlyCost = parseFloat(user?.hourlyCost) || 0;
+                const hourlyCost = Number.parseFloat(user?.hourlyCost) || 0;
 
                 await Attendance.create({
                     userId: att.userId,

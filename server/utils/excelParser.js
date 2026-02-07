@@ -91,8 +91,8 @@ const parsePrice = (priceRaw) => {
         str = str.replace(',', '.');
     }
 
-    const val = parseFloat(str);
-    return isNaN(val) ? null : val;
+    const val = Number.parseFloat(str);
+    return Number.isNaN(val) ? null : val;
 };
 
 /**

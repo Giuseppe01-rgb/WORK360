@@ -159,7 +159,7 @@ exports.distributeTime = async (req, res) => {
             if (activity) {
                 await activity.update({
                     percentageTime: activityData.percentageTime,
-                    durationHours: parseFloat(durationHours.toFixed(2))
+                    durationHours: Number.parseFloat(durationHours.toFixed(2))
                 });
                 return activity;
             }

@@ -12,9 +12,9 @@ exports.createSiteAccounting = async (req, res) => {
         const processedItems = (items || []).map(item => ({
             description: item.description || '',
             unit: item.unit || '',
-            quantity: parseFloat(item.quantity) || 0,
-            unitPrice: parseFloat(item.unitPrice) || 0,
-            total: (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0)
+            quantity: Number.parseFloat(item.quantity) || 0,
+            unitPrice: Number.parseFloat(item.unitPrice) || 0,
+            total: (Number.parseFloat(item.quantity) || 0) * (Number.parseFloat(item.unitPrice) || 0)
         }));
 
         const subtotal = processedItems.reduce((sum, item) => sum + item.total, 0);
@@ -106,9 +106,9 @@ exports.updateSiteAccounting = async (req, res) => {
         const processedItems = (items || []).map(item => ({
             description: item.description || '',
             unit: item.unit || '',
-            quantity: parseFloat(item.quantity) || 0,
-            unitPrice: parseFloat(item.unitPrice) || 0,
-            total: (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0)
+            quantity: Number.parseFloat(item.quantity) || 0,
+            unitPrice: Number.parseFloat(item.unitPrice) || 0,
+            total: (Number.parseFloat(item.quantity) || 0) * (Number.parseFloat(item.unitPrice) || 0)
         }));
 
         const subtotal = processedItems.reduce((sum, item) => sum + item.total, 0);
@@ -271,9 +271,9 @@ exports.downloadSiteAccountingPDF = async (req, res) => {
 
                 doc.text(item.description || '', 50, yPos, { width: colWidths.desc });
                 doc.text(item.unit || '', 250, yPos);
-                doc.text(parseFloat(item.quantity || 0).toString(), 300, yPos);
-                doc.text(`€ ${parseFloat(item.unitPrice || 0).toFixed(2)}`, 360, yPos);
-                doc.text(`€ ${parseFloat(item.total || 0).toFixed(2)}`, 430, yPos);
+                doc.text(Number.parseFloat(item.quantity || 0).toString(), 300, yPos);
+                doc.text(`€ ${Number.parseFloat(item.unitPrice || 0).toFixed(2)}`, 360, yPos);
+                doc.text(`€ ${Number.parseFloat(item.total || 0).toFixed(2)}`, 430, yPos);
 
                 yPos += rowHeight;
             });
@@ -284,7 +284,7 @@ exports.downloadSiteAccountingPDF = async (req, res) => {
 
             doc.font('Helvetica-Bold').fontSize(12);
             doc.text('TOTALE:', 360, yPos);
-            doc.text(`€ ${parseFloat(accounting.total || 0).toFixed(2)}`, 430, yPos);
+            doc.text(`€ ${Number.parseFloat(accounting.total || 0).toFixed(2)}`, 430, yPos);
         }
 
         // Notes

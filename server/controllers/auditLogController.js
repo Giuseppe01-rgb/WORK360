@@ -56,8 +56,8 @@ const getAuditLogs = async (req, res) => {
                 attributes: ['id', 'firstName', 'lastName', 'username']
             }],
             order: [['createdAt', 'DESC']],
-            limit: Math.min(parseInt(limit), 500),
-            offset: parseInt(offset)
+            limit: Math.min(Number.parseInt(limit), 500),
+            offset: Number.parseInt(offset)
         });
 
         // Format response
@@ -77,8 +77,8 @@ const getAuditLogs = async (req, res) => {
 
         res.json({
             total: count,
-            limit: parseInt(limit),
-            offset: parseInt(offset),
+            limit: Number.parseInt(limit),
+            offset: Number.parseInt(offset),
             logs: formattedLogs
         });
     } catch (error) {

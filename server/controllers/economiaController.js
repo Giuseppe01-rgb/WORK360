@@ -120,7 +120,7 @@ exports.createBulkEconomia = async (req, res, next) => {
         const economia = await Economia.create({
             workerId: userId, // Owner creates it, so use owner's ID
             siteId,
-            hours: parseFloat(hours),
+            hours: Number.parseFloat(hours),
             description: description.trim()
         });
 

@@ -378,11 +378,11 @@ router.get('/status', async (req, res) => {
         res.json({
             success: true,
             counts: {
-                companies: parseInt(companies[0].count),
-                users: parseInt(users[0].count),
-                sites: parseInt(sites[0].count),
-                attendances: parseInt(attendances[0].count),
-                catalog: parseInt(catalog[0].count)
+                companies: Number.parseInt(companies[0].count),
+                users: Number.parseInt(users[0].count),
+                sites: Number.parseInt(sites[0].count),
+                attendances: Number.parseInt(attendances[0].count),
+                catalog: Number.parseInt(catalog[0].count)
             }
         });
     } catch (error) {
@@ -537,7 +537,7 @@ router.get('/lunch-break', async (req, res) => {
 
                 // Calculate with new lunch break rule
                 const { workedHours, presenceHours, lunchBreakApplied } = calculateWorkedHours(clockIn, clockOut);
-                const oldHours = parseFloat(attendance.total_hours) || 0;
+                const oldHours = Number.parseFloat(attendance.total_hours) || 0;
 
                 // Only update if there's a difference (more than 0.5h change = lunch break applied)
                 if (Math.abs(oldHours - workedHours) > 0.4) {

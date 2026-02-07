@@ -11,7 +11,7 @@ const sanitizeDates = (data, dateFields) => {
             sanitized[field] === 'Invalid date' ||
             sanitized[field] === 'Invalid Date' ||
             sanitized[field] === '' ||
-            isNaN(new Date(sanitized[field]).getTime())
+            Number.isNaN(new Date(sanitized[field]).getTime())
         )) {
             delete sanitized[field];
         }
@@ -34,7 +34,7 @@ const sanitizeAllDates = (data) => {
             value === 'Invalid date' ||
             value === 'Invalid Date' ||
             value === '' ||
-            (typeof value === 'string' && isNaN(new Date(value).getTime()))
+            (typeof value === 'string' && Number.isNaN(new Date(value).getTime()))
         )) {
             delete sanitized[key];
         }

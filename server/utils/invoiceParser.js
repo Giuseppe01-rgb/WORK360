@@ -90,17 +90,17 @@ const extractMaterialsFromText = (text) => {
 
                 // Clean and validate
                 const cleanName = cleanMaterialName(name);
-                const cleanQuantity = parseFloat(quantity.replace(',', '.'));
+                const cleanQuantity = Number.parseFloat(quantity.replace(',', '.'));
                 const cleanUnit = normalizeUnit(unit);
-                const cleanPrice = parseFloat(price.replace(',', '.'));
+                const cleanPrice = Number.parseFloat(price.replace(',', '.'));
 
-                // Only add if name is reasonable (not too short/long) and quantity is valid
-                if (cleanName.length > 2 && cleanName.length < 150 && cleanQuantity > 0 && !isNaN(cleanQuantity)) {
+                // Only add if name is reasonable (not too short/long) and cleanQuantity is valid
+                if (cleanName.length > 2 && cleanName.length < 150 && cleanQuantity > 0 && !Number.isNaN(cleanQuantity)) {
                     materials.push({
                         displayName: cleanName,
                         quantity: cleanQuantity,
                         unit: cleanUnit,
-                        price: cleanPrice > 0 && !isNaN(cleanPrice) ? cleanPrice : null,
+                        price: cleanPrice > 0 && !Number.isNaN(cleanPrice) ? cleanPrice : null,
                         supplier: supplier || ''
                     });
                 }

@@ -50,7 +50,7 @@ async function migrateAttendances() {
 
                 // Calculate with new lunch break rule
                 const { workedHours, presenceHours, lunchBreakApplied } = calculateWorkedHours(clockIn, clockOut);
-                const oldHours = parseFloat(attendance.totalHours) || 0;
+                const oldHours = Number.parseFloat(attendance.totalHours) || 0;
 
                 // Only update if there's a difference
                 if (Math.abs(oldHours - workedHours) > 0.01) {

@@ -77,15 +77,15 @@ const getHoursPerEmployee = async (req, res) => {
                 firstName: d.first_name,
                 lastName: d.last_name,
                 username: d.username,
-                hourlyCost: parseFloat(d.hourly_cost) || 0
+                hourlyCost: Number.parseFloat(d.hourly_cost) || 0
             },
             employee: d.employee,
-            totalHours: parseFloat(d.total_hours || 0) + (liveHoursMap[d.user_id] || 0),
-            totalDays: parseInt(d.total_days || 0) + (parseInt(d.active_count) > 0 ? 1 : 0),
-            avgHoursPerDay: parseFloat(d.total_hours || 0) > 0
-                ? (parseFloat(d.total_hours || 0) / parseInt(d.total_days || 1)).toFixed(2)
+            totalHours: Number.parseFloat(d.total_hours || 0) + (liveHoursMap[d.user_id] || 0),
+            totalDays: Number.parseInt(d.total_days || 0) + (Number.parseInt(d.active_count) > 0 ? 1 : 0),
+            avgHoursPerDay: Number.parseFloat(d.total_hours || 0) > 0
+                ? (Number.parseFloat(d.total_hours || 0) / Number.parseInt(d.total_days || 1)).toFixed(2)
                 : '0.00',
-            isActive: parseInt(d.active_count) > 0
+            isActive: Number.parseInt(d.active_count) > 0
         })));
     } catch (error) {
         console.error('getHoursPerEmployee error:', error);
@@ -182,7 +182,7 @@ const getSiteReport = async (req, res, next) => {
             if (diffMs > 0) {
                 const hours = diffMs / 3600000; // Convert to hours
                 liveHours += hours;
-                const hourlyCost = parseFloat(att['user.hourlyCost']) || 0;
+                const hourlyCost = Number.parseFloat(att['user.hourlyCost']) || 0;
                 liveLaborCost += hours * hourlyCost;
             }
         });
@@ -201,11 +201,11 @@ const getSiteReport = async (req, res, next) => {
             type: sequelize.QueryTypes.SELECT
         });
 
-        const completedLaborCost = parseFloat(laborCostResult[0]?.total_labor_cost || 0);
+        const completedLaborCost = Number.parseFloat(laborCostResult[0]?.total_labor_cost || 0);
         const laborCost = completedLaborCost + liveLaborCost;
 
         // Calculate total hours (completed + live)
-        const completedHours = parseFloat(completedAttendance[0]?.totalHours || 0);
+        const completedHours = Number.parseFloat(completedAttendance[0]?.totalHours || 0);
         const totalHours = completedHours + liveHours;
 
         // Calculate materials cost from material_usages
@@ -221,7 +221,7 @@ const getSiteReport = async (req, res, next) => {
             type: sequelize.QueryTypes.SELECT
         });
 
-        const materialsCost = parseFloat(materialUsages[0]?.total_cost || 0);
+        const materialsCost = Number.parseFloat(materialUsages[0]?.total_cost || 0);
         const totalCost = laborCost + materialsCost;
 
         // Calculate percentages (avoid division by zero)
@@ -231,7 +231,7 @@ const getSiteReport = async (req, res, next) => {
         // Get contractValue and calculate margin
         // DEBUG: Log the raw contractValue from database
         console.log('[Analytics] Raw contractValue from DB:', site?.contractValue, 'Type:', typeof site?.contractValue);
-        const contractValue = parseFloat(site?.contractValue) || 0;
+        const contractValue = Number.parseFloat(site?.contractValue) || 0;
         console.log('[Analytics] Parsed contractValue:', contractValue);
         const marginCurrentValue = contractValue - totalCost;
         const marginCurrentPercent = contractValue > 0 ? (marginCurrentValue / contractValue) * 100 : 0;
@@ -288,7 +288,7 @@ const getSiteReport = async (req, res, next) => {
         // Calculate employee hours including live hours for active attendances
         const employeeHours = employeeHoursData.map(d => {
             let liveHoursForEmployee = 0;
-            const isActive = parseInt(d.active_count) > 0;
+            const isActive = Number.parseInt(d.active_count) > 0;
 
             // Calculate live hours from active attendances
             const activeClockIns = activeClockInsMap[d.user_id] || [];
@@ -308,10 +308,10 @@ const getSiteReport = async (req, res, next) => {
                     firstName: d.first_name,
                     lastName: d.last_name,
                     username: d.username,
-                    hourlyCost: parseFloat(d.hourly_cost) || 0
+                    hourlyCost: Number.parseFloat(d.hourly_cost) || 0
                 },
-                totalHours: parseFloat(d.completed_hours || 0) + liveHoursForEmployee,
-                totalDays: parseInt(d.completed_days || 0) + (isActive ? 1 : 0),
+                totalHours: Number.parseFloat(d.completed_hours || 0) + liveHoursForEmployee,
+                totalDays: Number.parseInt(d.completed_days || 0) + (isActive ? 1 : 0),
                 isActive: isActive
             };
         });
@@ -322,45 +322,45 @@ const getSiteReport = async (req, res, next) => {
                 id: m.id,
                 name: m.name || 'Materiale sconosciuto',
                 unit: m.unit || 'pz',
-                unitPrice: parseFloat(m.unitPrice) || 0,
-                totalQuantity: parseFloat(m.totalQuantity) || 0,
-                totalCost: parseFloat(m.totalCost) || 0
+                unitPrice: Number.parseFloat(m.unitPrice) || 0,
+                totalQuantity: Number.parseFloat(m.totalQuantity) || 0,
+                totalCost: Number.parseFloat(m.totalCost) || 0
             })),
             equipment: equipment.map(e => ({
                 ...e,
-                totalQuantity: parseFloat(e.totalQuantity) || 0,
-                count: parseInt(e.count) || 0
+                totalQuantity: Number.parseFloat(e.totalQuantity) || 0,
+                count: Number.parseInt(e.count) || 0
             })),
             attendance: completedAttendance[0] || { totalHours: 0, totalDays: 0 },
             totalHours,
-            liveHours: parseFloat(liveHours.toFixed(2)),
+            liveHours: Number.parseFloat(liveHours.toFixed(2)),
             activeWorkers: inProgressAttendances.length, // Number of workers currently on site
             hasLiveData: inProgressAttendances.length > 0,
             contractValue: contractValue || null,
             status: site?.status || 'active', // 'active' or 'completed'
             siteCost: {
-                total: parseFloat(totalCost.toFixed(2)),
-                labor: parseFloat(laborCost.toFixed(2)),
-                materials: parseFloat(materialsCost.toFixed(2))
+                total: Number.parseFloat(totalCost.toFixed(2)),
+                labor: Number.parseFloat(laborCost.toFixed(2)),
+                materials: Number.parseFloat(materialsCost.toFixed(2))
             },
             margin: contractValue ? {
-                marginCurrentValue: parseFloat(marginCurrentValue.toFixed(2)),
-                marginCurrentPercent: parseFloat(marginCurrentPercent.toFixed(2)),
-                costVsRevenuePercent: parseFloat(costVsRevenuePercent.toFixed(2))
+                marginCurrentValue: Number.parseFloat(marginCurrentValue.toFixed(2)),
+                marginCurrentPercent: Number.parseFloat(marginCurrentPercent.toFixed(2)),
+                costVsRevenuePercent: Number.parseFloat(costVsRevenuePercent.toFixed(2))
             } : null,
             costIncidence: {
-                materialsIncidencePercent: parseFloat(materialsIncidencePercent.toFixed(2)),
-                laborIncidencePercent: parseFloat(laborIncidencePercent.toFixed(2)),
-                totalCost: parseFloat(totalCost.toFixed(2)),
-                laborCost: parseFloat(laborCost.toFixed(2)),
-                materialsCost: parseFloat(materialsCost.toFixed(2))
+                materialsIncidencePercent: Number.parseFloat(materialsIncidencePercent.toFixed(2)),
+                laborIncidencePercent: Number.parseFloat(laborIncidencePercent.toFixed(2)),
+                totalCost: Number.parseFloat(totalCost.toFixed(2)),
+                laborCost: Number.parseFloat(laborCost.toFixed(2)),
+                materialsCost: Number.parseFloat(materialsCost.toFixed(2))
             },
             dailyReports: dailyReports.map(r => ({
                 id: r.id,
                 date: r.date,
                 activityType: r.activityType,
                 description: r.description,
-                hours: parseFloat(r.hours) || 0,
+                hours: Number.parseFloat(r.hours) || 0,
                 notes: r.notes,
                 createdAt: r.createdAt,
                 user: r.user ? {
@@ -472,7 +472,7 @@ const getDashboard = async (req, res) => {
             }]
         });
 
-        const monthlyHours = monthlyAttendances.reduce((sum, a) => sum + (parseFloat(a.totalHours) || 0), 0);
+        const monthlyHours = monthlyAttendances.reduce((sum, a) => sum + (Number.parseFloat(a.totalHours) || 0), 0);
 
         // Calculate company-wide costs
         let laborCost = 0;
@@ -490,8 +490,8 @@ const getDashboard = async (req, res) => {
         });
 
         allAttendances.forEach(a => {
-            const hours = parseFloat(a.totalHours) || 0;
-            const hourlyCost = parseFloat(a.user?.hourlyCost) || 25; // default €25/h
+            const hours = Number.parseFloat(a.totalHours) || 0;
+            const hourlyCost = Number.parseFloat(a.user?.hourlyCost) || 25; // default €25/h
             laborCost += hours * hourlyCost;
         });
 
@@ -508,7 +508,7 @@ const getDashboard = async (req, res) => {
             type: sequelize.QueryTypes.SELECT
         });
 
-        materialsCost = parseFloat(materialsCostResult[0]?.total_cost || 0);
+        materialsCost = Number.parseFloat(materialsCostResult[0]?.total_cost || 0);
 
         const totalCost = laborCost + materialsCost;
 
@@ -517,8 +517,8 @@ const getDashboard = async (req, res) => {
         const laborIncidencePercent = totalCost > 0 ? (laborCost / totalCost) * 100 : 0;
 
         // Calculate company margin
-        const totalContractValue = sites.reduce((sum, s) => sum + (parseFloat(s.contractValue) || 0), 0);
-        const sitesWithContractValue = sites.filter(s => parseFloat(s.contractValue) > 0).length;
+        const totalContractValue = sites.reduce((sum, s) => sum + (Number.parseFloat(s.contractValue) || 0), 0);
+        const sitesWithContractValue = sites.filter(s => Number.parseFloat(s.contractValue) > 0).length;
         const marginValue = totalContractValue - totalCost;
         const costVsRevenuePercent = totalContractValue > 0 ? (totalCost / totalContractValue) * 100 : 0;
 
@@ -526,31 +526,31 @@ const getDashboard = async (req, res) => {
             message: 'Dashboard analytics',
             activeSites,
             totalEmployees,
-            monthlyHours: parseFloat(monthlyHours.toFixed(2)),
+            monthlyHours: Number.parseFloat(monthlyHours.toFixed(2)),
             stats: {
                 totalSites,
                 activeSites,
                 totalWorkers: totalEmployees,
-                monthlyHours: parseFloat(monthlyHours.toFixed(2))
+                monthlyHours: Number.parseFloat(monthlyHours.toFixed(2))
             },
             companyCosts: {
-                total: parseFloat(totalCost.toFixed(2)),
-                labor: parseFloat(laborCost.toFixed(2)),
-                materials: parseFloat(materialsCost.toFixed(2))
+                total: Number.parseFloat(totalCost.toFixed(2)),
+                labor: Number.parseFloat(laborCost.toFixed(2)),
+                materials: Number.parseFloat(materialsCost.toFixed(2))
             },
             companyCostIncidence: {
-                materialsIncidencePercent: parseFloat(materialsIncidencePercent.toFixed(2)),
-                laborIncidencePercent: parseFloat(laborIncidencePercent.toFixed(2)),
-                totalCost: parseFloat(totalCost.toFixed(2)),
-                laborCost: parseFloat(laborCost.toFixed(2)),
-                materialsCost: parseFloat(materialsCost.toFixed(2))
+                materialsIncidencePercent: Number.parseFloat(materialsIncidencePercent.toFixed(2)),
+                laborIncidencePercent: Number.parseFloat(laborIncidencePercent.toFixed(2)),
+                totalCost: Number.parseFloat(totalCost.toFixed(2)),
+                laborCost: Number.parseFloat(laborCost.toFixed(2)),
+                materialsCost: Number.parseFloat(materialsCost.toFixed(2))
             },
             companyMargin: {
-                totalContractValue: parseFloat(totalContractValue.toFixed(2)),
+                totalContractValue: Number.parseFloat(totalContractValue.toFixed(2)),
                 totalSites,
                 sitesWithContractValue,
-                marginValue: parseFloat(marginValue.toFixed(2)),
-                costVsRevenuePercent: parseFloat(costVsRevenuePercent.toFixed(2))
+                marginValue: Number.parseFloat(marginValue.toFixed(2)),
+                costVsRevenuePercent: Number.parseFloat(costVsRevenuePercent.toFixed(2))
             }
         });
     } catch (error) {

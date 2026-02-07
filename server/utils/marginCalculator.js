@@ -29,8 +29,8 @@ function getSiteMarginInfo({ contractValue, totalCost }) {
     }
 
     return {
-        marginValue: parseFloat(marginValue.toFixed(2)),
-        marginPercent: parseFloat(marginPercent.toFixed(1)),
+        marginValue: Number.parseFloat(marginValue.toFixed(2)),
+        marginPercent: Number.parseFloat(marginPercent.toFixed(1)),
         status
     };
 }

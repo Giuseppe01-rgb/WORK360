@@ -118,7 +118,7 @@ const getTodayUsage = async (req, res) => {
 const getMostUsedBySite = async (req, res) => {
     try {
         const { siteId } = req.params;
-        const limit = parseInt(req.query.limit) || 5;
+        const limit = Number.parseInt(req.query.limit) || 5;
 
         if (!siteId) {
             return res.status(400).json({ message: 'ID cantiere richiesto' });
@@ -160,8 +160,8 @@ const getMostUsedBySite = async (req, res) => {
             const material = materials.find(m => m.id === usage.material_id);
             return {
                 material,
-                totalConfezioni: parseInt(usage.total_confezioni),
-                usageCount: parseInt(usage.usage_count)
+                totalConfezioni: Number.parseInt(usage.total_confezioni),
+                usageCount: Number.parseInt(usage.usage_count)
             };
         }).filter(item => item.material);
 
