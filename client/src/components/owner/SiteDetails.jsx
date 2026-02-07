@@ -532,7 +532,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <div className="flex justify-between items-center">
                                             <span className="flex items-center gap-2 text-slate-600 font-bold text-sm">
                                                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                                                Margine %
+                                                <span>Margine %</span>
                                             </span>
                                             <span className="font-black text-slate-900">{(report.margin?.marginCurrentPercent || 0).toFixed(1)}%</span>
                                         </div>
@@ -926,6 +926,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                     <div
                         role="dialog"
                         aria-modal="true"
+                        tabIndex={-1}
                         className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
                         onClick={(e) => { if (e.target === e.currentTarget) setSelectedNote(null); }}
                         onKeyDown={(e) => e.key === 'Escape' && setSelectedNote(null)}
@@ -963,6 +964,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                     <div
                         role="dialog"
                         aria-modal="true"
+                        tabIndex={-1}
                         className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
                         onClick={(e) => { if (e.target === e.currentTarget) setSelectedPhoto(null); }}
                         onKeyDown={(e) => e.key === 'Escape' && setSelectedPhoto(null)}
@@ -1157,6 +1159,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                             <div
                                 role="dialog"
                                 aria-modal="true"
+                                tabIndex={-1}
                                 className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center z-[10000]"
                                 onClick={(e) => { if (e.target === e.currentTarget) setSelectedMaterial(null); }}
                                 onKeyDown={(e) => e.key === 'Escape' && setSelectedMaterial(null)}
@@ -1234,6 +1237,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                             <div
                                 role="dialog"
                                 aria-modal="true"
+                                tabIndex={-1}
                                 className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10001] p-4"
                                 onClick={(e) => {
                                     if (e.target === e.currentTarget) {

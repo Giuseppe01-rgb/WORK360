@@ -167,7 +167,9 @@ const MaterialOCRScanner = ({ onScanComplete, onClose }) => {
                                 autoPlay
                                 playsInline
                                 className="w-full h-auto"
-                            />
+                            >
+                                <track kind="captions" />
+                            </video>
                             {/* Overlay guide */}
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                 <div className="border-4 border-blue-500 border-dashed rounded-lg w-3/4 h-2/3 opacity-50"></div>

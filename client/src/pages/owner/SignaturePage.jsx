@@ -163,11 +163,10 @@ export default function SignaturePage() {
                     {/* Preview Canvas */}
                     <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-8 mb-6 flex items-center justify-center min-h-[150px]">
                         <canvas
-                            role="img"
-                            aria-label="Anteprima firma"
                             ref={canvasRef}
                             width={600}
                             height={150}
+                            aria-label="Anteprima firma"
                             className="max-w-full h-auto"
                         />
                     </div>

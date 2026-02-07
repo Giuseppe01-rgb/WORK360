@@ -336,7 +336,9 @@ const ReportNewMaterial = ({ onSubmit, onClose, initialCode = '' }) => {
                                         autoPlay
                                         playsInline
                                         className="w-full h-auto"
-                                    />
+                                    >
+                                        <track kind="captions" />
+                                    </video>
                                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                         <div className="border-4 border-white border-dashed rounded-lg w-3/4 h-2/3 opacity-50"></div>
                                     </div>

@@ -611,6 +611,7 @@ export default function MaterialsCatalog() {
                 <div
                     role="dialog"
                     aria-modal="true"
+                    tabIndex={-1}
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
                     onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false); }}
                     onKeyDown={(e) => { if (e.key === 'Escape') setShowAddModal(false); }}
@@ -737,6 +738,7 @@ export default function MaterialsCatalog() {
                 <div
                     role="dialog"
                     aria-modal="true"
+                    tabIndex={-1}
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
                     onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false); }}
                     onKeyDown={(e) => { if (e.key === 'Escape') setShowEditModal(false); }}

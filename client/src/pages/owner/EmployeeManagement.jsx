@@ -336,6 +336,7 @@ export default function EmployeeManagement() {
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="employee-modal-title"
+                    tabIndex={-1}
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
                     onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
                     onKeyDown={(e) => { if (e.key === 'Escape') setShowModal(false); }}

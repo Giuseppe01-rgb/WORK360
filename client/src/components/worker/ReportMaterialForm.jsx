@@ -391,7 +391,9 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
                                         autoPlay
                                         playsInline
                                         className="w-full h-auto"
-                                    />
+                                    >
+                                        <track kind="captions" />
+                                    </video>
                                 </div>
                                 <canvas ref={canvasRef} className="hidden" />
                                 <button

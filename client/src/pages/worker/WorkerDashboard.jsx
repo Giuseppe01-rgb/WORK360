@@ -751,7 +751,7 @@ export default function WorkerDashboard() {
                             {activeAttendance && (
                                 <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                                     <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                    Cantiere selezionato automaticamente (sei timbrato)
+                                    <span>Cantiere selezionato automaticamente (sei timbrato)</span>
                                 </p>
                             )}
                             {!activeAttendance && selectedSite && (

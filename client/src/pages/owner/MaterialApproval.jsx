@@ -363,6 +363,7 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="create-material-modal-title"
+            tabIndex={-1}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
             onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
@@ -529,6 +530,7 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="link-material-modal-title"
+            tabIndex={-1}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
             onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}

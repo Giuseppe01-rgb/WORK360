@@ -254,9 +254,10 @@ const EconomiaForm = () => {
 
                         {/* Hours Selector */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-3">
+                            <label htmlFor="hours_display" className="block text-sm font-medium text-slate-700 mb-3">
                                 Ore Extra
                             </label>
+                            <input type="hidden" id="hours_display" value={formData.hours} readOnly />
                             <div className="flex items-center justify-center gap-4">
                                 <button
                                     type="button"
@@ -295,10 +296,7 @@ const EconomiaForm = () => {
                         {/* Description */}
                         <div>
                             <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-2">
-                                Descrizione
-                                <span className="text-slate-500 font-normal text-xs ml-2">
-                                    (minimo 10 caratteri)
-                                </span>
+                                Descrizione <span className="text-slate-500 font-normal text-xs">(minimo 10 caratteri)</span>
                             </label>
                             <textarea
                                 id="description"
