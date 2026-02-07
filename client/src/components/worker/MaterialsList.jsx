@@ -44,7 +44,7 @@ const MaterialsList = ({ materials, loading, onDelete }) => {
     const getTotalPrice = (usage) => {
         const material = getMaterial(usage);
         if (material?.prezzo && usage.numeroConfezioni) {
-            const total = parseFloat(material.prezzo) * usage.numeroConfezioni;
+            const total = Number.parseFloat(material.prezzo) * usage.numeroConfezioni;
             return total.toFixed(2);
         }
         return null;

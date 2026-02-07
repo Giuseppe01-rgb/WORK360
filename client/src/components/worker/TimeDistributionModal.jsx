@@ -11,12 +11,12 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
     // Initialize percentages evenly distributed
     useEffect(() => {
         if (activities.length > 0) {
-            const evenPercentage = parseFloat((100 / activities.length).toFixed(1));
+            const evenPercentage = Number.parseFloat((100 / activities.length).toFixed(1));
             const initial = {};
             activities.forEach((activity, index) => {
                 // Give the first activity any leftover to ensure we start at exactly 100%
                 if (index === 0) {
-                    initial[activity.id] = parseFloat((100 - evenPercentage * (activities.length - 1)).toFixed(1));
+                    initial[activity.id] = Number.parseFloat((100 - evenPercentage * (activities.length - 1)).toFixed(1));
                 } else {
                     initial[activity.id] = evenPercentage;
                 }
@@ -26,7 +26,7 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
     }, [activities]);
 
     const handlePercentageChange = (activityId, value) => {
-        const numValue = parseFloat(value) || 0;
+        const numValue = Number.parseFloat(value) || 0;
         if (numValue >= 0 && numValue <= 100) {
             setPercentages(prev => ({ ...prev, [activityId]: numValue }));
         }
@@ -41,13 +41,13 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
     };
 
     const handleAutoRebalance = () => {
-        const total = parseFloat(getTotalPercentage());
+        const total = Number.parseFloat(getTotalPercentage());
         if (total === 0) return;
 
         // Normalize all percentages to sum to 100
         const rebalanced = {};
         Object.entries(percentages).forEach(([id, value]) => {
-            rebalanced[id] = parseFloat(((value / total) * 100).toFixed(1));
+            rebalanced[id] = Number.parseFloat(((value / total) * 100).toFixed(1));
         });
 
         // Adjust for rounding errors - add/subtract from largest percentage
@@ -55,7 +55,7 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
         const diff = 100 - newTotal;
         if (Math.abs(diff) > 0) {
             const maxId = Object.entries(rebalanced).reduce((a, b) => b[1] > a[1] ? b : a, ['', 0])[0];
-            rebalanced[maxId] = parseFloat((rebalanced[maxId] + diff).toFixed(1));
+            rebalanced[maxId] = Number.parseFloat((rebalanced[maxId] + diff).toFixed(1));
         }
 
         setPercentages(rebalanced);
@@ -73,7 +73,7 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
     };
 
     const handleSubmit = async () => {
-        const total = parseFloat(getTotalPercentage());
+        const total = Number.parseFloat(getTotalPercentage());
 
         if (Math.abs(total - 100) > 0.1) {
             showError(`La somma deve essere esattamente 100% (attuale: ${total}%)`);
@@ -97,7 +97,7 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
         }
     };
 
-    const total = parseFloat(getTotalPercentage());
+    const total = Number.parseFloat(getTotalPercentage());
     const isValid = Math.abs(total - 100) < 0.1;
 
     return (
@@ -173,7 +173,7 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
                                             <span className="text-sm font-medium text-slate-600">%</span>
                                         </div>
                                         <div className="flex-1 text-right">
-                                            <span className="text-lg font-bold text-blue-600">{formatDuration(parseFloat(hours))}</span>
+                                            <span className="text-lg font-bold text-blue-600">{formatDuration(Number.parseFloat(hours))}</span>
                                         </div>
                                     </div>
                                 </div>

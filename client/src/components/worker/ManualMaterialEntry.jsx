@@ -80,11 +80,12 @@ const ManualMaterialEntry = ({ initialData = {}, onSubmit, onClose, onSearchCata
                 <div className="p-6 space-y-5">
                     {/* Codice Prodotto (opzionale, autocomplete) */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <label htmlFor="productCode" className="block text-sm font-bold text-slate-900 mb-2">
                             Codice Prodotto <span className="text-slate-400 font-normal">(opzionale)</span>
                         </label>
                         <div className="relative">
                             <input
+                                id="productCode"
                                 type="text"
                                 value={formData.codice_prodotto}
                                 onChange={(e) => handleCodeChange(e.target.value.toUpperCase())}
@@ -107,10 +108,11 @@ const ManualMaterialEntry = ({ initialData = {}, onSubmit, onClose, onSearchCata
 
                     {/* Nome Prodotto (obbligatorio) */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <label htmlFor="productName" className="block text-sm font-bold text-slate-900 mb-2">
                             Nome Prodotto <span className="text-red-600">*</span>
                         </label>
                         <input
+                            id="productName"
                             type="text"
                             value={formData.nome_prodotto}
                             onChange={(e) => handleChange('nome_prodotto', e.target.value)}
@@ -121,11 +123,12 @@ const ManualMaterialEntry = ({ initialData = {}, onSubmit, onClose, onSearchCata
 
                     {/* Quantità per Confezione */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <span className="block text-sm font-bold text-slate-900 mb-2">
                             Quantità per Confezione <span className="text-slate-400 font-normal">(opzionale)</span>
-                        </label>
+                        </span>
                         <div className="grid grid-cols-2 gap-3">
                             <input
+                                aria-label="Valore quantità"
                                 type="text"
                                 value={formData.quantita_valore}
                                 onChange={(e) => handleChange('quantita_valore', e.target.value)}
@@ -133,6 +136,7 @@ const ManualMaterialEntry = ({ initialData = {}, onSubmit, onClose, onSearchCata
                                 className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none"
                             />
                             <input
+                                aria-label="Unità di misura"
                                 type="text"
                                 value={formData.quantita_unita}
                                 onChange={(e) => handleChange('quantita_unita', e.target.value.toLowerCase())}
@@ -145,9 +149,9 @@ const ManualMaterialEntry = ({ initialData = {}, onSubmit, onClose, onSearchCata
 
                     {/* Pezzi Usati (obbligatorio) */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-3">
+                        <span className="block text-sm font-bold text-slate-900 mb-3">
                             Pezzi Usati <span className="text-red-600">*</span>
-                        </label>
+                        </span>
                         <div className="flex items-center gap-4">
                             <button
                                 type="button"

@@ -132,8 +132,9 @@ export default function AnalyticsDashboard() {
                             <Filter className="w-5 h-5" />
                         </div>
                         <div className="flex-1">
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Filtra per Cantiere</label>
+                            <label htmlFor="siteFilter" className="block text-sm font-semibold text-slate-700 mb-1">Filtra per Cantiere</label>
                             <select
+                                id="siteFilter"
                                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                 value={selectedSite}
                                 onChange={(e) => setSelectedSite(e.target.value)}

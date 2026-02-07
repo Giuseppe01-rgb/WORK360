@@ -214,9 +214,9 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
 
                     {/* Photo Upload */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-3">
+                        <span className="block text-sm font-bold text-slate-900 mb-3">
                             Foto Etichetta <span className="text-red-600">*</span>
-                        </label>
+                        </span>
 
                         {photoPreview ? (
                             <div className="relative">
@@ -270,10 +270,11 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
 
                     {/* Material Name */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <label htmlFor="materialName" className="block text-sm font-bold text-slate-900 mb-2">
                             Nome del materiale <span className="text-red-600">*</span>
                         </label>
                         <input
+                            id="materialName"
                             type="text"
                             value={nomeDigitato}
                             onChange={(e) => setNomeDigitato(e.target.value)}
@@ -288,9 +289,9 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
 
                     {/* Quantity */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-3">
+                        <span className="block text-sm font-bold text-slate-900 mb-3">
                             Quante confezioni hai usato? <span className="text-red-600">*</span>
-                        </label>
+                        </span>
                         <div className="flex items-center gap-4">
                             <button
                                 type="button"
@@ -318,10 +319,11 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
 
                     {/* Notes */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <label htmlFor="materialNotes" className="block text-sm font-bold text-slate-900 mb-2">
                             Note (opzionale)
                         </label>
                         <textarea
+                            id="materialNotes"
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                             placeholder="Es. Etichetta rovinata, codice illeggibile..."

@@ -205,7 +205,7 @@ export default function CompanySettings() {
                         {/* Logo Upload */}
                         <div className="flex flex-col md:flex-row gap-8 items-start">
                             <div className="w-full md:w-1/3">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Logo Aziendale</label>
+                                <label htmlFor="companyLogo" className="block text-sm font-medium text-slate-700 mb-2">Logo Aziendale</label>
                                 <div className="relative group cursor-pointer">
                                     <div className={`w-40 h-40 rounded-[2.5rem] border-2 border-dashed flex items-center justify-center overflow-hidden bg-slate-50 transition-colors ${logoPreview ? 'border-slate-200' : 'border-slate-300 hover:border-[#5D5FEF]'}`}>
                                         {logoPreview ? (
@@ -217,6 +217,7 @@ export default function CompanySettings() {
                                             </div>
                                         )}
                                         <input
+                                            id="companyLogo"
                                             type="file"
                                             accept="image/*"
                                             onChange={handleLogoChange}
@@ -230,10 +231,11 @@ export default function CompanySettings() {
                             <div className="w-full md:w-2/3 space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Ragione Sociale</label>
+                                        <label htmlFor="companyName" className="block text-sm font-medium text-slate-700 mb-2">Ragione Sociale</label>
                                         <div className="relative">
                                             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                             <input
+                                                id="companyName"
                                                 type="text"
                                                 name="name"
                                                 value={formData.name}
@@ -245,10 +247,11 @@ export default function CompanySettings() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Titolare / Legale Rappresentante</label>
+                                        <label htmlFor="ownerName" className="block text-sm font-medium text-slate-700 mb-2">Titolare / Legale Rappresentante</label>
                                         <div className="relative">
                                             <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                             <input
+                                                id="ownerName"
                                                 type="text"
                                                 name="ownerName"
                                                 value={formData.ownerName}
@@ -263,10 +266,11 @@ export default function CompanySettings() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Partita IVA</label>
+                                        <label htmlFor="piva" className="block text-sm font-medium text-slate-700 mb-2">Partita IVA</label>
                                         <div className="relative">
                                             <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                             <input
+                                                id="piva"
                                                 type="text"
                                                 name="piva"
                                                 value={formData.piva}
@@ -278,10 +282,11 @@ export default function CompanySettings() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Email Aziendale</label>
+                                        <label htmlFor="companyEmail" className="block text-sm font-medium text-slate-700 mb-2">Email Aziendale</label>
                                         <div className="relative">
                                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                             <input
+                                                id="companyEmail"
                                                 type="email"
                                                 name="email"
                                                 value={formData.email}
@@ -296,10 +301,11 @@ export default function CompanySettings() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">PEC (Posta Elettronica Certificata)</label>
+                                        <label htmlFor="pec" className="block text-sm font-medium text-slate-700 mb-2">PEC (Posta Elettronica Certificata)</label>
                                         <div className="relative">
                                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                             <input
+                                                id="pec"
                                                 type="email"
                                                 name="pec"
                                                 value={formData.pec}
@@ -310,10 +316,11 @@ export default function CompanySettings() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Telefono</label>
+                                        <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">Telefono</label>
                                         <div className="relative">
                                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                             <input
+                                                id="phone"
                                                 type="tel"
                                                 name="phone"
                                                 value={formData.phone}
@@ -337,8 +344,9 @@ export default function CompanySettings() {
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Indirizzo</label>
+                                    <label htmlFor="addressStreet" className="block text-sm font-medium text-slate-700 mb-2">Indirizzo</label>
                                     <input
+                                        id="addressStreet"
                                         type="text"
                                         name="address.street"
                                         value={formData.address.street}
@@ -348,8 +356,9 @@ export default function CompanySettings() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Città</label>
+                                    <label htmlFor="addressCity" className="block text-sm font-medium text-slate-700 mb-2">Città</label>
                                     <input
+                                        id="addressCity"
                                         type="text"
                                         name="address.city"
                                         value={formData.address.city}
@@ -360,8 +369,9 @@ export default function CompanySettings() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Provincia</label>
+                                        <label htmlFor="addressProvince" className="block text-sm font-medium text-slate-700 mb-2">Provincia</label>
                                         <input
+                                            id="addressProvince"
                                             type="text"
                                             name="address.province"
                                             value={formData.address.province}
@@ -372,8 +382,9 @@ export default function CompanySettings() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">CAP</label>
+                                        <label htmlFor="addressCap" className="block text-sm font-medium text-slate-700 mb-2">CAP</label>
                                         <input
+                                            id="addressCap"
                                             type="text"
                                             name="address.cap"
                                             value={formData.address.cap}
@@ -396,8 +407,9 @@ export default function CompanySettings() {
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Codice Fiscale</label>
+                                    <label htmlFor="taxCode" className="block text-sm font-medium text-slate-700 mb-2">Codice Fiscale</label>
                                     <input
+                                        id="taxCode"
                                         type="text"
                                         name="taxCode"
                                         value={formData.taxCode}
@@ -407,8 +419,9 @@ export default function CompanySettings() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Numero REA</label>
+                                    <label htmlFor="reaNumber" className="block text-sm font-medium text-slate-700 mb-2">Numero REA</label>
                                     <input
+                                        id="reaNumber"
                                         type="text"
                                         name="reaNumber"
                                         value={formData.reaNumber}
@@ -418,8 +431,9 @@ export default function CompanySettings() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Capitale Sociale</label>
+                                    <label htmlFor="shareCapital" className="block text-sm font-medium text-slate-700 mb-2">Capitale Sociale</label>
                                     <input
+                                        id="shareCapital"
                                         type="text"
                                         name="shareCapital"
                                         value={formData.shareCapital}
@@ -430,8 +444,9 @@ export default function CompanySettings() {
                                 </div>
                                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="md:col-span-1">
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">Banca</label>
+                                        <label htmlFor="bankName" className="block text-sm font-medium text-slate-700 mb-2">Banca</label>
                                         <input
+                                            id="bankName"
                                             type="text"
                                             name="bankName"
                                             value={formData.bankName}
@@ -441,8 +456,9 @@ export default function CompanySettings() {
                                         />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">IBAN</label>
+                                        <label htmlFor="iban" className="block text-sm font-medium text-slate-700 mb-2">IBAN</label>
                                         <input
+                                            id="iban"
                                             type="text"
                                             name="iban"
                                             value={formData.iban}
@@ -479,8 +495,9 @@ export default function CompanySettings() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Servizio Email</label>
+                                    <label htmlFor="emailService" className="block text-sm font-medium text-slate-700 mb-2">Servizio Email</label>
                                     <select
+                                        id="emailService"
                                         name="service"
                                         value={emailConfig.service}
                                         onChange={handleEmailConfigChange}
@@ -493,8 +510,9 @@ export default function CompanySettings() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Email *</label>
+                                    <label htmlFor="emailUser" className="block text-sm font-medium text-slate-700 mb-2">Email *</label>
                                     <input
+                                        id="emailUser"
                                         type="email"
                                         name="user"
                                         value={emailConfig.user}
@@ -507,8 +525,9 @@ export default function CompanySettings() {
                                 {emailConfig.service === 'custom' && (
                                     <>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-2">Host SMTP</label>
+                                            <label htmlFor="emailHost" className="block text-sm font-medium text-slate-700 mb-2">Host SMTP</label>
                                             <input
+                                                id="emailHost"
                                                 type="text"
                                                 name="host"
                                                 value={emailConfig.host}
@@ -518,8 +537,9 @@ export default function CompanySettings() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-2">Porta</label>
+                                            <label htmlFor="emailPort" className="block text-sm font-medium text-slate-700 mb-2">Porta</label>
                                             <input
+                                                id="emailPort"
                                                 type="number"
                                                 name="port"
                                                 value={emailConfig.port}
@@ -531,8 +551,9 @@ export default function CompanySettings() {
                                 )}
 
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">App Password *</label>
+                                    <label htmlFor="emailPassword" className="block text-sm font-medium text-slate-700 mb-2">App Password *</label>
                                     <input
+                                        id="emailPassword"
                                         type="password"
                                         name="password"
                                         value={emailConfig.password}
@@ -555,8 +576,9 @@ export default function CompanySettings() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Nome Mittente</label>
+                                    <label htmlFor="emailFromName" className="block text-sm font-medium text-slate-700 mb-2">Nome Mittente</label>
                                     <input
+                                        id="emailFromName"
                                         type="text"
                                         name="fromName"
                                         value={emailConfig.fromName || formData.name}

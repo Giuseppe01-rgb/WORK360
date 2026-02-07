@@ -205,7 +205,7 @@ export default function AttendanceList() {
                         <button
                             onClick={() => {
                                 const siteName = filters.siteId
-                                    ? sites.find(s => s.id === parseInt(filters.siteId))?.name
+                                    ? sites.find(s => s.id === Number.parseInt(filters.siteId))?.name
                                     : null;
                                 const dateRange = (filters.startDate || filters.endDate)
                                     ? `${filters.startDate || 'inizio'} - ${filters.endDate || 'oggi'}`
@@ -232,8 +232,9 @@ export default function AttendanceList() {
                     {/* Row 1: Cantiere e Operaio */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Cantiere</label>
+                            <label htmlFor="filterSite" className="block text-sm font-semibold text-slate-700 mb-1">Cantiere</label>
                             <select
+                                id="filterSite"
                                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                 value={filters.siteId}
                                 onChange={(e) => setFilters({ ...filters, siteId: e.target.value })}
@@ -246,8 +247,9 @@ export default function AttendanceList() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Operaio</label>
+                            <label htmlFor="filterUser" className="block text-sm font-semibold text-slate-700 mb-1">Operaio</label>
                             <select
+                                id="filterUser"
                                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                 value={filters.userId}
                                 onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
@@ -264,8 +266,9 @@ export default function AttendanceList() {
 
                     {/* Row 2: Stato */}
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1">Stato</label>
+                        <label htmlFor="filterStatus" className="block text-sm font-semibold text-slate-700 mb-1">Stato</label>
                         <select
+                            id="filterStatus"
                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                             value={filters.status}
                             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
@@ -279,8 +282,9 @@ export default function AttendanceList() {
                     {/* Row 3: Date su stessa riga */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Data Inizio</label>
+                            <label htmlFor="filterStartDate" className="block text-sm font-semibold text-slate-700 mb-1">Data Inizio</label>
                             <input
+                                id="filterStartDate"
                                 type="date"
                                 className="w-full max-w-full block min-h-[50px] px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                 value={filters.startDate}
@@ -289,8 +293,9 @@ export default function AttendanceList() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Data Fine</label>
+                            <label htmlFor="filterEndDate" className="block text-sm font-semibold text-slate-700 mb-1">Data Fine</label>
                             <input
+                                id="filterEndDate"
                                 type="date"
                                 className="w-full max-w-full block min-h-[50px] px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                 value={filters.endDate}
@@ -390,7 +395,10 @@ export default function AttendanceList() {
                             return (
                                 <div
                                     key={attendance.id}
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() => setSelectedAttendance(attendance)}
+                                    onKeyDown={(e) => e.key === 'Enter' && setSelectedAttendance(attendance)}
                                     className={`bg-white rounded-[2.5rem] shadow-sm hover:shadow-md transition-all cursor-pointer border-2 ${isCompleted ? 'border-slate-100' : 'border-green-200'
                                         }`}
                                 >
@@ -485,8 +493,12 @@ export default function AttendanceList() {
                 <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
                     {/* Backdrop */}
                     <div
-                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        role="button"
+                        aria-label="Chiudi dettaglio"
+                        tabIndex={0}
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-default"
                         onClick={() => setSelectedAttendance(null)}
+                        onKeyDown={(e) => e.key === 'Escape' && setSelectedAttendance(null)}
                     />
 
                     {/* Sheet */}

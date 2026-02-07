@@ -147,9 +147,9 @@ const ReportNewMaterial = ({ onSubmit, onClose, initialCode = '' }) => {
                     {/* Photo */}
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                            <label className="block text-sm font-bold text-slate-900">
+                            <span className="block text-sm font-bold text-slate-900">
                                 📸 Foto dell'etichetta *
-                            </label>
+                            </span>
                             {photoPreview && (
                                 <button
                                     type="button"
@@ -210,10 +210,11 @@ const ReportNewMaterial = ({ onSubmit, onClose, initialCode = '' }) => {
 
                     {/* Name */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <label htmlFor="newMaterialName" className="block text-sm font-bold text-slate-900 mb-2">
                             🏷 Nome del materiale (come lo vedi sul secchio) *
                         </label>
                         <input
+                            id="newMaterialName"
                             type="text"
                             placeholder="Es. Pittura bianca opaca"
                             value={formData.nomeDigitato}
@@ -225,10 +226,11 @@ const ReportNewMaterial = ({ onSubmit, onClose, initialCode = '' }) => {
 
                     {/* Category */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <label htmlFor="newMaterialCategory" className="block text-sm font-bold text-slate-900 mb-2">
                             📂 Categoria
                         </label>
                         <select
+                            id="newMaterialCategory"
                             value={formData.categoriaDigitata}
                             onChange={(e) => setFormData({ ...formData, categoriaDigitata: e.target.value })}
                             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none text-lg"
@@ -241,9 +243,9 @@ const ReportNewMaterial = ({ onSubmit, onClose, initialCode = '' }) => {
 
                     {/* Quantity */}
                     <div>
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <span className="block text-sm font-bold text-slate-900 mb-2">
                             🔢 Quanti secchi/sacchi hai usato?
-                        </label>
+                        </span>
                         <div className="flex items-center gap-4">
                             <button
                                 type="button"

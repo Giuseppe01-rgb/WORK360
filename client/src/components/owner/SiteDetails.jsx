@@ -180,7 +180,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     // Handle bulk economie submission
     const handleBulkEconomieSubmit = async (e) => {
         e.preventDefault();
-        if (!bulkEconomieForm.hours || parseFloat(bulkEconomieForm.hours) <= 0) {
+        if (!bulkEconomieForm.hours || Number.parseFloat(bulkEconomieForm.hours) <= 0) {
             alert('Inserisci un numero di ore valido');
             return;
         }
@@ -193,7 +193,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
         try {
             await economiaAPI.createBulk({
                 siteId: site.id,
-                hours: parseFloat(bulkEconomieForm.hours),
+                hours: Number.parseFloat(bulkEconomieForm.hours),
                 description: bulkEconomieForm.description.trim()
             });
             // Refresh economie list
@@ -265,11 +265,11 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     }
 
     // Calculations for the cost card (economie are NOT costs, they are additional revenue)
-    const laborCost = parseFloat(report?.siteCost?.labor) || 0;
-    const materialCost = parseFloat(report?.siteCost?.materials) || 0;
+    const laborCost = Number.parseFloat(report?.siteCost?.labor) || 0;
+    const materialCost = Number.parseFloat(report?.siteCost?.materials) || 0;
     // Economie are revenue, not costs - calculate for display only
     // IMPORTANT: Parse hours as float to avoid string concatenation issues
-    const economieHours = (economie || []).reduce((sum, e) => sum + (parseFloat(e.hours) || 0), 0);
+    const economieHours = (economie || []).reduce((sum, e) => sum + (Number.parseFloat(e.hours) || 0), 0);
     const economieRevenue = economieHours * 30; // 30€/hour billable to client
     // Total cost excludes economie (they add to revenue, not costs)
     const totalCost = laborCost + materialCost;
@@ -430,8 +430,8 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
                         {/* MARGIN CARD */}
                         {(() => {
-                            const contractVal = parseFloat(report?.contractValue);
-                            const isValidContract = !isNaN(contractVal) && contractVal > 0;
+                            const contractVal = Number.parseFloat(report?.contractValue);
+                            const isValidContract = !Number.isNaN(contractVal) && contractVal > 0;
                             return isValidContract;
                         })() ? (
                             <div className={`p-6 rounded-[2.5rem] shadow-sm border mb-6 relative overflow-hidden ${report.margin?.marginCurrentValue >= 0
@@ -464,11 +464,11 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     {(() => {
                                         // Calculate margin including economie as additional revenue
                                         // Ensure contractValue is a valid number
-                                        const contractVal = parseFloat(report.contractValue) || 0;
+                                        const contractVal = Number.parseFloat(report.contractValue) || 0;
                                         const totalRevenue = contractVal + economieRevenue;
                                         const adjustedMargin = totalRevenue - totalCost;
                                         // Check for NaN and fallback to 0
-                                        const displayMargin = isNaN(adjustedMargin) ? 0 : adjustedMargin;
+                                        const displayMargin = Number.isNaN(adjustedMargin) ? 0 : adjustedMargin;
                                         return (
                                             <p className={`text-5xl font-black tracking-tight ${displayMargin >= 0
                                                 ? 'text-green-600'
@@ -489,7 +489,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                             {report.status === 'completed' ? 'Prezzo fatturato' : 'Prezzo pattuito'}
                                         </p>
                                         <p className="text-2xl font-bold text-slate-900">
-                                            {(parseFloat(report.contractValue) || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            {(Number.parseFloat(report.contractValue) || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             <span className="text-lg text-slate-400 ml-1">€</span>
                                         </p>
                                     </div>
@@ -724,8 +724,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Ore totali</label>
+                                            <label htmlFor="bulkHours" className="block text-sm font-medium text-slate-700 mb-1">Ore totali</label>
                                             <input
+                                                id="bulkHours"
                                                 type="number"
                                                 step="0.5"
                                                 min="0.5"
@@ -735,11 +736,12 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                                 placeholder="es. 200"
                                                 required
                                             />
-                                            <p className="text-xs text-slate-500 mt-1">= {((parseFloat(bulkEconomieForm.hours) || 0) * 30).toFixed(2)}€ di valore</p>
+                                            <p className="text-xs text-slate-500 mt-1">= {((Number.parseFloat(bulkEconomieForm.hours) || 0) * 30).toFixed(2)}€ di valore</p>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Descrizione</label>
+                                            <label htmlFor="bulkDescription" className="block text-sm font-medium text-slate-700 mb-1">Descrizione</label>
                                             <input
+                                                id="bulkDescription"
                                                 type="text"
                                                 value={bulkEconomieForm.description}
                                                 onChange={(e) => setBulkEconomieForm({ ...bulkEconomieForm, description: e.target.value })}
@@ -1092,7 +1094,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         <p className="text-3xl font-bold text-green-600">
                                             {materialUsages.reduce((acc, curr) => {
                                                 const material = curr.materialMaster || curr.material;
-                                                const price = parseFloat(material?.price) || parseFloat(material?.prezzo) || 0;
+                                                const price = Number.parseFloat(material?.price) || Number.parseFloat(material?.prezzo) || 0;
                                                 return acc + (price * (curr.numeroConfezioni || 0));
                                             }, 0).toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                             <span className="text-xl text-green-400 ml-1">€</span>
@@ -1112,7 +1114,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     materialUsages.map((usage, index) => {
                                         const material = usage.materialMaster || usage.material;
                                         const materialName = material?.displayName || material?.nome_prodotto || 'Materiale';
-                                        const unitPrice = parseFloat(material?.price) || parseFloat(material?.prezzo) || 0;
+                                        const unitPrice = Number.parseFloat(material?.price) || Number.parseFloat(material?.prezzo) || 0;
                                         const totalCost = unitPrice * (usage.numeroConfezioni || 0);
 
                                         return (
@@ -1188,13 +1190,13 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                             <div className="bg-slate-50 p-4 rounded-2xl">
                                                 <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Prezzo Unit.</p>
                                                 <p className="text-2xl font-bold text-slate-900">
-                                                    €{(parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.price) || parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0).toFixed(2)}
+                                                    €{(Number.parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.price) || Number.parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0).toFixed(2)}
                                                 </p>
                                             </div>
                                             <div className="bg-green-50 p-4 rounded-2xl col-span-2">
                                                 <p className="text-xs text-green-600 uppercase tracking-wide mb-1">Totale</p>
                                                 <p className="text-3xl font-bold text-green-600">
-                                                    €{((parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.price) || parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0) * selectedMaterial.numeroConfezioni).toFixed(2)}
+                                                    €{((Number.parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.price) || Number.parseFloat((selectedMaterial.materialMaster || selectedMaterial.material)?.prezzo) || 0) * selectedMaterial.numeroConfezioni).toFixed(2)}
                                                 </p>
                                             </div>
                                         </div>
@@ -1248,7 +1250,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         e.preventDefault();
                                         const formData = new FormData(e.target);
                                         const updateData = {
-                                            numeroConfezioni: parseInt(formData.get('quantity')),
+                                            numeroConfezioni: Number.parseInt(formData.get('quantity')),
                                             note: formData.get('note')
                                         };
                                         // Include new materialId if user selected a different material
@@ -1264,8 +1266,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                                 <div className="space-y-2">
                                                     {/* Search Input */}
                                                     <div className="relative">
+                                                        <label htmlFor="materialSearch" className="sr-only">Cerca materiale</label>
                                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                                         <input
+                                                            id="materialSearch"
                                                             type="text"
                                                             value={catalogSearch}
                                                             onChange={(e) => setCatalogSearch(e.target.value)}
@@ -1342,8 +1346,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                             )}
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità</label>
+                                            <label htmlFor="editQuantity" className="block text-sm font-semibold text-slate-700 mb-2">Quantità</label>
                                             <input
+                                                id="editQuantity"
                                                 type="number"
                                                 name="quantity"
                                                 defaultValue={editingMaterial.numeroConfezioni}
@@ -1353,8 +1358,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Note</label>
+                                            <label htmlFor="editNotes" className="block text-sm font-semibold text-slate-700 mb-2">Note</label>
                                             <textarea
+                                                id="editNotes"
                                                 name="note"
                                                 defaultValue={editingMaterial.note || ''}
                                                 rows="2"
