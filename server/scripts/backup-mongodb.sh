@@ -9,7 +9,7 @@ echo "Timestamp: $(date)"
 # Get MongoDB URI from .env
 MONGO_URI=$(grep MONGO_URI .env | cut -d '=' -f2-)
 
-if [ -z "$MONGO_URI" ]; then
+if [[ -z "$MONGO_URI" ]]; then
     echo "❌ Error: MONGO_URI not found in .env"
     exit 1
 fi
