@@ -1266,7 +1266,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     }} className="p-6 space-y-4 overflow-y-auto flex-1">
                                         {/* Material Selector Section */}
                                         <div>
-                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Materiale</label>
+                                            <span className="block text-sm font-semibold text-slate-700 mb-2">Materiale</span>
                                             {showMaterialSelector ? (
                                                 <div className="space-y-2">
                                                     {/* Search Input */}

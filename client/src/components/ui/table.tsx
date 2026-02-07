@@ -12,6 +12,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     >
       <table
         data-slot="table"
+        role="table"
         className={cn("w-full caption-bottom text-sm", className)}
         aria-label={props["aria-label"] || "Data table"}
         {...props}

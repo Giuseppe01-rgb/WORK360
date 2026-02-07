@@ -608,8 +608,14 @@ export default function MaterialsCatalog() {
 
             {/* Add Material Modal */}
             {showAddModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowAddModal(false)}>
-                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
+                    onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false); }}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setShowAddModal(false); }}
+                >
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-slate-900">Aggiungi Materiale</h2>
@@ -728,8 +734,14 @@ export default function MaterialsCatalog() {
 
             {/* Edit Material Modal */}
             {showEditModal && selectedMaterial && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowEditModal(false)}>
-                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
+                    onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false); }}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setShowEditModal(false); }}
+                >
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-slate-900">Modifica Materiale</h2>
@@ -898,7 +910,7 @@ export default function MaterialsCatalog() {
                                 <div className="p-4 md:p-6 overflow-y-auto flex-1">
                                     {/* File Upload Area */}
                                     <div className="mb-6">
-                                        <label className="block text-sm font-bold text-slate-900 mb-3">Seleziona file fattura *</label>
+                                        <span className="block text-sm font-bold text-slate-900 mb-3">Seleziona file fattura *</span>
                                         <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-slate-400 transition-colors">
                                             <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
                                             <p className="text-slate-600 font-medium mb-2">Trascina il file qui o clicca per selezionare</p>
@@ -1041,7 +1053,7 @@ export default function MaterialsCatalog() {
                                                                 step="0.01"
                                                                 aria-label="Quantità"
                                                                 value={material.quantity || ''}
-                                                                onChange={(e) => handleEditParsedMaterial(material.id, 'quantity', parseFloat(e.target.value))}
+                                                                onChange={(e) => handleEditParsedMaterial(material.id, 'quantity', Number.parseFloat(e.target.value))}
                                                                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                                             />
                                                         </td>
@@ -1071,7 +1083,7 @@ export default function MaterialsCatalog() {
                                                                 min="0"
                                                                 aria-label="Prezzo"
                                                                 value={material.price || ''}
-                                                                onChange={(e) => handleEditParsedMaterial(material.id, 'price', e.target.value ? parseFloat(e.target.value) : null)}
+                                                                onChange={(e) => handleEditParsedMaterial(material.id, 'price', e.target.value ? Number.parseFloat(e.target.value) : null)}
                                                                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                                                 placeholder="Opzionale"
                                                             />

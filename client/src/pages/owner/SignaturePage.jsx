@@ -124,10 +124,11 @@ export default function SignaturePage() {
 
                     {/* Text Input */}
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        <label htmlFor="signatureText" className="block text-sm font-semibold text-slate-700 mb-2">
                             Il tuo nome
                         </label>
                         <input
+                            id="signatureText"
                             type="text"
                             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all text-lg"
                             placeholder="Es: Mario Rossi"
@@ -138,9 +139,9 @@ export default function SignaturePage() {
 
                     {/* Font Selection */}
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                        <span className="block text-sm font-semibold text-slate-700 mb-3">
                             Stile della firma
-                        </label>
+                        </span>
                         <div className="flex flex-wrap gap-3">
                             {fonts.map(font => (
                                 <button

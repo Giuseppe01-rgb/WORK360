@@ -359,8 +359,12 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
 
     return (
         <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-material-modal-title"
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+            onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
         >
             <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="p-6 border-b border-slate-200 sticky top-0 bg-white z-10">
@@ -515,13 +519,17 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
 
     return (
         <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="link-material-modal-title"
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+            onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
         >
             <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div className="p-6 border-b border-slate-200">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold">Collega a Materiale Esistente</h3>
+                        <h3 id="link-material-modal-title" className="text-xl font-bold">Collega a Materiale Esistente</h3>
                         <button onClick={onClose} aria-label="Chiudi" className="p-2 hover:bg-slate-100 rounded-full">
                             <X className="w-6 h-6" />
                         </button>
@@ -529,6 +537,7 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
                     <input
                         type="text"
                         placeholder="Cerca nel catalogo..."
+                        aria-label="Cerca nel catalogo"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full mt-4 px-4 py-2 border rounded-lg"

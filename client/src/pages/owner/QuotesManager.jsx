@@ -985,7 +985,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 <Euro className="w-3 h-3" /> Totale
                                             </div>
                                             <div className="text-lg font-bold text-slate-900">
-                                                € {parseFloat(acc.total || 0).toFixed(2)}
+                                                € {Number.parseFloat(acc.total || 0).toFixed(2)}
                                             </div>
                                         </div>
                                     </div>
@@ -1093,7 +1093,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label htmlFor="validity_days" className="block text-sm font-medium text-slate-700 mb-1">Validità Offerta (giorni)</label>
-                                                <input id="validity_days" type="number" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.validityDays} onChange={(e) => setFormData({ ...formData, validityDays: parseInt(e.target.value) || 0 })} />
+                                                <input id="validity_days" type="number" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.validityDays} onChange={(e) => setFormData({ ...formData, validityDays: Number.parseInt(e.target.value) || 0 })} />
                                             </div>
                                             <div>
                                                 <label htmlFor="work_duration" className="block text-sm font-medium text-slate-700 mb-1">Tempi di Esecuzione</label>
@@ -1105,7 +1105,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             </div>
                                             <div>
                                                 <label htmlFor="safety_costs" className="block text-sm font-medium text-slate-700 mb-1">Oneri Sicurezza (€)</label>
-                                                <input id="safety_costs" type="number" step="0.01" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.safetyCosts} onChange={(e) => setFormData({ ...formData, safetyCosts: parseFloat(e.target.value) || 0 })} />
+                                                <input id="safety_costs" type="number" step="0.01" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.safetyCosts} onChange={(e) => setFormData({ ...formData, safetyCosts: Number.parseFloat(e.target.value) || 0 })} />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label htmlFor="legal_notes" className="block text-sm font-medium text-slate-700 mb-1">Note Legali Aggiuntive</label>
@@ -1347,8 +1347,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dati Generali</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Cantiere *</label>
+                                                    <label htmlFor="sal_site" className="block text-sm font-medium text-slate-700 mb-1">Cantiere *</label>
                                                     <select
+                                                        id="sal_site"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.site}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, site: e.target.value }))}
@@ -1362,8 +1363,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Numero SAL *</label>
+                                                    <label htmlFor="sal_number" className="block text-sm font-medium text-slate-700 mb-1">Numero SAL *</label>
                                                     <input
+                                                        id="sal_number"
                                                         type="text"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.number}
@@ -1374,8 +1376,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione *</label>
+                                                    <label htmlFor="sal_date" className="block text-sm font-medium text-slate-700 mb-1">Data Emissione *</label>
                                                     <input
+                                                        id="sal_date"
                                                         type="date"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.date}
@@ -1385,8 +1388,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio *</label>
+                                                    <label htmlFor="sal_periodStart" className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio *</label>
                                                     <input
+                                                        id="sal_periodStart"
                                                         type="date"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.periodStart}
@@ -1396,8 +1400,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine *</label>
+                                                    <label htmlFor="sal_periodEnd" className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine *</label>
                                                     <input
+                                                        id="sal_periodEnd"
                                                         type="date"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.periodEnd}
@@ -1491,7 +1496,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         style={{ width: '100%', boxSizing: 'border-box' }}
                                                         value={salFormData.contractValue === 0 ? '' : salFormData.contractValue}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, contractValue: parseFloat(e.target.value) || 0 }))}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, contractValue: Number.parseFloat(e.target.value) || 0 }))}
                                                         placeholder="0.00"
                                                         required
                                                     />
@@ -1506,7 +1511,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         style={{ width: '100%', boxSizing: 'border-box' }}
                                                         value={salFormData.previousAmount === 0 ? '' : salFormData.previousAmount}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, previousAmount: parseFloat(e.target.value) || 0 }))}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, previousAmount: Number.parseFloat(e.target.value) || 0 }))}
                                                         placeholder="0.00"
                                                     />
                                                 </div>
@@ -1520,7 +1525,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         style={{ width: '100%', boxSizing: 'border-box' }}
                                                         value={salFormData.currentAmount === 0 ? '' : salFormData.currentAmount}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, currentAmount: parseFloat(e.target.value) || 0 }))}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, currentAmount: Number.parseFloat(e.target.value) || 0 }))}
                                                         placeholder="0.00"
                                                         required
                                                     />
@@ -1552,7 +1557,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         style={{ width: '100%', boxSizing: 'border-box' }}
                                                         value={salFormData.penalties === 0 ? '' : salFormData.penalties}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, penalties: parseFloat(e.target.value) || 0 }))}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, penalties: Number.parseFloat(e.target.value) || 0 }))}
                                                         placeholder="0.00"
                                                     />
                                                 </div>
@@ -1563,7 +1568,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                         id="vatRate"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.vatRate}
-                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, vatRate: parseFloat(e.target.value) }))}
+                                                        onChange={(e) => setSalFormData(prev => ({ ...prev, vatRate: Number.parseFloat(e.target.value) }))}
                                                         required
                                                     >
                                                         <option value="22">22% - Ordinaria</option>
@@ -1620,8 +1625,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Direttore Lavori (Opzionale)</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Nome e Cognome</label>
+                                                    <label htmlFor="sal_supervisorName" className="block text-sm font-medium text-slate-700 mb-1">Nome e Cognome</label>
                                                     <input
+                                                        id="sal_supervisorName"
                                                         type="text"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.supervisorName}
@@ -1631,8 +1637,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Qualifica</label>
+                                                    <label htmlFor="sal_supervisorQualification" className="block text-sm font-medium text-slate-700 mb-1">Qualifica</label>
                                                     <input
+                                                        id="sal_supervisorQualification"
                                                         type="text"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.supervisorQualification}
@@ -1648,8 +1655,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Codici Appalto Pubblico (Opzionale)</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">CIG (Codice Identificativo Gara)</label>
+                                                    <label htmlFor="sal_cig" className="block text-sm font-medium text-slate-700 mb-1">CIG (Codice Identificativo Gara)</label>
                                                     <input
+                                                        id="sal_cig"
                                                         type="text"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.cig}
@@ -1659,8 +1667,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">CUP (Codice Unico Progetto)</label>
+                                                    <label htmlFor="sal_cup" className="block text-sm font-medium text-slate-700 mb-1">CUP (Codice Unico Progetto)</label>
                                                     <input
+                                                        id="sal_cup"
                                                         type="text"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.cup}
@@ -1775,8 +1784,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dati Generali</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Seleziona un cantiere</label>
+                                            <label htmlFor="acc_site" className="block text-sm font-medium text-slate-700 mb-1">Seleziona un cantiere</label>
                                             <select
+                                                id="acc_site"
                                                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
                                                 value={accountingFormData.site}
                                                 onChange={(e) => setAccountingFormData(prev => ({ ...prev, site: e.target.value }))}
@@ -1788,8 +1798,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Numero SAL</label>
+                                            <label htmlFor="acc_number" className="block text-sm font-medium text-slate-700 mb-1">Numero SAL</label>
                                             <input
+                                                id="acc_number"
                                                 type="text"
                                                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
                                                 placeholder="Es. SAL-001"
@@ -1805,8 +1816,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Date</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Data Emissione</label>
+                                            <label htmlFor="acc_issueDate" className="block text-sm font-medium text-slate-700 mb-1">Data Emissione</label>
                                             <input
+                                                id="acc_issueDate"
                                                 type="date"
                                                 className="w-full max-w-full block box-border px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none text-base"
                                                 value={accountingFormData.issueDate}
@@ -1814,8 +1826,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio</label>
+                                            <label htmlFor="acc_periodStart" className="block text-sm font-medium text-slate-700 mb-1">Periodo Inizio</label>
                                             <input
+                                                id="acc_periodStart"
                                                 type="date"
                                                 className="w-full max-w-full block box-border px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none text-base"
                                                 value={accountingFormData.periodStart}
@@ -1823,8 +1836,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine</label>
+                                            <label htmlFor="acc_periodEnd" className="block text-sm font-medium text-slate-700 mb-1">Periodo Fine</label>
                                             <input
+                                                id="acc_periodEnd"
                                                 type="date"
                                                 className="w-full max-w-full block box-border px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none text-base"
                                                 value={accountingFormData.periodEnd}
@@ -1839,8 +1853,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dati Committente</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Nome Committente</label>
+                                            <label htmlFor="acc_clientName" className="block text-sm font-medium text-slate-700 mb-1">Nome Committente</label>
                                             <input
+                                                id="acc_clientName"
                                                 type="text"
                                                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
                                                 placeholder="Nome o Ragione Sociale"
@@ -1849,8 +1864,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">P.IVA</label>
+                                            <label htmlFor="acc_vatNumber" className="block text-sm font-medium text-slate-700 mb-1">P.IVA</label>
                                             <input
+                                                id="acc_vatNumber"
                                                 type="text"
                                                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
                                                 placeholder="00000000000"
@@ -1859,8 +1875,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Codice Fiscale</label>
+                                            <label htmlFor="acc_fiscalCode" className="block text-sm font-medium text-slate-700 mb-1">Codice Fiscale</label>
                                             <input
+                                                id="acc_fiscalCode"
                                                 type="text"
                                                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
                                                 placeholder="AAABBB00C00D000E"
@@ -1869,8 +1886,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             />
                                         </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
+                                            <label htmlFor="acc_address" className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
                                             <input
+                                                id="acc_address"
                                                 type="text"
                                                 className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
                                                 placeholder="Via, Città, CAP"
@@ -1908,7 +1926,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         {accountingFormData.items.map((item, index) => (
                                             <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-2 items-start bg-slate-50 p-3 rounded-lg border border-slate-100">
                                                 <div className="md:col-span-5">
-                                                    <label className="block text-xs text-slate-500 mb-1 md:hidden">Descrizione</label>
+                                                    <span className="block text-xs text-slate-500 mb-1 md:hidden">Descrizione</span>
                                                     <textarea
                                                         className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-900 focus:outline-none resize-y min-h-[60px]"
                                                         placeholder="Descrizione lavoro..."
@@ -1917,7 +1935,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-xs text-slate-500 mb-1 md:hidden">Unità di Misura</label>
+                                                    <span className="block text-xs text-slate-500 mb-1 md:hidden">Unità di Misura</span>
                                                     <input
                                                         type="text"
                                                         className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-900 focus:outline-none text-center"
@@ -1927,7 +1945,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-xs text-slate-500 mb-1 md:hidden">Quantità</label>
+                                                    <span className="block text-xs text-slate-500 mb-1 md:hidden">Quantità</span>
                                                     <input
                                                         type="text"
                                                         inputMode="decimal"
@@ -1938,7 +1956,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                     />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-xs text-slate-500 mb-1 md:hidden">Prezzo €</label>
+                                                    <span className="block text-xs text-slate-500 mb-1 md:hidden">Prezzo €</span>
                                                     <input
                                                         type="text"
                                                         inputMode="decimal"

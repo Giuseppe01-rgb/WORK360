@@ -685,8 +685,9 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             });
                         }} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Materiale</label>
+                                <label htmlFor="edit_material_name" className="block text-sm font-semibold text-slate-700 mb-2">Materiale</label>
                                 <input
+                                    id="edit_material_name"
                                     type="text"
                                     value={(editingMaterial.materialMaster || editingMaterial.material)?.nome_prodotto || 'Materiale'}
                                     disabled
@@ -694,8 +695,9 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità (confezioni)</label>
+                                <label htmlFor="edit_quantity" className="block text-sm font-semibold text-slate-700 mb-2">Quantità (confezioni)</label>
                                 <input
+                                    id="edit_quantity"
                                     type="number"
                                     name="quantity"
                                     defaultValue={editingMaterial.numeroConfezioni}
@@ -705,8 +707,9 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Note</label>
+                                <label htmlFor="edit_note" className="block text-sm font-semibold text-slate-700 mb-2">Note</label>
                                 <textarea
+                                    id="edit_note"
                                     name="note"
                                     defaultValue={editingMaterial.note || ''}
                                     rows="2"
@@ -1065,8 +1068,9 @@ export default function SiteManagement() {
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Nome Cantiere *</label>
+                                        <label htmlFor="site_name" className="block text-sm font-medium text-slate-700 mb-1">Nome Cantiere *</label>
                                         <input
+                                            id="site_name"
                                             type="text"
                                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                             value={formData.name}
@@ -1075,8 +1079,9 @@ export default function SiteManagement() {
                                         />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo *</label>
+                                        <label htmlFor="site_address" className="block text-sm font-medium text-slate-700 mb-1">Indirizzo *</label>
                                         <input
+                                            id="site_address"
                                             type="text"
                                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                             value={formData.address}
@@ -1085,8 +1090,9 @@ export default function SiteManagement() {
                                         />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Data Inizio *</label>
+                                        <label htmlFor="site_startDate" className="block text-sm font-medium text-slate-700 mb-1">Data Inizio *</label>
                                         <input
+                                            id="site_startDate"
                                             type="date"
                                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                             value={formData.startDate}
@@ -1095,8 +1101,9 @@ export default function SiteManagement() {
                                         />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Data Fine (prevista)</label>
+                                        <label htmlFor="site_endDate" className="block text-sm font-medium text-slate-700 mb-1">Data Fine (prevista)</label>
                                         <input
+                                            id="site_endDate"
                                             type="date"
                                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                             value={formData.endDate}
@@ -1104,8 +1111,9 @@ export default function SiteManagement() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Stato</label>
+                                        <label htmlFor="site_status" className="block text-sm font-medium text-slate-700 mb-1">Stato</label>
                                         <select
+                                            id="site_status"
                                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                             value={formData.status}
                                             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
@@ -1117,16 +1125,18 @@ export default function SiteManagement() {
                                         </select>
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Descrizione</label>
+                                        <label htmlFor="site_description" className="block text-sm font-medium text-slate-700 mb-1">Descrizione</label>
                                         <textarea
+                                            id="site_description"
                                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[100px]"
                                             value={formData.description}
                                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                         />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Prezzo pattuito (€ IVA esclusa)</label>
+                                        <label htmlFor="site_contractValue" className="block text-sm font-medium text-slate-700 mb-1">Prezzo pattuito (€ IVA esclusa)</label>
                                         <input
+                                            id="site_contractValue"
                                             type="text"
                                             inputMode="decimal"
                                             pattern="[0-9]*\.?[0-9]*"

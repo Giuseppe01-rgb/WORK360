@@ -332,8 +332,15 @@ export default function EmployeeManagement() {
 
             {/* Create/Edit Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
-                    <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="employee-modal-title"
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
+                    onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setShowModal(false); }}
+                >
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
                         <button
                             onClick={resetForm}
                             aria-label="Chiudi"
@@ -494,7 +501,7 @@ export default function EmployeeManagement() {
 
                             <div className="space-y-4 bg-slate-50 p-4 rounded-xl">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-600 mb-1">USERNAME</label>
+                                    <span className="block text-xs font-bold text-slate-600 mb-1">USERNAME</span>
                                     <div className="flex items-center gap-2">
                                         <code className="flex-1 px-3 py-2 bg-white rounded-lg text-sm font-mono font-bold text-slate-900 border border-slate-200">
                                             {generatedCredentials.username}
@@ -514,7 +521,7 @@ export default function EmployeeManagement() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-600 mb-1">PASSWORD</label>
+                                    <span className="block text-xs font-bold text-slate-600 mb-1">PASSWORD</span>
                                     <div className="flex items-center gap-2">
                                         <code className="flex-1 px-3 py-2 bg-white rounded-lg text-sm font-mono font-bold text-slate-900 border border-slate-200">
                                             {generatedCredentials.password}

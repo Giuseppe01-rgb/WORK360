@@ -213,9 +213,9 @@ const MaterialQuickAdd = ({ selectedSite, onSuccess }) => {
 
                             {/* Quantity Selector */}
                             <div className="mb-6">
-                                <label className="block text-sm font-bold text-slate-900 mb-3">
+                                <span className="block text-sm font-bold text-slate-900 mb-3">
                                     Quante confezioni hai usato?
-                                </label>
+                                </span>
                                 <div className="flex items-center gap-4">
                                     <button
                                         aria-label="Diminuisci quantità"

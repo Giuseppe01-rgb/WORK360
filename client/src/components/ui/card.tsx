@@ -28,13 +28,17 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+function CardTitle({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <h4
+    <div
+      role="heading"
+      aria-level={4}
       data-slot="card-title"
       className={cn("leading-none", className)}
       {...props}
-    />
+    >
+      {children || <span className="sr-only">Titolo</span>}
+    </div>
   );
 }
 

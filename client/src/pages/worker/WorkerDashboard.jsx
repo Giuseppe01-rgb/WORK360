@@ -651,9 +651,9 @@ export default function WorkerDashboard() {
 
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                <span className="block text-sm font-semibold text-slate-700 mb-2">
                                     Seleziona Cantiere
-                                </label>
+                                </span>
                                 <CustomSelect
                                     value={selectedSite}
                                     onChange={(e) => setSelectedSite(e.target.value)}
@@ -729,9 +729,9 @@ export default function WorkerDashboard() {
 
                         {/* Site Selection - Always show for materials */}
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            <span className="block text-sm font-semibold text-slate-700 mb-2">
                                 Seleziona Cantiere
-                            </label>
+                            </span>
                             <CustomSelect
                                 value={selectedSite}
                                 onChange={(e) => setSelectedSite(e.target.value)}
@@ -838,7 +838,7 @@ export default function WorkerDashboard() {
                         </h3>
                         <form onSubmit={handleNoteSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
+                                <span className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</span>
                                 <CustomSelect
                                     value={selectedSite}
                                     onChange={(e) => setSelectedSite(e.target.value)}
@@ -847,8 +847,9 @@ export default function WorkerDashboard() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Nota</label>
+                                <label htmlFor="note_text" className="block text-sm font-semibold text-slate-700 mb-2">Nota</label>
                                 <textarea
+                                    id="note_text"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none min-h-[120px]"
                                     placeholder="Descrivi il lavoro svolto o problemi riscontrati..."
                                     value={noteText}
@@ -886,7 +887,7 @@ export default function WorkerDashboard() {
                         </h3>
                         <form onSubmit={handlePhotoSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
+                                <span className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</span>
                                 <CustomSelect
                                     value={selectedSite}
                                     onChange={(e) => setSelectedSite(e.target.value)}
@@ -913,8 +914,9 @@ export default function WorkerDashboard() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Didascalia</label>
+                                <label htmlFor="photo_caption" className="block text-sm font-semibold text-slate-700 mb-2">Didascalia</label>
                                 <input
+                                    id="photo_caption"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none"
                                     placeholder="Descrizione della foto..."
                                     value={photoCaption}
@@ -995,7 +997,7 @@ export default function WorkerDashboard() {
 
                             <form onSubmit={handleActivitySubmit} className="space-y-4 mb-8 border-b border-slate-100 pb-8">
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</label>
+                                    <span className="block text-sm font-semibold text-slate-700 mb-2">Cantiere</span>
                                     <CustomSelect
                                         value={selectedSite}
                                         onChange={(e) => setSelectedSite(e.target.value)}
@@ -1005,8 +1007,9 @@ export default function WorkerDashboard() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Descrizione Attività</label>
+                                    <label htmlFor="activity_description" className="block text-sm font-semibold text-slate-700 mb-2">Descrizione Attività</label>
                                     <textarea
+                                        id="activity_description"
                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none min-h-[120px]"
                                         placeholder="Descrivi il lavoro svolto..."
                                         value={materialForm.name}
@@ -1149,8 +1152,9 @@ export default function WorkerDashboard() {
                                 submitReport();
                             }} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Note / Problemi / Dettagli</label>
+                                    <label htmlFor="report_notes" className="block text-sm font-semibold text-slate-700 mb-2">Note / Problemi / Dettagli</label>
                                     <textarea
+                                        id="report_notes"
                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none min-h-[120px]"
                                         placeholder="Descrivi eventuali problemi o dettagli extra..."
                                         value={noteText}
@@ -1199,8 +1203,9 @@ export default function WorkerDashboard() {
                         </div>
                         <form onSubmit={handleSaveNewMaterial} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Nome Materiale *</label>
+                                <label htmlFor="new_material_name" className="block text-sm font-semibold text-slate-700 mb-2">Nome Materiale *</label>
                                 <input
+                                    id="new_material_name"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-none"
                                     placeholder="Es. Cemento Portland"
                                     value={materialForm.name}
@@ -1209,8 +1214,9 @@ export default function WorkerDashboard() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Unità di Misura *</label>
+                                <label htmlFor="new_material_unit" className="block text-sm font-semibold text-slate-700 mb-2">Unità di Misura *</label>
                                 <input
+                                    id="new_material_unit"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-none"
                                     placeholder="kg, L, pz, mq..."
                                     value={materialForm.unit}
@@ -1269,7 +1275,7 @@ export default function WorkerDashboard() {
                             setScannedMaterial(null);
                         }} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Cantiere *</label>
+                                <span className="block text-sm font-semibold text-slate-700 mb-2">Cantiere *</span>
                                 <CustomSelect
                                     value={selectedSite}
                                     onChange={(e) => setSelectedSite(e.target.value)}
@@ -1278,8 +1284,9 @@ export default function WorkerDashboard() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Quantità Utilizzata *</label>
+                                <label htmlFor="scanned_quantity" className="block text-sm font-semibold text-slate-700 mb-2">Quantità Utilizzata *</label>
                                 <input
+                                    id="scanned_quantity"
                                     type="number"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-none"
                                     placeholder="0"
