@@ -2,15 +2,24 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const SquircleCard = ({ children, className = '', onClick }) => {
+    if (onClick) {
+        return (
+            <button
+                type="button"
+                onClick={onClick}
+                className={`bg-white rounded-[2.5rem] border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-300 relative group overflow-hidden w-full text-left ${className}`}
+            >
+                <div className="relative h-full w-full">
+                    {children}
+                </div>
+            </button>
+        );
+    }
+
     return (
         <div
-            role={onClick ? 'button' : undefined}
-            tabIndex={onClick ? 0 : undefined}
-            onClick={onClick}
-            onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick(e) : undefined}
             className={`bg-white rounded-[2.5rem] border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-300 relative group overflow-hidden ${className}`}
         >
-            {/* Content */}
             <div className="relative h-full w-full">
                 {children}
             </div>

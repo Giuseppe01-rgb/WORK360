@@ -155,9 +155,11 @@ const MaterialApproval = () => {
                                 {/* Mobile: Stack vertically, Desktop: Side by side */}
                                 <div className="flex flex-col md:flex-row">
                                     {/* Photo Section */}
-                                    <div
-                                        className="relative md:w-48 h-48 md:h-auto flex-shrink-0 cursor-pointer group"
-                                        onClick={() => window.open(report.fotoUrl, '_blank')}
+                                    <a
+                                        href={report.fotoUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="relative md:w-48 h-48 md:h-auto flex-shrink-0 cursor-pointer group block"
                                     >
                                         <img
                                             src={report.fotoUrl}
@@ -167,7 +169,7 @@ const MaterialApproval = () => {
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                                             <Image className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
-                                    </div>
+                                    </a>
 
                                     {/* Content Section */}
                                     <div className="flex-1 p-5">
@@ -356,7 +358,10 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        >
             <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="p-6 border-b border-slate-200 sticky top-0 bg-white z-10">
                     <div className="flex items-center justify-between">
@@ -509,7 +514,10 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        >
             <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div className="p-6 border-b border-slate-200">
                     <div className="flex items-center justify-between">

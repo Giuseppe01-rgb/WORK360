@@ -258,7 +258,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                     {/* Margin Card */}
                     {(() => {
                         const contractVal = Number.parseFloat(report?.contractValue);
-                        return !isNaN(contractVal) && contractVal > 0;
+                        return !Number.isNaN(contractVal) && contractVal > 0;
                     })() ? (
                         (() => {
                             // Calculate economie revenue for margin
@@ -270,8 +270,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             const totalRevenue = contractVal + economieRevenue;
                             const adjustedMargin = totalRevenue - (Number.parseFloat(report.siteCost?.total) || 0);
                             // Check for NaN and fallback to 0
-                            const displayMargin = isNaN(adjustedMargin) ? 0 : adjustedMargin;
-                            const displayRevenue = isNaN(totalRevenue) ? 0 : totalRevenue;
+                            const displayMargin = Number.isNaN(adjustedMargin) ? 0 : adjustedMargin;
+                            const displayRevenue = Number.isNaN(totalRevenue) ? 0 : totalRevenue;
 
                             return (
                                 <div className={`border rounded-[2.5rem] p-6 md:p-8 ${displayMargin >= 0
@@ -487,7 +487,10 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             {report.dailyReports.map((dailyReport) => (
                                 <div
                                     key={dailyReport.id}
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() => setSelectedReport(dailyReport)}
+                                    onKeyDown={(e) => e.key === 'Enter' && setSelectedReport(dailyReport)}
                                     className="bg-white p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all cursor-pointer border border-slate-100 group"
                                 >
                                     <div className="flex items-center justify-between mb-3">
@@ -665,8 +668,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
 
             {/* Material Edit Modal */}
             {editingMaterial && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={() => setEditingMaterial(null)}>
-                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl relative animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={(e) => { if (e.target === e.currentTarget) setEditingMaterial(null); }}>
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl relative animate-in zoom-in duration-200">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                             <h3 className="text-lg font-bold text-slate-900">Modifica Materiale</h3>
                             <button onClick={() => setEditingMaterial(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
@@ -736,8 +739,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
 const ReportModal = ({ report, onClose }) => {
     if (!report) return null;
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={onClose}>
-            <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl relative animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+            <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl relative animate-in zoom-in duration-200">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">

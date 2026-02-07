@@ -1050,16 +1050,16 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dati Azienda</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Nome Azienda</label>
-                                                <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.company.name} onChange={(e) => setFormData({ ...formData, company: { ...formData.company, name: e.target.value } })} required />
+                                                <label htmlFor="company_name" className="block text-sm font-medium text-slate-700 mb-1">Nome Azienda</label>
+                                                <input id="company_name" type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.company.name} onChange={(e) => setFormData({ ...formData, company: { ...formData.company, name: e.target.value } })} required />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
-                                                <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.company.address} onChange={(e) => setFormData({ ...formData, company: { ...formData.company, address: e.target.value } })} />
+                                                <label htmlFor="company_address" className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
+                                                <input id="company_address" type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.company.address} onChange={(e) => setFormData({ ...formData, company: { ...formData.company, address: e.target.value } })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">P.IVA</label>
-                                                <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.company.piva} onChange={(e) => setFormData({ ...formData, company: { ...formData.company, piva: e.target.value } })} />
+                                                <label htmlFor="company_piva" className="block text-sm font-medium text-slate-700 mb-1">P.IVA</label>
+                                                <input id="company_piva" type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.company.piva} onChange={(e) => setFormData({ ...formData, company: { ...formData.company, piva: e.target.value } })} />
                                             </div>
                                         </div>
                                     </section>
@@ -1069,20 +1069,20 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dati Cliente</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Nome Cliente *</label>
-                                                <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.name} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, name: e.target.value } })} required />
+                                                <label htmlFor="client_name" className="block text-sm font-medium text-slate-700 mb-1">Nome Cliente *</label>
+                                                <input id="client_name" type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.name} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, name: e.target.value } })} required />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
-                                                <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.address} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, address: e.target.value } })} />
+                                                <label htmlFor="client_address" className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
+                                                <input id="client_address" type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.address} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, address: e.target.value } })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Email *</label>
-                                                <input type="email" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.email} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, email: e.target.value } })} />
+                                                <label htmlFor="client_email" className="block text-sm font-medium text-slate-700 mb-1">Email *</label>
+                                                <input id="client_email" type="email" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.email} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, email: e.target.value } })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Telefono</label>
-                                                <input type="tel" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.phone} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, phone: e.target.value } })} />
+                                                <label htmlFor="client_phone" className="block text-sm font-medium text-slate-700 mb-1">Telefono</label>
+                                                <input id="client_phone" type="tel" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.client.phone} onChange={(e) => setFormData({ ...formData, client: { ...formData.client, phone: e.target.value } })} />
                                             </div>
                                         </div>
                                     </section>
@@ -1092,24 +1092,24 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Termini & Condizioni</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Validità Offerta (giorni)</label>
-                                                <input type="number" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.validityDays} onChange={(e) => setFormData({ ...formData, validityDays: parseInt(e.target.value) || 0 })} />
+                                                <label htmlFor="validity_days" className="block text-sm font-medium text-slate-700 mb-1">Validità Offerta (giorni)</label>
+                                                <input id="validity_days" type="number" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.validityDays} onChange={(e) => setFormData({ ...formData, validityDays: parseInt(e.target.value) || 0 })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Tempi di Esecuzione</label>
-                                                <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" placeholder="Es. 60 giorni lavorativi" value={formData.workDuration} onChange={(e) => setFormData({ ...formData, workDuration: e.target.value })} />
+                                                <label htmlFor="work_duration" className="block text-sm font-medium text-slate-700 mb-1">Tempi di Esecuzione</label>
+                                                <input id="work_duration" type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" placeholder="Es. 60 giorni lavorativi" value={formData.workDuration} onChange={(e) => setFormData({ ...formData, workDuration: e.target.value })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Pagamento</label>
-                                                <input type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" placeholder="Es. Bonifico 30gg d.f." value={formData.paymentTerms} onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })} />
+                                                <label htmlFor="payment_terms" className="block text-sm font-medium text-slate-700 mb-1">Pagamento</label>
+                                                <input id="payment_terms" type="text" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" placeholder="Es. Bonifico 30gg d.f." value={formData.paymentTerms} onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Oneri Sicurezza (€)</label>
-                                                <input type="number" step="0.01" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.safetyCosts} onChange={(e) => setFormData({ ...formData, safetyCosts: parseFloat(e.target.value) || 0 })} />
+                                                <label htmlFor="safety_costs" className="block text-sm font-medium text-slate-700 mb-1">Oneri Sicurezza (€)</label>
+                                                <input id="safety_costs" type="number" step="0.01" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900" value={formData.safetyCosts} onChange={(e) => setFormData({ ...formData, safetyCosts: parseFloat(e.target.value) || 0 })} />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-slate-700 mb-1">Note Legali Aggiuntive</label>
-                                                <textarea className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 h-20" placeholder="Eventuali clausole specifiche..." value={formData.legalNotes} onChange={(e) => setFormData({ ...formData, legalNotes: e.target.value })}></textarea>
+                                                <label htmlFor="legal_notes" className="block text-sm font-medium text-slate-700 mb-1">Note Legali Aggiuntive</label>
+                                                <textarea id="legal_notes" className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 h-20" placeholder="Eventuali clausole specifiche..." value={formData.legalNotes} onChange={(e) => setFormData({ ...formData, legalNotes: e.target.value })}></textarea>
                                             </div>
                                         </div>
                                     </section>
@@ -1139,6 +1139,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                         <textarea
                                                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-900 focus:outline-none resize-y min-h-[60px]"
                                                             placeholder="Descrizione..."
+                                                            aria-label="Descrizione voce"
                                                             value={item.description}
                                                             onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                                                             required
@@ -1148,6 +1149,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                         <textarea
                                                             className="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-slate-900 focus:outline-none resize-y min-h-[60px] text-center"
                                                             placeholder="U.M."
+                                                            aria-label="Unità di misura"
                                                             value={item.unit || ''}
                                                             onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
                                                         />
@@ -1157,6 +1159,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                             type="number"
                                                             className="w-full bg-white border border-slate-200 rounded px-2 py-2 text-center text-sm focus:ring-2 focus:ring-slate-900 focus:outline-none"
                                                             value={item.quantity}
+                                                            aria-label="Quantità"
                                                             onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
                                                             required
                                                         />
@@ -1167,6 +1170,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                             step="0.01"
                                                             className="w-full bg-white border border-slate-200 rounded px-2 py-2 text-center text-sm focus:ring-2 focus:ring-slate-900 focus:outline-none"
                                                             value={item.unitPrice}
+                                                            aria-label="Prezzo unitario"
                                                             onChange={(e) => handleItemChange(index, 'unitPrice', e.target.value)}
                                                             required
                                                         />

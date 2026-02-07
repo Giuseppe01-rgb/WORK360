@@ -311,11 +311,11 @@ export default function OwnerDashboard() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                                                    <button onClick={(e) => handleEdit(e, site)} className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                                                <div className="flex gap-1">
+                                                    <button onClick={(e) => { e.stopPropagation(); handleEdit(e, site); }} className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
                                                         <Edit className="w-4 h-4" />
                                                     </button>
-                                                    <button onClick={(e) => handleDelete(e, site.id)} className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+                                                    <button onClick={(e) => { e.stopPropagation(); handleDelete(e, site.id); }} className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
@@ -381,8 +381,8 @@ export default function OwnerDashboard() {
 
             {/* Modal Nuovo/Modifica Cantiere */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4" onClick={resetForm}>
-                    <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4" onClick={(e) => { if (e.target === e.currentTarget) resetForm(); }}>
+                    <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-bold text-slate-900">
                                 {editingSite ? 'Modifica Cantiere' : 'Nuovo Cantiere'}

@@ -112,15 +112,14 @@ export const ConfirmModalProvider = ({ children }) => {
             {modalState.isOpen && (
                 <div
                     className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-                    onClick={modalState.onCancel}
+                    onClick={(e) => { if (e.target === e.currentTarget) modalState.onCancel(); }}
                 >
                     {/* Backdrop */}
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-none" />
 
                     {/* Modal Content */}
                     <div
                         className="relative bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 fade-in duration-200"
-                        onClick={e => e.stopPropagation()}
                     >
                         {/* Close button */}
                         <button

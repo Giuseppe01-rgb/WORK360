@@ -332,7 +332,7 @@ export default function EmployeeManagement() {
 
             {/* Create/Edit Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setShowModal(false)}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
                     <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
                         <button
                             onClick={resetForm}
@@ -352,7 +352,7 @@ export default function EmployeeManagement() {
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-2">Ruolo *</label>
+                                    <span className="block text-sm font-bold text-slate-900 mb-2">Ruolo *</span>
                                     <div className="grid grid-cols-2 gap-4">
                                         <button
                                             type="button"

@@ -1020,6 +1020,7 @@ export default function MaterialsCatalog() {
                                                         <td className="px-4 py-3">
                                                             <input
                                                                 type="text"
+                                                                aria-label="Nome Materiale"
                                                                 value={material.displayName}
                                                                 onChange={(e) => handleEditParsedMaterial(material.id, 'displayName', e.target.value)}
                                                                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
@@ -1028,6 +1029,7 @@ export default function MaterialsCatalog() {
                                                         <td className="px-4 py-3">
                                                             <input
                                                                 type="text"
+                                                                aria-label="Fornitore"
                                                                 value={material.supplier || ''}
                                                                 onChange={(e) => handleEditParsedMaterial(material.id, 'supplier', e.target.value)}
                                                                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
@@ -1037,6 +1039,7 @@ export default function MaterialsCatalog() {
                                                             <input
                                                                 type="number"
                                                                 step="0.01"
+                                                                aria-label="Quantità"
                                                                 value={material.quantity || ''}
                                                                 onChange={(e) => handleEditParsedMaterial(material.id, 'quantity', parseFloat(e.target.value))}
                                                                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
@@ -1045,6 +1048,7 @@ export default function MaterialsCatalog() {
                                                         <td className="px-4 py-3">
                                                             <select
                                                                 value={material.unit}
+                                                                aria-label="Unità di misura"
                                                                 onChange={(e) => handleEditParsedMaterial(material.id, 'unit', e.target.value)}
                                                                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                                             >
@@ -1065,6 +1069,7 @@ export default function MaterialsCatalog() {
                                                                 type="number"
                                                                 step="0.01"
                                                                 min="0"
+                                                                aria-label="Prezzo"
                                                                 value={material.price || ''}
                                                                 onChange={(e) => handleEditParsedMaterial(material.id, 'price', e.target.value ? parseFloat(e.target.value) : null)}
                                                                 className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"

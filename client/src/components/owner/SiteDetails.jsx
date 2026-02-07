@@ -926,10 +926,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         role="dialog"
                         aria-modal="true"
                         className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
-                        onClick={() => setSelectedNote(null)}
+                        onClick={(e) => { if (e.target === e.currentTarget) setSelectedNote(null); }}
                         onKeyDown={(e) => e.key === 'Escape' && setSelectedNote(null)}
                     >
-                        <div className="bg-white rounded-[2.5rem] w-full max-w-2xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-white rounded-[2.5rem] w-full max-w-2xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
                             <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-bold text-slate-900">
@@ -963,10 +963,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         role="dialog"
                         aria-modal="true"
                         className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
-                        onClick={() => setSelectedPhoto(null)}
+                        onClick={(e) => { if (e.target === e.currentTarget) setSelectedPhoto(null); }}
                         onKeyDown={(e) => e.key === 'Escape' && setSelectedPhoto(null)}
                     >
-                        <div className="bg-white rounded-[2.5rem] w-full max-w-4xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-white rounded-[2.5rem] w-full max-w-4xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
                             <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-bold text-slate-900">
@@ -1118,13 +1118,11 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         const totalCost = unitPrice * (usage.numeroConfezioni || 0);
 
                                         return (
-                                            <div
+                                            <button
                                                 key={usage.id}
-                                                role="button"
-                                                tabIndex={0}
+                                                type="button"
                                                 onClick={() => setSelectedMaterial(usage)}
-                                                onKeyDown={(e) => e.key === 'Enter' && setSelectedMaterial(usage)}
-                                                className={`px-4 py-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors ${index !== materialUsages.length - 1 ? 'border-b border-slate-100' : ''}`}
+                                                className={`w-full text-left px-4 py-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors ${index !== materialUsages.length - 1 ? 'border-b border-slate-100' : ''}`}
                                             >
                                                 <div className="flex-1">
                                                     <p className="font-semibold text-slate-900">{materialName}</p>
@@ -1141,7 +1139,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                                     </p>
                                                     <ChevronRight className="w-5 h-5 text-slate-300" />
                                                 </div>
-                                            </div>
+                                            </button>
                                         );
                                     })
                                 ) : (
@@ -1159,10 +1157,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 role="dialog"
                                 aria-modal="true"
                                 className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center z-[10000]"
-                                onClick={() => setSelectedMaterial(null)}
+                                onClick={(e) => { if (e.target === e.currentTarget) setSelectedMaterial(null); }}
                                 onKeyDown={(e) => e.key === 'Escape' && setSelectedMaterial(null)}
                             >
-                                <div className="bg-white rounded-t-[2.5rem] w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
+                                <div className="bg-white rounded-t-[2.5rem] w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300">
                                     <div className="flex items-center justify-between px-6 pt-4 pb-2">
                                         <div className="w-12 h-1.5 bg-slate-200 rounded-full"></div>
                                         <button
@@ -1236,10 +1234,17 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 role="dialog"
                                 aria-modal="true"
                                 className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10001] p-4"
-                                onClick={() => { setEditingMaterial(null); setShowMaterialSelector(false); setNewSelectedMaterial(null); setCatalogSearch(''); }}
+                                onClick={(e) => {
+                                    if (e.target === e.currentTarget) {
+                                        setEditingMaterial(null);
+                                        setShowMaterialSelector(false);
+                                        setNewSelectedMaterial(null);
+                                        setCatalogSearch('');
+                                    }
+                                }}
                                 onKeyDown={(e) => e.key === 'Escape' && (setEditingMaterial(null), setShowMaterialSelector(false), setNewSelectedMaterial(null), setCatalogSearch(''))}
                             >
-                                <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                                <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col">
                                     <div className="p-6 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
                                         <h3 className="text-lg font-bold text-slate-900">Modifica Materiale</h3>
                                         <button onClick={() => { setEditingMaterial(null); setShowMaterialSelector(false); setNewSelectedMaterial(null); setCatalogSearch(''); }} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
