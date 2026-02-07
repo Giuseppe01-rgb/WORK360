@@ -127,7 +127,7 @@ const cleanMaterialName = (name) => {
     clean = clean.replace(/\s*\([^)]*cod\.[^)]*\)\s*$/i, '');
 
     // Remove multiple spaces
-    clean = clean.replace(/\s+/g, ' ');
+    clean = clean.replaceAll(/\s+/g, ' ');
 
     // Remove trailing pipes or dashes
     clean = clean.replace(/[\|–-]+$/, '');

@@ -381,7 +381,7 @@ export default function OwnerDashboard() {
 
             {/* Modal Nuovo/Modifica Cantiere */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4" onClick={(e) => { if (e.target === e.currentTarget) resetForm(); }}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4" role="button" tabIndex={0} onClick={(e) => { if (e.target === e.currentTarget) resetForm(); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') resetForm(); }}>
                     <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-xl font-bold text-slate-900">

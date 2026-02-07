@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -90,3 +91,16 @@ const LoadingButton = ({
 };
 
 export default LoadingButton;
+
+LoadingButton.propTypes = {
+    children: PropTypes.node,
+    variant: PropTypes.oneOf(['primary', 'secondary', 'danger', 'ghost', 'success']),
+    size: PropTypes.oneOf(['sm', 'md', 'lg']),
+    isLoading: PropTypes.bool,
+    loadingText: PropTypes.string,
+    disabled: PropTypes.bool,
+    fullWidth: PropTypes.bool,
+    className: PropTypes.string,
+    type: PropTypes.string,
+    onClick: PropTypes.func
+};

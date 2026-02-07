@@ -96,6 +96,22 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
         </button>
     );
 
+    MaterialCard.propTypes = {
+        material: PropTypes.shape({
+            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            nome_prodotto: PropTypes.string,
+            marca: PropTypes.string,
+            quantita: PropTypes.string,
+            categoria: PropTypes.string,
+            codice_prodotto: PropTypes.string
+        }).isRequired,
+        onClick: PropTypes.func.isRequired,
+        usageStats: PropTypes.shape({
+            usageCount: PropTypes.number,
+            totalConfezioni: PropTypes.number
+        })
+    };
+
     // Helper component for loading states
     const LoadingState = ({ message = 'Caricamento...' }) => (
         <div className="text-center py-12">
@@ -103,6 +119,10 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
             <p className="text-slate-600">{message}</p>
         </div>
     );
+
+    LoadingState.propTypes = {
+        message: PropTypes.string
+    };
 
     // Helper component for empty states
     const EmptyState = ({ icon: Icon, title, subtitle, action }) => (
@@ -113,6 +133,13 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
             {action}
         </div>
     );
+
+    EmptyState.propTypes = {
+        icon: PropTypes.elementType.isRequired,
+        title: PropTypes.string,
+        subtitle: PropTypes.string,
+        action: PropTypes.node
+    };
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">

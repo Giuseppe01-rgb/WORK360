@@ -80,7 +80,7 @@ export default function ActivityLogPage() {
     };
 
     const formatAction = (action) => {
-        return action?.replace(/_/g, ' ').toLowerCase().replace(/^\w/, c => c.toUpperCase()) || '';
+        return action?.replaceAll('_', ' ').toLowerCase().replace(/^\w/, c => c.toUpperCase()) || '';
     };
 
     return (

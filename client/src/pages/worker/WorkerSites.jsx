@@ -149,7 +149,10 @@ const SiteDetails = ({ site, onBack }) => {
                             {reports.map((report) => (
                                 <div
                                     key={report.id}
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() => setExpandedReport(expandedReport?.id === report.id ? null : report)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpandedReport(expandedReport?.id === report.id ? null : report); }}
                                     className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 cursor-pointer hover:shadow-md hover:border-blue-200 transition-all"
                                 >
                                     <div className="flex items-center justify-between mb-3">
@@ -239,8 +242,11 @@ const SiteDetails = ({ site, onBack }) => {
                             {photos.map((photo) => (
                                 <div
                                     key={photo.id}
+                                    role="button"
+                                    tabIndex={0}
                                     className="group relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all cursor-pointer"
                                     onClick={() => window.open(photo.photoUrl || photo.url, '_blank')}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') window.open(photo.photoUrl || photo.url, '_blank'); }}
                                 >
                                     <img
                                         src={photo.photoUrl || photo.url}
@@ -421,7 +427,10 @@ export default function WorkerSites() {
                     filteredSites.map(site => (
                         <div
                             key={site.id}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => setSelectedSite(site)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedSite(site); }}
                             className="bg-white p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all cursor-pointer group"
                         >
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

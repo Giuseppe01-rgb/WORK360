@@ -669,7 +669,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
 
             {/* Material Edit Modal */}
             {editingMaterial && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={(e) => { if (e.target === e.currentTarget) setEditingMaterial(null); }}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" role="button" tabIndex={0} onClick={(e) => { if (e.target === e.currentTarget) setEditingMaterial(null); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setEditingMaterial(null); }}>
                     <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl relative animate-in zoom-in duration-200">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                             <h3 className="text-lg font-bold text-slate-900">Modifica Materiale</h3>
@@ -750,7 +750,7 @@ SiteDetails.propTypes = {
 const ReportModal = ({ report, onClose }) => {
     if (!report) return null;
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" role="button" tabIndex={0} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}>
             <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl relative animate-in zoom-in duration-200">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                     <div className="flex items-center gap-3">
@@ -1009,7 +1009,10 @@ export default function SiteManagement() {
                 {sites.map(site => (
                     <div
                         key={site.id}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setSelectedSite(site)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedSite(site); }}
                         className="bg-white p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all cursor-pointer group"
                     >
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

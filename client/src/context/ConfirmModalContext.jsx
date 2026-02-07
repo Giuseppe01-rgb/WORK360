@@ -113,7 +113,10 @@ export const ConfirmModalProvider = ({ children }) => {
             {modalState.isOpen && (
                 <div
                     className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+                    role="button"
+                    tabIndex={0}
                     onClick={(e) => { if (e.target === e.currentTarget) modalState.onCancel(); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') modalState.onCancel(); }}
                 >
                     {/* Backdrop */}
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-none" />

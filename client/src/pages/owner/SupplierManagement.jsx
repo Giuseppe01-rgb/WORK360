@@ -114,7 +114,7 @@ export default function SupplierManagement() {
     };
 
     const renderStars = (rating) => {
-        return [...Array(5)].map((_, i) => (
+        return [...new Array(5)].map((_, i) => (
             <Star key={i} className={`w-4 h-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'}`} />
         ));
     };

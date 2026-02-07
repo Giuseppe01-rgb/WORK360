@@ -61,7 +61,7 @@ export default function OnboardingPage() {
 
         try {
             // Create admin username in format: admin.firstname.companyname
-            const username = `admin.${formData.firstName.toLowerCase()}.${formData.companyName.toLowerCase().replace(/\s+/g, '')}`;
+            const username = `admin.${formData.firstName.toLowerCase()}.${formData.companyName.toLowerCase().replaceAll(/\s+/g, '')}`;
 
             await register({
                 username,

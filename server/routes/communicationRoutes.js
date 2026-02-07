@@ -38,7 +38,7 @@ router.post('/send-email/quote/:id', protect, requireOwner, async (req, res) => 
             company.emailConfig,
             email,
             subject,
-            `<p>${message.replaceAll(/\n/g, '<br>')}</p>`,
+            `<p>${message.replaceAll('\n', '<br>')}</p>`,
             pdfBuffer,
             `preventivo-${quote.number}.pdf`
         );
@@ -99,7 +99,7 @@ router.post('/send-email/sal/:id', protect, requireOwner, async (req, res) => {
             company.emailConfig,
             email,
             subject,
-            `<p>${message.replaceAll(/\n/g, '<br>')}</p>`,
+            `<p>${message.replaceAll('\n', '<br>')}</p>`,
             pdfBuffer,
             `sal-${sal.number}.pdf`
         );

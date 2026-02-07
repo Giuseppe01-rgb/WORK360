@@ -81,10 +81,10 @@ const parsePrice = (priceRaw) => {
     if (str.includes('.') && str.includes(',')) {
         if (str.lastIndexOf(',') > str.lastIndexOf('.')) {
             // IT format: 1.234,56
-            str = str.replaceAll(/\./g, '').replace(',', '.');
+            str = str.replaceAll('.', '').replace(',', '.');
         } else {
             // US format: 1,234.56
-            str = str.replaceAll(/,/g, '');
+            str = str.replaceAll(',', '');
         }
     } else if (str.includes(',')) {
         // Only comma: decimal separator
