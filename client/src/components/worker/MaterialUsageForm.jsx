@@ -82,6 +82,7 @@ const MaterialUsageForm = ({ material, siteId, onConfirm, onCancel, editMode = f
                         <div className="flex items-center gap-4">
                             <button
                                 type="button"
+                                aria-label="Diminuisci quantità"
                                 onClick={() => setNumeroConfezioni(Math.max(1, numeroConfezioni - 1))}
                                 className="w-16 h-16 bg-slate-200 hover:bg-slate-300 rounded-xl text-3xl font-bold transition-all hover:scale-110 active:scale-95"
                             >
@@ -94,6 +95,7 @@ const MaterialUsageForm = ({ material, siteId, onConfirm, onCancel, editMode = f
                             </div>
                             <button
                                 type="button"
+                                aria-label="Aumenta quantità"
                                 onClick={() => setNumeroConfezioni(numeroConfezioni + 1)}
                                 className="w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-3xl font-bold transition-all hover:scale-110 active:scale-95"
                             >
@@ -104,10 +106,11 @@ const MaterialUsageForm = ({ material, siteId, onConfirm, onCancel, editMode = f
 
                     {/* Optional Note */}
                     <div className="mb-6">
-                        <label className="block text-sm font-bold text-slate-900 mb-2">
+                        <label htmlFor="notes" className="block text-sm font-bold text-slate-900 mb-2">
                             Note (opzionale)
                         </label>
                         <textarea
+                            id="notes"
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                             placeholder="Es. Confezione danneggiata..."

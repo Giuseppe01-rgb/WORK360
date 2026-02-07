@@ -361,7 +361,7 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
                 <div className="p-6 border-b border-slate-200 sticky top-0 bg-white z-10">
                     <div className="flex items-center justify-between">
                         <h3 className="text-xl font-bold">Crea Nuovo Materiale</h3>
-                        <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full">
+                        <button onClick={onClose} aria-label="Chiudi" className="p-2 hover:bg-slate-100 rounded-full">
                             <X className="w-6 h-6" />
                         </button>
                     </div>
@@ -370,8 +370,9 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-semibold mb-2">Codice Prodotto</label>
+                            <label htmlFor="codice_prodotto" className="block text-sm font-semibold mb-2">Codice Prodotto</label>
                             <input
+                                id="codice_prodotto"
                                 type="text"
                                 value={formData.codice_prodotto}
                                 onChange={(e) => setFormData({ ...formData, codice_prodotto: e.target.value.toUpperCase() })}
@@ -380,8 +381,9 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold mb-2">Nome Prodotto *</label>
+                            <label htmlFor="nome_prodotto" className="block text-sm font-semibold mb-2">Nome Prodotto *</label>
                             <input
+                                id="nome_prodotto"
                                 type="text"
                                 value={formData.nome_prodotto}
                                 onChange={(e) => setFormData({ ...formData, nome_prodotto: e.target.value })}
@@ -390,8 +392,9 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold mb-2">Marca *</label>
+                            <label htmlFor="marca" className="block text-sm font-semibold mb-2">Marca *</label>
                             <input
+                                id="marca"
                                 type="text"
                                 value={formData.marca}
                                 onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
@@ -400,8 +403,9 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold mb-2">Categoria *</label>
+                            <label htmlFor="categoria" className="block text-sm font-semibold mb-2">Categoria *</label>
                             <select
+                                id="categoria"
                                 value={formData.categoria}
                                 onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg"
@@ -415,8 +419,9 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold mb-2">Quantità (es. "14 lt", "375 ml")</label>
+                            <label htmlFor="quantita" className="block text-sm font-semibold mb-2">Quantità (es. "14 lt", "375 ml")</label>
                             <input
+                                id="quantita"
                                 type="text"
                                 value={formData.quantita}
                                 onChange={(e) => setFormData({ ...formData, quantita: e.target.value })}
@@ -425,8 +430,9 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold mb-2">Prezzo (€)</label>
+                            <label htmlFor="prezzo" className="block text-sm font-semibold mb-2">Prezzo (€)</label>
                             <input
+                                id="prezzo"
                                 type="number"
                                 step="0.01"
                                 value={formData.prezzo}
@@ -436,8 +442,9 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
                             />
                         </div>
                         <div className="col-span-2">
-                            <label className="block text-sm font-semibold mb-2">Fornitore</label>
+                            <label htmlFor="fornitore" className="block text-sm font-semibold mb-2">Fornitore</label>
                             <input
+                                id="fornitore"
                                 type="text"
                                 value={formData.fornitore}
                                 onChange={(e) => setFormData({ ...formData, fornitore: e.target.value })}
@@ -507,7 +514,7 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
                 <div className="p-6 border-b border-slate-200">
                     <div className="flex items-center justify-between">
                         <h3 className="text-xl font-bold">Collega a Materiale Esistente</h3>
-                        <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full">
+                        <button onClick={onClose} aria-label="Chiudi" className="p-2 hover:bg-slate-100 rounded-full">
                             <X className="w-6 h-6" />
                         </button>
                     </div>

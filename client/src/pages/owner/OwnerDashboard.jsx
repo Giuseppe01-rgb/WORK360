@@ -65,8 +65,8 @@ export default function OwnerDashboard() {
 
         // Validate contractValue if provided
         if (formData.contractValue) {
-            const contractVal = parseFloat(formData.contractValue);
-            if (isNaN(contractVal)) {
+            const contractVal = Number.parseFloat(formData.contractValue);
+            if (Number.isNaN(contractVal)) {
                 showNotification('error', 'Prezzo pattuito non valido: inserisci un numero');
                 return;
             }
@@ -192,6 +192,7 @@ export default function OwnerDashboard() {
                 <div className="relative mb-6">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
+                        aria-label="Cerca cantiere"
                         type="text"
                         placeholder="Cerca cantiere..."
                         value={searchTerm}
@@ -284,8 +285,8 @@ export default function OwnerDashboard() {
                                 const durationDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
 
                                 // Has contract value
-                                const hasContract = parseFloat(site.contractValue) > 0;
-                                const contractValue = parseFloat(site.contractValue) || 0;
+                                const hasContract = Number.parseFloat(site.contractValue) > 0;
+                                const contractValue = Number.parseFloat(site.contractValue) || 0;
 
                                 return (
                                     <SquircleCard key={site.id} onClick={() => setSelectedSite(site)}>
@@ -386,15 +387,16 @@ export default function OwnerDashboard() {
                             <h3 className="text-xl font-bold text-slate-900">
                                 {editingSite ? 'Modifica Cantiere' : 'Nuovo Cantiere'}
                             </h3>
-                            <button onClick={resetForm} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                            <button onClick={resetForm} aria-label="Chiudi" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                                 <X className="w-6 h-6 text-slate-500" />
                             </button>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Nome Cantiere</label>
+                                <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">Nome Cantiere</label>
                                 <input
+                                    id="name"
                                     type="text"
                                     required
                                     value={formData.name}
@@ -405,10 +407,11 @@ export default function OwnerDashboard() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
+                                <label htmlFor="address" className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
                                 <div className="relative">
                                     <MapPin className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
                                     <input
+                                        id="address"
                                         type="text"
                                         required
                                         value={formData.address}
@@ -421,8 +424,9 @@ export default function OwnerDashboard() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Data Inizio</label>
+                                    <label htmlFor="startDate" className="block text-sm font-medium text-slate-700 mb-1">Data Inizio</label>
                                     <input
+                                        id="startDate"
                                         type="date"
                                         required
                                         value={formData.startDate}
@@ -431,8 +435,9 @@ export default function OwnerDashboard() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Data Fine (prevista)</label>
+                                    <label htmlFor="endDate" className="block text-sm font-medium text-slate-700 mb-1">Data Fine (prevista)</label>
                                     <input
+                                        id="endDate"
                                         type="date"
                                         value={formData.endDate}
                                         onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
@@ -442,8 +447,9 @@ export default function OwnerDashboard() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Stato</label>
+                                <label htmlFor="status" className="block text-sm font-medium text-slate-700 mb-1">Stato</label>
                                 <select
+                                    id="status"
                                     value={formData.status}
                                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all appearance-none bg-white"
@@ -456,8 +462,9 @@ export default function OwnerDashboard() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Prezzo pattuito (€ IVA esclusa)</label>
+                                <label htmlFor="contractValue" className="block text-sm font-medium text-slate-700 mb-1">Prezzo pattuito (€ IVA esclusa)</label>
                                 <input
+                                    id="contractValue"
                                     type="text"
                                     inputMode="decimal"
                                     pattern="[0-9]*\.?[0-9]*"

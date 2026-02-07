@@ -173,11 +173,12 @@ export default function UserProfile() {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Current Password */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            <label htmlFor="currentPassword" className="block text-sm font-semibold text-slate-700 mb-2">
                                 Password Attuale *
                             </label>
                             <div className="relative">
                                 <input
+                                    id="currentPassword"
                                     type={showPasswords.current ? 'text' : 'password'}
                                     name="currentPassword"
                                     value={formData.currentPassword}
@@ -187,6 +188,7 @@ export default function UserProfile() {
                                 />
                                 <button
                                     type="button"
+                                    aria-label={showPasswords.current ? "Nascondi password" : "Mostra password"}
                                     onClick={() => togglePasswordVisibility('current')}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                                 >
@@ -197,11 +199,12 @@ export default function UserProfile() {
 
                         {/* New Password */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            <label htmlFor="newPassword" className="block text-sm font-semibold text-slate-700 mb-2">
                                 Nuova Password *
                             </label>
                             <div className="relative">
                                 <input
+                                    id="newPassword"
                                     type={showPasswords.new ? 'text' : 'password'}
                                     name="newPassword"
                                     value={formData.newPassword}
@@ -211,6 +214,7 @@ export default function UserProfile() {
                                 />
                                 <button
                                     type="button"
+                                    aria-label={showPasswords.new ? "Nascondi password" : "Mostra password"}
                                     onClick={() => togglePasswordVisibility('new')}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                                 >
@@ -235,11 +239,12 @@ export default function UserProfile() {
 
                         {/* Confirm Password */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-700 mb-2">
                                 Conferma Nuova Password *
                             </label>
                             <div className="relative">
                                 <input
+                                    id="confirmPassword"
                                     type={showPasswords.confirm ? 'text' : 'password'}
                                     name="confirmPassword"
                                     value={formData.confirmPassword}
@@ -249,6 +254,7 @@ export default function UserProfile() {
                                 />
                                 <button
                                     type="button"
+                                    aria-label={showPasswords.confirm ? "Nascondi password" : "Mostra password"}
                                     onClick={() => togglePasswordVisibility('confirm')}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                                 >

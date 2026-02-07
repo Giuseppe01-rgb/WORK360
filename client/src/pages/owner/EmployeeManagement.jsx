@@ -288,8 +288,8 @@ export default function EmployeeManagement() {
                                                 <span className="font-bold text-xs">€</span>
                                             </div>
                                             <span className="text-sm font-bold text-slate-900 truncate">
-                                                {parseFloat(employee.hourlyCost) > 0
-                                                    ? `${parseFloat(employee.hourlyCost).toFixed(2)}/h`
+                                                {Number.parseFloat(employee.hourlyCost) > 0
+                                                    ? `${Number.parseFloat(employee.hourlyCost).toFixed(2)}/h`
                                                     : '-'}
                                             </span>
                                         </div>
@@ -336,6 +336,7 @@ export default function EmployeeManagement() {
                     <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
                         <button
                             onClick={resetForm}
+                            aria-label="Chiudi"
                             className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full transition-colors"
                         >
                             <X className="w-6 h-6 text-slate-500" />
@@ -378,8 +379,9 @@ export default function EmployeeManagement() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-bold text-slate-900 mb-2">Nome *</label>
+                                        <label htmlFor="firstName" className="block text-sm font-bold text-slate-900 mb-2">Nome *</label>
                                         <input
+                                            id="firstName"
                                             type="text"
                                             value={formData.firstName}
                                             onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
@@ -389,8 +391,9 @@ export default function EmployeeManagement() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-slate-900 mb-2">Cognome *</label>
+                                        <label htmlFor="lastName" className="block text-sm font-bold text-slate-900 mb-2">Cognome *</label>
                                         <input
+                                            id="lastName"
                                             type="text"
                                             value={formData.lastName}
                                             onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
@@ -402,8 +405,9 @@ export default function EmployeeManagement() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-2">Email</label>
+                                    <label htmlFor="email" className="block text-sm font-bold text-slate-900 mb-2">Email</label>
                                     <input
+                                        id="email"
                                         type="email"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -413,8 +417,9 @@ export default function EmployeeManagement() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-2">Telefono</label>
+                                    <label htmlFor="phone" className="block text-sm font-bold text-slate-900 mb-2">Telefono</label>
                                     <input
+                                        id="phone"
                                         type="tel"
                                         value={formData.phone}
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -424,8 +429,9 @@ export default function EmployeeManagement() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-2">Costo Orario (€)</label>
+                                    <label htmlFor="hourlyCost" className="block text-sm font-bold text-slate-900 mb-2">Costo Orario (€)</label>
                                     <input
+                                        id="hourlyCost"
                                         type="number"
                                         step="0.01"
                                         min="0"
@@ -437,8 +443,9 @@ export default function EmployeeManagement() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-2">Data di Nascita</label>
+                                    <label htmlFor="birthDate" className="block text-sm font-bold text-slate-900 mb-2">Data di Nascita</label>
                                     <input
+                                        id="birthDate"
                                         type="date"
                                         value={formData.birthDate}
                                         onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
@@ -495,6 +502,7 @@ export default function EmployeeManagement() {
                                         <button
                                             onClick={() => copyToClipboard(generatedCredentials.username, 'username')}
                                             className="p-2 hover:bg-white rounded-lg transition-colors"
+                                            aria-label="Copia username"
                                             title="Copia"
                                         >
                                             {copiedField === 'username' ?
@@ -514,6 +522,7 @@ export default function EmployeeManagement() {
                                         <button
                                             onClick={() => copyToClipboard(generatedCredentials.password, 'password')}
                                             className="p-2 hover:bg-white rounded-lg transition-colors"
+                                            aria-label="Copia password"
                                             title="Copia"
                                         >
                                             {copiedField === 'password' ?
@@ -545,6 +554,7 @@ export default function EmployeeManagement() {
             {/* FAB - Always visible */}
             <button
                 onClick={() => setShowModal(true)}
+                aria-label="Aggiungi operaio"
                 className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-40"
             >
                 <Plus className="w-7 h-7" />

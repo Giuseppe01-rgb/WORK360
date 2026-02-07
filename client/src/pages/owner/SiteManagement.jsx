@@ -143,6 +143,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onBack}
+                        aria-label="Indietro"
                         className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-slate-900"
                     >
                         <ArrowLeft className="w-6 h-6" />
@@ -163,9 +164,11 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                     >
                         <Download className="w-4 h-4" />
                         <span className="hidden sm:inline">Esporta Excel</span>
+                        <span className="sr-only sm:not-sr-only">Esporta Excel</span>
                     </button>
                     <button
                         onClick={onDelete}
+                        aria-label="Elimina cantiere"
                         className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium"
                     >
                         <Trash2 className="w-4 h-4" />
@@ -194,6 +197,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             <div className="md:hidden mb-6">
                 <select
                     value={activeSection}
+                    aria-label="Seleziona sezione"
                     onChange={(e) => setActiveSection(e.target.value)}
                     className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 >
@@ -253,18 +257,18 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
 
                     {/* Margin Card */}
                     {(() => {
-                        const contractVal = parseFloat(report?.contractValue);
+                        const contractVal = Number.parseFloat(report?.contractValue);
                         return !isNaN(contractVal) && contractVal > 0;
                     })() ? (
                         (() => {
                             // Calculate economie revenue for margin
                             // IMPORTANT: Parse hours as float to avoid string concatenation
-                            const economieHours = (economie || []).reduce((sum, e) => sum + (parseFloat(e.hours) || 0), 0);
+                            const economieHours = (economie || []).reduce((sum, e) => sum + (Number.parseFloat(e.hours) || 0), 0);
                             const economieRevenue = economieHours * 30;
                             // Ensure contractValue is a valid number
-                            const contractVal = parseFloat(report.contractValue) || 0;
+                            const contractVal = Number.parseFloat(report.contractValue) || 0;
                             const totalRevenue = contractVal + economieRevenue;
-                            const adjustedMargin = totalRevenue - (parseFloat(report.siteCost?.total) || 0);
+                            const adjustedMargin = totalRevenue - (Number.parseFloat(report.siteCost?.total) || 0);
                             // Check for NaN and fallback to 0
                             const displayMargin = isNaN(adjustedMargin) ? 0 : adjustedMargin;
                             const displayRevenue = isNaN(totalRevenue) ? 0 : totalRevenue;
@@ -315,14 +319,14 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                         <div className="flex items-center gap-2">
                                             <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                                             <span className="text-sm font-medium text-slate-700">
-                                                {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}: {(parseFloat(report.siteCost?.total) || 0).toFixed(2)}€
+                                                {report.status === 'completed' ? 'Costo totale' : 'Costi maturati'}: {(Number.parseFloat(report.siteCost?.total) || 0).toFixed(2)}€
                                             </span>
                                         </div>
                                         {report.status !== 'completed' && (
                                             <div className="flex items-center gap-2">
                                                 <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
                                                 <span className="text-sm font-medium text-slate-700">
-                                                    Costo su ricavo: {(displayRevenue > 0 ? ((parseFloat(report.siteCost?.total) || 0) / displayRevenue) * 100 : 0).toFixed(1)}%
+                                                    Costo su ricavo: {(displayRevenue > 0 ? ((Number.parseFloat(report.siteCost?.total) || 0) / displayRevenue) * 100 : 0).toFixed(1)}%
                                                 </span>
                                             </div>
                                         )}
@@ -425,7 +429,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                     {materialUsages.map((usage) => {
                                         const material = usage.materialMaster || usage.material;
                                         const materialName = material?.nome_prodotto || material?.display_name || 'Materiale';
-                                        const totalCost = material?.prezzo ? (usage.numeroConfezioni * parseFloat(material.prezzo)).toFixed(2) : null;
+                                        const totalCost = material?.prezzo ? (usage.numeroConfezioni * Number.parseFloat(material.prezzo)).toFixed(2) : null;
 
                                         return (
                                             <div key={usage.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg min-w-[200px] group">
@@ -449,6 +453,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                                                         onClick={() => handleDeleteMaterial(usage.id)}
                                                         className="p-1.5 hover:bg-red-100 rounded-lg text-red-400 hover:text-red-600 transition-colors"
                                                         title="Elimina"
+                                                        aria-label="Elimina materiale"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
@@ -672,7 +677,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                             e.preventDefault();
                             const formData = new FormData(e.target);
                             handleSaveMaterial(editingMaterial.id, {
-                                numeroConfezioni: parseInt(formData.get('quantity')),
+                                numeroConfezioni: Number.parseInt(formData.get('quantity')),
                                 note: formData.get('note')
                             });
                         }} className="p-6 space-y-4">

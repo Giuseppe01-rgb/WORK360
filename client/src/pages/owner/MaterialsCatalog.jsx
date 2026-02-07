@@ -115,7 +115,7 @@ export default function MaterialsCatalog() {
                 marca: formData.marca,
                 fornitore: formData.fornitore,
                 quantita: formData.quantityValue ? `${formData.quantityValue} ${formData.unit}` : '',
-                prezzo: formData.prezzo ? parseFloat(formData.prezzo) : null,
+                prezzo: formData.prezzo ? Number.parseFloat(formData.prezzo) : null,
                 categoria: 'Altro'
             };
             await colouraMaterialAPI.create(data);
@@ -191,7 +191,7 @@ export default function MaterialsCatalog() {
                 marca: formData.marca,
                 fornitore: formData.fornitore,
                 quantita: formData.quantityValue ? `${formData.quantityValue} ${formData.unit}` : '',
-                prezzo: formData.prezzo ? parseFloat(formData.prezzo) : null
+                prezzo: formData.prezzo ? Number.parseFloat(formData.prezzo) : null
             };
             await colouraMaterialAPI.update(selectedMaterial.id, data);
             resetForm();
@@ -440,6 +440,7 @@ export default function MaterialsCatalog() {
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                         <input
+                            aria-label="Cerca materiale"
                             type="text"
                             placeholder="Cerca materiale o fornitore..."
                             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
@@ -614,6 +615,7 @@ export default function MaterialsCatalog() {
                                 <h2 className="text-xl font-bold text-slate-900">Aggiungi Materiale</h2>
                                 <button
                                     onClick={resetForm}
+                                    aria-label="Chiudi"
                                     className="p-2 hover:bg-slate-100 rounded-full transition-colors"
                                 >
                                     <X className="w-5 h-5 text-slate-500" />
@@ -622,8 +624,9 @@ export default function MaterialsCatalog() {
                         </div>
                         <form onSubmit={handleAdd} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Nome Materiale *</label>
+                                <label htmlFor="add_nome_prodotto" className="block text-sm font-bold text-slate-900 mb-1.5">Nome Materiale *</label>
                                 <input
+                                    id="add_nome_prodotto"
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.nome_prodotto}
@@ -633,8 +636,9 @@ export default function MaterialsCatalog() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Marca *</label>
+                                <label htmlFor="add_marca" className="block text-sm font-bold text-slate-900 mb-1.5">Marca *</label>
                                 <input
+                                    id="add_marca"
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.marca}
@@ -644,8 +648,9 @@ export default function MaterialsCatalog() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Fornitore</label>
+                                <label htmlFor="add_fornitore" className="block text-sm font-bold text-slate-900 mb-1.5">Fornitore</label>
                                 <input
+                                    id="add_fornitore"
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.fornitore}
@@ -655,8 +660,9 @@ export default function MaterialsCatalog() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-1.5">Quantità</label>
+                                    <label htmlFor="add_quantityValue" className="block text-sm font-bold text-slate-900 mb-1.5">Quantità</label>
                                     <input
+                                        id="add_quantityValue"
                                         type="number"
                                         step="0.01"
                                         min="0"
@@ -667,8 +673,9 @@ export default function MaterialsCatalog() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-1.5">Unità</label>
+                                    <label htmlFor="add_unit" className="block text-sm font-bold text-slate-900 mb-1.5">Unità</label>
                                     <select
+                                        id="add_unit"
                                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                         value={formData.unit}
                                         onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
@@ -686,8 +693,9 @@ export default function MaterialsCatalog() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Prezzo Unitario (€)</label>
+                                <label htmlFor="add_prezzo" className="block text-sm font-bold text-slate-900 mb-1.5">Prezzo Unitario (€)</label>
                                 <input
+                                    id="add_prezzo"
                                     type="number"
                                     step="0.01"
                                     min="0"
@@ -727,6 +735,7 @@ export default function MaterialsCatalog() {
                                 <h2 className="text-xl font-bold text-slate-900">Modifica Materiale</h2>
                                 <button
                                     onClick={resetForm}
+                                    aria-label="Chiudi"
                                     className="p-2 hover:bg-slate-100 rounded-full transition-colors"
                                 >
                                     <X className="w-5 h-5 text-slate-500" />
@@ -735,8 +744,9 @@ export default function MaterialsCatalog() {
                         </div>
                         <form onSubmit={handleUpdate} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Nome Materiale *</label>
+                                <label htmlFor="edit_nome_prodotto" className="block text-sm font-bold text-slate-900 mb-1.5">Nome Materiale *</label>
                                 <input
+                                    id="edit_nome_prodotto"
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.nome_prodotto}
@@ -745,8 +755,9 @@ export default function MaterialsCatalog() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Marca *</label>
+                                <label htmlFor="edit_marca" className="block text-sm font-bold text-slate-900 mb-1.5">Marca *</label>
                                 <input
+                                    id="edit_marca"
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.marca}
@@ -755,8 +766,9 @@ export default function MaterialsCatalog() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Fornitore</label>
+                                <label htmlFor="edit_fornitore" className="block text-sm font-bold text-slate-900 mb-1.5">Fornitore</label>
                                 <input
+                                    id="edit_fornitore"
                                     type="text"
                                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.fornitore}
@@ -765,8 +777,9 @@ export default function MaterialsCatalog() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-1.5">Quantità</label>
+                                    <label htmlFor="edit_quantityValue" className="block text-sm font-bold text-slate-900 mb-1.5">Quantità</label>
                                     <input
+                                        id="edit_quantityValue"
                                         type="number"
                                         step="0.01"
                                         min="0"
@@ -776,8 +789,9 @@ export default function MaterialsCatalog() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-900 mb-1.5">Unità</label>
+                                    <label htmlFor="edit_unit" className="block text-sm font-bold text-slate-900 mb-1.5">Unità</label>
                                     <select
+                                        id="edit_unit"
                                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                         value={formData.unit}
                                         onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
@@ -795,8 +809,9 @@ export default function MaterialsCatalog() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-900 mb-1.5">Prezzo Unitario (€)</label>
+                                <label htmlFor="edit_prezzo" className="block text-sm font-bold text-slate-900 mb-1.5">Prezzo Unitario (€)</label>
                                 <input
+                                    id="edit_prezzo"
                                     type="number"
                                     step="0.01"
                                     min="0"

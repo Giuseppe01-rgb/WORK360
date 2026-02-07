@@ -249,8 +249,8 @@ export default function QuotesManager() {
             newItems[index][field] = value;
 
             // Calculate total for this item
-            const qty = parseFloat(newItems[index].quantity) || 0;
-            const price = parseFloat(newItems[index].unitPrice) || 0;
+            const qty = Number.parseFloat(newItems[index].quantity) || 0;
+            const price = Number.parseFloat(newItems[index].unitPrice) || 0;
             newItems[index].total = qty * price;
 
             return { ...prev, items: newItems };
@@ -428,8 +428,8 @@ export default function QuotesManager() {
             newItems[index][field] = value; // Store raw value for input
 
             // Calculate total using parsed values
-            const qty = parseFloat(field === 'quantity' ? value : newItems[index].quantity) || 0;
-            const price = parseFloat(field === 'unitPrice' ? value : newItems[index].unitPrice) || 0;
+            const qty = Number.parseFloat(field === 'quantity' ? value : newItems[index].quantity) || 0;
+            const price = Number.parseFloat(field === 'unitPrice' ? value : newItems[index].unitPrice) || 0;
             newItems[index].total = qty * price;
         } else {
             newItems[index][field] = value;
@@ -737,6 +737,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                         <input
                             type="text"
+                            aria-label="Cerca preventivo"
                             placeholder="Cerca preventivo..."
                             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                         />
@@ -757,6 +758,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                         <input
                             type="text"
+                            aria-label="Cerca SAL"
                             placeholder="Cerca SAL..."
                             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                         />
@@ -777,6 +779,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                         <input
                             type="text"
+                            aria-label="Cerca contabilità"
                             placeholder="Cerca contabilità..."
                             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                         />
@@ -1406,8 +1409,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Committente</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Nome/Ragione Sociale *</label>
+                                                    <label htmlFor="clientName" className="block text-sm font-medium text-slate-700 mb-1">Nome/Ragione Sociale *</label>
                                                     <input
+                                                        id="clientName"
                                                         type="text"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.clientName}
@@ -1418,8 +1422,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">P.IVA / Codice Fiscale *</label>
+                                                    <label htmlFor="clientVatNumber" className="block text-sm font-medium text-slate-700 mb-1">P.IVA / Codice Fiscale *</label>
                                                     <input
+                                                        id="clientVatNumber"
                                                         type="text"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.clientVatNumber}
@@ -1430,8 +1435,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Codice Fiscale (se diverso)</label>
+                                                    <label htmlFor="clientFiscalCode" className="block text-sm font-medium text-slate-700 mb-1">Codice Fiscale (se diverso)</label>
                                                     <input
+                                                        id="clientFiscalCode"
                                                         type="text"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.clientFiscalCode}
@@ -1441,8 +1447,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo *</label>
+                                                    <label htmlFor="clientAddress" className="block text-sm font-medium text-slate-700 mb-1">Indirizzo *</label>
                                                     <input
+                                                        id="clientAddress"
                                                         type="text"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.clientAddress}
@@ -1458,6 +1465,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                         <section>
                                             <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Descrizione Lavori</h3>
                                             <textarea
+                                                aria-label="Descrizione Lavori"
                                                 className="w-full max-w-full block min-h-[120px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                 value={salFormData.workDescription}
                                                 onChange={(e) => setSalFormData(prev => ({ ...prev, workDescription: e.target.value }))}
@@ -1471,8 +1479,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                             <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">Dettagli Economici</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Valore Contratto (€) *</label>
+                                                    <label htmlFor="contractValue" className="block text-sm font-medium text-slate-700 mb-1">Valore Contratto (€) *</label>
                                                     <input
+                                                        id="contractValue"
                                                         type="number"
                                                         step="0.01"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
@@ -1485,8 +1494,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Importo SAL Precedenti (€)</label>
+                                                    <label htmlFor="previousAmount" className="block text-sm font-medium text-slate-700 mb-1">Importo SAL Precedenti (€)</label>
                                                     <input
+                                                        id="previousAmount"
                                                         type="number"
                                                         step="0.01"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
@@ -1498,8 +1508,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Importo Questo SAL (€) *</label>
+                                                    <label htmlFor="currentAmount" className="block text-sm font-medium text-slate-700 mb-1">Importo Questo SAL (€) *</label>
                                                     <input
+                                                        id="currentAmount"
                                                         type="number"
                                                         step="0.01"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
@@ -1512,9 +1523,10 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Completamento (%) *</label>
+                                                    <label htmlFor="completionPercentage" className="block text-sm font-medium text-slate-700 mb-1">Completamento (%) *</label>
                                                     <div className="relative">
                                                         <input
+                                                            id="completionPercentage"
                                                             type="number"
                                                             step="0.01"
                                                             className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-900 text-base pr-10 cursor-not-allowed appearance-none"
@@ -1528,8 +1540,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Penali (€)</label>
+                                                    <label htmlFor="penalties" className="block text-sm font-medium text-slate-700 mb-1">Penali (€)</label>
                                                     <input
+                                                        id="penalties"
                                                         type="number"
                                                         step="0.01"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
@@ -1541,8 +1554,9 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-slate-700 mb-1">Aliquota IVA (%) *</label>
+                                                    <label htmlFor="vatRate" className="block text-sm font-medium text-slate-700 mb-1">Aliquota IVA (%) *</label>
                                                     <select
+                                                        id="vatRate"
                                                         className="w-full max-w-full block min-h-[50px] px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                                         value={salFormData.vatRate}
                                                         onChange={(e) => setSalFormData(prev => ({ ...prev, vatRate: parseFloat(e.target.value) }))}

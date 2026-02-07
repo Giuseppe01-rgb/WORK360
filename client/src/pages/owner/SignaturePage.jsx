@@ -148,8 +148,8 @@ export default function SignaturePage() {
                                     type="button"
                                     onClick={() => setSelectedFont(font)}
                                     className={`px-4 py-2 rounded-lg border transition-all text-lg ${selectedFont === font
-                                            ? 'border-slate-900 bg-slate-900 text-white shadow-md'
-                                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                                        ? 'border-slate-900 bg-slate-900 text-white shadow-md'
+                                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                                         }`}
                                     style={{ fontFamily: `"${font}", cursive` }}
                                 >
@@ -162,6 +162,8 @@ export default function SignaturePage() {
                     {/* Preview Canvas */}
                     <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-8 mb-6 flex items-center justify-center min-h-[150px]">
                         <canvas
+                            role="img"
+                            aria-label="Anteprima firma"
                             ref={canvasRef}
                             width={600}
                             height={150}

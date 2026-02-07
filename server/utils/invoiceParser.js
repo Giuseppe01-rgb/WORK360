@@ -73,8 +73,8 @@ const extractMaterialsFromText = (text) => {
         /^(.+?)\t+(\d+[.,]?\d*)\t+(pz|kg|m|l|mq|mc|sacchi|litri|metri|rotoli|taniche|cartucce)\t+€?\s*(\d+[.,]?\d*)/i,
     ];
 
-    for (let line of lines) {
-        line = line.trim();
+    for (const rawLine of lines) {
+        const line = rawLine.trim();
 
         // Skip empty lines, headers, totals
         if (!line || line.length < 5) continue;

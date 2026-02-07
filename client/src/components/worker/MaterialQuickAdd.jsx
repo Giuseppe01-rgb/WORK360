@@ -218,6 +218,7 @@ const MaterialQuickAdd = ({ selectedSite, onSuccess }) => {
                                 </label>
                                 <div className="flex items-center gap-4">
                                     <button
+                                        aria-label="Diminuisci quantità"
                                         onClick={() => setQuantidade(Math.max(1, quantidade - 1))}
                                         className="w-16 h-16 bg-slate-200 hover:bg-slate-300 rounded-xl text-3xl font-bold transition-colors"
                                     >
@@ -227,6 +228,7 @@ const MaterialQuickAdd = ({ selectedSite, onSuccess }) => {
                                         <div className="text-5xl font-bold text-blue-600">{quantidade}</div>
                                     </div>
                                     <button
+                                        aria-label="Aumenta quantità"
                                         onClick={() => setQuantidade(quantidade + 1)}
                                         className="w-16 h-16 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-3xl font-bold transition-colors"
                                     >

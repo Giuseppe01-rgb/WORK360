@@ -127,7 +127,7 @@ const EconomiaForm = () => {
         setEditingEconomia(economia);
         setFormData({
             site: economia.siteId,
-            hours: parseFloat(economia.hours),
+            hours: Number.parseFloat(economia.hours),
             description: economia.description
         });
         // Scroll to form
@@ -234,10 +234,11 @@ const EconomiaForm = () => {
                     <form onSubmit={handleSubmit} className="p-6 space-y-6">
                         {/* Site Selection */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                            <label htmlFor="site" className="block text-sm font-medium text-slate-700 mb-2">
                                 Cantiere
                             </label>
                             <select
+                                id="site"
                                 value={formData.site}
                                 onChange={(e) => setFormData({ ...formData, site: e.target.value })}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
@@ -260,6 +261,7 @@ const EconomiaForm = () => {
                                 <button
                                     type="button"
                                     onClick={handleDecrement}
+                                    aria-label="Diminuisci ore"
                                     className="w-12 h-12 bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 active:scale-95 transition-all flex items-center justify-center font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                     disabled={formData.hours <= 0.5}
                                 >
@@ -278,6 +280,7 @@ const EconomiaForm = () => {
                                 <button
                                     type="button"
                                     onClick={handleIncrement}
+                                    aria-label="Aumenta ore"
                                     className="w-12 h-12 bg-amber-500 text-white rounded-full hover:bg-amber-600 active:scale-95 transition-all flex items-center justify-center font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                     disabled={formData.hours >= 24}
                                 >
@@ -291,13 +294,14 @@ const EconomiaForm = () => {
 
                         {/* Description */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                            <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-2">
                                 Descrizione
                                 <span className="text-slate-500 font-normal text-xs ml-2">
                                     (minimo 10 caratteri)
                                 </span>
                             </label>
                             <textarea
+                                id="description"
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 rows={6}
@@ -393,7 +397,7 @@ const EconomiaForm = () => {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="bg-amber-100 text-amber-700 text-sm font-bold px-2 py-0.5 rounded">
-                                                        {parseFloat(economia.hours).toFixed(1)} ore
+                                                        {Number.parseFloat(economia.hours).toFixed(1)} ore
                                                     </span>
                                                     <span className="text-xs text-slate-500">
                                                         {formatDate(economia.date)}
@@ -411,6 +415,7 @@ const EconomiaForm = () => {
                                                     onClick={() => handleEditEconomia(economia)}
                                                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                     title="Modifica"
+                                                    aria-label="Modifica economia"
                                                 >
                                                     <Pencil className="w-5 h-5" />
                                                 </button>
@@ -418,6 +423,7 @@ const EconomiaForm = () => {
                                                     onClick={() => handleDeleteEconomia(economia)}
                                                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                                     title="Elimina"
+                                                    aria-label="Elimina economia"
                                                 >
                                                     <Trash2 className="w-5 h-5" />
                                                 </button>

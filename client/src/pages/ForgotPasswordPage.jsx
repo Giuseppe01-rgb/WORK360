@@ -47,11 +47,12 @@ export default function ForgotPasswordPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            <label htmlFor="username" className="block text-sm font-semibold text-slate-700 mb-2">
                                 Username
                             </label>
                             <div className="relative">
                                 <input
+                                    id="username"
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}

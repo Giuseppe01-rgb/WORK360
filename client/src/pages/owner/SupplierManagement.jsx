@@ -192,8 +192,9 @@ export default function SupplierManagement() {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Nome Fornitore *</label>
+                                <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">Nome Fornitore *</label>
                                 <input
+                                    id="name"
                                     type="text"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.name}
@@ -203,8 +204,9 @@ export default function SupplierManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                                <label htmlFor="category" className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
                                 <input
+                                    id="category"
                                     type="text"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     placeholder="es. Edilizia, Idraulica..."
@@ -214,8 +216,9 @@ export default function SupplierManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Persona di Contatto</label>
+                                <label htmlFor="contactPerson" className="block text-sm font-medium text-slate-700 mb-1">Persona di Contatto</label>
                                 <input
+                                    id="contactPerson"
                                     type="text"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.contactPerson}
@@ -224,8 +227,9 @@ export default function SupplierManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">Email</label>
                                 <input
+                                    id="email"
                                     type="email"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.email}
@@ -234,8 +238,9 @@ export default function SupplierManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Telefono</label>
+                                <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-1">Telefono</label>
                                 <input
+                                    id="phone"
                                     type="tel"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.phone}
@@ -244,11 +249,12 @@ export default function SupplierManagement() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Valutazione</label>
+                                <label htmlFor="rating" className="block text-sm font-medium text-slate-700 mb-1">Valutazione</label>
                                 <select
+                                    id="rating"
                                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                     value={formData.rating}
-                                    onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })}
+                                    onChange={(e) => setFormData({ ...formData, rating: Number.parseInt(e.target.value) })}
                                 >
                                     <option value="1">1 Stella</option>
                                     <option value="2">2 Stelle</option>
@@ -260,8 +266,9 @@ export default function SupplierManagement() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
+                            <label htmlFor="address" className="block text-sm font-medium text-slate-700 mb-1">Indirizzo</label>
                             <input
+                                id="address"
                                 type="text"
                                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                 value={formData.address}
@@ -270,8 +277,9 @@ export default function SupplierManagement() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Specializzazioni (separate da virgola)</label>
+                            <label htmlFor="specialties" className="block text-sm font-medium text-slate-700 mb-1">Specializzazioni (separate da virgola)</label>
                             <input
+                                id="specialties"
                                 type="text"
                                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                                 placeholder="es. Mattoni, Cemento, Sabbia"
@@ -281,8 +289,9 @@ export default function SupplierManagement() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Note</label>
+                            <label htmlFor="notes" className="block text-sm font-medium text-slate-700 mb-1">Note</label>
                             <textarea
+                                id="notes"
                                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 min-h-[100px]"
                                 value={formData.notes}
                                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}

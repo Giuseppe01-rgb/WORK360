@@ -99,10 +99,11 @@ export default function LoginPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Username */}
                     <div>
-                        <label className="block text-sm font-bold text-accent mb-2">
+                        <label htmlFor="username" className="block text-sm font-bold text-accent mb-2">
                             Username
                         </label>
                         <input
+                            id="username"
                             type="text"
                             name="username"
                             value={formData.username}
@@ -116,11 +117,12 @@ export default function LoginPage() {
 
                     {/* Password */}
                     <div>
-                        <label className="block text-sm font-bold text-accent mb-2">
+                        <label htmlFor="password" className="block text-sm font-bold text-accent mb-2">
                             Password
                         </label>
                         <div className="relative">
                             <input
+                                id="password"
                                 type={showPassword ? 'text' : 'password'}
                                 name="password"
                                 value={formData.password}
@@ -132,6 +134,7 @@ export default function LoginPage() {
                             />
                             <button
                                 type="button"
+                                aria-label={showPassword ? "Nascondi password" : "Mostra password"}
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-input-placeholder hover:text-accent transition-colors"
                             >

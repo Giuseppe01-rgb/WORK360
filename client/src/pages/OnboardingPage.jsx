@@ -127,10 +127,11 @@ export default function OnboardingPage() {
                     {/* Step 1: Company Info */}
                     {step === 1 && (
                         <div className="animate-in fade-in slide-in-from-right duration-300">
-                            <label className="block text-sm font-bold text-accent mb-2">
+                            <label htmlFor="companyName" className="block text-sm font-bold text-accent mb-2">
                                 Nome Azienda *
                             </label>
                             <input
+                                id="companyName"
                                 type="text"
                                 name="companyName"
                                 value={formData.companyName}
@@ -163,10 +164,11 @@ export default function OnboardingPage() {
                         <div className="animate-in fade-in slide-in-from-right duration-300 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-accent mb-2">
+                                    <label htmlFor="firstName" className="block text-sm font-bold text-accent mb-2">
                                         Nome *
                                     </label>
                                     <input
+                                        id="firstName"
                                         type="text"
                                         name="firstName"
                                         value={formData.firstName}
@@ -177,10 +179,11 @@ export default function OnboardingPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-accent mb-2">
+                                    <label htmlFor="lastName" className="block text-sm font-bold text-accent mb-2">
                                         Cognome *
                                     </label>
                                     <input
+                                        id="lastName"
                                         type="text"
                                         name="lastName"
                                         value={formData.lastName}
@@ -193,10 +196,11 @@ export default function OnboardingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-accent mb-2">
+                                <label htmlFor="email" className="block text-sm font-bold text-accent mb-2">
                                     Email *
                                 </label>
                                 <input
+                                    id="email"
                                     type="email"
                                     name="email"
                                     value={formData.email}
@@ -208,10 +212,11 @@ export default function OnboardingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-accent mb-2">
+                                <label htmlFor="phone" className="block text-sm font-bold text-accent mb-2">
                                     Telefono *
                                 </label>
                                 <input
+                                    id="phone"
                                     type="tel"
                                     name="phone"
                                     value={formData.phone}
@@ -223,10 +228,11 @@ export default function OnboardingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-accent mb-2">
+                                <label htmlFor="password" className="block text-sm font-bold text-accent mb-2">
                                     Password *
                                 </label>
                                 <input
+                                    id="password"
                                     type="password"
                                     name="password"
                                     value={formData.password}
@@ -239,10 +245,11 @@ export default function OnboardingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-accent mb-2">
+                                <label htmlFor="confirmPassword" className="block text-sm font-bold text-accent mb-2">
                                     Conferma password *
                                 </label>
                                 <input
+                                    id="confirmPassword"
                                     type="password"
                                     name="confirmPassword"
                                     value={formData.confirmPassword}
@@ -256,6 +263,7 @@ export default function OnboardingPage() {
                             <div className="flex gap-3 mt-8">
                                 <button
                                     type="button"
+                                    aria-label="Indietro"
                                     onClick={() => setStep(1)}
                                     className="px-6 py-4 text-accent font-bold hover:bg-slate-50 rounded-xl transition-all flex items-center gap-2 border-2 border-transparent hover:border-slate-200"
                                 >
