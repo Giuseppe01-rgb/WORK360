@@ -25,7 +25,7 @@ CONTROLLERS=(
 for controller in "${CONTROLLERS[@]}"; do
   FILE="server/controllers/$controller"
   
-  if [ -f "$FILE" ]; then
+  if [[ -f "$FILE" ]]; then
     echo "Processing $controller..."
     
     # Add imports if not present
