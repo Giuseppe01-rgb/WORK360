@@ -7,6 +7,43 @@ import { siteAPI, workActivityAPI, noteAPI, photoAPI } from '../../utils/api';
 import Layout from '../../components/Layout';
 import { useToast } from '../../context/ToastContext';
 
+// Helper function to get status badge classes
+const getSiteStatusClasses = (status) => {
+    switch (status) {
+        case 'active':
+            return 'bg-green-100 text-green-700';
+        case 'planned':
+            return 'bg-blue-100 text-blue-700';
+        default:
+            return 'bg-slate-100 text-slate-700';
+    }
+};
+
+// Helper function to get status label
+const getSiteStatusLabel = (status) => {
+    switch (status) {
+        case 'active':
+            return 'In Corso';
+        case 'planned':
+            return 'Pianificato';
+        default:
+            return 'Archiviato';
+    }
+};
+
+// Helper function to get tab color for active state
+const getTabActiveColor = (colorName) => {
+    const colorMap = {
+        'slate': '#64748b',
+        'green': '#22c55e',
+        'blue': '#3b82f6',
+        'amber': '#f59e0b',
+        'red': '#ef4444'
+    };
+    return colorMap[colorName] || '#64748b';
+};
+
+
 const SiteDetails = ({ site, onBack }) => {
     const { showError } = useToast();
     const [reports, setReports] = useState([]);
@@ -352,10 +389,7 @@ export default function WorkerSites() {
                                 style={{
                                     scrollSnapAlign: 'start',
                                     ...(isActive ? {
-                                        backgroundColor: tab.color === 'slate' ? '#64748b' :
-                                            tab.color === 'green' ? '#22c55e' :
-                                                tab.color === 'blue' ? '#3b82f6' :
-                                                    tab.color === 'amber' ? '#f59e0b' : '#ef4444',
+                                        backgroundColor: getTabActiveColor(tab.color),
                                         color: 'white'
                                     } : {})
                                 }}
@@ -403,11 +437,8 @@ export default function WorkerSites() {
                                     </div>
                                 </div>
 
-                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${site.status === 'active' ? 'bg-green-100 text-green-700' :
-                                    site.status === 'planned' ? 'bg-blue-100 text-blue-700' :
-                                        'bg-slate-100 text-slate-700'
-                                    }`}>
-                                    {site.status === 'active' ? 'In Corso' : site.status === 'planned' ? 'Pianificato' : 'Archiviato'}
+                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getSiteStatusClasses(site.status)}`}>
+                                    {getSiteStatusLabel(site.status)}
                                 </span>
                             </div>
                         </div>

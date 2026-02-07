@@ -7,6 +7,21 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import { Plus, Search, FileText, Calendar, DollarSign, User, MapPin, Edit, Trash2, X, CheckCircle, AlertTriangle, Send, Loader, ChevronDown, ChevronUp, Building2, Percent, Euro, Download, Eye } from 'lucide-react';
 import React from 'react';
 
+// Helper function to get quote status styling
+const getQuoteStatusClasses = (status) => {
+    switch (status) {
+        case 'accepted':
+            return 'bg-green-100 text-green-700';
+        case 'rejected':
+            return 'bg-red-100 text-red-700';
+        case 'sent':
+            return 'bg-blue-100 text-blue-700';
+        default:
+            return 'bg-slate-100 text-slate-600';
+    }
+};
+
+
 class DebugErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
@@ -794,11 +809,7 @@ ${user?.company?.name || 'Il team WORK360'}`;
                                     <select
                                         value={quote.status}
                                         onChange={(e) => handleStatusChange(quote.id, e.target.value)}
-                                        className={`text-xs font-bold px-3 py-1 rounded-full border-none focus:ring-0 cursor-pointer appearance-none text-center min-w-[80px] ${quote.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                                            quote.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                quote.status === 'sent' ? 'bg-blue-100 text-blue-700' :
-                                                    'bg-slate-100 text-slate-600'
-                                            }`}
+                                        className={`text-xs font-bold px-3 py-1 rounded-full border-none focus:ring-0 cursor-pointer appearance-none text-center min-w-[80px] ${getQuoteStatusClasses(quote.status)}`}
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <option value="draft">Bozza</option>

@@ -310,6 +310,59 @@ const createManualAttendance = async (req, res) => {
     }
 };
 
+// Helper function to build attendances from new format (workers + siteId + dates)
+const buildAttendancesFromNewFormat = (workers, siteId, dates) => {
+    const attendances = [];
+    for (const workerId of workers) {
+        for (const dateEntry of dates) {
+            attendances.push({
+                userId: workerId,
+                siteId: siteId,
+                date: dateEntry.date,
+                clockIn: dateEntry.clockIn,
+                clockOut: dateEntry.clockOut,
+                notes: dateEntry.notes || ''
+            });
+        }
+    }
+    return attendances;
+};
+
+// Helper function to process a single attendance entry
+const processSingleAttendance = async (att, companyId) => {
+    const { userId, siteId, date, clockIn, clockOut, notes, totalHours } = att;
+
+    // Verify site
+    const site = await ConstructionSite.findOne({ where: { id: siteId, companyId } });
+    if (!site) {
+        throw new Error('Cantiere non trovato');
+    }
+
+    // Get user's current hourly cost
+    const user = await User.findByPk(userId, { attributes: ['hourlyCost'] });
+    const hourlyCost = parseFloat(user?.hourlyCost) || 0;
+
+    const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}:00+01:00`), location: null } : null;
+    const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}:00+01:00`), location: null } : null;
+
+    // Calculate worked hours with automatic lunch break deduction
+    let hours = totalHours || 0;
+    if (clockInData && clockOutData && !totalHours) {
+        const { workedHours } = calculateWorkedHours(clockInData.time, clockOutData.time);
+        hours = workedHours;
+    }
+
+    await Attendance.create({
+        userId,
+        siteId,
+        hourlyCost,
+        clockIn: clockInData,
+        clockOut: clockOutData,
+        totalHours: hours,
+        notes: notes || null
+    });
+};
+
 const bulkCreateAttendances = async (req, res) => {
     try {
         const companyId = getCompanyId(req);
@@ -317,25 +370,13 @@ const bulkCreateAttendances = async (req, res) => {
 
         // Support both old format (attendances array) and new format (workers + siteId + dates)
         if (req.body.attendances && Array.isArray(req.body.attendances)) {
-            // Old format: direct array of attendance objects
             attendancesToCreate = req.body.attendances;
         } else if (req.body.workers && req.body.siteId && req.body.dates) {
-            // New format: workers array, siteId, dates array
-            const { workers, siteId, dates } = req.body;
-
-            // Create attendance entries for each worker × date combination
-            for (const workerId of workers) {
-                for (const dateEntry of dates) {
-                    attendancesToCreate.push({
-                        userId: workerId,
-                        siteId: siteId,
-                        date: dateEntry.date,
-                        clockIn: dateEntry.clockIn,
-                        clockOut: dateEntry.clockOut,
-                        notes: dateEntry.notes || ''
-                    });
-                }
-            }
+            attendancesToCreate = buildAttendancesFromNewFormat(
+                req.body.workers,
+                req.body.siteId,
+                req.body.dates
+            );
         } else {
             return res.status(400).json({ message: 'Array di presenze richiesto o workers/siteId/dates' });
         }
@@ -347,54 +388,14 @@ const bulkCreateAttendances = async (req, res) => {
         const results = { created: 0, errors: [] };
 
         for (let i = 0; i < attendancesToCreate.length; i++) {
-            const att = attendancesToCreate[i];
             try {
-                const { userId, siteId, date, clockIn, clockOut, notes, totalHours } = att;
-
-                console.log(`Processing attendance ${i + 1}/${attendancesToCreate.length}:`, { userId, siteId, date, clockIn, clockOut });
-
-                // Verify site
-                const site = await ConstructionSite.findOne({ where: { id: siteId, companyId } });
-                if (!site) {
-                    console.log(`Site not found for siteId: ${siteId}, companyId: ${companyId}`);
-                    results.errors.push({ index: i, error: 'Cantiere non trovato' });
-                    continue;
-                }
-
-                // Get user's current hourly cost
-                const user = await User.findByPk(userId, { attributes: ['hourlyCost'] });
-                const hourlyCost = parseFloat(user?.hourlyCost) || 0;
-
-                const clockInData = clockIn ? { time: new Date(`${date}T${clockIn}:00+01:00`), location: null } : null;
-                const clockOutData = clockOut ? { time: new Date(`${date}T${clockOut}:00+01:00`), location: null } : null;
-
-                // Calculate worked hours with automatic lunch break deduction
-                let hours = totalHours || 0;
-                if (clockInData && clockOutData && !totalHours) {
-                    const { workedHours } = calculateWorkedHours(clockInData.time, clockOutData.time);
-                    hours = workedHours;
-                }
-
-                console.log(`Creating attendance with hours: ${hours}, hourlyCost: ${hourlyCost}`);
-
-                await Attendance.create({
-                    userId,
-                    siteId,
-                    hourlyCost,
-                    clockIn: clockInData,
-                    clockOut: clockOutData,
-                    totalHours: hours,
-                    notes: notes || null
-                });
+                await processSingleAttendance(attendancesToCreate[i], companyId);
                 results.created++;
-                console.log(`Successfully created attendance ${i + 1}`);
             } catch (rowError) {
                 console.error(`Error creating attendance ${i + 1}:`, rowError.message);
                 results.errors.push({ index: i, error: rowError.message });
             }
         }
-
-        console.log('Bulk create finished:', results);
 
         res.json({
             message: `${results.created}/${attendancesToCreate.length} presenze create`,

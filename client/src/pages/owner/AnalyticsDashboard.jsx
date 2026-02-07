@@ -4,6 +4,58 @@ import { analyticsAPI, siteAPI } from '../../utils/api';
 import { BarChart3, Users, Clock, Building2, Package, Calendar, Filter, FileText, Download } from 'lucide-react';
 import { exportAnalyticsReport } from '../../utils/excelExport';
 
+// Helper function to get site status badge styling
+const getSiteStatusClasses = (status) => {
+    switch (status) {
+        case 'active':
+            return 'bg-green-100 text-green-700';
+        case 'planned':
+            return 'bg-blue-100 text-blue-700';
+        default:
+            return 'bg-yellow-100 text-yellow-700';
+    }
+};
+
+// Helper function to get site status label
+const getSiteStatusLabel = (status) => {
+    switch (status) {
+        case 'active':
+            return 'In Corso';
+        case 'planned':
+            return 'Pianificato';
+        default:
+            return 'Archiviato';
+    }
+};
+
+// Helper function to get margin status badge styling
+const getMarginStatusClasses = (marginStatus) => {
+    switch (marginStatus) {
+        case 'high':
+            return 'bg-green-100 text-green-700';
+        case 'medium':
+            return 'bg-yellow-100 text-yellow-700';
+        case 'low':
+            return 'bg-red-100 text-red-700';
+        default:
+            return 'bg-slate-100 text-slate-500';
+    }
+};
+
+// Helper function to get margin status label
+const getMarginStatusLabel = (marginStatus) => {
+    switch (marginStatus) {
+        case 'high':
+            return 'Buono';
+        case 'medium':
+            return 'Medio';
+        case 'low':
+            return 'Basso';
+        default:
+            return 'N/D';
+    }
+};
+
 export default function AnalyticsDashboard() {
     const [analytics, setAnalytics] = useState(null);
     const [siteStats, setSiteStats] = useState([]);
@@ -393,11 +445,8 @@ export default function AnalyticsDashboard() {
                                         <Building2 className="w-5 h-5 text-slate-400" />
                                         {stat.site.name}
                                     </h4>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${stat.site.status === 'active' ? 'bg-green-100 text-green-700' :
-                                        stat.site.status === 'planned' ? 'bg-blue-100 text-blue-700' :
-                                            'bg-yellow-100 text-yellow-700'
-                                        }`}>
-                                        {stat.site.status === 'active' ? 'In Corso' : stat.site.status === 'planned' ? 'Pianificato' : 'Archiviato'}
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getSiteStatusClasses(stat.site.status)}`}>
+                                        {getSiteStatusLabel(stat.site.status)}
                                     </span>
                                 </div>
 
@@ -429,14 +478,8 @@ export default function AnalyticsDashboard() {
                                             <div className="font-bold text-xl text-slate-900">
                                                 {stat.marginPercent != null ? `${stat.marginPercent.toFixed(1)}%` : '—'}
                                             </div>
-                                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${stat.marginStatus === 'high' ? 'bg-green-100 text-green-700' :
-                                                stat.marginStatus === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                                                    stat.marginStatus === 'low' ? 'bg-red-100 text-red-700' :
-                                                        'bg-slate-100 text-slate-500'
-                                                }`}>
-                                                {stat.marginStatus === 'high' ? 'Buono' :
-                                                    stat.marginStatus === 'medium' ? 'Medio' :
-                                                        stat.marginStatus === 'low' ? 'Basso' : 'N/D'}
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${getMarginStatusClasses(stat.marginStatus)}`}>
+                                                {getMarginStatusLabel(stat.marginStatus)}
                                             </span>
                                         </div>
                                     </div>
