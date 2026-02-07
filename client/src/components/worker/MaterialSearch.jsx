@@ -95,6 +95,24 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
         </button>
     );
 
+    // Helper component for loading states
+    const LoadingState = ({ message = 'Caricamento...' }) => (
+        <div className="text-center py-12">
+            <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-3" />
+            <p className="text-slate-600">{message}</p>
+        </div>
+    );
+
+    // Helper component for empty states
+    const EmptyState = ({ icon: Icon, title, subtitle, action }) => (
+        <div className="text-center py-12">
+            <Icon className="w-16 h-16 text-slate-300 mx-auto mb-3" />
+            {title && <p className="text-slate-600 font-medium mb-2">{title}</p>}
+            {subtitle && <p className="text-slate-500 text-sm mb-4">{subtitle}</p>}
+            {action}
+        </div>
+    );
+
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
@@ -161,39 +179,37 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
                 <div className="flex-1 overflow-y-auto p-6">
                     {activeTab === 'search' && (
                         <>
-                            {loading ? (
-                                <div className="text-center py-12">
-                                    <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-3" />
-                                    <p className="text-slate-600">Caricamento catalogo...</p>
-                                </div>
-                            ) : allMaterials.length === 0 ? (
-                                <div className="text-center py-12">
-                                    <Package className="w-16 h-16 text-slate-300 mx-auto mb-3" />
-                                    <p className="text-slate-600 font-medium mb-2">Catalogo vuoto</p>
-                                    <p className="text-slate-500 text-sm">Nessun materiale disponibile</p>
-                                </div>
-                            ) : filteredMaterials.length === 0 ? (
-                                <div className="text-center py-12">
-                                    <Package className="w-16 h-16 text-slate-300 mx-auto mb-3" />
-                                    <p className="text-slate-600 font-medium mb-2">Nessun materiale trovato</p>
-                                    <p className="text-slate-500 text-sm mb-4">Nessun materiale corrisponde a "{searchQuery}"</p>
+                            {loading && <LoadingState message="Caricamento catalogo..." />}
 
-                                    {/* Report New Material Button */}
-                                    <button
-                                        onClick={() => {
-                                            onClose();
-                                            if (onReportNew) {
-                                                onReportNew();
-                                            }
-                                        }}
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 text-white font-semibold rounded-xl hover:bg-orange-700 transition-colors shadow-lg"
-                                    >
-                                        📢 Non lo trovo → Segnala Nuovo Materiale
-                                    </button>
-                                </div>
-                            ) : (
+                            {!loading && allMaterials.length === 0 && (
+                                <EmptyState
+                                    icon={Package}
+                                    title="Catalogo vuoto"
+                                    subtitle="Nessun materiale disponibile"
+                                />
+                            )}
+
+                            {!loading && allMaterials.length > 0 && filteredMaterials.length === 0 && (
+                                <EmptyState
+                                    icon={Package}
+                                    title="Nessun materiale trovato"
+                                    subtitle={`Nessun materiale corrisponde a "${searchQuery}"`}
+                                    action={
+                                        <button
+                                            onClick={() => {
+                                                onClose();
+                                                if (onReportNew) onReportNew();
+                                            }}
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 text-white font-semibold rounded-xl hover:bg-orange-700 transition-colors shadow-lg"
+                                        >
+                                            📢 Non lo trovo → Segnala Nuovo Materiale
+                                        </button>
+                                    }
+                                />
+                            )}
+
+                            {!loading && filteredMaterials.length > 0 && (
                                 <div className="space-y-3">
-                                    {/* Show count */}
                                     <p className="text-sm text-slate-600 mb-2">
                                         {searchQuery ? (
                                             <>Trovati <strong>{filteredMaterials.length}</strong> materiali</>
@@ -201,7 +217,6 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
                                             <>Catalogo completo: <strong>{allMaterials.length}</strong> materiali</>
                                         )}
                                     </p>
-
                                     {filteredMaterials.map((material) => (
                                         <MaterialCard
                                             key={material.id}
@@ -214,18 +229,19 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
                         </>
                     )}
 
+
                     {activeTab === 'most-used' && (
                         <>
-                            {loadingMostUsed ? (
-                                <div className="text-center py-12">
-                                    <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto" />
-                                </div>
-                            ) : mostUsed.length === 0 ? (
-                                <div className="text-center py-12">
-                                    <TrendingUp className="w-16 h-16 text-slate-300 mx-auto mb-3" />
-                                    <p className="text-slate-500">Nessun materiale usato in questo cantiere</p>
-                                </div>
-                            ) : (
+                            {loadingMostUsed && <LoadingState />}
+
+                            {!loadingMostUsed && mostUsed.length === 0 && (
+                                <EmptyState
+                                    icon={TrendingUp}
+                                    subtitle="Nessun materiale usato in questo cantiere"
+                                />
+                            )}
+
+                            {!loadingMostUsed && mostUsed.length > 0 && (
                                 <div className="space-y-3">
                                     <p className="text-sm text-slate-600 mb-4">
                                         🔥 I 5 materiali più usati in questo cantiere
@@ -245,6 +261,7 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
                             )}
                         </>
                     )}
+
                 </div>
             </div>
         </div>

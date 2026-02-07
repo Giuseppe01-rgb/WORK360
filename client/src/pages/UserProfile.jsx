@@ -35,6 +35,17 @@ export default function UserProfile() {
         });
     };
 
+    // Helper function for password strength
+    const getPasswordStrength = (password) => {
+        if (password.length < 6) {
+            return { barColor: 'bg-red-200', textColor: 'text-red-600', message: 'Troppo debole (min 6 caratteri)' };
+        }
+        if (password.length < 8) {
+            return { barColor: 'bg-yellow-200', textColor: 'text-yellow-600', message: 'Media' };
+        }
+        return { barColor: 'bg-green-200', textColor: 'text-green-600', message: 'Forte' };
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -206,24 +217,20 @@ export default function UserProfile() {
                                     {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                             </div>
-                            {formData.newPassword && (
-                                <div className="mt-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className={`h-1 flex-1 rounded-full ${formData.newPassword.length < 6 ? 'bg-red-200' :
-                                            formData.newPassword.length < 8 ? 'bg-yellow-200' :
-                                                'bg-green-200'
-                                            }`}></div>
+                            {formData.newPassword && (() => {
+                                const strength = getPasswordStrength(formData.newPassword);
+                                return (
+                                    <div className="mt-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`h-1 flex-1 rounded-full ${strength.barColor}`}></div>
+                                        </div>
+                                        <p className={`text-xs mt-1 ${strength.textColor}`}>
+                                            {strength.message}
+                                        </p>
                                     </div>
-                                    <p className={`text-xs mt-1 ${formData.newPassword.length < 6 ? 'text-red-600' :
-                                        formData.newPassword.length < 8 ? 'text-yellow-600' :
-                                            'text-green-600'
-                                        }`}>
-                                        {formData.newPassword.length < 6 ? 'Troppo debole (min 6 caratteri)' :
-                                            formData.newPassword.length < 8 ? 'Media' :
-                                                'Forte'}
-                                    </p>
-                                </div>
-                            )}
+                                );
+                            })()}
+
                         </div>
 
                         {/* Confirm Password */}

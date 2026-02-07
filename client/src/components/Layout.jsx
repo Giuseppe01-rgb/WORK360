@@ -154,62 +154,64 @@ export default function Layout({ children, title, hideHeader = false }) {
 
     const menuGroups = user?.role === 'owner' ? ownerLinks : workerLinks;
 
-    // Helper to render a single nav item
-    const NavItem = ({ link, isMobile = false }) => {
-        const Icon = link.icon;
-        const isActive = location.pathname === link.path ||
-            (link.submenu && link.submenu.some(sub => location.pathname + location.search === sub.path));
+    // Helper to get active state classes
+    const getNavItemClasses = (isActive) => isActive
+        ? 'bg-[#8B5CF6] text-white shadow-lg shadow-purple-500/30'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50';
 
-        if (link.submenu) {
-            return (
-                <div className="mb-2">
-                    <button
-                        onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
-                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 group ${isActive
-                            ? 'bg-[#8B5CF6] text-white shadow-lg shadow-purple-500/30'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                            }`}
-                    >
-                        <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
-                        <span className={`flex-1 text-left ${isActive ? 'font-bold' : 'font-medium'}`}>{link.label}</span>
-                        {isWorkerFunctionsOpen ?
-                            <ChevronUp className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} /> :
-                            <ChevronDown className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} />
-                        }
-                    </button>
-                    {isWorkerFunctionsOpen && (
-                        <div className="ml-4 mt-1 pl-4 border-l border-slate-100 space-y-1">
-                            {link.submenu.map((sublink) => {
-                                const isSubActive = location.pathname + location.search === sublink.path;
-                                return (
-                                    <Link
-                                        key={sublink.path}
-                                        to={sublink.path}
-                                        onClick={() => isMobile && setIsMobileMenuOpen(false)}
-                                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isSubActive
+    // Component for expandable submenu items
+    const NavItemWithSubmenu = ({ link, isMobile }) => {
+        const Icon = link.icon;
+        const isActive = link.submenu.some(sub => location.pathname + location.search === sub.path);
+
+        return (
+            <div className="mb-2">
+                <button
+                    onClick={() => setIsWorkerFunctionsOpen(!isWorkerFunctionsOpen)}
+                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 group ${getNavItemClasses(isActive)}`}
+                >
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                    <span className={`flex-1 text-left ${isActive ? 'font-bold' : 'font-medium'}`}>{link.label}</span>
+                    {isWorkerFunctionsOpen
+                        ? <ChevronUp className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} />
+                        : <ChevronDown className={`w-4 h-4 ${isActive ? 'text-white/70' : 'text-slate-400'}`} />
+                    }
+                </button>
+                {isWorkerFunctionsOpen && (
+                    <div className="ml-4 mt-1 pl-4 border-l border-slate-100 space-y-1">
+                        {link.submenu.map((sublink) => {
+                            const isSubActive = location.pathname + location.search === sublink.path;
+                            return (
+                                <Link
+                                    key={sublink.path}
+                                    to={sublink.path}
+                                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${isSubActive
                                             ? 'text-[#8B5CF6] font-bold bg-purple-50'
                                             : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'
-                                            }`}
-                                    >
-                                        <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-[#8B5CF6]' : 'bg-slate-300'}`}></span>
-                                        {sublink.label}
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-            );
-        }
+                                        }`}
+                                >
+                                    <span className={`w-1.5 h-1.5 rounded-full ${isSubActive ? 'bg-[#8B5CF6]' : 'bg-slate-300'}`}></span>
+                                    {sublink.label}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Component for regular nav links
+    const NavItemLink = ({ link, isMobile }) => {
+        const Icon = link.icon;
+        const isActive = location.pathname === link.path;
 
         return (
             <Link
                 to={link.path}
                 onClick={() => isMobile && setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 group mb-1 ${isActive
-                    ? 'bg-[#8B5CF6] text-white shadow-lg shadow-purple-500/30'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                    }`}
+                className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 group mb-1 ${getNavItemClasses(isActive)}`}
             >
                 <div className={`p-1 rounded-lg ${isActive ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-slate-200'}`}>
                     <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-500'}`} />
@@ -233,6 +235,14 @@ export default function Layout({ children, title, hideHeader = false }) {
             </Link>
         );
     };
+
+    // Simplified NavItem that delegates to the appropriate component
+    const NavItem = ({ link, isMobile = false }) => {
+        return link.submenu
+            ? <NavItemWithSubmenu link={link} isMobile={isMobile} />
+            : <NavItemLink link={link} isMobile={isMobile} />;
+    };
+
 
     return (
         <div className="min-h-screen bg-[#f1f5f9] flex font-sans">

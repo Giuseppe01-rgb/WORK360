@@ -58,6 +58,11 @@ export const ConfirmModalProvider = ({ children }) => {
      */
     const showConfirm = useCallback((options) => {
         return new Promise((resolve) => {
+            const closeAndResolve = (result) => {
+                setModalState(prev => ({ ...prev, isOpen: false }));
+                resolve(result);
+            };
+
             setModalState({
                 isOpen: true,
                 title: options.title || 'Conferma',
@@ -65,14 +70,8 @@ export const ConfirmModalProvider = ({ children }) => {
                 confirmText: options.confirmText || 'Conferma',
                 cancelText: options.cancelText || 'Annulla',
                 variant: options.variant || 'default',
-                onConfirm: () => {
-                    setModalState(prev => ({ ...prev, isOpen: false }));
-                    resolve(true);
-                },
-                onCancel: () => {
-                    setModalState(prev => ({ ...prev, isOpen: false }));
-                    resolve(false);
-                }
+                onConfirm: () => closeAndResolve(true),
+                onCancel: () => closeAndResolve(false)
             });
         });
     }, []);
