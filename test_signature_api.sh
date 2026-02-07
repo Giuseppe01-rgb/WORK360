@@ -13,7 +13,7 @@ echo "Login response: $LOGIN_RESPONSE"
 
 TOKEN=$(echo $LOGIN_RESPONSE | grep -o '"token":"[^"]*' | cut -d'"' -f4)
 
-if [ -z "$TOKEN" ]; then
+if [[ -z "$TOKEN" ]]; then
   echo "❌ Failed to get token. Login might have failed."
   exit 1
 fi
