@@ -602,7 +602,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         <div className="space-y-4">
                             {/* EMPLOYEES CARD */}
                             <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => setShowEmployeesModal(true)}
+                                onKeyDown={(e) => e.key === 'Enter' && setShowEmployeesModal(true)}
                                 className="bg-white rounded-[2.5rem] border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
                             >
                                 <div className="flex items-center gap-4">
@@ -621,7 +624,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
                             {/* MATERIALS CARD */}
                             <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={handleOpenMaterialsModal}
+                                onKeyDown={(e) => e.key === 'Enter' && handleOpenMaterialsModal()}
                                 className="bg-white rounded-[2.5rem] border border-slate-100 p-5 hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
                             >
                                 <div className="flex items-center gap-4">
@@ -650,7 +656,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                             report.dailyReports.map((dailyReport) => (
                                 <div
                                     key={dailyReport.id}
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() => setSelectedNote({ ...dailyReport, content: dailyReport.activityType })}
+                                    onKeyDown={(e) => e.key === 'Enter' && setSelectedNote({ ...dailyReport, content: dailyReport.activityType })}
                                     className="bg-white rounded-[2.5rem] border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer group"
                                 >
                                     <div className="flex items-start justify-between mb-3">
@@ -815,7 +824,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                             notes.map((note) => (
                                 <div
                                     key={note.id}
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() => setSelectedNote(note)}
+                                    onKeyDown={(e) => e.key === 'Enter' && setSelectedNote(note)}
                                     className="bg-white rounded-[2.5rem] border border-slate-100 p-6 hover:shadow-md transition-all cursor-pointer"
                                 >
                                     <div className="flex items-start justify-between mb-3">
@@ -859,7 +871,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                 {photos.map((photo) => (
                                     <div
                                         key={photo.id}
+                                        role="button"
+                                        tabIndex={0}
                                         onClick={() => setSelectedPhoto(photo)}
+                                        onKeyDown={(e) => e.key === 'Enter' && setSelectedPhoto(photo)}
                                         className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden hover:shadow-md transition-all cursor-pointer group relative"
                                     >
                                         <button
@@ -905,7 +920,13 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {/* Note Detail Modal */}
             {
                 selectedNote && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedNote(null)}>
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
+                        onClick={() => setSelectedNote(null)}
+                        onKeyDown={(e) => e.key === 'Escape' && setSelectedNote(null)}
+                    >
                         <div className="bg-white rounded-[2.5rem] w-full max-w-2xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                             <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
                                 <div>
@@ -936,7 +957,13 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {/* Photo Detail Modal */}
             {
                 selectedPhoto && (
-                    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto" onClick={() => setSelectedPhoto(null)}>
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
+                        onClick={() => setSelectedPhoto(null)}
+                        onKeyDown={(e) => e.key === 'Escape' && setSelectedPhoto(null)}
+                    >
                         <div className="bg-white rounded-[2.5rem] w-full max-w-4xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                             <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
                                 <div>
@@ -1091,7 +1118,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         return (
                                             <div
                                                 key={usage.id}
+                                                role="button"
+                                                tabIndex={0}
                                                 onClick={() => setSelectedMaterial(usage)}
+                                                onKeyDown={(e) => e.key === 'Enter' && setSelectedMaterial(usage)}
                                                 className={`px-4 py-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors ${index !== materialUsages.length - 1 ? 'border-b border-slate-100' : ''}`}
                                             >
                                                 <div className="flex-1">
@@ -1123,7 +1153,13 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
                         {/* Material Detail Modal */}
                         {selectedMaterial && !editingMaterial && (
-                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center z-[10000]" onClick={() => setSelectedMaterial(null)}>
+                            <div
+                                role="dialog"
+                                aria-modal="true"
+                                className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center z-[10000]"
+                                onClick={() => setSelectedMaterial(null)}
+                                onKeyDown={(e) => e.key === 'Escape' && setSelectedMaterial(null)}
+                            >
                                 <div className="bg-white rounded-t-[2.5rem] w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300" onClick={e => e.stopPropagation()}>
                                     <div className="flex items-center justify-between px-6 pt-4 pb-2">
                                         <div className="w-12 h-1.5 bg-slate-200 rounded-full"></div>
@@ -1194,7 +1230,13 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
                         {/* Material Edit Modal */}
                         {editingMaterial && (
-                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10001] p-4" onClick={() => { setEditingMaterial(null); setShowMaterialSelector(false); setNewSelectedMaterial(null); setCatalogSearch(''); }}>
+                            <div
+                                role="dialog"
+                                aria-modal="true"
+                                className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10001] p-4"
+                                onClick={() => { setEditingMaterial(null); setShowMaterialSelector(false); setNewSelectedMaterial(null); setCatalogSearch(''); }}
+                                onKeyDown={(e) => e.key === 'Escape' && (setEditingMaterial(null), setShowMaterialSelector(false), setNewSelectedMaterial(null), setCatalogSearch(''))}
+                            >
                                 <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
                                     <div className="p-6 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
                                         <h3 className="text-lg font-bold text-slate-900">Modifica Materiale</h3>
