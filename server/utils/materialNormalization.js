@@ -2,8 +2,8 @@ const normalizeMaterialInput = (name, unit) => {
     if (!name) return null;
 
     // 1. Basic normalization
-    let cleanName = name.toLowerCase().trim().replace(/\s+/g, ' ');
-    let cleanUnit = unit ? unit.toLowerCase().trim().replace(/\s+/g, ' ') : 'pz';
+    let cleanName = name.toLowerCase().trim().replaceAll(/\s+/g, ' ');
+    let cleanUnit = unit ? unit.toLowerCase().trim().replaceAll(/\s+/g, ' ') : 'pz';
 
     // 2. Unit normalization
     const unitMap = {
@@ -53,7 +53,7 @@ const normalizeMaterialInput = (name, unit) => {
 
     // Clean punctuation and truncate
     if (spec) {
-        spec = spec.replace(/[.,;:]/g, '').trim();
+        spec = spec.replaceAll(/[.,;:]/g, '').trim();
         if (spec.length > 40) {
             spec = spec.substring(0, 40).trim() + '...';
         }

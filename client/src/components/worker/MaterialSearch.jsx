@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Package, TrendingUp, Loader2, X } from 'lucide-react';
+import PropTypes from 'prop-types';
 import { colouraMaterialAPI, materialUsageAPI } from '../../utils/api';
 
 const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
@@ -266,6 +267,13 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
             </div>
         </div>
     );
+};
+
+MaterialSearch.propTypes = {
+    siteId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    onSelect: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onReportNew: PropTypes.func.isRequired
 };
 
 export default MaterialSearch;

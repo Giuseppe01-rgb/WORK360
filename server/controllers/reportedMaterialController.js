@@ -90,7 +90,7 @@ const approveAndCreateNew = async (req, res) => {
 
         // Create new material in catalog
         const materialName = displayName || reported.nomeDigitato;
-        const normalizedKey = materialName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 100);
+        const normalizedKey = materialName.toLowerCase().replaceAll(/[^a-z0-9]/g, '').substring(0, 100);
 
         const newMaterial = await MaterialMaster.create({
             companyId,

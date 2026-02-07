@@ -24,7 +24,7 @@ const formatDate = (dateString) => {
  * Download workbook as Excel file
  */
 const downloadWorkbook = (workbook, fileName) => {
-    const sanitizedName = fileName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const sanitizedName = fileName.replaceAll(/[^a-zA-Z0-9_-]/g, '_');
     XLSX.writeFile(workbook, `${sanitizedName}.xlsx`);
 };
 

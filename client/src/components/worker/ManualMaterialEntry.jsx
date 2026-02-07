@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Package, X, Search, Loader2 } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 const ManualMaterialEntry = ({ initialData = {}, onSubmit, onClose, onSearchCatalog }) => {
     const [formData, setFormData] = useState({
@@ -195,6 +196,13 @@ const ManualMaterialEntry = ({ initialData = {}, onSubmit, onClose, onSearchCata
             </div>
         </div>
     );
+};
+
+ManualMaterialEntry.propTypes = {
+    initialData: PropTypes.object,
+    onSubmit: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onSearchCatalog: PropTypes.func.isRequired
 };
 
 export default ManualMaterialEntry;

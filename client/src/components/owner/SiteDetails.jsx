@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { analyticsAPI, noteAPI, photoAPI, economiaAPI, materialUsageAPI, colouraMaterialAPI, siteAPI } from '../../utils/api';
 import { Plus, Users, Clock, X, ChevronRight, Package, MapPin, Edit, Trash2, ArrowLeft, RefreshCw, Search, FileText, Camera, Zap } from 'lucide-react';
 import PortalModal from '../../components/PortalModal';
@@ -1397,4 +1398,11 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
         </div >
     );
 };
+
+SiteDetails.propTypes = {
+    site: PropTypes.object.isRequired,
+    onBack: PropTypes.func.isRequired,
+    showConfirm: PropTypes.func
+};
+
 export default SiteDetails;

@@ -9,7 +9,7 @@ const { sequelize } = require('../config/database');
 
 // Helper function to generate UUID
 const generateUUID = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replaceAll(/[xy]/g, function (c) {
         const r = Math.trunc(Math.random() * 16);
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -428,7 +428,7 @@ router.post('/catalog', express.json({ limit: '50mb' }), async (req, res) => {
             for (const mat of data.colouramaterials) {
                 try {
                     const generateUUID = () => {
-                        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replaceAll(/[xy]/g, function (c) {
                             const r = Math.trunc(Math.random() * 16);
                             const v = c === 'x' ? r : (r & 0x3 | 0x8);
                             return v.toString(16);
@@ -437,7 +437,7 @@ router.post('/catalog', express.json({ limit: '50mb' }), async (req, res) => {
 
                     const newId = generateUUID();
                     const displayName = mat.nome_prodotto || 'Materiale';
-                    const normalizedKey = displayName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 100);
+                    const normalizedKey = displayName.toLowerCase().replaceAll(/[^a-z0-9]/g, '').substring(0, 100);
 
                     await sequelize.query(`
                         INSERT INTO material_masters (id, company_id, family, spec, unit, display_name, normalized_key, supplier, barcode, price, created_by_id, created_at, updated_at)

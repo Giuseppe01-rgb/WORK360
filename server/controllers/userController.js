@@ -42,8 +42,8 @@ const createUser = async (req, res) => {
         // Generate username
         // Format for owner: admin.firstname.companyname
         // Format for worker: firstname.companyname
-        const companySlug = company.name.toLowerCase().replace(/\s+/g, '');
-        const firstNameSlug = firstName.toLowerCase().replace(/\s+/g, '');
+        const companySlug = company.name.toLowerCase().replaceAll(/\s+/g, '');
+        const firstNameSlug = firstName.toLowerCase().replaceAll(/\s+/g, '');
 
         let username;
         if (role === 'owner') {

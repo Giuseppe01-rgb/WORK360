@@ -113,7 +113,7 @@ const parseHours = (hoursRaw) => {
     let str = String(hoursRaw).trim();
 
     // Remove any text like "h", "ore", etc.
-    str = str.replace(/[hHoO][a-zA-Z]*/g, '').trim();
+    str = str.replaceAll(/[hHoO][a-zA-Z]*/g, '').trim();
 
     // Handle Italian decimal format (comma as decimal)
     str = str.replace(',', '.');

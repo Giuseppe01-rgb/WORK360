@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import PropTypes from 'prop-types';
 import { workActivityAPI } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -240,6 +241,13 @@ const TimeDistributionModal = ({ activities, totalHours, onClose, onSuccess }) =
             </div>
         </div>
     );
+};
+
+TimeDistributionModal.propTypes = {
+    activities: PropTypes.array.isRequired,
+    totalHours: PropTypes.number.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onSuccess: PropTypes.func.isRequired
 };
 
 export default TimeDistributionModal;

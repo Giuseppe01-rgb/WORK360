@@ -127,7 +127,7 @@ const createMaterial = async (req, res) => {
         }
 
         const displayName = nome_prodotto;
-        const normalizedKey = displayName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 100);
+        const normalizedKey = displayName.toLowerCase().replaceAll(/[^a-z0-9]/g, '').substring(0, 100);
 
         const material = await MaterialMaster.create({
             companyId,
@@ -179,7 +179,7 @@ const updateMaterial = async (req, res) => {
 
         if (nome_prodotto) {
             material.displayName = nome_prodotto;
-            material.normalizedKey = nome_prodotto.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 100);
+            material.normalizedKey = nome_prodotto.toLowerCase().replaceAll(/[^a-z0-9]/g, '').substring(0, 100);
         }
         if (categoria !== undefined) material.family = categoria || 'Altro';
         if (marca !== undefined) material.spec = marca || '';
@@ -287,7 +287,7 @@ const importFromExcel = async (req, res) => {
                 }
 
                 const displayName = mapped.nome_prodotto;
-                const normalizedKey = displayName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 100);
+                const normalizedKey = displayName.toLowerCase().replaceAll(/[^a-z0-9]/g, '').substring(0, 100);
 
                 // Check if already exists in database
                 const existing = await MaterialMaster.findOne({

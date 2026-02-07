@@ -1145,7 +1145,7 @@ export default function SiteManagement() {
                                             value={formData.contractValue}
                                             onChange={(e) => {
                                                 // Allow only numbers and decimal point
-                                                const val = e.target.value.replace(/[^0-9.]/g, '');
+                                                const val = e.target.value.replaceAll(/[^0-9.]/g, '');
                                                 setFormData({ ...formData, contractValue: val });
                                             }}
                                         />

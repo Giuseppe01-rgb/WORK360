@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Camera, AlertCircle, Loader } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 const MaterialOCRScanner = ({ onScanComplete, onClose }) => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -203,6 +204,11 @@ const MaterialOCRScanner = ({ onScanComplete, onClose }) => {
             )}
         </div>
     );
+};
+
+MaterialOCRScanner.propTypes = {
+    onScanComplete: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired
 };
 
 export default MaterialOCRScanner;

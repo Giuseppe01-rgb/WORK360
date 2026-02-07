@@ -15,7 +15,7 @@
  */
 exports.generateWhatsAppLink = (phone, message, pdfUrl) => {
     // Remove + and spaces from phone number
-    const cleanPhone = phone.replace(/[\s+]/g, '');
+    const cleanPhone = phone.replaceAll(/[\s+]/g, '');
 
     // Compose message with PDF link
     const fullMessage = pdfUrl
@@ -84,7 +84,7 @@ exports.sendWhatsAppMessage = async (to, body, mediaUrl) => {
  */
 exports.formatPhoneNumber = (phone) => {
     // Remove all non-numeric characters
-    let cleaned = phone.replace(/\D/g, '');
+    let cleaned = phone.replaceAll(/\D/g, '');
 
     // If number doesn't start with country code, assume Italy (+39)
     if (!cleaned.startsWith('39') && cleaned.length === 10) {

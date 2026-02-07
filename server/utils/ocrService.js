@@ -21,8 +21,8 @@ const extractTextFromImage = async (imageBuffer) => {
         // Clean and normalize text
         const cleanedText = text
             .trim()
-            .replace(/\s+/g, ' ')
-            .replace(/[^\w\s\-]/g, '');
+            .replaceAll(/\s+/g, ' ')
+            .replaceAll(/[^\w\s\-]/g, '');
 
         console.log('OCR extracted text:', cleanedText);
         return cleanedText;
@@ -45,7 +45,7 @@ const findProductCodes = (text) => {
 
     // Remove duplicates and clean
     const uniqueCodes = [...new Set(matches.map(code =>
-        code.replace(/[\s\-]/g, '').toUpperCase()
+        code.replaceAll(/[\s\-]/g, '').toUpperCase()
     ))];
 
     console.log('Found product codes:', uniqueCodes);

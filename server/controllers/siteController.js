@@ -38,7 +38,7 @@ const createSite = async (req, res) => {
 
         // Sanitize contractValue: convert comma to point for Italian format, ensure valid number
         if (siteData.contractValue !== undefined && siteData.contractValue !== null) {
-            let cleanValue = String(siteData.contractValue).replace(',', '.').replace(/[^0-9.]/g, '');
+            let cleanValue = String(siteData.contractValue).replace(',', '.').replaceAll(/[^0-9.]/g, '');
             const parsed = Number.parseFloat(cleanValue);
             siteData.contractValue = !Number.isNaN(parsed) && parsed > 0 ? parsed : null;
         }
@@ -241,7 +241,7 @@ const updateSite = async (req, res) => {
 
         // Sanitize contractValue: convert comma to point for Italian format, ensure valid number
         if (updateData.contractValue !== undefined && updateData.contractValue !== null) {
-            let cleanValue = String(updateData.contractValue).replace(',', '.').replace(/[^0-9.]/g, '');
+            let cleanValue = String(updateData.contractValue).replace(',', '.').replaceAll(/[^0-9.]/g, '');
             const parsed = Number.parseFloat(cleanValue);
             updateData.contractValue = !Number.isNaN(parsed) && parsed > 0 ? parsed : null;
         }

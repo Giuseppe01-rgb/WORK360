@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Package, CheckCircle } from 'lucide-react';
+import PropTypes from 'prop-types';
 import MaterialOCRScanner from './MaterialOCRScanner';
 import MaterialCatalogSearch from './MaterialCatalogSearch';
 import ReportNewMaterial from './ReportNewMaterial';
@@ -327,6 +328,11 @@ const MaterialQuickAdd = ({ selectedSite, onSuccess }) => {
             )}
         </div>
     );
+};
+
+MaterialQuickAdd.propTypes = {
+    selectedSite: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    onSuccess: PropTypes.func.isRequired
 };
 
 export default MaterialQuickAdd;

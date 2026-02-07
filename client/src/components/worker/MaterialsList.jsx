@@ -1,4 +1,5 @@
 import { Package, Clock } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 const MaterialsList = ({ materials, loading, onDelete }) => {
     if (loading) {
@@ -149,6 +150,12 @@ const MaterialsList = ({ materials, loading, onDelete }) => {
             })}
         </div>
     );
+};
+
+MaterialsList.propTypes = {
+    materials: PropTypes.array,
+    loading: PropTypes.bool,
+    onDelete: PropTypes.func
 };
 
 export default MaterialsList;

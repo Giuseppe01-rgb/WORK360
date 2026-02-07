@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import Toast from '../components/Toast';
 
 const ToastContext = createContext();
@@ -63,4 +64,8 @@ export const ToastProvider = ({ children }) => {
             </div>
         </ToastContext.Provider>
     );
+};
+
+ToastProvider.propTypes = {
+    children: PropTypes.node.isRequired
 };

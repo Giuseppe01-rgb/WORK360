@@ -462,7 +462,7 @@ export default function QuotesManager() {
             const dataToSave = { ...formData };
             if (!id && (!formData.number || formData.number.trim() === '')) {
                 const today = new Date();
-                const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
+                const dateStr = today.toISOString().split('T')[0].replaceAll(/-/g, '');
                 const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
                 dataToSave.number = `PREV-${dateStr}-${randomNum}`;
             }

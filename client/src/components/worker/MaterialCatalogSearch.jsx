@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Package, Search, AlertCircle, X, Loader2 } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 const MaterialCatalogSearch = ({ onSelect, onClose, onReportNew }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -178,6 +179,12 @@ const MaterialCatalogSearch = ({ onSelect, onClose, onReportNew }) => {
             </div>
         </div>
     );
+};
+
+MaterialCatalogSearch.propTypes = {
+    onSelect: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onReportNew: PropTypes.func.isRequired
 };
 
 export default MaterialCatalogSearch;

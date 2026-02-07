@@ -33,7 +33,7 @@ export const getSiteColor = (identifier) => {
     // DJB2 hash algorithm - better distribution for sequential numbers
     let hash = 5381;
     for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+        hash = ((hash << 5) + hash) ^ str.codePointAt(i);
     }
 
     // Add extra mixing for numeric IDs

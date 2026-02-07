@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, X, Upload, AlertCircle } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 const ReportNewMaterial = ({ onSubmit, onClose, initialCode = '' }) => {
     const [formData, setFormData] = useState({
@@ -358,6 +359,12 @@ const ReportNewMaterial = ({ onSubmit, onClose, initialCode = '' }) => {
             )}
         </div>
     );
+};
+
+ReportNewMaterial.propTypes = {
+    onSubmit: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
+    initialCode: PropTypes.string
 };
 
 export default ReportNewMaterial;

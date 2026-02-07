@@ -75,16 +75,16 @@ const parsePrice = (priceRaw) => {
     let str = String(priceRaw).trim();
 
     // Remove currency symbols and spaces
-    str = str.replace(/[€$£\s]/g, '');
+    str = str.replaceAll(/[€$£\s]/g, '');
 
     // Handle Italian format (comma as decimal)
     if (str.includes('.') && str.includes(',')) {
         if (str.lastIndexOf(',') > str.lastIndexOf('.')) {
             // IT format: 1.234,56
-            str = str.replace(/\./g, '').replace(',', '.');
+            str = str.replaceAll(/\./g, '').replace(',', '.');
         } else {
             // US format: 1,234.56
-            str = str.replace(/,/g, '');
+            str = str.replaceAll(/,/g, '');
         }
     } else if (str.includes(',')) {
         // Only comma: decimal separator

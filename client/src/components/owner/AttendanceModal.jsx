@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar, User, MapPin, Clock } from 'lucide-react';
+import PropTypes from 'prop-types';
 import { attendanceAPI, siteAPI, userAPI } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -231,3 +232,9 @@ export default function AttendanceModal({ attendance, onClose, onSuccess }) {
         </div>
     );
 }
+
+AttendanceModal.propTypes = {
+    attendance: PropTypes.object,
+    onClose: PropTypes.func.isRequired,
+    onSuccess: PropTypes.func
+};

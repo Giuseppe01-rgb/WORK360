@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Upload, AlertCircle, X } from 'lucide-react';
+import PropTypes from 'prop-types';
 import { photoAPI } from '../../utils/api';
 
 const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
@@ -410,6 +411,12 @@ const ReportMaterialForm = ({ siteId, onSubmit, onCancel }) => {
             )}
         </div>
     );
+};
+
+ReportMaterialForm.propTypes = {
+    siteId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    onSubmit: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired
 };
 
 export default ReportMaterialForm;

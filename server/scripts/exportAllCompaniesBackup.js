@@ -206,7 +206,7 @@ async function main() {
 
         // Generate filename
         const now = new Date();
-        const dateStr = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        const dateStr = now.toISOString().replaceAll(/[:.]/g, '-').slice(0, 19);
         const filename = `work360-backup-${dateStr}.json`;
         const filepath = path.join(absoluteBackupDir, filename);
 

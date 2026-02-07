@@ -150,7 +150,7 @@ const exportCompanyData = async (req, res) => {
 
         // Generate filename with date
         const now = new Date();
-        const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+        const dateStr = now.toISOString().slice(0, 10).replaceAll(/-/g, '');
         const filename = `work360-company-export-${companyId}-${dateStr}.json`;
 
         // Set headers for download

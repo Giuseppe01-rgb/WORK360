@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { AlertTriangle, Trash2, HelpCircle, X } from 'lucide-react';
 
 const ConfirmModalContext = createContext();
@@ -164,4 +165,8 @@ export const ConfirmModalProvider = ({ children }) => {
             )}
         </ConfirmModalContext.Provider>
     );
+};
+
+ConfirmModalProvider.propTypes = {
+    children: PropTypes.node.isRequired
 };

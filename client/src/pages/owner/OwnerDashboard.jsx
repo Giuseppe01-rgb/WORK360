@@ -471,7 +471,7 @@ export default function OwnerDashboard() {
                                     value={formData.contractValue}
                                     onChange={(e) => {
                                         // Allow only numbers and decimal point
-                                        const val = e.target.value.replace(/[^0-9.]/g, '');
+                                        const val = e.target.value.replaceAll(/[^0-9.]/g, '');
                                         setFormData({ ...formData, contractValue: val });
                                     }}
                                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all"

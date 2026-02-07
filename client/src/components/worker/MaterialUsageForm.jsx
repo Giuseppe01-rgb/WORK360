@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Package, CheckCircle, Edit2 } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 const MaterialUsageForm = ({ material, siteId, onConfirm, onCancel, editMode = false, initialData = null }) => {
     const [numeroConfezioni, setNumeroConfezioni] = useState(1);
@@ -140,6 +141,22 @@ const MaterialUsageForm = ({ material, siteId, onConfirm, onCancel, editMode = f
             </div>
         </div>
     );
+};
+
+MaterialUsageForm.propTypes = {
+    material: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        nome_prodotto: PropTypes.string,
+        marca: PropTypes.string,
+        categoria: PropTypes.string,
+        quantita: PropTypes.string,
+        codice_prodotto: PropTypes.string
+    }).isRequired,
+    siteId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    onConfirm: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
+    editMode: PropTypes.bool,
+    initialData: PropTypes.object
 };
 
 export default MaterialUsageForm;

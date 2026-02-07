@@ -1,4 +1,5 @@
 import { ShoppingCart, Edit2, Trash2, Plus, Send, Package } from 'lucide-react';
+import PropTypes from 'prop-types';
 
 export default function MaterialCart({
     cartItems = [],
@@ -130,3 +131,12 @@ export default function MaterialCart({
         </div>
     );
 }
+
+MaterialCart.propTypes = {
+    cartItems: PropTypes.array,
+    onEdit: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
+    onAddMore: PropTypes.func.isRequired,
+    onSubmitAll: PropTypes.func.isRequired,
+    loading: PropTypes.bool
+};

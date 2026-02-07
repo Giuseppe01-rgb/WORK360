@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Plus, Trash2, CheckCircle, Copy, ChevronDown, Check } from 'lucide-react';
+import PropTypes from 'prop-types';
 import { attendanceAPI, siteAPI, userAPI } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -368,3 +369,15 @@ export default function BulkAttendanceModal({ onClose, onSuccess }) {
         </div>
     );
 }
+
+MultiSelect.propTypes = {
+    options: PropTypes.array.isRequired,
+    selected: PropTypes.array.isRequired,
+    onChange: PropTypes.func.isRequired,
+    placeholder: PropTypes.string
+};
+
+BulkAttendanceModal.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    onSuccess: PropTypes.func
+};
