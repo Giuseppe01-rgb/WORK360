@@ -61,14 +61,23 @@ async function sendBackupEmail(filepath, filename, stats) {
     console.log(`📧 Sending backup to: ${recipientEmail}`);
 
     try {
+        const emailPort = parseInt(process.env.EMAIL_PORT) || 465;
+        const isSecure = emailPort === 465;
+
+        console.log(`📧 SMTP Config: ${process.env.EMAIL_HOST || 'smtp.gmail.com'}:${emailPort} (secure: ${isSecure})`);
+
         const transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.EMAIL_PORT) || 587,
-            secure: process.env.EMAIL_PORT === '465',
+            port: emailPort,
+            secure: isSecure, // true for 465, false for other ports
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASSWORD
-            }
+            },
+            // Increased timeouts for Railway environment
+            connectionTimeout: 30000, // 30 seconds
+            greetingTimeout: 30000,
+            socketTimeout: 60000
         });
 
         // Verify connection
