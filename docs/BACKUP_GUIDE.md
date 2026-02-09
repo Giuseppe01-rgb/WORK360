@@ -1,5 +1,17 @@
 # 🔒 Guida Backup Dati WORK360
 
+## 0. ✉️ Backup Automatico via Email (NUOVO!)
+
+Per ricevere i backup via email, aggiungi questa variabile su Railway:
+
+| Variabile | Valore |
+|-----------|--------|
+| `BACKUP_RECIPIENT_EMAIL` | La tua email (es: tuonome@gmail.com) |
+
+Le email verranno inviate usando le credenziali SMTP esistenti (`EMAIL_USER`, `EMAIL_PASSWORD`).
+
+---
+
 ## 1. Backup Automatici Railway (già attivi)
 
 Railway esegue backup automatici ogni notte alle **03:00**.

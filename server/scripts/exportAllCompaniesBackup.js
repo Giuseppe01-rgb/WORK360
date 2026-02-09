@@ -4,7 +4,10 @@
  * Level 4 Security - Export all companies data for backup
  * 
  * Usage: npm run backup:all
- * Requires: BACKUP_DIR environment variable
+ * Requires: 
+ *   - BACKUP_DIR environment variable (optional, defaults to ./backups)
+ *   - BACKUP_RECIPIENT_EMAIL - email address to receive backups
+ *   - EMAIL_USER, EMAIL_PASSWORD, EMAIL_HOST, EMAIL_PORT - SMTP config
  * 
  * For Railway Scheduled Job:
  * - Command: npm run backup:all
@@ -15,6 +18,7 @@ require('dotenv').config();
 
 const fs = require('fs');
 const path = require('path');
+const nodemailer = require('nodemailer');
 const { sequelize } = require('../config/database');
 
 // Import all models
@@ -37,6 +41,100 @@ const {
     WorkActivity,
     Document
 } = require('../models');
+
+/**
+ * Send backup via email
+ */
+async function sendBackupEmail(filepath, filename, stats) {
+    const recipientEmail = process.env.BACKUP_RECIPIENT_EMAIL;
+
+    if (!recipientEmail) {
+        console.log('⚠️  BACKUP_RECIPIENT_EMAIL not set, skipping email...');
+        return false;
+    }
+
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+        console.log('⚠️  Email credentials not configured (EMAIL_USER/EMAIL_PASSWORD), skipping email...');
+        return false;
+    }
+
+    console.log(`📧 Sending backup to: ${recipientEmail}`);
+
+    try {
+        const transporter = nodemailer.createTransport({
+            host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.EMAIL_PORT) || 587,
+            secure: process.env.EMAIL_PORT === '465',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        });
+
+        // Verify connection
+        await transporter.verify();
+        console.log('✅ SMTP connection verified');
+
+        const now = new Date();
+        const dateFormatted = now.toLocaleDateString('it-IT', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        const fileSize = (fs.statSync(filepath).size / 1024).toFixed(2);
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #2563eb, #7c3aed); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+                    <h1 style="color: white; margin: 0;">🔒 WORK360 Backup</h1>
+                </div>
+                <div style="padding: 30px; background: #f8fafc; border-radius: 0 0 12px 12px;">
+                    <p style="font-size: 16px; color: #333;">
+                        Il backup giornaliero di WORK360 è stato completato con successo.
+                    </p>
+                    <div style="background: white; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #e2e8f0;">
+                        <h3 style="margin-top: 0; color: #1e293b;">📊 Statistiche Backup</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr><td style="padding: 8px 0; color: #64748b;">Data:</td><td style="padding: 8px 0; font-weight: bold;">${dateFormatted}</td></tr>
+                            <tr><td style="padding: 8px 0; color: #64748b;">Aziende:</td><td style="padding: 8px 0; font-weight: bold;">${stats.totalCompanies}</td></tr>
+                            <tr><td style="padding: 8px 0; color: #64748b;">Dimensione file:</td><td style="padding: 8px 0; font-weight: bold;">${fileSize} KB</td></tr>
+                            <tr><td style="padding: 8px 0; color: #64748b;">Nome file:</td><td style="padding: 8px 0; font-weight: bold;">${filename}</td></tr>
+                        </table>
+                    </div>
+                    <p style="color: #64748b; font-size: 14px;">
+                        ⚠️ Conserva questo file in un luogo sicuro (Google Drive, Dropbox, etc.)
+                    </p>
+                </div>
+                <p style="text-align: center; color: #94a3b8; font-size: 12px; margin-top: 20px;">
+                    © ${now.getFullYear()} WORK360 - Backup automatico
+                </p>
+            </div>
+        `;
+
+        const mailOptions = {
+            from: `WORK360 Backup <${process.env.EMAIL_USER}>`,
+            to: recipientEmail,
+            subject: `🔒 WORK360 Backup - ${dateFormatted}`,
+            html,
+            attachments: [
+                {
+                    filename,
+                    path: filepath,
+                    contentType: 'application/json'
+                }
+            ]
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`✅ Email sent successfully! MessageId: ${info.messageId}`);
+        return true;
+    } catch (error) {
+        console.error('❌ Error sending email:', error.message);
+        return false;
+    }
+}
 
 /**
  * Export all data for a single company
@@ -214,10 +312,20 @@ async function main() {
         fs.writeFileSync(filepath, JSON.stringify(backupData, null, 2), 'utf8');
 
         console.log('');
-        console.log('✅ Backup completed successfully!');
+        console.log('✅ Backup file created successfully!');
         console.log(`📄 File: ${filepath}`);
         console.log(`📦 Size: ${(fs.statSync(filepath).size / 1024).toFixed(2)} KB`);
         console.log(`🏢 Companies: ${companiesData.length}`);
+
+        // Send backup via email
+        console.log('');
+        const emailSent = await sendBackupEmail(filepath, filename, { totalCompanies: companiesData.length });
+
+        if (emailSent) {
+            console.log('✅ Backup completed and sent via email!');
+        } else {
+            console.log('⚠️  Backup completed but email not sent (check configuration)');
+        }
 
         process.exit(0);
     } catch (error) {
