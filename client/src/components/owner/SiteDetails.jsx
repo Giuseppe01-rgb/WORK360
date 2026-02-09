@@ -924,12 +924,12 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {
                 selectedNote && (
                     <div
-                        role="dialog"
-                        aria-modal="true"
-                        tabIndex={-1}
+                        role="button"
+                        aria-label="Chiudi modal"
+                        tabIndex={0}
                         className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
                         onClick={(e) => { if (e.target === e.currentTarget) setSelectedNote(null); }}
-                        onKeyDown={(e) => e.key === 'Escape' && setSelectedNote(null)}
+                        onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') setSelectedNote(null); }}
                     >
                         <div className="bg-white rounded-[2.5rem] w-full max-w-2xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
                             <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
@@ -962,12 +962,12 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             {
                 selectedPhoto && (
                     <div
-                        role="dialog"
-                        aria-modal="true"
-                        tabIndex={-1}
+                        role="button"
+                        aria-label="Chiudi modal"
+                        tabIndex={0}
                         className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
                         onClick={(e) => { if (e.target === e.currentTarget) setSelectedPhoto(null); }}
-                        onKeyDown={(e) => e.key === 'Escape' && setSelectedPhoto(null)}
+                        onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') setSelectedPhoto(null); }}
                     >
                         <div className="bg-white rounded-[2.5rem] w-full max-w-4xl my-auto shadow-2xl max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
                             <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
@@ -1157,12 +1157,12 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         {/* Material Detail Modal */}
                         {selectedMaterial && !editingMaterial && (
                             <div
-                                role="dialog"
-                                aria-modal="true"
-                                tabIndex={-1}
+                                role="button"
+                                aria-label="Chiudi modal"
+                                tabIndex={0}
                                 className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center z-[10000]"
                                 onClick={(e) => { if (e.target === e.currentTarget) setSelectedMaterial(null); }}
-                                onKeyDown={(e) => e.key === 'Escape' && setSelectedMaterial(null)}
+                                onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') setSelectedMaterial(null); }}
                             >
                                 <div className="bg-white rounded-t-[2.5rem] w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300">
                                     <div className="flex items-center justify-between px-6 pt-4 pb-2">
@@ -1235,9 +1235,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         {/* Material Edit Modal */}
                         {editingMaterial && (
                             <div
-                                role="dialog"
-                                aria-modal="true"
-                                tabIndex={-1}
+                                role="button"
+                                aria-label="Chiudi modal"
+                                tabIndex={0}
                                 className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10001] p-4"
                                 onClick={(e) => {
                                     if (e.target === e.currentTarget) {
@@ -1247,7 +1247,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                         setCatalogSearch('');
                                     }
                                 }}
-                                onKeyDown={(e) => e.key === 'Escape' && (setEditingMaterial(null), setShowMaterialSelector(false), setNewSelectedMaterial(null), setCatalogSearch(''))}
+                                onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') { setEditingMaterial(null); setShowMaterialSelector(false); setNewSelectedMaterial(null); setCatalogSearch(''); } }}
                             >
                                 <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col">
                                     <div className="p-6 border-b border-slate-100 flex justify-between items-center flex-shrink-0">

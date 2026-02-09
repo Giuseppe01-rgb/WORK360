@@ -271,7 +271,7 @@ export default function Layout({ children, title, hideHeader = false }) {
         link: PropTypes.shape({
             icon: PropTypes.elementType.isRequired,
             label: PropTypes.string.isRequired,
-            path: PropTypes.string,
+            path: PropTypes.string.isRequired,
             badge: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
             subtitle: PropTypes.string,
             submenu: PropTypes.arrayOf(PropTypes.shape({

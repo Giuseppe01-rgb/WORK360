@@ -98,7 +98,7 @@ const MaterialSearch = ({ siteId, onSelect, onClose, onReportNew }) => {
 
     MaterialCard.propTypes = {
         material: PropTypes.shape({
-            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
             nome_prodotto: PropTypes.string,
             marca: PropTypes.string,
             quantita: PropTypes.string,
