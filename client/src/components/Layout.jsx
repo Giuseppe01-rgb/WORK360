@@ -50,7 +50,7 @@ export default function Layout({ children, title, hideHeader = false }) {
                     setActiveSitesCount(active);
 
                     // Fetch pending materials count
-                    const materialsRes = await reportedMaterialAPI.getAll({ status: 'pending' });
+                    const materialsRes = await reportedMaterialAPI.getAll({ stato: 'da_approvare' });
                     // Assuming the API returns an array or an object with data array
                     const pending = Array.isArray(materialsRes.data) ? materialsRes.data.length : 0;
                     setPendingMaterialsCount(pending);
