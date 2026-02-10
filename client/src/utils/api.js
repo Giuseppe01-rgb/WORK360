@@ -295,6 +295,7 @@ export const absenceRequestAPI = {
     requestChanges: (id, data) => api.post(`/absence-requests/${id}/request-changes`, data),
     cancel: (id) => api.post(`/absence-requests/${id}/cancel`),
     resubmit: (id, data) => api.post(`/absence-requests/${id}/resubmit`, data),
+    delete: (id) => api.delete(`/absence-requests/${id}`),
 };
 
 export default api;

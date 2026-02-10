@@ -19,6 +19,7 @@ router.get('/all', requireOwner, controller.listAll);
 // Parameterized routes
 router.get('/:id', controller.getById);
 router.post('/:id/cancel', controller.cancel);
+router.delete('/:id', controller.deleteRequest);
 router.post('/:id/resubmit', validateAbsenceRequest, controller.resubmit);
 router.post('/:id/approve', requireOwner, controller.approve);
 router.post('/:id/reject', requireOwner, validateAbsenceDecision, controller.reject);

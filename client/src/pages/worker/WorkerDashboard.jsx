@@ -700,6 +700,26 @@ export default function WorkerDashboard() {
             }
         };
 
+        const handleAbsDelete = async (requestId) => {
+            const confirmed = await showConfirm({
+                title: 'Elimina richiesta',
+                message: 'Sei sicuro di voler eliminare definitivamente questa richiesta? Questa azione non può essere annullata.',
+                confirmText: 'Elimina',
+                variant: 'danger'
+            });
+            if (!confirmed) return;
+
+            try {
+                await absenceRequestAPI.delete(requestId);
+                showSuccess('Richiesta eliminata');
+                setSelectedAbsRequest(null);
+                loadAbsRequests();
+            } catch (error) {
+                const msg = error.response?.data?.message || 'Errore nell\'eliminazione';
+                showError(msg);
+            }
+        };
+
         const handleSelectAbsRequest = async (request) => {
             try {
                 const response = await absenceRequestAPI.getById(request.id);
@@ -730,6 +750,7 @@ export default function WorkerDashboard() {
                     loading={absLoading}
                     onSelectRequest={handleSelectAbsRequest}
                     onCancel={handleAbsCancel}
+                    onDelete={handleAbsDelete}
                     statusFilter={absStatusFilter}
                     onFilterChange={setAbsStatusFilter}
                 />

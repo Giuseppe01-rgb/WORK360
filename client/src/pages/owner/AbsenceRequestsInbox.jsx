@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import Layout from '../../components/Layout';
 import { absenceRequestAPI, userAPI } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useConfirmModal } from '../../context/ConfirmModalContext';
 import {
     CalendarDays, ChevronDown, UserCircle, Check, X as XIcon,
-    MessageSquare, Loader2, Filter, Search
+    MessageSquare, Loader2, Filter, Trash2
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -31,11 +32,12 @@ function formatDateRange(start, end) {
 
 export default function AbsenceRequestsInbox() {
     const { showSuccess, showError } = useToast();
+    const showConfirm = useConfirmModal();
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({ status: '', type: '', employeeId: '', month: '', is104: '' });
     const [employees, setEmployees] = useState([]);
-    const [actionModal, setActionModal] = useState(null); // { type: 'approve'|'reject'|'request-changes', request }
+    const [actionModal, setActionModal] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
     const [decisionNote, setDecisionNote] = useState('');
     const [requestedChanges, setRequestedChanges] = useState('');
@@ -133,6 +135,25 @@ export default function AbsenceRequestsInbox() {
         }
     };
 
+    const handleDelete = async (requestId) => {
+        const confirmed = await showConfirm({
+            title: 'Elimina richiesta',
+            message: 'Sei sicuro di voler eliminare definitivamente questa richiesta? Questa azione non può essere annullata.',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
+
+        try {
+            await absenceRequestAPI.delete(requestId);
+            showSuccess('Richiesta eliminata');
+            setExpandedId(null);
+            loadRequests();
+        } catch (error) {
+            showError(error.response?.data?.message || 'Errore nell\'eliminazione');
+        }
+    };
+
     const openActionModal = (type, request) => {
         setActionModal({ type, request });
         setDecisionNote('');
@@ -222,85 +243,106 @@ export default function AbsenceRequestsInbox() {
                             <p className="text-slate-500 font-medium">Nessuna richiesta trovata</p>
                         </div>
                     ) : (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {requests.map((req) => {
                                 const statusConf = STATUS_CONFIG[req.status] || STATUS_CONFIG.PENDING;
                                 const isExpanded = expandedId === req.id;
                                 const isPending = req.status === 'PENDING';
+                                const employeeName = req.employee
+                                    ? `${req.employee.firstName} ${req.employee.lastName}`
+                                    : '–';
 
                                 return (
                                     <div
                                         key={req.id}
                                         className={`rounded-2xl border transition-all ${isExpanded ? 'border-[#8B5CF6]/30 ring-2 ring-[#8B5CF6]/10' : 'border-slate-100 hover:border-slate-200'}`}
                                     >
-                                        {/* Row Header */}
+                                        {/* Card Header — bigger, more info visible */}
                                         <div
-                                            className="p-4 flex items-center gap-4 cursor-pointer"
+                                            className="p-5 cursor-pointer"
                                             onClick={() => setExpandedId(isExpanded ? null : req.id)}
                                         >
-                                            {/* Employee */}
-                                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                                    <UserCircle className="w-6 h-6 text-slate-400" />
+                                            {/* Employee name — large and clear */}
+                                            <div className="flex items-start justify-between gap-3 mb-3">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="w-11 h-11 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <UserCircle className="w-7 h-7 text-slate-400" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-base font-bold text-slate-900">
+                                                            {employeeName}
+                                                        </p>
+                                                        <p className="text-sm font-semibold text-slate-600 mt-0.5">
+                                                            {formatDateRange(req.startDate, req.endDate)}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-sm font-bold text-slate-900 truncate">
-                                                        {req.employee ? `${req.employee.firstName} ${req.employee.lastName}` : '–'}
-                                                    </p>
-                                                    <p className="text-xs text-slate-500">
-                                                        {formatDateRange(req.startDate, req.endDate)}
-                                                    </p>
-                                                </div>
+                                                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform flex-shrink-0 mt-1 ${isExpanded ? 'rotate-180' : ''}`} />
                                             </div>
 
-                                            {/* Tags */}
-                                            <div className="flex items-center gap-2 flex-shrink-0">
-                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${statusConf.color}`}>
+                                            {/* Tags row */}
+                                            <div className="flex items-center gap-2 flex-wrap mb-3">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusConf.color}`}>
                                                     {statusConf.label}
                                                 </span>
-                                                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600">
+                                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600">
                                                     {TYPE_LABELS[req.type]}
                                                 </span>
+                                                {req.category && (
+                                                    <span className="px-2.5 py-1 rounded-full text-xs text-slate-500 bg-white border border-slate-200">
+                                                        {CATEGORY_LABELS[req.category]}
+                                                    </span>
+                                                )}
                                                 {req.is104 && (
-                                                    <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                                                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
                                                         L.104
                                                     </span>
                                                 )}
                                             </div>
 
-                                            {/* Quick Actions (pending only) */}
-                                            {isPending && (
-                                                <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                                                    <button
-                                                        onClick={() => openActionModal('approve', req)}
-                                                        className="p-2 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors"
-                                                        title="Approva"
-                                                    >
-                                                        <Check className="w-4 h-4" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => openActionModal('reject', req)}
-                                                        className="p-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors"
-                                                        title="Rifiuta"
-                                                    >
-                                                        <XIcon className="w-4 h-4" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => openActionModal('request-changes', req)}
-                                                        className="p-2 bg-purple-50 text-purple-700 rounded-xl hover:bg-purple-100 transition-colors"
-                                                        title="Richiedi modifiche"
-                                                    >
-                                                        <MessageSquare className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            )}
-
-                                            <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                            {/* Quick Actions */}
+                                            <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                                                {isPending && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => openActionModal('approve', req)}
+                                                            className="px-3 py-1.5 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors text-xs font-bold flex items-center gap-1.5"
+                                                            title="Approva"
+                                                        >
+                                                            <Check className="w-3.5 h-3.5" />
+                                                            Approva
+                                                        </button>
+                                                        <button
+                                                            onClick={() => openActionModal('reject', req)}
+                                                            className="px-3 py-1.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors text-xs font-bold flex items-center gap-1.5"
+                                                            title="Rifiuta"
+                                                        >
+                                                            <XIcon className="w-3.5 h-3.5" />
+                                                            Rifiuta
+                                                        </button>
+                                                        <button
+                                                            onClick={() => openActionModal('request-changes', req)}
+                                                            className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-xl hover:bg-purple-100 transition-colors text-xs font-bold flex items-center gap-1.5"
+                                                            title="Richiedi modifiche"
+                                                        >
+                                                            <MessageSquare className="w-3.5 h-3.5" />
+                                                            Modifiche
+                                                        </button>
+                                                    </>
+                                                )}
+                                                <button
+                                                    onClick={() => handleDelete(req.id)}
+                                                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-auto"
+                                                    title="Elimina richiesta"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </div>
 
                                         {/* Expanded Detail */}
                                         {isExpanded && (
-                                            <div className="px-4 pb-4 border-t border-slate-100 pt-3">
+                                            <div className="px-5 pb-5 border-t border-slate-100 pt-4">
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                                     {req.category && (
                                                         <div>

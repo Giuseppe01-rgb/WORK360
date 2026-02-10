@@ -500,6 +500,57 @@ exports.cancel = async (req, res, next) => {
 };
 
 // =============================================
+// DELETE — owner: any request; worker: own PENDING/CANCELLED only
+// =============================================
+exports.deleteRequest = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const userId = getUserId(req);
+        const companyId = getCompanyId(req);
+        const isOwner = req.user.role === 'owner';
+
+        const request = await AbsenceRequest.findOne({
+            where: { id, companyId }
+        });
+
+        if (!request) {
+            return res.status(404).json({ message: 'Richiesta non trovata' });
+        }
+
+        // SECURITY: non-owner can only delete own requests in PENDING/CANCELLED
+        if (!isOwner) {
+            if (request.employeeId !== userId) {
+                return res.status(404).json({ message: 'Richiesta non trovata' });
+            }
+            if (!['PENDING', 'CANCELLED'].includes(request.status)) {
+                return res.status(400).json({
+                    message: 'Puoi eliminare solo richieste in attesa o annullate.'
+                });
+            }
+        }
+
+        // Delete associated revisions first
+        await AbsenceRequestRevision.destroy({
+            where: { absenceRequestId: id }
+        });
+
+        await request.destroy();
+
+        logInfo('Absence request deleted', {
+            requestId: id,
+            deletedBy: userId,
+            employeeId: request.employeeId,
+            isOwner,
+            companyId
+        });
+
+        res.json({ message: 'Richiesta eliminata con successo' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// =============================================
 // RESUBMIT — own request only, CHANGES_REQUESTED → PENDING
 // =============================================
 exports.resubmit = async (req, res, next) => {
