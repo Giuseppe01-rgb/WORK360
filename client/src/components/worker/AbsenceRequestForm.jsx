@@ -262,7 +262,7 @@ export default function AbsenceRequestForm({ onSubmit, onClose, initialData, loa
                     )}
 
                     {/* Dates */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">Data inizio</label>
                             <input
@@ -311,7 +311,7 @@ export default function AbsenceRequestForm({ onSubmit, onClose, initialData, loa
 
                     {/* Time Pickers (PERMESSO+HOURS only) */}
                     {isHoursMode && (
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1">
                                     <Clock className="w-4 h-4" /> Ora inizio
