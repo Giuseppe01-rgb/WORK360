@@ -19,6 +19,8 @@ const Document = require('./Document');
 const AuditLog = require('./AuditLog');
 const PushSubscription = require('./PushSubscription');
 const SiteAccounting = require('./SiteAccounting');
+const AbsenceRequest = require('./AbsenceRequest');
+const AbsenceRequestRevision = require('./AbsenceRequestRevision');
 
 // ========== ASSOCIATIONS ==========
 
@@ -39,6 +41,7 @@ User.hasMany(Note, { foreignKey: 'userId', as: 'notes' });
 User.hasMany(Photo, { foreignKey: 'userId', as: 'photos' });
 User.hasMany(Equipment, { foreignKey: 'userId', as: 'equipment' });
 User.hasMany(Economia, { foreignKey: 'workerId', as: 'economias' });
+User.hasMany(AbsenceRequest, { foreignKey: 'employeeId', as: 'absenceRequests' });
 
 // ConstructionSite relationships
 ConstructionSite.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
@@ -147,6 +150,14 @@ AuditLog.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
 PushSubscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 User.hasMany(PushSubscription, { foreignKey: 'userId', as: 'pushSubscriptions' });
 
+// AbsenceRequest relationships
+AbsenceRequest.belongsTo(User, { foreignKey: 'employeeId', as: 'employee' });
+AbsenceRequest.belongsTo(User, { foreignKey: 'decisionBy', as: 'decider' });
+AbsenceRequest.belongsTo(Company, { foreignKey: 'companyId', as: 'company' });
+AbsenceRequest.hasMany(AbsenceRequestRevision, { foreignKey: 'absenceRequestId', as: 'revisions' });
+AbsenceRequestRevision.belongsTo(AbsenceRequest, { foreignKey: 'absenceRequestId', as: 'absenceRequest' });
+AbsenceRequestRevision.belongsTo(User, { foreignKey: 'changedBy', as: 'changedByUser' });
+
 module.exports = {
     User,
     Company,
@@ -168,5 +179,7 @@ module.exports = {
     Document,
     AuditLog,
     PushSubscription,
-    SiteAccounting
+    SiteAccounting,
+    AbsenceRequest,
+    AbsenceRequestRevision
 };

@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
-import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI, workActivityAPI, materialMasterAPI, materialUsageAPI, reportedMaterialAPI } from '../../utils/api';
+import { attendanceAPI, siteAPI, materialAPI, equipmentAPI, noteAPI, photoAPI, workActivityAPI, materialMasterAPI, materialUsageAPI, reportedMaterialAPI, absenceRequestAPI } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
-import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2, Building2 } from 'lucide-react';
+import { Clock, Package, FileText, Camera, MapPin, LogIn, LogOut, Upload, Plus, Scan, Loader2, Building2, Calendar } from 'lucide-react';
 import TimeDistributionModal from '../../components/worker/TimeDistributionModal';
 import BarcodeScanner from '../../components/common/BarcodeScanner';
 import MaterialsList from '../../components/worker/MaterialsList';
@@ -15,6 +15,9 @@ import MaterialUsageForm from '../../components/worker/MaterialUsageForm';
 import ReportMaterialForm from '../../components/worker/ReportMaterialForm';
 import MaterialCart from '../../components/worker/MaterialCart';
 import NotificationSettings from '../../components/settings/NotificationSettings';
+import AbsenceRequestForm from '../../components/worker/AbsenceRequestForm';
+import AbsenceRequestList from '../../components/worker/AbsenceRequestList';
+import AbsenceRequestDetail from '../../components/worker/AbsenceRequestDetail';
 
 export default function WorkerDashboard() {
     const { user } = useAuth();
@@ -595,6 +598,164 @@ export default function WorkerDashboard() {
             showError('Errore durante l\'eliminazione');
         }
     };
+
+    // =============================================
+    // ABSENCES SECTION COMPONENT
+    // =============================================
+    function AbsencesSection() {
+        const [absRequests, setAbsRequests] = useState([]);
+        const [absLoading, setAbsLoading] = useState(true);
+        const [absSubmitting, setAbsSubmitting] = useState(false);
+        const [showAbsForm, setShowAbsForm] = useState(false);
+        const [selectedAbsRequest, setSelectedAbsRequest] = useState(null);
+        const [absStatusFilter, setAbsStatusFilter] = useState('');
+        const [absOverlaps, setAbsOverlaps] = useState([]);
+        const [resubmitData, setResubmitData] = useState(null);
+
+        useEffect(() => {
+            loadAbsRequests();
+        }, [absStatusFilter]);
+
+        const loadAbsRequests = async () => {
+            try {
+                setAbsLoading(true);
+                const params = {};
+                if (absStatusFilter) params.status = absStatusFilter;
+                const response = await absenceRequestAPI.getMine(params);
+                setAbsRequests(response.data.data || []);
+            } catch (error) {
+                showError('Errore nel caricamento delle richieste');
+            } finally {
+                setAbsLoading(false);
+            }
+        };
+
+        const handleAbsCreate = async (payload) => {
+            try {
+                setAbsSubmitting(true);
+                const response = await absenceRequestAPI.create(payload);
+                showSuccess('Richiesta inviata con successo');
+                setShowAbsForm(false);
+                setAbsOverlaps([]);
+                if (response.data.overlaps) {
+                    setAbsOverlaps(response.data.overlappingRequests || []);
+                }
+                loadAbsRequests();
+            } catch (error) {
+                const msg = error.response?.data?.errors?.[0]?.msg
+                    || error.response?.data?.message
+                    || 'Errore nell\'invio della richiesta';
+                showError(msg);
+            } finally {
+                setAbsSubmitting(false);
+            }
+        };
+
+        const handleAbsCancel = async (requestId) => {
+            const confirmed = await showConfirm({
+                title: 'Annulla richiesta',
+                message: 'Sei sicuro di voler annullare questa richiesta?',
+                confirmText: 'Annulla richiesta',
+                variant: 'danger'
+            });
+            if (!confirmed) return;
+
+            try {
+                await absenceRequestAPI.cancel(requestId);
+                showSuccess('Richiesta annullata');
+                setSelectedAbsRequest(null);
+                loadAbsRequests();
+            } catch (error) {
+                const msg = error.response?.data?.message || 'Errore nell\'annullamento';
+                showError(msg);
+            }
+        };
+
+        const handleAbsResubmit = (request) => {
+            setSelectedAbsRequest(null);
+            setResubmitData(request);
+            setShowAbsForm(true);
+        };
+
+        const handleAbsResubmitSubmit = async (payload) => {
+            if (!resubmitData) return;
+            try {
+                setAbsSubmitting(true);
+                const response = await absenceRequestAPI.resubmit(resubmitData.id, payload);
+                showSuccess('Richiesta reinviata con successo');
+                setShowAbsForm(false);
+                setResubmitData(null);
+                setAbsOverlaps([]);
+                if (response.data.overlaps) {
+                    setAbsOverlaps(response.data.overlappingRequests || []);
+                }
+                loadAbsRequests();
+            } catch (error) {
+                const msg = error.response?.data?.errors?.[0]?.msg
+                    || error.response?.data?.message
+                    || 'Errore nel reinvio della richiesta';
+                showError(msg);
+            } finally {
+                setAbsSubmitting(false);
+            }
+        };
+
+        const handleSelectAbsRequest = async (request) => {
+            try {
+                const response = await absenceRequestAPI.getById(request.id);
+                setSelectedAbsRequest(response.data);
+            } catch (error) {
+                showError('Errore nel caricamento dei dettagli');
+            }
+        };
+
+        return (
+            <div className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                        <Calendar className="w-6 h-6 text-[#8B5CF6]" />
+                        Permessi e Ferie
+                    </h3>
+                    <button
+                        onClick={() => { setResubmitData(null); setShowAbsForm(true); }}
+                        className="px-4 py-2.5 bg-[#8B5CF6] text-white font-bold text-sm rounded-xl hover:bg-[#7C3AED] transition-colors shadow-lg shadow-purple-500/20 flex items-center gap-2"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Nuova Richiesta
+                    </button>
+                </div>
+
+                <AbsenceRequestList
+                    requests={absRequests}
+                    loading={absLoading}
+                    onSelectRequest={handleSelectAbsRequest}
+                    onCancel={handleAbsCancel}
+                    statusFilter={absStatusFilter}
+                    onFilterChange={setAbsStatusFilter}
+                />
+
+                {/* Create / Resubmit Form Modal */}
+                {showAbsForm && (
+                    <AbsenceRequestForm
+                        onSubmit={resubmitData ? handleAbsResubmitSubmit : handleAbsCreate}
+                        onClose={() => { setShowAbsForm(false); setResubmitData(null); setAbsOverlaps([]); }}
+                        initialData={resubmitData}
+                        loading={absSubmitting}
+                        overlaps={absOverlaps}
+                    />
+                )}
+
+                {/* Detail Modal */}
+                {selectedAbsRequest && (
+                    <AbsenceRequestDetail
+                        request={selectedAbsRequest}
+                        onClose={() => setSelectedAbsRequest(null)}
+                        onResubmit={handleAbsResubmit}
+                    />
+                )}
+            </div>
+        );
+    }
 
     return (
         <Layout title={`Benvenuto ${user?.firstName || ''}`} subtitle={user?.username}>
@@ -1181,6 +1342,11 @@ export default function WorkerDashboard() {
                             </form>
                         </div>
                     </div>
+                )}
+
+                {/* ABSENCES TAB */}
+                {activeTab === 'absences' && (
+                    <AbsencesSection />
                 )}
             </div>
 

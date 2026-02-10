@@ -285,4 +285,16 @@ export const backupAPI = {
     }
 };
 
+export const absenceRequestAPI = {
+    create: (data) => api.post('/absence-requests', data),
+    getMine: (params) => api.get('/absence-requests/mine', { params }),
+    getAll: (params) => api.get('/absence-requests/all', { params }),
+    getById: (id) => api.get(`/absence-requests/${id}`),
+    approve: (id, data) => api.post(`/absence-requests/${id}/approve`, data),
+    reject: (id, data) => api.post(`/absence-requests/${id}/reject`, data),
+    requestChanges: (id, data) => api.post(`/absence-requests/${id}/request-changes`, data),
+    cancel: (id) => api.post(`/absence-requests/${id}/cancel`),
+    resubmit: (id, data) => api.post(`/absence-requests/${id}/resubmit`, data),
+};
+
 export default api;

@@ -277,6 +277,133 @@ const validateWorkActivity = [
 ];
 
 // =============================================================================
+// =============================================================================
+// ABSENCE REQUESTS
+// =============================================================================
+
+const validateAbsenceRequest = [
+    body('type')
+        .notEmpty().withMessage('Il tipo di richiesta è obbligatorio.')
+        .isIn(['FERIE', 'PERMESSO']).withMessage('Il tipo deve essere FERIE o PERMESSO.'),
+
+    body('mode')
+        .custom((value, { req }) => {
+            if (req.body.type === 'FERIE') {
+                if (value !== null && value !== undefined && value !== '') {
+                    throw new Error('Il campo mode deve essere nullo per le ferie.');
+                }
+                return true;
+            }
+            if (req.body.type === 'PERMESSO') {
+                if (!value || !['HOURS', 'DAY'].includes(value)) {
+                    throw new Error('Il campo mode è obbligatorio per i permessi (HOURS o DAY).');
+                }
+            }
+            return true;
+        }),
+
+    body('category')
+        .custom((value, { req }) => {
+            if (req.body.type === 'PERMESSO') {
+                if (!value || !['PERSONALE', 'MEDICO', 'LEGGE_104', 'ALTRO'].includes(value)) {
+                    throw new Error('La categoria è obbligatoria per i permessi.');
+                }
+            }
+            return true;
+        }),
+
+    body('startDate')
+        .notEmpty().withMessage('La data di inizio è obbligatoria.')
+        .isISO8601().withMessage('La data di inizio deve essere una data valida.'),
+
+    body('endDate')
+        .optional({ nullable: true })
+        .isISO8601().withMessage('La data di fine deve essere una data valida.')
+        .custom((value, { req }) => {
+            if (value && req.body.startDate && new Date(value) < new Date(req.body.startDate)) {
+                throw new Error('La data di fine non può essere precedente alla data di inizio.');
+            }
+            return true;
+        }),
+
+    body('dayPart')
+        .custom((value, { req }) => {
+            const { type, mode } = req.body;
+            // PERMESSO + HOURS: dayPart must be null
+            if (type === 'PERMESSO' && mode === 'HOURS') {
+                if (value) {
+                    throw new Error('Il campo dayPart deve essere nullo per permessi a ore.');
+                }
+                return true;
+            }
+            // PERMESSO + DAY: dayPart required
+            if (type === 'PERMESSO' && mode === 'DAY') {
+                if (!value || !['FULL', 'AM', 'PM'].includes(value)) {
+                    throw new Error('Il campo dayPart è obbligatorio per permessi a giornata (FULL, AM, PM).');
+                }
+                return true;
+            }
+            // FERIE: dayPart allowed only if single day
+            if (type === 'FERIE' && value) {
+                if (!['FULL', 'AM', 'PM'].includes(value)) {
+                    throw new Error('Il campo dayPart deve essere FULL, AM o PM.');
+                }
+            }
+            return true;
+        }),
+
+    body('startTime')
+        .custom((value, { req }) => {
+            const { type, mode } = req.body;
+            if (type === 'PERMESSO' && mode === 'HOURS') {
+                if (!value) {
+                    throw new Error('L\'ora di inizio è obbligatoria per permessi a ore.');
+                }
+            } else if (value) {
+                throw new Error('L\'ora di inizio è consentita solo per permessi a ore.');
+            }
+            return true;
+        }),
+
+    body('endTime')
+        .custom((value, { req }) => {
+            const { type, mode } = req.body;
+            if (type === 'PERMESSO' && mode === 'HOURS') {
+                if (!value) {
+                    throw new Error('L\'ora di fine è obbligatoria per permessi a ore.');
+                }
+            } else if (value) {
+                throw new Error('L\'ora di fine è consentita solo per permessi a ore.');
+            }
+            return true;
+        }),
+
+    body('notes')
+        .optional({ nullable: true })
+        .isLength({ max: 1000 }).withMessage('Le note non possono superare 1000 caratteri.')
+        .trim(),
+
+    handleValidation
+];
+
+const validateAbsenceDecision = [
+    body('decisionNote')
+        .notEmpty().withMessage('La nota di decisione è obbligatoria.')
+        .isLength({ max: 2000 }).withMessage('La nota non può superare 2000 caratteri.')
+        .trim(),
+
+    handleValidation
+];
+
+const validateAbsenceRequestChanges = [
+    body('requestedChanges')
+        .notEmpty().withMessage('Le modifiche richieste sono obbligatorie.')
+        .isLength({ max: 2000 }).withMessage('Le modifiche richieste non possono superare 2000 caratteri.')
+        .trim(),
+
+    handleValidation
+];
+
 // EXPORTS
 // =============================================================================
 
@@ -297,4 +424,8 @@ module.exports = {
     validateNote,
     // Work Activities
     validateWorkActivity,
+    // Absence Requests
+    validateAbsenceRequest,
+    validateAbsenceDecision,
+    validateAbsenceRequestChanges,
 };

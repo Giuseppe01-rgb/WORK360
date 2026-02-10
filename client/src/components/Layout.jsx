@@ -25,7 +25,8 @@ import {
     Camera,
     FileCheck,
     User,
-    Activity
+    Activity,
+    CalendarDays
 } from 'lucide-react';
 import Tutorial from './Tutorial';
 
@@ -95,6 +96,7 @@ export default function Layout({ children, title, hideHeader = false }) {
                         { path: '/worker/economies', label: 'Economie', icon: Zap },
                         { path: '/owner/worker-functions?tab=notes', label: 'Note', icon: StickyNote },
                         { path: '/owner/worker-functions?tab=photos', label: 'Foto', icon: Camera },
+                        { path: '/owner/worker-functions?tab=absences', label: 'Permessi e Ferie', icon: CalendarDays },
                     ]
                 },
                 { path: '/owner/attendance', label: 'Presenze', icon: Users },
@@ -119,6 +121,7 @@ export default function Layout({ children, title, hideHeader = false }) {
                 { path: '/owner/quotes', label: 'Preventivi & SAL', icon: FileText },
                 { path: '/owner/signature', label: 'Firma Digitale', icon: PenTool },
                 { path: '/owner/analytics', label: 'Analytics', icon: BarChart3 },
+                { path: '/owner/absence-requests', label: 'Ferie e Permessi', icon: CalendarDays },
                 { path: '/owner/activity-log', label: 'Riepilogo Attività', icon: Activity },
                 { path: '/owner/settings', label: 'Dati Azienda', icon: Settings },
             ]
@@ -143,6 +146,7 @@ export default function Layout({ children, title, hideHeader = false }) {
                 { path: '/worker/economies', label: 'Economie', icon: Zap },
                 { path: '/worker?tab=notes', label: 'Note', icon: StickyNote },
                 { path: '/worker?tab=photos', label: 'Foto', icon: Camera },
+                { path: '/worker?tab=absences', label: 'Permessi e Ferie', icon: CalendarDays },
             ]
         },
         {
