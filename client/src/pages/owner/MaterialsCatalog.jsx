@@ -614,7 +614,7 @@ export default function MaterialsCatalog() {
                     tabIndex={0}
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
                     onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false); }}
-                    onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') setShowAddModal(false); }}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setShowAddModal(false); }}
                 >
                     <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
@@ -741,7 +741,7 @@ export default function MaterialsCatalog() {
                     tabIndex={0}
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4 py-4 md:p-4 overflow-y-auto"
                     onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false); }}
-                    onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') setShowEditModal(false); }}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setShowEditModal(false); }}
                 >
                     <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-slate-100 sticky top-0 bg-white z-10">
