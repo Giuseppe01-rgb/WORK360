@@ -32,7 +32,7 @@ function formatDateRange(start, end) {
 
 export default function AbsenceRequestsInbox() {
     const { showSuccess, showError } = useToast();
-    const showConfirm = useConfirmModal();
+    const { showConfirm } = useConfirmModal();
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({ status: '', type: '', employeeId: '', month: '', is104: '' });
