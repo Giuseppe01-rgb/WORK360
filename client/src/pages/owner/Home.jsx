@@ -190,16 +190,16 @@ SiteCard.propTypes = {
 };
 
 // ─── Main Home Component ─────────────────────────────────────────────
+// Persistent module-level cache to survive navigation/unmount
+let cachedDashboard = null;
+let cachedSites = { top: null, worst: null };
+
 export default function Home() {
     const { user } = useAuth();
-    const [dashboard, setDashboard] = useState(null);
-    const [sitePerformance, setSitePerformance] = useState({ top: null, worst: null });
-    const [loading, setLoading] = useState(true);
+    const [dashboard, setDashboard] = useState(cachedDashboard);
+    const [sitePerformance, setSitePerformance] = useState(cachedSites);
+    const [loading, setLoading] = useState(!cachedDashboard);
     const [refreshing, setRefreshing] = useState(false);
-
-    // Use ref to persist data across re-renders and prevent zero-data flash
-    const cachedDashboard = useRef(null);
-    const cachedSites = useRef({ top: null, worst: null });
 
     const loadDashboard = useCallback(async (isRefresh = false) => {
         try {
@@ -211,7 +211,7 @@ export default function Home() {
 
             // Only update state if we got valid data
             if (dashRes.data) {
-                cachedDashboard.current = dashRes.data;
+                cachedDashboard = dashRes.data;
                 setDashboard(dashRes.data);
             }
 
@@ -239,16 +239,16 @@ export default function Home() {
                         top: sorted[0],
                         worst: sorted.length > 1 ? sorted[sorted.length - 1] : null
                     };
-                    cachedSites.current = newPerf;
+                    cachedSites = newPerf;
                     setSitePerformance(newPerf);
                 }
             }
         } catch (error) {
             console.error('Error loading dashboard:', error);
-            // On error, restore cached data to prevent zero-flash
-            if (cachedDashboard.current) {
-                setDashboard(cachedDashboard.current);
-                setSitePerformance(cachedSites.current);
+            // On error, restore cached data if any
+            if (cachedDashboard) {
+                setDashboard(cachedDashboard);
+                setSitePerformance(cachedSites);
             }
         } finally {
             setLoading(false);

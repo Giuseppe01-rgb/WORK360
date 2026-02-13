@@ -56,11 +56,15 @@ const getMarginStatusLabel = (marginStatus) => {
     }
 };
 
+// Persistent module-level cache to survive navigation
+let cachedAnalytics = null;
+let cachedSiteStats = [];
+
 export default function AnalyticsDashboard() {
-    const [analytics, setAnalytics] = useState(null);
-    const [siteStats, setSiteStats] = useState([]);
+    const [analytics, setAnalytics] = useState(cachedAnalytics);
+    const [siteStats, setSiteStats] = useState(cachedSiteStats);
     const [selectedSite, setSelectedSite] = useState('');
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!cachedAnalytics);
 
     useEffect(() => {
         loadAnalytics();
@@ -68,12 +72,14 @@ export default function AnalyticsDashboard() {
 
     const loadAnalytics = async () => {
         try {
+            setLoading(true); // Reset loading on every call
             const params = selectedSite ? { siteId: selectedSite } : {};
             const [analyticsResp, sitesResp] = await Promise.all([
                 analyticsAPI.getDashboard(params),
                 siteAPI.getAll()
             ]);
 
+            cachedAnalytics = analyticsResp.data;
             setAnalytics(analyticsResp.data);
 
             // Load real stats for each site
@@ -104,9 +110,16 @@ export default function AnalyticsDashboard() {
             });
 
             const siteStatsData = await Promise.all(siteStatsPromises);
-            setSiteStats(siteStatsData);
-        } catch (error) {
-            console.error('Error loading analytics:', error);
+            const validStats = siteStatsData.filter(Boolean);
+            cachedSiteStats = validStats;
+            setSiteStats(validStats);
+        } catch (err) {
+            console.error('Error loading analytics:', err);
+            // On error, restore from cache if available
+            if (cachedAnalytics) {
+                setAnalytics(cachedAnalytics);
+                setSiteStats(cachedSiteStats);
+            }
         } finally {
             setLoading(false);
         }

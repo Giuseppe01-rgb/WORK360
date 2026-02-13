@@ -235,6 +235,14 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     useEffect(() => {
         const loadDetails = async () => {
             try {
+                setLoading(true); // Reset loading state
+                // Clear previous data to avoid ghosting
+                setReport(null);
+                setEmployeeHours([]);
+                setNotes([]);
+                setPhotos([]);
+                setEconomie([]);
+
                 const [rep, hours, notesData, reportsData, photosData, economieData] = await Promise.all([
                     analyticsAPI.getSiteReport(site.id),
                     analyticsAPI.getHoursPerEmployee({ siteId: site.id }),
@@ -254,8 +262,10 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                 setLoading(false);
             }
         };
-        loadDetails();
-    }, [site]);
+        if (site?.id) {
+            loadDetails();
+        }
+    }, [site?.id]);
 
     if (loading) {
         return (
