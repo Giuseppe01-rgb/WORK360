@@ -14,8 +14,21 @@ import { exportSiteReport } from '../../utils/excelExport';
 const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     // Use global context for site report
     const { getSiteReport, siteReports } = useData();
-    const siteId = site?.id ? Number(site.id) : null;
+    // Normalize siteId to string to match DataContext
+    const siteId = site?.id ? String(site.id) : null;
     const reportState = siteId ? (siteReports[siteId] || { data: null, status: 'idle' }) : { data: null, status: 'idle' };
+
+    useEffect(() => {
+        if (siteId) {
+            console.log(`[SiteDetails] Site ID: ${siteId} (type: ${typeof siteId})`);
+            console.log(`[SiteDetails] Report Status: ${reportState.status}`);
+            if (reportState.data) {
+                console.log(`[SiteDetails] Report Data found. TotalCost: ${reportState.data.siteCost?.total}`);
+            } else {
+                console.log(`[SiteDetails] No report data yet.`);
+            }
+        }
+    }, [siteId, reportState]);
 
     // v1.2.1 - Economie integration
     const [report, setReport] = useState(null);
@@ -126,6 +139,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             if (!siteId) return;
 
             console.log(`[SiteManagement] Loading details for site ${siteId}...`);
+            console.log(`[SiteManagement] Loading details for site ${siteId}...`);
+            // Pass string ID to context
             getSiteReport(siteId);
 
             try {

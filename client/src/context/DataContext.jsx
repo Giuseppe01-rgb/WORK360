@@ -98,28 +98,36 @@ export const DataProvider = ({ children }) => {
             return;
         }
 
+        // Normalize ID to string for object keys to avoid mismatch
+        const validId = String(id);
+
         // Prevent duplicate fetches for the same ID
-        if (fetchingSites.current.has(id)) {
-            console.log(`[DataContext] Request for site ${id} already in progress. Skipping.`);
+        if (fetchingSites.current.has(validId)) {
+            console.log(`[DataContext] Request for site ${validId} already in progress. Skipping.`);
             return;
         }
 
-        fetchingSites.current.add(id);
+        fetchingSites.current.add(validId);
 
         setSiteReports(prev => {
-            const current = prev[id] || { data: null, status: 'idle' };
+            const current = prev[validId] || { data: null, status: 'idle' };
             // Optimistic update: unique request guaranteed by ref
             const nextStatus = current.data ? 'refreshing' : 'loading';
-            return { ...prev, [id]: { ...current, status: nextStatus } };
+            return { ...prev, [validId]: { ...current, status: nextStatus } };
         });
 
         try {
-            console.log(`[DataContext] Fetching report for site ${id}...`);
-            const res = await analyticsAPI.getSiteReport(id);
+            console.log(`[DataContext] Fetching report for site ${validId} (type: ${typeof validId})...`);
+            const res = await analyticsAPI.getSiteReport(id); // API expects number or string, usually fine
+            console.log(`[DataContext] Received report for site ${validId}:`, res.data ? 'Data present' : 'No data');
+            if (res.data) {
+                console.log(`[DataContext] Site ${validId} ContractValue:`, res.data.contractValue);
+                console.log(`[DataContext] Site ${validId} TotalCost:`, res.data.siteCost?.total);
+            }
 
             setSiteReports(prev => ({
                 ...prev,
-                [id]: {
+                [validId]: {
                     data: res.data,
                     status: 'ready',
                     error: null,
@@ -127,17 +135,17 @@ export const DataProvider = ({ children }) => {
                 }
             }));
         } catch (error) {
-            console.error(`[DataContext] Error fetching site ${id}:`, error);
+            console.error(`[DataContext] Error fetching site ${validId}:`, error);
             setSiteReports(prev => ({
                 ...prev,
-                [id]: {
-                    ...prev[id],
+                [validId]: {
+                    ...prev[validId],
                     status: 'error',
                     error: error.message
                 }
             }));
         } finally {
-            fetchingSites.current.delete(id);
+            fetchingSites.current.delete(validId);
         }
     }, []);
 
