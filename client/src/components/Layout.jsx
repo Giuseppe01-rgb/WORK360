@@ -18,7 +18,7 @@ import {
     ChevronDown,
     ChevronUp,
     Settings,
-
+    Home,
     Clock,
     Zap,
     StickyNote,
@@ -76,10 +76,21 @@ export default function Layout({ children, title, hideHeader = false }) {
     // Owner menu with categories
     const ownerLinks = [
         {
-            category: 'GESTIONE CANTIERI',
+            category: 'PANORAMICA',
             items: [
                 {
                     path: '/owner',
+                    label: 'Home',
+                    icon: Home,
+                    subtitle: 'Dashboard aziendale'
+                },
+            ]
+        },
+        {
+            category: 'GESTIONE CANTIERI',
+            items: [
+                {
+                    path: '/owner/dashboard',
                     label: 'Cantieri',
                     icon: Building2,
                     subtitle: activeSitesCount > 0 ? `${activeSitesCount} attivi` : 'Nessun cantiere attivo'

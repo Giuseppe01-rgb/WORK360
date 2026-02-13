@@ -4,6 +4,7 @@ const { Attendance, Material, Equipment, User, ConstructionSite, MaterialUsage, 
 const { assertSiteBelongsToCompany } = require('../utils/security');
 const { getCompanyId } = require('../utils/sequelizeHelpers');
 const { getSiteMarginInfo } = require('../utils/marginCalculator');
+const { generateHomeInsights } = require('../utils/insightGenerator');
 
 // @desc    Get hours per employee
 // @route   GET /api/analytics/hours-per-employee
@@ -522,6 +523,24 @@ const getDashboard = async (req, res) => {
         const marginValue = totalContractValue - totalCost;
         const costVsRevenuePercent = totalContractValue > 0 ? (totalCost / totalContractValue) * 100 : 0;
 
+        // Calculate margin growth as a percentage of contract value
+        const marginGrowthPercent = totalContractValue > 0
+            ? (marginValue / totalContractValue) * 100
+            : 0;
+
+        // Generate rule-based insights for the Home dashboard
+        const homeInsights = generateHomeInsights({
+            marginGrowthPercent,
+            marginPercent: marginGrowthPercent,
+            laborPercent: laborIncidencePercent,
+            materialsPercent: materialsIncidencePercent,
+            monthlyHours,
+            totalWorkers: totalEmployees,
+            activeSites,
+            totalSites,
+            sitesWithMargin: sitesWithContractValue
+        });
+
         res.json({
             message: 'Dashboard analytics',
             activeSites,
@@ -550,8 +569,10 @@ const getDashboard = async (req, res) => {
                 totalSites,
                 sitesWithContractValue,
                 marginValue: Number.parseFloat(marginValue.toFixed(2)),
+                marginGrowthPercent: Number.parseFloat(marginGrowthPercent.toFixed(2)),
                 costVsRevenuePercent: Number.parseFloat(costVsRevenuePercent.toFixed(2))
-            }
+            },
+            homeInsights
         });
     } catch (error) {
         console.error('getDashboard error:', error);

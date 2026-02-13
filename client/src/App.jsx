@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import WorkerDashboard from './pages/worker/WorkerDashboard';
 import WorkerSites from './pages/worker/WorkerSites';
+import Home from './pages/owner/Home';
 import OwnerDashboard from './pages/owner/OwnerDashboard';
 import SiteManagement from './pages/owner/SiteManagement';
 import AttendanceList from './pages/owner/AttendanceList';
@@ -22,7 +23,9 @@ import MaterialsCatalog from './pages/owner/MaterialsCatalog';
 import MaterialApproval from './pages/owner/MaterialApproval';
 import ActivityLogPage from './pages/owner/ActivityLogPage';
 import AbsenceRequestsInbox from './pages/owner/AbsenceRequestsInbox';
+import HomeDemo from './pages/owner/HomeDemo';
 import EconomiaForm from './pages/worker/EconomiaForm';
+
 import UserProfile from './pages/UserProfile';
 import Loading from './components/Loading';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -99,6 +102,14 @@ function AppRoutes() {
       {/* Owner Routes */}
       <Route
         path="/owner"
+        element={
+          <ProtectedRoute requireOwner>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/owner/dashboard"
         element={
           <ProtectedRoute requireOwner>
             <OwnerDashboard />
@@ -208,6 +219,10 @@ function AppRoutes() {
             <AbsenceRequestsInbox />
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/owner/home-demo"
+        element={<HomeDemo />}
       />
     </Routes>
   );
