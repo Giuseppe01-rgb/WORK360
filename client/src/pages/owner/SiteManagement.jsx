@@ -64,7 +64,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
         });
         if (!confirmed) return;
         try {
-            await noteAPI.delete(reportId);
+            await workActivityAPI.delete(reportId);
             setDailyReports(prev => prev.filter(r => r.id !== reportId));
         } catch (error) {
             console.error('Error deleting report:', error);
@@ -158,7 +158,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                 const [hours, notesData, dailyReportsData, economieData, materialsData] = await Promise.all([
                     safeFetch('hours', analyticsAPI.getHoursPerEmployee({ siteId })),
                     safeFetch('notes', noteAPI.getAll({ siteId })), // Note: checks for ALL notes? filtering usually happens on backend or finding only type='note'
-                    safeFetch('daily_reports', noteAPI.getAll({ siteId, type: 'daily_report' })),
+                    // safeFetch('daily_reports', noteAPI.getAll({ siteId, type: 'daily_report' })), // OLD: Wrong API
+                    safeFetch('daily_reports', workActivityAPI.getAll({ siteId })), // NEW: Correct API for WorkActivities
                     safeFetch('economie', economiaAPI.getBySite(siteId)),
                     safeFetch('materials', materialUsageAPI.getBySite(siteId))
                 ]);
