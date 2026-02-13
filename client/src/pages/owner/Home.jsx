@@ -200,7 +200,7 @@ export default function Home() {
             ]);
 
             // Only update state if we got valid data
-            if (dashRes.data && dashRes.data.stats) {
+            if (dashRes.data) {
                 cachedDashboard.current = dashRes.data;
                 setDashboard(dashRes.data);
             }
@@ -425,7 +425,7 @@ export default function Home() {
                                     backContent={insights.sites}
                                 />
                             )}
-                            {sitePerformance.worst && sitePerformance.worst.name !== sitePerformance.top?.name && (
+                            {sitePerformance.worst && (
                                 <SiteCard
                                     site={sitePerformance.worst}
                                     type="worst"
