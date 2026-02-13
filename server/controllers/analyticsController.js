@@ -127,7 +127,7 @@ const getSiteReport = async (req, res, next) => {
             LEFT JOIN coloura_materials cm ON mu.material_id = cm.id
             WHERE mu.site_id = :siteId
               AND mu.stato = 'catalogato'
-            GROUP BY COALESCE(mm.id, cm.id), COALESCE(mm.display_name, cm.nome_prodotto), COALESCE(mm.unit, cm.quantita), COALESCE(mm.price, cm.prezzo)
+            GROUP BY mm.id, cm.id, mm.display_name, cm.nome_prodotto, mm.unit, cm.quantita, mm.price, cm.prezzo
             ORDER BY "totalCost" DESC
         `, {
             replacements: { siteId },
