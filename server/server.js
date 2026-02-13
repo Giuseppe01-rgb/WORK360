@@ -344,6 +344,22 @@ sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
                 END $$;
             `);
 
+            // Safe Migration: Add hourly_cost to attendances via QueryInterface
+            try {
+                const queryInterface = sequelize.getQueryInterface();
+                const tableInfo = await queryInterface.describeTable('attendances');
+                if (!tableInfo.hourly_cost) {
+                    console.log('[Migration] Adding "hourly_cost" column to attendances...');
+                    await queryInterface.addColumn('attendances', 'hourly_cost', {
+                        type: sequelize.Sequelize.DECIMAL(10, 2),
+                        defaultValue: 0
+                    });
+                    console.log('[Migration] "hourly_cost" column added successfully.');
+                }
+            } catch (err) {
+                console.error('[Migration] Failed to add hourly_cost column:', err.message);
+            }
+
             console.log('✅ Migrations checked');
         } catch (migrationError) {
             console.error('[Migration] Error:', migrationError.message);
