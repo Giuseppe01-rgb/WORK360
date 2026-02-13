@@ -180,13 +180,6 @@ export default function OwnerDashboard() {
             )}
 
             <div className="space-y-6 pb-20">
-                {/* HEADER - UPDATED */}
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <p className="text-slate-500 font-medium">Bentornato,</p>
-                        <h1 className="text-3xl font-black text-slate-900">{user?.firstName}</h1>
-                    </div>
-                </div>
 
                 {/* SEARCH - UPDATED */}
                 <div className="relative mb-6">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
     TrendingUp,
@@ -34,8 +34,11 @@ const getStatusInfo = (val) => {
     return { label: 'CRITICITÀ', color: 'text-red-500', bg: 'bg-red-500', shadow: 'shadow-[0_0_20px_rgba(239,68,68,0.4)]' };
 };
 
+// ─── N.B. Disclaimer for flip card backs ─────────────────────────────
+const FLIP_DISCLAIMER = 'N.B.: Se utilizzi l\'app da poco o sei all\'inizio, probabilmente il feed sarà di alta efficienza, ma non sarà realistico, poiché si basa su pochi dati disponibili. Col tempo l\'app raccoglierà maggiori dati, dando un risultato sempre più vero.';
+
 // ─── FlipCard Component ──────────────────────────────────────────────
-const FlipCard = ({ children, backContent, className = '', disabled = false }) => {
+const FlipCard = ({ children, backContent, className = '', disabled = false, showDisclaimer = false }) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
     if (disabled || !backContent) return <div className={className}>{children}</div>;
@@ -52,10 +55,15 @@ const FlipCard = ({ children, backContent, className = '', disabled = false }) =
                 <div className="w-full h-full backface-hidden">
                     {children}
                 </div>
-                <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-slate-800 rounded-[2.5rem] p-8 text-white flex flex-col justify-start overflow-hidden">
-                    <div className="text-justify text-xs leading-relaxed text-slate-200 hyphens-auto" style={{ textAlignLast: 'left' }}>
+                <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-slate-100 rounded-[2.5rem] p-8 flex flex-col justify-start overflow-y-auto">
+                    <p className="text-sm leading-relaxed text-slate-700 hyphens-auto" style={{ textAlign: 'left' }}>
                         {backContent}
-                    </div>
+                    </p>
+                    {showDisclaimer && (
+                        <p className="text-[11px] leading-relaxed text-slate-500 mt-4 pt-4 border-t border-slate-200 italic">
+                            {FLIP_DISCLAIMER}
+                        </p>
+                    )}
                 </div>
             </div>
         </div>
@@ -66,7 +74,8 @@ FlipCard.propTypes = {
     children: PropTypes.node.isRequired,
     backContent: PropTypes.string,
     className: PropTypes.string,
-    disabled: PropTypes.bool
+    disabled: PropTypes.bool,
+    showDisclaimer: PropTypes.bool
 };
 
 // ─── MetricCard Component ────────────────────────────────────────────
@@ -164,7 +173,11 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    const loadDashboard = async (isRefresh = false) => {
+    // Use ref to persist data across re-renders and prevent zero-data flash
+    const cachedDashboard = useRef(null);
+    const cachedSites = useRef({ top: null, worst: null });
+
+    const loadDashboard = useCallback(async (isRefresh = false) => {
         try {
             if (isRefresh) setRefreshing(true);
             const [dashRes, sitesRes] = await Promise.all([
@@ -172,7 +185,11 @@ export default function Home() {
                 siteAPI.getAll()
             ]);
 
-            setDashboard(dashRes.data);
+            // Only update state if we got valid data
+            if (dashRes.data && dashRes.data.stats) {
+                cachedDashboard.current = dashRes.data;
+                setDashboard(dashRes.data);
+            }
 
             // Calculate site performance by fetching reports for sites with contract values
             const activeSites = sitesRes.data.filter(s => s.status === 'active' && Number.parseFloat(s.contractValue) > 0);
@@ -194,26 +211,33 @@ export default function Home() {
                 const validReports = siteReports.filter(Boolean);
                 if (validReports.length > 0) {
                     const sorted = [...validReports].sort((a, b) => b.margin - a.margin);
-                    setSitePerformance({
+                    const newPerf = {
                         top: sorted[0],
                         worst: sorted.length > 1 ? sorted[sorted.length - 1] : null
-                    });
+                    };
+                    cachedSites.current = newPerf;
+                    setSitePerformance(newPerf);
                 }
             }
         } catch (error) {
             console.error('Error loading dashboard:', error);
+            // On error, restore cached data to prevent zero-flash
+            if (cachedDashboard.current && !dashboard) {
+                setDashboard(cachedDashboard.current);
+                setSitePerformance(cachedSites.current);
+            }
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    };
+    }, [dashboard]);
 
     useEffect(() => {
         loadDashboard();
         // Auto-refresh every 5 minutes
         const interval = setInterval(() => loadDashboard(true), 300000);
         return () => clearInterval(interval);
-    }, []);
+    }, [loadDashboard]);
 
     if (loading) {
         return (
@@ -256,6 +280,7 @@ export default function Home() {
                             Benvenuto, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{user?.firstName || 'Boss'}</span>
                         </h1>
                         <p className="text-slate-500 mt-1 font-medium">Ecco la panoramica in tempo reale per la tua azienda.</p>
+                        <p className="text-slate-400 text-xs mt-1 italic">Ricorda, più sarai preciso nell&apos;inserimento dei dati, più il dato sarà realistico.</p>
                     </div>
                     <div className="hidden md:flex items-center gap-3">
                         <button
@@ -279,20 +304,21 @@ export default function Home() {
                         <FlipCard
                             className="h-full"
                             backContent={insights.status || 'Dati in caricamento...'}
+                            showDisclaimer
                         >
                             <div className="bg-slate-900 rounded-[3rem] p-10 shadow-xl relative overflow-hidden h-full flex flex-col justify-between">
                                 <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
 
-                                <div className="relative z-10 flex justify-between items-start">
-                                    <div className="flex flex-col gap-1">
+                                <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-4">
+                                    <div className="flex flex-col gap-1 min-w-0 flex-shrink">
                                         <h3 className="text-white/40 font-bold text-xs uppercase tracking-widest">Growth Performance</h3>
-                                        <p className={`text-4xl font-black tracking-tighter ${qStatus.color}`}>
+                                        <p className={`text-3xl sm:text-4xl font-black tracking-tighter ${qStatus.color}`}>
                                             {qStatus.label}
                                         </p>
                                     </div>
-                                    <div className="bg-white/5 p-4 rounded-3xl border border-white/10 text-right">
+                                    <div className="bg-white/5 p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-white/10 text-right flex-shrink-0">
                                         <p className="text-[10px] text-white/40 font-bold uppercase mb-1">Margine Azienda</p>
-                                        <p className="text-2xl font-black text-white">{growthPercent >= 0 ? '+' : ''}{growthPercent.toFixed(1)}%</p>
+                                        <p className="text-xl sm:text-2xl font-black text-white">{growthPercent >= 0 ? '+' : ''}{growthPercent.toFixed(1)}%</p>
                                     </div>
                                 </div>
 
