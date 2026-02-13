@@ -344,6 +344,21 @@ sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
                 END $$;
             `);
 
+            // Ensure attendances.hourly_cost exists (Deployment Fix)
+            await sequelize.query(`
+                DO $$ 
+                BEGIN 
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name = 'attendances' 
+                        AND column_name = 'hourly_cost'
+                    ) THEN
+                        ALTER TABLE attendances ADD COLUMN hourly_cost DECIMAL(10,2);
+                        RAISE NOTICE 'Added hourly_cost to attendances';
+                    END IF;
+                END $$;
+            `);
+
             console.log('✅ Migrations checked');
         } catch (migrationError) {
             console.error('[Migration] Error:', migrationError.message);
