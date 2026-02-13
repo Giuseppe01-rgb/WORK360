@@ -246,7 +246,7 @@ export default function Home() {
         } catch (error) {
             console.error('Error loading dashboard:', error);
             // On error, restore cached data to prevent zero-flash
-            if (cachedDashboard.current && !dashboard) {
+            if (cachedDashboard.current) {
                 setDashboard(cachedDashboard.current);
                 setSitePerformance(cachedSites.current);
             }
@@ -254,7 +254,7 @@ export default function Home() {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [dashboard]);
+    }, []);
 
     useEffect(() => {
         loadDashboard();
