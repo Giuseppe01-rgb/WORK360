@@ -190,15 +190,12 @@ SiteCard.propTypes = {
 };
 
 // ─── Main Home Component ─────────────────────────────────────────────
-// Persistent module-level cache to survive navigation/unmount
-let cachedDashboard = null;
-let cachedSites = { top: null, worst: null };
 
 export default function Home() {
     const { user } = useAuth();
-    const [dashboard, setDashboard] = useState(cachedDashboard);
-    const [sitePerformance, setSitePerformance] = useState(cachedSites);
-    const [loading, setLoading] = useState(!cachedDashboard);
+    const [dashboard, setDashboard] = useState(null);
+    const [sitePerformance, setSitePerformance] = useState({ top: null, worst: null });
+    const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
     const loadDashboard = useCallback(async (isRefresh = false) => {
@@ -209,21 +206,20 @@ export default function Home() {
                 siteAPI.getAll()
             ]);
 
-            // Only update state if we got valid data
             if (dashRes.data) {
-                cachedDashboard = dashRes.data;
                 setDashboard(dashRes.data);
             }
 
             // Calculate site performance by fetching reports for sites with contract values
-            const activeSites = sitesRes.data.filter(s => s.status === 'active' && Number.parseFloat(s.contractValue) > 0);
+            const allSites = Array.isArray(sitesRes.data) ? sitesRes.data : [];
+            const activeSites = allSites.filter(s => s.status === 'active' && Number.parseFloat(s.contractValue) > 0);
             if (activeSites.length > 0) {
                 const siteReports = await Promise.all(
                     activeSites.map(async (site) => {
                         try {
                             const report = await analyticsAPI.getSiteReport(site.id);
                             const contractValue = Number.parseFloat(site.contractValue) || 0;
-                            const totalCost = report.data.siteCost?.total || 0;
+                            const totalCost = report.data?.siteCost?.total || 0;
                             const margin = contractValue - totalCost;
                             const costVsRevenue = contractValue > 0 ? Math.round((totalCost / contractValue) * 100) : 0;
                             return { name: site.name, margin: Math.round(margin), costVsRevenue };
@@ -235,21 +231,14 @@ export default function Home() {
                 const validReports = siteReports.filter(Boolean);
                 if (validReports.length > 0) {
                     const sorted = [...validReports].sort((a, b) => b.margin - a.margin);
-                    const newPerf = {
+                    setSitePerformance({
                         top: sorted[0],
                         worst: sorted.length > 1 ? sorted[sorted.length - 1] : null
-                    };
-                    cachedSites = newPerf;
-                    setSitePerformance(newPerf);
+                    });
                 }
             }
         } catch (error) {
             console.error('Error loading dashboard:', error);
-            // On error, restore cached data if any
-            if (cachedDashboard) {
-                setDashboard(cachedDashboard);
-                setSitePerformance(cachedSites);
-            }
         } finally {
             setLoading(false);
             setRefreshing(false);

@@ -56,15 +56,11 @@ const getMarginStatusLabel = (marginStatus) => {
     }
 };
 
-// Persistent module-level cache to survive navigation
-let cachedAnalytics = null;
-let cachedSiteStats = [];
-
 export default function AnalyticsDashboard() {
-    const [analytics, setAnalytics] = useState(cachedAnalytics);
-    const [siteStats, setSiteStats] = useState(cachedSiteStats);
+    const [analytics, setAnalytics] = useState(null);
+    const [siteStats, setSiteStats] = useState([]);
     const [selectedSite, setSelectedSite] = useState('');
-    const [loading, setLoading] = useState(!cachedAnalytics);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadAnalytics();
@@ -72,28 +68,28 @@ export default function AnalyticsDashboard() {
 
     const loadAnalytics = async () => {
         try {
-            setLoading(true); // Reset loading on every call
+            setLoading(true);
             const params = selectedSite ? { siteId: selectedSite } : {};
             const [analyticsResp, sitesResp] = await Promise.all([
                 analyticsAPI.getDashboard(params),
                 siteAPI.getAll()
             ]);
 
-            cachedAnalytics = analyticsResp.data;
             setAnalytics(analyticsResp.data);
 
             // Load real stats for each site
-            const siteStatsPromises = sitesResp.data.map(async (site) => {
+            const allSites = Array.isArray(sitesResp.data) ? sitesResp.data : [];
+            const siteStatsPromises = allSites.map(async (site) => {
                 try {
                     const siteReport = await analyticsAPI.getSiteReport(site.id);
                     return {
                         site: site,
-                        totalAttendances: siteReport.data.totalAttendances || 0,
-                        totalHours: siteReport.data.totalHours || 0,
-                        uniqueWorkers: siteReport.data.uniqueWorkers || 0,
-                        materials: siteReport.data.materials?.slice(0, 5) || [],
-                        marginPercent: siteReport.data.marginPercent,
-                        marginStatus: siteReport.data.status || 'unknown'
+                        totalAttendances: siteReport.data?.totalAttendances || 0,
+                        totalHours: siteReport.data?.totalHours || 0,
+                        uniqueWorkers: siteReport.data?.uniqueWorkers || 0,
+                        materials: siteReport.data?.materials?.slice(0, 5) || [],
+                        marginPercent: siteReport.data?.marginPercent,
+                        marginStatus: siteReport.data?.status || 'unknown'
                     };
                 } catch (err) {
                     console.error(`Error loading stats for site ${site.id}:`, err);
@@ -110,16 +106,9 @@ export default function AnalyticsDashboard() {
             });
 
             const siteStatsData = await Promise.all(siteStatsPromises);
-            const validStats = siteStatsData.filter(Boolean);
-            cachedSiteStats = validStats;
-            setSiteStats(validStats);
+            setSiteStats(siteStatsData.filter(Boolean));
         } catch (err) {
             console.error('Error loading analytics:', err);
-            // On error, restore from cache if available
-            if (cachedAnalytics) {
-                setAnalytics(cachedAnalytics);
-                setSiteStats(cachedSiteStats);
-            }
         } finally {
             setLoading(false);
         }

@@ -506,7 +506,7 @@ const getDashboard = async (req, res) => {
             FROM material_usages mu
             LEFT JOIN material_masters mm ON mu.material_id = mm.id
             LEFT JOIN coloura_materials cm ON mu.material_id = cm.id
-            WHERE (mm.company_id = :companyId OR cm.company_id = :companyId)
+            WHERE mu.company_id = :companyId
               AND mu.stato = 'catalogato'
         `, {
             replacements: { companyId },
