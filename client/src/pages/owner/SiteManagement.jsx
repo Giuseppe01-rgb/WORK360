@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Layout from '../../components/Layout';
 import { useConfirmModal } from '../../context/ConfirmModalContext';
+import { useData } from '../../context/DataContext';
 import { siteAPI, analyticsAPI, workActivityAPI, noteAPI, economiaAPI, materialUsageAPI } from '../../utils/api';
 import {
     Building2, MapPin, Calendar, Clock, Package, Users,
@@ -11,6 +12,11 @@ import {
 import { exportSiteReport } from '../../utils/excelExport';
 
 const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
+    // Use global context for site report
+    const { getSiteReport, siteReports } = useData();
+    const siteId = site?.id ? Number(site.id) : null;
+    const reportState = siteId ? (siteReports[siteId] || { data: null, status: 'idle' }) : { data: null, status: 'idle' };
+
     // v1.2.1 - Economie integration
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
@@ -75,9 +81,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
         try {
             await materialUsageAPI.delete(usageId);
             setMaterialUsages(prev => prev.filter(m => m.id !== usageId));
-            // Refresh report data for updated totals
-            const rep = await analyticsAPI.getSiteReport(site.id);
-            setReport(rep.data);
+            // Trigger refresh via context to update totals
+            getSiteReport(site.id, true);
         } catch (error) {
             console.error('Error deleting material usage:', error);
         }
@@ -88,9 +93,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             await materialUsageAPI.update(usageId, updatedData);
             const materialsData = await materialUsageAPI.getBySite(site.id);
             setMaterialUsages(materialsData.data || []);
-            // Refresh report data for updated totals
-            const rep = await analyticsAPI.getSiteReport(site.id);
-            setReport(rep.data);
+            // Trigger refresh via context to update totals
+            getSiteReport(site.id, true);
             setEditingMaterial(null);
         } catch (error) {
             console.error('Error updating material usage:', error);
@@ -101,64 +105,74 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
         let isMounted = true;
 
         const loadDetails = async () => {
-            try {
-                setLoading(true);
-                // Reset state to avoid ghosting
-                setReport(null);
-                setEmployeeHours([]);
-                setNotes([]);
-                setEconomie([]);
-                setMaterialUsages([]);
+            if (!siteId) return;
 
-                // Use individual try/catch for each request to avoid crashing the whole view
-                const safeFetch = async (promise, fallback = { data: [] }) => {
-                    try { return await promise; }
+            console.log(`[SiteManagement] Loading details for site ${siteId}...`);
+            getSiteReport(siteId);
+
+            try {
+                // Only show full spinner if we have NO data at all
+                if (!reportState.data && reportState.status !== 'ready') {
+                    setLoading(true);
+                }
+
+                // Helper for side-data with logging
+                const safeFetch = async (name, promise, fallback = { data: [] }) => {
+                    try {
+                        console.log(`[SiteManagement] Fetching ${name}...`);
+                        const res = await promise;
+                        console.log(`[SiteManagement] ${name} loaded.`);
+                        return res;
+                    }
                     catch (e) {
-                        console.error('Safe fetch failed:', e);
+                        console.error(`[SiteManagement] ${name} failed:`, e);
                         return fallback;
                     }
                 };
 
-                const [rep, hours, notesData, economieData, materialsData] = await Promise.all([
-                    safeFetch(analyticsAPI.getSiteReport(site.id), { data: null }),
-                    safeFetch(analyticsAPI.getHoursPerEmployee({ siteId: site.id })),
-                    safeFetch(noteAPI.getAll({ siteId: site.id })),
-                    safeFetch(economiaAPI.getBySite(site.id)),
-                    safeFetch(materialUsageAPI.getBySite(site.id))
+                const [hours, notesData, economieData, materialsData] = await Promise.all([
+                    safeFetch('hours', analyticsAPI.getHoursPerEmployee({ siteId: site.id })),
+                    safeFetch('notes', noteAPI.getAll({ siteId: site.id })),
+                    safeFetch('economie', economiaAPI.getBySite(site.id)),
+                    safeFetch('materials', materialUsageAPI.getBySite(site.id))
                 ]);
 
                 if (isMounted) {
-                    setReport(rep.data);
+                    console.log('[SiteManagement] All data fetched. Updating state.');
                     setEmployeeHours(hours.data);
                     setNotes(notesData.data || []);
                     setEconomie(economieData.data || []);
                     setMaterialUsages(materialsData.data || []);
                 }
             } catch (err) {
-                console.error("Error in loadDetails:", err);
+                console.error("[SiteManagement] Critical error loading details:", err);
             } finally {
-                if (isMounted) setLoading(false);
+                if (isMounted) {
+                    console.log('[SiteManagement] Loading complete.');
+                    setLoading(false);
+                }
             }
         };
 
         if (site?.id) {
             loadDetails();
+        } else {
+            console.error('[SiteManagement] No siteId found, cancelling load.');
+            setLoading(false);
         }
 
-        // Auto-refresh every 2 minutes
-        const interval = setInterval(() => {
-            if (site?.id) {
-                analyticsAPI.getSiteReport(site.id)
-                    .then(rep => { if (isMounted) setReport(rep.data); })
-                    .catch(err => console.error("Auto-refresh error:", err));
-            }
-        }, 120000);
+        // Auto-refresh handled by Context for main report.
+        // For side data, we could add polling here if needed, but Context polling is safer.
 
-        return () => {
-            isMounted = false;
-            clearInterval(interval);
-        };
-    }, [site?.id]);
+        return () => { isMounted = false; };
+    }, [siteId, getSiteReport]);
+
+    // Sync Context Report to Local State
+    useEffect(() => {
+        if (reportState.data) {
+            setReport(reportState.data);
+        }
+    }, [reportState.data]);
 
     if (loading) {
         return (
