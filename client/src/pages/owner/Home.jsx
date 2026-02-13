@@ -486,7 +486,7 @@ export default function Home() {
                                         <span>Ricavo Totale</span>
                                     </div>
                                     <span className="text-xl font-black text-slate-900">
-                                        {(dashboard?.companyMargin?.totalContractValue || 0).toLocaleString('it-IT')}€
+                                        {(dashData?.companyMargin?.totalContractValue || 0).toLocaleString('it-IT')}€
                                     </span>
                                 </div>
                             </div>
@@ -508,7 +508,7 @@ export default function Home() {
                                         <span>Costo Totale</span>
                                     </div>
                                     <span className="text-xl font-black text-slate-900">
-                                        {(dashboard?.companyCosts?.labor || 0).toLocaleString('it-IT')}€
+                                        {(dashData?.companyCosts?.total || 0).toLocaleString('it-IT')}€
                                     </span>
                                 </div>
                             </div>

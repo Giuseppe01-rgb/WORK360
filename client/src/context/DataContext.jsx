@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { analyticsAPI, siteAPI } from '../utils/api';
 import { useAuth } from './AuthContext';
 
@@ -88,6 +88,9 @@ export const DataProvider = ({ children }) => {
         }
     }, [dashboard.updatedAt, dashboard.status]); // Depend on status to allow retries? Actually simpler to just allow calls.
 
+    // Track in-flight requests to prevent duplicates
+    const fetchingSites = useRef(new Set());
+
     const getSiteReport = useCallback(async (siteId, force = false) => {
         const id = Number(siteId);
         if (!id || isNaN(id)) {
@@ -95,17 +98,19 @@ export const DataProvider = ({ children }) => {
             return;
         }
 
+        // Prevent duplicate fetches for the same ID
+        if (fetchingSites.current.has(id)) {
+            console.log(`[DataContext] Request for site ${id} already in progress. Skipping.`);
+            return;
+        }
+
+        fetchingSites.current.add(id);
+
         setSiteReports(prev => {
             const current = prev[id] || { data: null, status: 'idle' };
-            // If already loading/refreshing, don't trigger again
-            if (current.status === 'loading' || current.status === 'refreshing') return prev;
-
+            // Optimistic update: unique request guaranteed by ref
             const nextStatus = current.data ? 'refreshing' : 'loading';
-
-            return {
-                ...prev,
-                [id]: { ...current, status: nextStatus }
-            };
+            return { ...prev, [id]: { ...current, status: nextStatus } };
         });
 
         try {
@@ -131,6 +136,8 @@ export const DataProvider = ({ children }) => {
                     error: error.message
                 }
             }));
+        } finally {
+            fetchingSites.current.delete(id);
         }
     }, []);
 
