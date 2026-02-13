@@ -14,21 +14,23 @@ import { exportSiteReport } from '../../utils/excelExport';
 const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     // Use global context for site report
     const { getSiteReport, siteReports } = useData();
-    // Normalize siteId to string to match DataContext
-    const siteId = site?.id ? String(site.id) : null;
+
+    // Robust ID extraction (Client-Side Fix)
+    const rawId = site?.id || site?._id || site?.siteId;
+    const siteId = rawId ? String(rawId) : null;
+
     const reportState = siteId ? (siteReports[siteId] || { data: null, status: 'idle' }) : { data: null, status: 'idle' };
 
     useEffect(() => {
         if (siteId) {
-            console.log(`[SiteDetails] Site ID: ${siteId} (type: ${typeof siteId})`);
-            console.log(`[SiteDetails] Report Status: ${reportState.status}`);
+            console.log(`[SiteDetails] Site ID resolved: ${siteId}`);
             if (reportState.data) {
-                console.log(`[SiteDetails] Report Data found. TotalCost: ${reportState.data.siteCost?.total}`);
-            } else {
-                console.log(`[SiteDetails] No report data yet.`);
+                console.log(`[SiteDetails] Data present.`);
             }
+        } else {
+            console.error(`[SiteDetails] ID MISSING! Site object dump:`, site);
         }
-    }, [siteId, reportState]);
+    }, [siteId, reportState, site]);
 
     // v1.2.1 - Economie integration
     const [report, setReport] = useState(null);
@@ -204,7 +206,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             }
         };
 
-        if (site?.id) {
+        if (siteId) {
             loadDetails();
         } else {
             console.error('[SiteManagement] No siteId found, cancelling load.');
@@ -272,31 +274,48 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                 </div>
             </div>
 
-            {/* DEBUG PROBE UI - Remove after fixing */}
-            {report?.debug && (
-                <div className="bg-red-50 border-2 border-red-200 p-4 rounded-xl mb-6 font-mono text-xs overflow-x-auto">
-                    <p className="font-bold text-red-700 mb-2">🕵️‍♂️ SONDA DIAGNOSTICA (Dati Grezzi Server)</p>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <p><strong>ID Ricevuto:</strong> {report.debug.receivedSiteId} ({report.debug.receivedSiteIdType})</p>
-                            <p><strong>Presenze Totali (DB):</strong> {report.debug.attendanceCountRaw}</p>
-                            <p><strong>Presenze Chiuse (DB):</strong> {report.debug.attendanceWithClockOutCount}</p>
-                        </div>
-                        <div>
-                            <p><strong>Materiali (DB):</strong> {report.debug.materialUsageCountRaw}</p>
-                            <p><strong>Contratto DB:</strong> {report.debug.siteDbContractValue}</p>
-                            <p><strong>Company ID:</strong> {report.debug.siteDbCompanyId}</p>
-                        </div>
-                    </div>
-                    {report.debug.firstAttendance ? (
-                        <div className="mt-2 pt-2 border-t border-red-200">
-                            <p><strong>Esempio Presenza:</strong> ID: {report.debug.firstAttendance.id} | User: {report.debug.firstAttendance.userId} | Date: {report.debug.firstAttendance.date}</p>
-                        </div>
-                    ) : (
-                        <p className="mt-2 text-red-600 font-bold">⚠️ NESSUNA PRESENZA TROVATA NEL DB PER QUESTO SITO!</p>
-                    )}
+            {/* DEBUG PROBE UI - ALWAYS VISIBLE FOR DIAGNOSIS */}
+            <div className="bg-red-50 border-2 border-red-200 p-4 rounded-xl mb-6 font-mono text-xs overflow-x-auto">
+                <div className="flex justify-between items-start mb-2">
+                    <p className="font-bold text-red-700">🕵️‍♂️ DIAGNOSTICA COMPLETA (Client & Server)</p>
+                    <button
+                        onClick={() => siteId && getSiteReport(siteId, true)}
+                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 font-bold"
+                    >
+                        FORZA AGGIORNAMENTO ↻
+                    </button>
                 </div>
-            )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* CLIENT SIDE DEBUG */}
+                    <div className="border p-2 rounded bg-white/50">
+                        <p className="font-bold text-red-800 border-b border-red-200 mb-1">DATA FROM PROPS (Frontend)</p>
+                        <p><strong>Resolved ID:</strong> {siteId || 'UNDEFINED'}</p>
+                        <p><strong>Raw ID:</strong> {String(rawId)}</p>
+                        <details>
+                            <summary className="cursor-pointer font-bold text-blue-600">Vedi Oggetto 'site' completo</summary>
+                            <pre className="mt-1 bg-white p-1 border rounded max-h-40 overflow-y-auto">
+                                {JSON.stringify(site, null, 2)}
+                            </pre>
+                        </details>
+                    </div>
+
+                    {/* SERVER SIDE DEBUG */}
+                    <div className="border p-2 rounded bg-white/50">
+                        <p className="font-bold text-red-800 border-b border-red-200 mb-1">DATA FROM SERVER</p>
+                        {report?.debug ? (
+                            <>
+                                <p><strong>ID Ricevuto:</strong> {report.debug.receivedSiteId}</p>
+                                <p><strong>Presenze DB:</strong> {report.debug.attendanceCountRaw}</p>
+                                <p><strong>Materiali DB:</strong> {report.debug.materialUsageCountRaw}</p>
+                                <p><strong>Errore:</strong> {report?.error || 'Nessuno'}</p>
+                            </>
+                        ) : (
+                            <p className="text-gray-500 italic">Nessun dato dal server (o caricamento in corso...)</p>
+                        )}
+                    </div>
+                </div>
+            </div>
 
             {/* Desktop Tabs */}
             <div className="hidden md:flex border-b border-slate-200 mb-6">
