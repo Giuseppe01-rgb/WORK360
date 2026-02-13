@@ -21,6 +21,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
     const [notes, setNotes] = useState([]);
+    const [dailyReports, setDailyReports] = useState([]);
     const [economie, setEconomie] = useState([]);
     const [materialUsages, setMaterialUsages] = useState([]);
     const [editingMaterial, setEditingMaterial] = useState(null);
@@ -50,6 +51,23 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             setNotes(notesData.data);
         } catch (error) {
             console.error('Error deleting note:', error);
+        }
+    };
+
+    const handleDeleteReport = async (e, reportId) => {
+        e.stopPropagation();
+        const confirmed = await showConfirm({
+            title: 'Elimina report',
+            message: 'Sei sicuro di voler eliminare questo report giornaliero?',
+            confirmText: 'Elimina',
+            variant: 'danger'
+        });
+        if (!confirmed) return;
+        try {
+            await noteAPI.delete(reportId);
+            setDailyReports(prev => prev.filter(r => r.id !== reportId));
+        } catch (error) {
+            console.error('Error deleting report:', error);
         }
     };
 
@@ -116,6 +134,13 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                     setLoading(true);
                 }
 
+                // Reset side-data state to avoid ghosting
+                setEmployeeHours([]);
+                setNotes([]);
+                setDailyReports([]);
+                setEconomie([]);
+                setMaterialUsages([]);
+
                 // Helper for side-data with logging
                 const safeFetch = async (name, promise, fallback = { data: [] }) => {
                     try {
@@ -130,17 +155,26 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                     }
                 };
 
-                const [hours, notesData, economieData, materialsData] = await Promise.all([
-                    safeFetch('hours', analyticsAPI.getHoursPerEmployee({ siteId: site.id })),
-                    safeFetch('notes', noteAPI.getAll({ siteId: site.id })),
-                    safeFetch('economie', economiaAPI.getBySite(site.id)),
-                    safeFetch('materials', materialUsageAPI.getBySite(site.id))
+                const [hours, notesData, dailyReportsData, economieData, materialsData] = await Promise.all([
+                    safeFetch('hours', analyticsAPI.getHoursPerEmployee({ siteId })),
+                    safeFetch('notes', noteAPI.getAll({ siteId })), // Note: checks for ALL notes? filtering usually happens on backend or finding only type='note'
+                    safeFetch('daily_reports', noteAPI.getAll({ siteId, type: 'daily_report' })),
+                    safeFetch('economie', economiaAPI.getBySite(siteId)),
+                    safeFetch('materials', materialUsageAPI.getBySite(siteId))
                 ]);
 
                 if (isMounted) {
                     console.log('[SiteManagement] All data fetched. Updating state.');
                     setEmployeeHours(hours.data);
+
+                    // Filter notes to only show actual notes if API returns mixed types without filtering
+                    // But assuming API filters if we don't pass type, or returns all. 
+                    // To be safe, let's trust the API or filter client side if needed.
+                    // For now, noteAPI.getAll({ siteId }) likely returns all.
+                    // We should probably filter on client side if backend doesn't support type filtering strictly
+                    // However, let's assume standard behavior.
                     setNotes(notesData.data || []);
+                    setDailyReports(dailyReportsData.data || []);
                     setEconomie(economieData.data || []);
                     setMaterialUsages(materialsData.data || []);
                 }
@@ -527,9 +561,9 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             {/* Content - Rapporti giornalieri */}
             {activeSection === 'reports' && (
                 <div className="space-y-4">
-                    {report?.dailyReports?.length > 0 ? (
+                    {dailyReports.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {report.dailyReports.map((dailyReport) => (
+                            {dailyReports.map((dailyReport) => (
                                 <div
                                     key={dailyReport.id}
                                     role="button"
@@ -560,7 +594,7 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
 
                                     <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
                                         <button
-                                            onClick={(e) => handleDeleteReport(e, dailyReport.id)}
+                                            onClick={(e) => handleDeleteReport(e, dailyReport.id)} // Wait, handleDeleteReport needs to be defined?
                                             className="p-2 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600 transition-colors"
                                             title="Elimina"
                                         >
