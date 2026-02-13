@@ -191,23 +191,35 @@ const getSiteReport = async (req, res, next) => {
 
         // Calculate labor cost using individual hourly rates (completed attendances)
         // Uses attendance.hourly_cost if available (new records), falls back to user.hourly_cost (old records)
-        const laborCostResult = await sequelize.query(`
-            SELECT 
-                SUM(a.total_hours * COALESCE(NULLIF(a.hourly_cost, 0), NULLIF(u.hourly_cost, 0), 25)) as total_labor_cost
-            FROM attendances a
-            JOIN users u ON a.user_id = u.id
-            WHERE a.site_id = :siteId
-              AND a.clock_out IS NOT NULL
-        `, {
-            replacements: { siteId },
-            type: sequelize.QueryTypes.SELECT
+        // Calculate labor cost using Sequelize to match getDashboard logic (proven to work)
+        const siteAttendances = await Attendance.findAll({
+            where: {
+                siteId,
+                clockOut: { [Op.ne]: null }
+            },
+            include: [{
+                model: User,
+                as: 'user',
+                attributes: ['hourlyCost']
+            }]
         });
 
-        const completedLaborCost = Number.parseFloat(laborCostResult[0]?.total_labor_cost || 0);
-        const laborCost = completedLaborCost + liveLaborCost;
+        // Sum labor cost in JS
+        let completedLaborCost = 0;
+        let completedHours = 0;
 
-        // Calculate total hours (completed + live)
-        const completedHours = Number.parseFloat(completedAttendance[0]?.totalHours || 0);
+        siteAttendances.forEach(a => {
+            const hours = Number.parseFloat(a.totalHours) || 0;
+            // Logic: 1. Attendance specific cost (if > 0) -> 2. User current cost (if > 0) -> 3. Fallback 25
+            const attCost = Number.parseFloat(a.hourlyCost) || 0;
+            const userCost = Number.parseFloat(a.user?.hourlyCost) || 0;
+            const effectiveCost = attCost > 0 ? attCost : (userCost > 0 ? userCost : 25);
+
+            completedLaborCost += hours * effectiveCost;
+            completedHours += hours;
+        });
+
+        const laborCost = completedLaborCost + liveLaborCost;
         const totalHours = completedHours + liveHours;
 
         // Calculate materials cost from material_usages
