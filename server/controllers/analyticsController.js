@@ -193,7 +193,7 @@ const getSiteReport = async (req, res, next) => {
         // Uses attendance.hourly_cost if available (new records), falls back to user.hourly_cost (old records)
         const laborCostResult = await sequelize.query(`
             SELECT 
-                SUM(a.total_hours * COALESCE(a.hourly_cost, u.hourly_cost, 0)) as total_labor_cost
+                SUM(a.total_hours * COALESCE(NULLIF(a.hourly_cost, 0), u.hourly_cost, 0)) as total_labor_cost
             FROM attendances a
             JOIN users u ON a.user_id = u.id
             WHERE a.site_id = :siteId
@@ -247,6 +247,7 @@ const getSiteReport = async (req, res, next) => {
             order: [['date', 'DESC']],
             limit: 50
         });
+        console.log(`[Analytics] Daily Reports found: ${dailyReports.length}`);
 
         // Get employee hours breakdown for this site (completed attendances only)
         const employeeHoursData = await sequelize.query(`
