@@ -101,6 +101,7 @@ const getSiteReport = async (req, res, next) => {
     try {
         const { siteId } = req.params;
         const companyId = getCompanyId(req);
+        console.log(`[Analytics] getSiteReport called for siteId: ${siteId}, companyId: ${companyId}`);
 
         // Validate siteId
         if (!siteId || siteId === 'undefined' || siteId === 'null') {
@@ -133,6 +134,7 @@ const getSiteReport = async (req, res, next) => {
             replacements: { siteId },
             type: sequelize.QueryTypes.SELECT
         });
+        console.log(`[Analytics] Materials found: ${materials.length}`);
 
         // Get equipment summary
         const equipment = await Equipment.findAll({
@@ -145,6 +147,7 @@ const getSiteReport = async (req, res, next) => {
             group: ['name'],
             raw: true
         });
+        console.log(`[Analytics] Equipment found: ${equipment.length}`);
 
         // Get attendance summary (completed attendances)
         const completedAttendance = await Attendance.findAll({
@@ -158,6 +161,7 @@ const getSiteReport = async (req, res, next) => {
             ],
             raw: true
         });
+        console.log(`[Analytics] Completed attendance:`, completedAttendance[0]);
 
         // Get in-progress attendances (no clockOut) and calculate live hours
         const inProgressAttendances = await Attendance.findAll({
@@ -188,6 +192,7 @@ const getSiteReport = async (req, res, next) => {
                 liveLaborCost += hours * hourlyCost;
             }
         });
+        console.log(`[Analytics] Calculated liveLaborCost: ${liveLaborCost}`);
 
         // Calculate labor cost using individual hourly rates (completed attendances)
         // Uses attendance.hourly_cost if available (new records), falls back to user.hourly_cost (old records)
@@ -202,6 +207,7 @@ const getSiteReport = async (req, res, next) => {
             replacements: { siteId },
             type: sequelize.QueryTypes.SELECT
         });
+        console.log(`[Analytics] Raw labor cost result:`, laborCostResult);
 
         const completedLaborCost = Number.parseFloat(laborCostResult[0]?.total_labor_cost || 0);
         const laborCost = completedLaborCost + liveLaborCost;
@@ -223,9 +229,11 @@ const getSiteReport = async (req, res, next) => {
             replacements: { siteId },
             type: sequelize.QueryTypes.SELECT
         });
+        console.log(`[Analytics] Materials cost result:`, materialUsages);
 
         const materialsCost = Number.parseFloat(materialUsages[0]?.total_cost || 0);
         const totalCost = laborCost + materialsCost;
+        console.log(`[Analytics] TOTAL COST: ${totalCost} (Labor: ${laborCost}, Materials: ${materialsCost})`);
 
         // Calculate percentages (avoid division by zero)
         const materialsIncidencePercent = totalCost > 0 ? (materialsCost / totalCost) * 100 : 0;
@@ -247,6 +255,7 @@ const getSiteReport = async (req, res, next) => {
             order: [['date', 'DESC']],
             limit: 50
         });
+        console.log(`[Analytics] Daily reports found: ${dailyReports.length}`);
 
         // Get employee hours breakdown for this site (completed attendances only)
         const employeeHoursData = await sequelize.query(`
