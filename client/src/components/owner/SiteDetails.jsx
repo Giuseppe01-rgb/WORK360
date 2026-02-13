@@ -233,38 +233,55 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     };
 
     useEffect(() => {
+        let isMounted = true;
+
         const loadDetails = async () => {
             try {
-                setLoading(true); // Reset loading state
-                // Clear previous data to avoid ghosting
+                setLoading(true);
+                // Reset state to avoid ghosting
                 setReport(null);
                 setEmployeeHours([]);
                 setNotes([]);
                 setPhotos([]);
                 setEconomie([]);
 
+                // Safe fetch helper
+                const safeFetch = async (promise, fallback = { data: [] }) => {
+                    try { return await promise; }
+                    catch (e) {
+                        console.error('Safe fetch failed:', e);
+                        return fallback;
+                    }
+                };
+
                 const [rep, hours, notesData, reportsData, photosData, economieData] = await Promise.all([
-                    analyticsAPI.getSiteReport(site.id),
-                    analyticsAPI.getHoursPerEmployee({ siteId: site.id }),
-                    noteAPI.getAll({ siteId: site.id, type: 'note' }),
-                    noteAPI.getAll({ siteId: site.id, type: 'daily_report' }),
-                    photoAPI.getAll({ siteId: site.id }),
-                    economiaAPI.getBySite(site.id)
+                    safeFetch(analyticsAPI.getSiteReport(site.id), { data: null }),
+                    safeFetch(analyticsAPI.getHoursPerEmployee({ siteId: site.id })),
+                    safeFetch(noteAPI.getAll({ siteId: site.id, type: 'note' })),
+                    safeFetch(noteAPI.getAll({ siteId: site.id, type: 'daily_report' }), { data: [] }),
+                    safeFetch(photoAPI.getAll({ siteId: site.id })),
+                    safeFetch(economiaAPI.getBySite(site.id))
                 ]);
-                setReport(rep.data);
-                setEmployeeHours(hours.data);
-                setNotes(notesData.data || []);
-                setPhotos(photosData.data || []);
-                setEconomie(economieData.data || []);
+
+                if (isMounted) {
+                    setReport(rep.data);
+                    setEmployeeHours(hours.data);
+                    setNotes(notesData.data || []);
+                    setPhotos(photosData.data || []);
+                    setEconomie(economieData.data || []);
+                }
             } catch (err) {
                 console.error("Error loading site details:", err);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
+
         if (site?.id) {
             loadDetails();
         }
+
+        return () => { isMounted = false; };
     }, [site?.id]);
 
     if (loading) {

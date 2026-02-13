@@ -116,17 +116,18 @@ const getSiteReport = async (req, res, next) => {
         // Get materials summary from material_usages (linked to material_masters)
         const materials = await sequelize.query(`
             SELECT 
-                mm.id,
-                mm.display_name as name,
-                mm.unit,
-                mm.price as "unitPrice",
+                COALESCE(mm.id, cm.id) as id,
+                COALESCE(mm.display_name, cm.nome_prodotto, 'Materiale sconosciuto') as name,
+                COALESCE(mm.unit, cm.quantita, 'pz') as unit,
+                COALESCE(mm.price, cm.prezzo, 0) as "unitPrice",
                 SUM(mu.numero_confezioni) as "totalQuantity",
-                SUM(mu.numero_confezioni * COALESCE(mm.price, 0)) as "totalCost"
+                SUM(mu.numero_confezioni * COALESCE(mm.price, cm.prezzo, 0)) as "totalCost"
             FROM material_usages mu
             LEFT JOIN material_masters mm ON mu.material_id = mm.id
+            LEFT JOIN coloura_materials cm ON mu.material_id = cm.id
             WHERE mu.site_id = :siteId
               AND mu.stato = 'catalogato'
-            GROUP BY mm.id, mm.display_name, mm.unit, mm.price
+            GROUP BY COALESCE(mm.id, cm.id), COALESCE(mm.display_name, cm.nome_prodotto), COALESCE(mm.unit, cm.quantita), COALESCE(mm.price, cm.prezzo)
             ORDER BY "totalCost" DESC
         `, {
             replacements: { siteId },
@@ -212,9 +213,10 @@ const getSiteReport = async (req, res, next) => {
         // Calculate materials cost from material_usages
         const materialUsages = await sequelize.query(`
             SELECT 
-                SUM(mu.numero_confezioni * COALESCE(mm.price, 0)) as total_cost
+                SUM(mu.numero_confezioni * COALESCE(mm.price, cm.prezzo, 0)) as total_cost
             FROM material_usages mu
             LEFT JOIN material_masters mm ON mu.material_id = mm.id
+            LEFT JOIN coloura_materials cm ON mu.material_id = cm.id
             WHERE mu.site_id = :siteId
               AND mu.stato = 'catalogato'
         `, {
@@ -500,10 +502,11 @@ const getDashboard = async (req, res) => {
         // Get materials cost from material_usages (linked to material_masters)
         const materialsCostResult = await sequelize.query(`
             SELECT 
-                SUM(mu.numero_confezioni * COALESCE(mm.price, 0)) as total_cost
+                SUM(mu.numero_confezioni * COALESCE(mm.price, cm.prezzo, 0)) as total_cost
             FROM material_usages mu
-            JOIN material_masters mm ON mu.material_id = mm.id
-            WHERE mm.company_id = :companyId
+            LEFT JOIN material_masters mm ON mu.material_id = mm.id
+            LEFT JOIN coloura_materials cm ON mu.material_id = cm.id
+            WHERE (mm.company_id = :companyId OR cm.company_id = :companyId)
               AND mu.stato = 'catalogato'
         `, {
             replacements: { companyId },

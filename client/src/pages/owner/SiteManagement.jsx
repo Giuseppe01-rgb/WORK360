@@ -98,37 +98,67 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     };
 
     useEffect(() => {
+        let isMounted = true;
+
         const loadDetails = async () => {
             try {
+                setLoading(true);
+                // Reset state to avoid ghosting
+                setReport(null);
+                setEmployeeHours([]);
+                setNotes([]);
+                setEconomie([]);
+                setMaterialUsages([]);
+
+                // Use individual try/catch for each request to avoid crashing the whole view
+                const safeFetch = async (promise, fallback = { data: [] }) => {
+                    try { return await promise; }
+                    catch (e) {
+                        console.error('Safe fetch failed:', e);
+                        return fallback;
+                    }
+                };
+
                 const [rep, hours, notesData, economieData, materialsData] = await Promise.all([
-                    analyticsAPI.getSiteReport(site.id),
-                    analyticsAPI.getHoursPerEmployee({ siteId: site.id }),
-                    noteAPI.getAll({ siteId: site.id }),
-                    economiaAPI.getBySite(site.id),
-                    materialUsageAPI.getBySite(site.id)
+                    safeFetch(analyticsAPI.getSiteReport(site.id), { data: null }),
+                    safeFetch(analyticsAPI.getHoursPerEmployee({ siteId: site.id })),
+                    safeFetch(noteAPI.getAll({ siteId: site.id })),
+                    safeFetch(economiaAPI.getBySite(site.id)),
+                    safeFetch(materialUsageAPI.getBySite(site.id))
                 ]);
-                setReport(rep.data);
-                setEmployeeHours(hours.data);
-                setNotes(notesData.data);
-                setEconomie(economieData.data);
-                setMaterialUsages(materialsData.data || []);
+
+                if (isMounted) {
+                    setReport(rep.data);
+                    setEmployeeHours(hours.data);
+                    setNotes(notesData.data || []);
+                    setEconomie(economieData.data || []);
+                    setMaterialUsages(materialsData.data || []);
+                }
             } catch (err) {
-                console.error("Error loading site details:", err);
+                console.error("Error in loadDetails:", err);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
-        loadDetails();
 
-        // Auto-refresh every 2 minutes for live data updates
+        if (site?.id) {
+            loadDetails();
+        }
+
+        // Auto-refresh every 2 minutes
         const interval = setInterval(() => {
-            analyticsAPI.getSiteReport(site.id).then(rep => {
-                setReport(rep.data);
-            }).catch(err => console.error("Auto-refresh error:", err));
-        }, 120000); // 2 minutes
+            if (site?.id) {
+                analyticsAPI.getSiteReport(site.id)
+                    .then(rep => { if (isMounted) setReport(rep.data); })
+                    .catch(err => console.error("Auto-refresh error:", err));
+            }
+        }, 120000);
 
-        return () => clearInterval(interval);
-    }, [site]);
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, [site?.id]);
 
     if (loading) {
         return (
