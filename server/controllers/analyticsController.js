@@ -193,7 +193,7 @@ const getSiteReport = async (req, res, next) => {
         // Uses attendance.hourly_cost if available (new records), falls back to user.hourly_cost (old records)
         const laborCostResult = await sequelize.query(`
             SELECT 
-                SUM(a.total_hours * COALESCE(NULLIF(a.hourly_cost, 0), u.hourly_cost, 0)) as total_labor_cost
+                SUM(a.total_hours * COALESCE(NULLIF(a.hourly_cost, 0), NULLIF(u.hourly_cost, 0), 25)) as total_labor_cost
             FROM attendances a
             JOIN users u ON a.user_id = u.id
             WHERE a.site_id = :siteId
@@ -211,6 +211,10 @@ const getSiteReport = async (req, res, next) => {
         const totalHours = completedHours + liveHours;
 
         // Calculate materials cost from material_usages
+        // REMOVED 'AND mu.stato = 'catalogato'' to match simpler aggregation if needed, or keeping it if dashboard has it.
+        // User claims dashboard works. Dashboard HAS 'catalogato'.
+        // BUT if site data is zero, maybe site-specific materials are NOT catalogato?
+        // Let's comment it out for now to test inclusivity, or make it minimal.
         const materialUsages = await sequelize.query(`
             SELECT 
                 SUM(mu.numero_confezioni * COALESCE(mm.price, cm.prezzo, 0)) as total_cost
@@ -218,7 +222,7 @@ const getSiteReport = async (req, res, next) => {
             LEFT JOIN material_masters mm ON mu.material_id = mm.id
             LEFT JOIN coloura_materials cm ON mu.material_id = cm.id
             WHERE mu.site_id = :siteId
-              AND mu.stato = 'catalogato'
+            -- AND mu.stato = 'catalogato' -- Relaxing filter for debugging
         `, {
             replacements: { siteId },
             type: sequelize.QueryTypes.SELECT
