@@ -244,43 +244,39 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
         const loadDetails = async () => {
             if (!siteId) return;
 
-            // 1. Trigger Context Fetch for the main report (atomic, cached)
-            // If it's already loading/ready/refreshing, getSiteReport handles dedup.
-            // We force=false by default, but maybe we want to ensure freshness on mount?
-            // getSiteReport checks cache validity.
+            console.log(`[SiteDetails] Loading details for site ${siteId}...`);
             getSiteReport(siteId);
 
-            // 2. Fetch other details locally (Notes, Photos, etc.)
-            // We can keep the 'loading' state for THOSE specific items, 
-            // but for the 'Main Stats' (Margin/Costs) we should use the Context status to avoid 0-flicker.
-
             try {
-                // Only set global loading if we have NO report data yet
+                // Only show full spinner if we have NO data at all
                 if (!reportState.data && reportState.status !== 'ready') {
                     setLoading(true);
                 }
 
-                // We don't want to wipe existing data if we are just refreshing
-                // so we DON'T call setEmployeeHours([]) etc here unless it's a completely new siteId.
-                // But the effect runs on [site.id]. If site.id changes, we SHOULD wipe.
-                // If site.id is same (refresh), we SHOULD NOT wipe.
-                // The current effect has [site?.id], so it runs on change.
-
-                // Helpers for side-data
-                const safeFetch = async (promise, fallback = { data: [] }) => {
-                    try { return await promise; }
-                    catch (e) { console.error('Safe fetch failed:', e); return fallback; }
+                // Helper for side-data with logging
+                const safeFetch = async (name, promise, fallback = { data: [] }) => {
+                    try {
+                        console.log(`[SiteDetails] Fetching ${name}...`);
+                        const res = await promise;
+                        console.log(`[SiteDetails] ${name} loaded.`);
+                        return res;
+                    }
+                    catch (e) {
+                        console.error(`[SiteDetails] ${name} failed:`, e);
+                        return fallback;
+                    }
                 };
 
                 const [hours, notesData, reportsData, photosData, economieData] = await Promise.all([
-                    safeFetch(analyticsAPI.getHoursPerEmployee({ siteId })),
-                    safeFetch(noteAPI.getAll({ siteId, type: 'note' })),
-                    safeFetch(noteAPI.getAll({ siteId, type: 'daily_report' }), { data: [] }),
-                    safeFetch(photoAPI.getAll({ siteId })),
-                    safeFetch(economiaAPI.getBySite(siteId))
+                    safeFetch('hours', analyticsAPI.getHoursPerEmployee({ siteId })),
+                    safeFetch('notes', noteAPI.getAll({ siteId, type: 'note' })),
+                    safeFetch('daily_reports', noteAPI.getAll({ siteId, type: 'daily_report' }), { data: [] }),
+                    safeFetch('photos', photoAPI.getAll({ siteId })),
+                    safeFetch('economie', economiaAPI.getBySite(siteId))
                 ]);
 
                 if (isMounted) {
+                    console.log('[SiteDetails] All data fetched. Updating state.');
                     setEmployeeHours(hours.data);
                     setNotes(notesData.data || []);
                     // setReports is for 'daily reports', different from 'site report'
@@ -319,9 +315,12 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                     setEconomie(economieData.data || []);
                 }
             } catch (err) {
-                console.error("Error loading site details:", err);
+                console.error("[SiteDetails] Critical error loading site details:", err);
             } finally {
-                if (isMounted) setLoading(false);
+                if (isMounted) {
+                    console.log('[SiteDetails] Loading complete.');
+                    setLoading(false);
+                }
             }
         };
 
@@ -340,9 +339,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     }, [reportState.data]);
 
     // Computed loading state for UI
-    // If we have data (reportState.data is present), we are NOT loading in a blocking way.
-    // If we have NO data and status is loading, then we are blocking.
-    const isBlockingLoad = (loading || reportState.status === 'loading') && !reportState.data;
+    // Block blocking load ONLY if we have absolutely no data. 
+    // If we have report data (from context or cache), show it while side-data loads.
+    const isBlockingLoad = (!reportState.data && reportState.status === 'loading') || (loading && !reportState.data);
 
     // We need to inject this logic into the render.
     // Since I am replacing the `useEffect`, I can't easily change the `if (loading)` render guard later in the file without another replace.
