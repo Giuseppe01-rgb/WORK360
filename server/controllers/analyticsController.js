@@ -268,18 +268,19 @@ const getSiteReport = async (req, res, next) => {
         });
 
         // Get active attendances separately with their clockIn times
-        const activeAttendancesPerEmployee = await Attendance.findAll({
+        const activeAttendances = await Attendance.findAll({
             where: {
-                siteId,
-                clockOut: null
+                'siteId': siteId,
+                'clockOut': null
             },
-            attributes: ['userId', 'clockIn', 'createdAt'],
+            include: [{ model: User, as: 'user', attributes: ['id', 'hourlyCost'] }],
+            attributes: ['id', 'clockIn', 'createdAt', 'userId'],
             raw: true
         });
 
         // Create a map of userId to their active clockIn times
         const activeClockInsMap = {};
-        activeAttendancesPerEmployee.forEach(att => {
+        activeAttendances.forEach(att => {
             if (!activeClockInsMap[att.userId]) {
                 activeClockInsMap[att.userId] = [];
             }
@@ -464,7 +465,7 @@ const getDashboard = async (req, res) => {
         const monthlyAttendances = await Attendance.findAll({
             where: {
                 clockOut: { [Op.ne]: null },
-                clockIn: { [Op.gte]: startOfMonth }
+                'clockIn.time': { [Op.gte]: startOfMonth }
             },
             include: [{
                 model: User,
@@ -508,6 +509,7 @@ const getDashboard = async (req, res) => {
             replacements: { companyId },
             type: sequelize.QueryTypes.SELECT
         });
+
 
         materialsCost = Number.parseFloat(materialsCostResult[0]?.total_cost || 0);
 

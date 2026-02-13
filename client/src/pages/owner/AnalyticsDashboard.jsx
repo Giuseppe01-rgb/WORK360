@@ -209,7 +209,7 @@ export default function AnalyticsDashboard() {
             )}
 
             {/* Company-Wide Cost Incidence Card */}
-            {analytics?.companyCostIncidence && analytics.companyCostIncidence.materialsIncidencePercent != null ? (
+            {analytics?.companyCostIncidence ? (
                 <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6">
                     <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-3">
@@ -229,7 +229,7 @@ export default function AnalyticsDashboard() {
                         <div className="border-b border-slate-100 pb-4">
                             <p className="text-slate-500 text-sm font-medium mb-1">Materiali</p>
                             <p className="text-2xl font-bold text-purple-600">
-                                {(analytics.companyCostIncidence.materialsIncidencePercent || 0).toFixed(1)}
+                                {(Number.parseFloat(analytics.companyCostIncidence.materialsIncidencePercent) || 0).toFixed(1)}
                                 <span className="text-lg text-purple-400 ml-1">%</span>
                             </p>
                         </div>
@@ -237,7 +237,7 @@ export default function AnalyticsDashboard() {
                         <div>
                             <p className="text-slate-500 text-sm font-medium mb-1">Manodopera</p>
                             <p className="text-2xl font-bold text-blue-600">
-                                {(analytics.companyCostIncidence.laborIncidencePercent || 0).toFixed(1)}
+                                {(Number.parseFloat(analytics.companyCostIncidence.laborIncidencePercent) || 0).toFixed(1)}
                                 <span className="text-lg text-blue-400 ml-1">%</span>
                             </p>
                         </div>
@@ -251,8 +251,8 @@ export default function AnalyticsDashboard() {
                         </div>
                         <h3 className="text-slate-700 font-bold text-sm">Incidenza costi aziendali</h3>
                     </div>
-                    <p className="text-slate-600 text-sm">
-                        Non ci sono ancora dati sufficienti per calcolare l'incidenza dei costi.
+                    <p className="text-slate-600 text-sm text-center py-4 italic">
+                        Dati non disponibili o in caricamento...
                     </p>
                 </div>
             )}
