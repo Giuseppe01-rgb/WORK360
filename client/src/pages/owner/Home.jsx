@@ -59,17 +59,27 @@ const FlipCard = ({ children, backContent, className = '', disabled = false, sho
             tabIndex={0}
             style={{ position: 'relative' }}
         >
-            {/* Front Face */}
-            <div className={`card-face ${isFlipped ? 'card-face-hidden' : 'card-face-visible'}`}>
+            {/* Front Face — always in flow to maintain container height */}
+            <div
+                className="card-face"
+                style={{ opacity: isFlipped ? 0 : 1, visibility: isFlipped ? 'hidden' : 'visible', transition: 'opacity 0.4s ease, visibility 0.4s ease' }}
+            >
                 {children}
             </div>
 
-            {/* Back Face */}
+            {/* Back Face — always absolutely positioned on top */}
             <div
-                className={`card-face ${isFlipped ? 'card-face-visible' : 'card-face-hidden'}`}
-                style={{ position: isFlipped ? 'relative' : 'absolute', inset: 0, zIndex: isFlipped ? 1 : 0 }}
+                className="card-face"
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    zIndex: 2,
+                    opacity: isFlipped ? 1 : 0,
+                    visibility: isFlipped ? 'visible' : 'hidden',
+                    transition: 'opacity 0.4s ease, visibility 0.4s ease'
+                }}
             >
-                <div className="bg-slate-100 rounded-[2.5rem] p-8 h-full flex flex-col justify-start overflow-y-auto border border-slate-200" style={{ minHeight: '280px' }}>
+                <div className="bg-slate-100 rounded-[2.5rem] p-8 h-full flex flex-col justify-start overflow-y-auto border border-slate-200">
                     <p className="text-sm leading-relaxed text-slate-700 hyphens-auto" style={{ textAlign: 'left' }}>
                         {backContent}
                     </p>

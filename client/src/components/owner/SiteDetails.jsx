@@ -387,7 +387,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                         </div>
 
                         {/* INCIDENCE CARD - Apple Health Style */}
-                        {report?.costIncidence?.materialsIncidencePercent !== null ? (
+                        {report?.costIncidence && report.costIncidence.materialsIncidencePercent != null ? (
                             <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 mb-6">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
@@ -401,7 +401,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     <div className="border-b border-slate-100 pb-4">
                                         <p className="text-slate-500 text-sm font-medium mb-1">Materiali</p>
                                         <p className="text-2xl font-bold text-purple-600">
-                                            {report.costIncidence.materialsIncidencePercent.toFixed(1)}
+                                            {(report.costIncidence.materialsIncidencePercent || 0).toFixed(1)}
                                             <span className="text-lg text-purple-400 ml-1">%</span>
                                         </p>
                                     </div>
@@ -409,7 +409,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                                     <div>
                                         <p className="text-slate-500 text-sm font-medium mb-1">Manodopera</p>
                                         <p className="text-2xl font-bold text-blue-600">
-                                            {report.costIncidence.laborIncidencePercent.toFixed(1)}
+                                            {(report.costIncidence.laborIncidencePercent || 0).toFixed(1)}
                                             <span className="text-lg text-blue-400 ml-1">%</span>
                                         </p>
                                     </div>
