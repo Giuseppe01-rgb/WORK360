@@ -17,13 +17,20 @@ import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
 import { analyticsAPI, siteAPI } from '../../utils/api';
 
-// ─── CSS for 3D Flip Cards ───────────────────────────────────────────
+// ─── CSS for card transitions ────────────────────────────────────────
 const FLIP_STYLES = `
-    .perspective-1000 { perspective: 1000px; }
-    .preserve-3d { transform-style: preserve-3d; }
-    .backface-hidden { backface-visibility: hidden; }
-    .rotate-y-180 { transform: rotateY(180deg); }
     .hyphens-auto { hyphens: auto; -webkit-hyphens: auto; }
+    .card-face {
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .card-face-hidden {
+        opacity: 0;
+        visibility: hidden;
+    }
+    .card-face-visible {
+        opacity: 1;
+        visibility: visible;
+    }
 `;
 
 // ─── Status Info (mirrors backend thresholds) ────────────────────────
@@ -37,7 +44,7 @@ const getStatusInfo = (val) => {
 // ─── N.B. Disclaimer for flip card backs ─────────────────────────────
 const FLIP_DISCLAIMER = 'N.B.: Se utilizzi l\'app da poco o sei all\'inizio, probabilmente il feed sarà di alta efficienza, ma non sarà realistico, poiché si basa su pochi dati disponibili. Col tempo l\'app raccoglierà maggiori dati, dando un risultato sempre più vero.';
 
-// ─── FlipCard Component ──────────────────────────────────────────────
+// ─── FlipCard Component (opacity-based, no 3D transforms) ───────────
 const FlipCard = ({ children, backContent, className = '', disabled = false, showDisclaimer = false }) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
@@ -45,17 +52,24 @@ const FlipCard = ({ children, backContent, className = '', disabled = false, sho
 
     return (
         <div
-            className={`perspective-1000 cursor-pointer ${className}`}
+            className={`cursor-pointer ${className}`}
             onClick={() => setIsFlipped(!isFlipped)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsFlipped(!isFlipped); }}
             role="button"
             tabIndex={0}
+            style={{ position: 'relative' }}
         >
-            <div className={`relative w-full h-full transition-transform duration-700 preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-                <div className="w-full h-full backface-hidden">
-                    {children}
-                </div>
-                <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-slate-100 rounded-[2.5rem] p-8 flex flex-col justify-start overflow-y-auto">
+            {/* Front Face */}
+            <div className={`card-face ${isFlipped ? 'card-face-hidden' : 'card-face-visible'}`}>
+                {children}
+            </div>
+
+            {/* Back Face */}
+            <div
+                className={`card-face ${isFlipped ? 'card-face-visible' : 'card-face-hidden'}`}
+                style={{ position: isFlipped ? 'relative' : 'absolute', inset: 0, zIndex: isFlipped ? 1 : 0 }}
+            >
+                <div className="bg-slate-100 rounded-[2.5rem] p-8 h-full flex flex-col justify-start overflow-y-auto border border-slate-200" style={{ minHeight: '280px' }}>
                     <p className="text-sm leading-relaxed text-slate-700 hyphens-auto" style={{ textAlign: 'left' }}>
                         {backContent}
                     </p>
@@ -281,6 +295,7 @@ export default function Home() {
                         </h1>
                         <p className="text-slate-500 mt-1 font-medium">Ecco la panoramica in tempo reale per la tua azienda.</p>
                         <p className="text-slate-400 text-xs mt-1 italic">Ricorda, più sarai preciso nell&apos;inserimento dei dati, più il dato sarà realistico.</p>
+                        <p className="text-slate-400 text-xs mt-1 font-medium">👆 Tocca le card per maggiori dettagli.</p>
                     </div>
                     <div className="hidden md:flex items-center gap-3">
                         <button
