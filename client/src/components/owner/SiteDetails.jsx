@@ -326,6 +326,9 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
         if (siteId) {
             loadDetails();
+        } else {
+            console.error('[SiteDetails] No siteId found, cancelling load.');
+            setLoading(false);
         }
 
         return () => { isMounted = false; };
