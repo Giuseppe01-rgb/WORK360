@@ -56,65 +56,143 @@ const getMarginStatusLabel = (marginStatus) => {
     }
 };
 
+import { useData } from '../../context/DataContext';
+
 export default function AnalyticsDashboard() {
-    const [analytics, setAnalytics] = useState(null);
+    const { dashboard, sites, refreshDashboard } = useData();
     const [siteStats, setSiteStats] = useState([]);
     const [selectedSite, setSelectedSite] = useState('');
-    const [loading, setLoading] = useState(true);
+    const [localLoading, setLocalLoading] = useState(false); // Only for the siteStats calculation if needed separately
+
+    // Initial load check
+    useEffect(() => {
+        if (dashboard.status === 'idle') {
+            refreshDashboard();
+        }
+    }, [dashboard.status, refreshDashboard]);
+
+    // Calculate detailed stats for sites (these are not in the main dashboard object)
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadSiteStats = async () => {
+            if (sites.status !== 'ready' && sites.status !== 'refreshing') return;
+            if (!sites.data || sites.data.length === 0) return;
+
+            setLocalLoading(true);
+            try {
+                const allSites = sites.data;
+                // Filter if selectedSite is set? No, the filter UI is client-side usually,
+                // but the original code had: const params = selectedSite ? { siteId: selectedSite } : {};
+                // and analyticsAPI.getDashboard(params). 
+                // Context returns GLOBAL dashboard. If we want site-specific dashboard, the API supports it.
+                // However, the current context `refreshDashboard` does NOT take params. 
+                // To stick to the "Global Cache" pattern, `AnalyticsDashboard` main cards should show company data (global).
+                // The "Statistiche per Cantiere" list below shows specific site data.
+                // The "Filtra per Cantiere" dropdown in the original code re-fetched the *entire dashboard* with a siteId param.
+                // This changes the top cards to show only that site's data.
+                // This clashes with a single global "dashboard" cache context.
+
+                // CORRECTION: Standard pattern for "Global Dashboard" vs "Filtered View":
+                // The Context provides the "Company Overview".
+                // If the user selects a site, we typically want to see that site's details.
+                // The original code re-used the `getDashboard` endpoint with `?siteId=...`.
+
+                // DECISION: To avoid breaking the "Filter" feature while using Context:
+                // 1. The Context provides the ALL-COMPANY dashboard.
+                // 2. If `selectedSite` is empty, we use Context data.
+                // 3. If `selectedSite` is active, we must FETCH that specific view (bypass context or use a separate "filteredDashboard" state).
+                // 4. HOWEVER, the user asked to fix SITES DETAILS state sync.
+
+                // Let's implement Hybrid:
+                // - Top cards use `dashboard.data` (Context) when no filter.
+                // - When filter is active, fetch specific data safely.
+
+                // Actually, purely client-side filtering might be better if the data allows, but `getDashboard` aggregates backend side.
+                // Let's keep strict segregation:
+                // If selectedSite is present, we are in "Filtered Mode" -> Local State.
+                // If selectedSite is empty, we are in "Global Mode" -> Context State.
+
+                // Load real stats for each site list
+                const siteStatsPromises = allSites.map(async (site) => {
+                    try {
+                        const siteReport = await analyticsAPI.getSiteReport(site.id);
+                        return {
+                            site: site,
+                            totalAttendances: siteReport.data?.totalAttendances || 0,
+                            totalHours: siteReport.data?.totalHours || 0,
+                            uniqueWorkers: siteReport.data?.uniqueWorkers || 0,
+                            materials: siteReport.data?.materials?.slice(0, 5) || [],
+                            marginPercent: siteReport.data?.marginPercent,
+                            marginStatus: siteReport.data?.status || 'unknown'
+                        };
+                    } catch (err) {
+                        console.error(`Error loading stats for site ${site.id}:`, err);
+                        return {
+                            site: site,
+                            totalAttendances: 0,
+                            totalHours: 0,
+                            uniqueWorkers: 0,
+                            materials: [],
+                            marginPercent: null,
+                            marginStatus: 'unknown'
+                        };
+                    }
+                });
+
+                const siteStatsData = await Promise.all(siteStatsPromises);
+                if (isMounted) setSiteStats(siteStatsData.filter(Boolean));
+            } catch (err) {
+                console.error('Error loading site stats:', err);
+            } finally {
+                if (isMounted) setLocalLoading(false);
+            }
+        };
+
+        loadSiteStats();
+
+        return () => { isMounted = false; };
+    }, [sites.data, sites.status]);
+
+    // Handling the filtered dashboard data
+    const [filteredDashboard, setFilteredDashboard] = useState(null);
+    const [filtering, setFiltering] = useState(false);
 
     useEffect(() => {
-        loadAnalytics();
+        let isMounted = true;
+        const fetchFiltered = async () => {
+            if (!selectedSite) {
+                setFilteredDashboard(null);
+                return;
+            }
+            setFiltering(true);
+            try {
+                const res = await analyticsAPI.getDashboard({ siteId: selectedSite });
+                if (isMounted) setFilteredDashboard(res.data);
+            } catch (error) {
+                console.error("Filter error:", error);
+            } finally {
+                if (isMounted) setFiltering(false);
+            }
+        }
+
+        fetchFiltered();
+        return () => { isMounted = false; };
     }, [selectedSite]);
 
-    const loadAnalytics = async () => {
-        try {
-            setLoading(true);
-            const params = selectedSite ? { siteId: selectedSite } : {};
-            const [analyticsResp, sitesResp] = await Promise.all([
-                analyticsAPI.getDashboard(params),
-                siteAPI.getAll()
-            ]);
+    // Data Source Selection
+    // If selectedSite is set, use filteredDashboard. If not, use context dashboard.data.
+    const activeData = selectedSite ? filteredDashboard : dashboard.data;
 
-            setAnalytics(analyticsResp.data);
+    // Loading State
+    // If global mode: loading if context is loading (initial).
+    // If filtered mode: loading if filtering is true.
+    // OPTIMIZATION: Show context data while filtering? No, misleading. Show loading spinner for filter.
+    const isLoading =
+        (!selectedSite && (dashboard.status === 'loading' && !dashboard.data)) ||
+        (selectedSite && (filtering && !filteredDashboard));
 
-            // Load real stats for each site
-            const allSites = Array.isArray(sitesResp.data) ? sitesResp.data : [];
-            const siteStatsPromises = allSites.map(async (site) => {
-                try {
-                    const siteReport = await analyticsAPI.getSiteReport(site.id);
-                    return {
-                        site: site,
-                        totalAttendances: siteReport.data?.totalAttendances || 0,
-                        totalHours: siteReport.data?.totalHours || 0,
-                        uniqueWorkers: siteReport.data?.uniqueWorkers || 0,
-                        materials: siteReport.data?.materials?.slice(0, 5) || [],
-                        marginPercent: siteReport.data?.marginPercent,
-                        marginStatus: siteReport.data?.status || 'unknown'
-                    };
-                } catch (err) {
-                    console.error(`Error loading stats for site ${site.id}:`, err);
-                    return {
-                        site: site,
-                        totalAttendances: 0,
-                        totalHours: 0,
-                        uniqueWorkers: 0,
-                        materials: [],
-                        marginPercent: null,
-                        marginStatus: 'unknown'
-                    };
-                }
-            });
-
-            const siteStatsData = await Promise.all(siteStatsPromises);
-            setSiteStats(siteStatsData.filter(Boolean));
-        } catch (err) {
-            console.error('Error loading analytics:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
+    if (isLoading) {
         return (
             <Layout title="Analisi Dati">
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -123,6 +201,12 @@ export default function AnalyticsDashboard() {
             </Layout>
         );
     }
+
+    // Determine values safely
+    // If we are in "idle" state with no data yet, activeData might be null.
+    // But duplicate "loading" check above should prevent this.
+    // If activeData is null here, it means we are in "filtering" but have old data or "global" with ready data.
+    const analytics = activeData;
 
     return (
         <Layout title="Analisi Dati">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
     TrendingUp,
@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
-import { analyticsAPI, siteAPI } from '../../utils/api';
+import { useData } from '../../context/DataContext';
+import { analyticsAPI } from '../../utils/api'; // Keep for specific site reports if needed, though they might move to context too
 
 // ─── CSS for card transitions ────────────────────────────────────────
 const FLIP_STYLES = `
@@ -193,66 +194,82 @@ SiteCard.propTypes = {
 
 export default function Home() {
     const { user } = useAuth();
-    const [dashboard, setDashboard] = useState(null);
+    const { dashboard, sites, refreshDashboard } = useData(); // Use Context
     const [sitePerformance, setSitePerformance] = useState({ top: null, worst: null });
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
 
-    const loadDashboard = useCallback(async (isRefresh = false) => {
-        try {
-            if (isRefresh) setRefreshing(true);
-            const [dashRes, sitesRes] = await Promise.all([
-                analyticsAPI.getDashboard(),
-                siteAPI.getAll()
-            ]);
+    // Derived state for site performance calculation
+    // This could also be moved to context if used elsewhere, but Home specific logic is fine here.
+    // We use useEffect to calculate this when sites/dashboard data changes naturally.
+    useEffect(() => {
+        let isMounted = true;
 
-            if (dashRes.data) {
-                setDashboard(dashRes.data);
-            }
+        const calculateSitePerformance = async () => {
+            // Only calculate if we have sites data
+            if (!sites.data || sites.data.length === 0) return;
 
-            // Calculate site performance by fetching reports for sites with contract values
-            const allSites = Array.isArray(sitesRes.data) ? sitesRes.data : [];
-            const activeSites = allSites.filter(s => s.status === 'active' && Number.parseFloat(s.contractValue) > 0);
-            if (activeSites.length > 0) {
-                const siteReports = await Promise.all(
-                    activeSites.map(async (site) => {
-                        try {
-                            const report = await analyticsAPI.getSiteReport(site.id);
-                            const contractValue = Number.parseFloat(site.contractValue) || 0;
-                            const totalCost = report.data?.siteCost?.total || 0;
-                            const margin = contractValue - totalCost;
-                            const costVsRevenue = contractValue > 0 ? Math.round((totalCost / contractValue) * 100) : 0;
-                            return { name: site.name, margin: Math.round(margin), costVsRevenue };
-                        } catch {
-                            return null;
+            try {
+                const allSites = sites.data;
+                const activeSites = allSites.filter(s => s.status === 'active' && Number.parseFloat(s.contractValue) > 0);
+
+                if (activeSites.length > 0) {
+                    // This specific detail fetch might still need to happen here if not in context siteReports
+                    // For now, let's keep it but ensure it doesn't block the main UI render
+                    // OPTIMIZATION: In a real scenario, we might want to lazy load this or have backend return it in dashboard
+                    const siteReports = await Promise.all(
+                        activeSites.map(async (site) => {
+                            try {
+                                const report = await analyticsAPI.getSiteReport(site.id); // Consider caching this too via getSiteReport context action if needed
+                                const contractValue = Number.parseFloat(site.contractValue) || 0;
+                                const totalCost = report.data?.siteCost?.total || 0;
+                                const margin = contractValue - totalCost;
+                                const costVsRevenue = contractValue > 0 ? Math.round((totalCost / contractValue) * 100) : 0;
+                                return { name: site.name, margin: Math.round(margin), costVsRevenue };
+                            } catch {
+                                return null;
+                            }
+                        })
+                    );
+
+                    if (isMounted) {
+                        const validReports = siteReports.filter(Boolean);
+                        if (validReports.length > 0) {
+                            const sorted = [...validReports].sort((a, b) => b.margin - a.margin);
+                            setSitePerformance({
+                                top: sorted[0],
+                                worst: sorted.length > 1 ? sorted[sorted.length - 1] : null
+                            });
                         }
-                    })
-                );
-                const validReports = siteReports.filter(Boolean);
-                if (validReports.length > 0) {
-                    const sorted = [...validReports].sort((a, b) => b.margin - a.margin);
-                    setSitePerformance({
-                        top: sorted[0],
-                        worst: sorted.length > 1 ? sorted[sorted.length - 1] : null
-                    });
+                    }
                 }
+            } catch (error) {
+                console.error("Error calculating site performance:", error);
             }
-        } catch (error) {
-            console.error('Error loading dashboard:', error);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
+        };
+
+        if (sites.status === 'ready' || sites.status === 'refreshing') {
+            calculateSitePerformance();
         }
-    }, []);
+
+        return () => { isMounted = false; };
+    }, [sites.data, sites.status]); // Recalculate when sites data updates
+
+
+    // Loading State: Only explicit loading (initial load). Refreshing keeps old data visible.
+    const isLoading = dashboard.status === 'loading' || sites.status === 'loading';
+    const isRefreshing = dashboard.status === 'refreshing' || sites.status === 'refreshing';
 
     useEffect(() => {
-        loadDashboard();
-        // Auto-refresh every 5 minutes
-        const interval = setInterval(() => loadDashboard(true), 300000);
-        return () => clearInterval(interval);
-    }, [loadDashboard]);
+        // Initial load if idle (though Context might trigger it automatically)
+        if (dashboard.status === 'idle') {
+            refreshDashboard();
+        }
 
-    if (loading) {
+        // Auto-refresh every 5 minutes
+        const interval = setInterval(() => refreshDashboard(), 300000);
+        return () => clearInterval(interval);
+    }, [refreshDashboard, dashboard.status]);
+
+    if (isLoading) {
         return (
             <Layout title="Home" hideHeader>
                 <div className="flex items-center justify-center min-h-[400px]">
@@ -262,15 +279,18 @@ export default function Home() {
         );
     }
 
+    // Safely access data - defaults are handled, but we expect data to be present if status is ready/refreshing
+    const dashData = dashboard.data || {};
+
     // Derive values from real API data
-    const growthPercent = dashboard?.companyMargin?.marginGrowthPercent || 0;
+    const growthPercent = dashData?.companyMargin?.marginGrowthPercent || 0;
     const qStatus = getStatusInfo(growthPercent);
-    const marginValue = dashboard?.companyMargin?.marginValue || 0;
-    const monthlyHours = dashboard?.monthlyHours || 0;
-    const totalWorkers = dashboard?.totalEmployees || 0;
-    const activeSites = dashboard?.activeSites || 0;
-    const laborPercent = dashboard?.companyCostIncidence?.laborIncidencePercent || 0;
-    const insights = dashboard?.homeInsights?.insights || {};
+    const marginValue = dashData?.companyMargin?.marginValue || 0;
+    const monthlyHours = dashData?.monthlyHours || 0;
+    const totalWorkers = dashData?.totalEmployees || 0;
+    const activeSitesCount = dashData?.activeSites || 0;
+    const laborPercent = dashData?.companyCostIncidence?.laborIncidencePercent || 0;
+    const insights = dashData?.homeInsights?.insights || {};
 
     // Format date in Italian
     const today = new Date();
@@ -298,13 +318,13 @@ export default function Home() {
                     </div>
                     <div className="hidden md:flex items-center gap-3">
                         <button
-                            onClick={() => loadDashboard(true)}
-                            disabled={refreshing}
+                            onClick={() => refreshDashboard(true)}
+                            disabled={isRefreshing}
                             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all disabled:opacity-50"
                             title="Aggiorna dati"
                             aria-label="Aggiorna dati"
                         >
-                            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                         </button>
                         <span className="text-xs font-bold text-slate-400 bg-white border border-slate-100 px-4 py-2 rounded-full shadow-sm">
                             {dateStr}
@@ -357,7 +377,7 @@ export default function Home() {
                                     <div className="flex justify-between items-start mt-4">
                                         <div className="text-white/40 max-w-[200px]">
                                             <p className="text-xs font-bold leading-tight">Analisi Trend Lineare</p>
-                                            <p className="text-[10px] opacity-60 mt-1">{activeSites} cantieri attivi contribuiscono al dato.</p>
+                                            <p className="text-[10px] opacity-60 mt-1">{activeSitesCount} cantieri attivi contribuiscono al dato.</p>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className={`w-2 h-2 rounded-full ${qStatus.bg}`} />
@@ -499,10 +519,10 @@ export default function Home() {
                             <div>
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Cantieri Attivi</span>
-                                    <div className={`w-2 h-2 rounded-full ${activeSites > 0 ? 'bg-green-500' : 'bg-slate-400'}`} />
+                                    <div className={`w-2 h-2 rounded-full ${activeSitesCount > 0 ? 'bg-green-500' : 'bg-slate-400'}`} />
                                 </div>
                                 <p className="text-4xl font-black text-slate-900 tracking-tight">
-                                    {activeSites}
+                                    {activeSitesCount}
                                 </p>
                                 <div className="mt-6 p-6 rounded-[2rem] bg-slate-50 border border-slate-100 relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-500/5 rounded-full -mr-8 -mt-8" />

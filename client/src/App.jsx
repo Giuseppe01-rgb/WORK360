@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { ConfirmModalProvider } from './context/ConfirmModalContext';
+import { DataProvider } from './context/DataContext';
 import WelcomePage from './pages/WelcomePage';
 import OnboardingPage from './pages/OnboardingPage';
 import LoginPage from './pages/LoginPage';
@@ -234,9 +235,11 @@ function App() {
       <ToastProvider>
         <ConfirmModalProvider>
           <AuthProvider>
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
+            <DataProvider>
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+            </DataProvider>
           </AuthProvider>
         </ConfirmModalProvider>
       </ToastProvider>

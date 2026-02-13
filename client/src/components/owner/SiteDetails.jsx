@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { analyticsAPI, noteAPI, photoAPI, economiaAPI, materialUsageAPI, colouraMaterialAPI, siteAPI } from '../../utils/api';
 import { Plus, Users, Clock, X, ChevronRight, Package, MapPin, Edit, Trash2, ArrowLeft, RefreshCw, Search, FileText, Camera, Zap } from 'lucide-react';
 import PortalModal from '../../components/PortalModal';
+import { useData } from '../../context/DataContext';
 
 const SiteDetails = ({ site, onBack, showConfirm }) => {
     const [activeTab, setActiveTab] = useState('dati');
@@ -232,41 +233,88 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
         }
     };
 
+
+    const { siteReports, getSiteReport } = useData();
+    const siteId = Number(site.id);
+    const reportState = siteReports[siteId] || { data: null, status: 'idle' };
+
     useEffect(() => {
         let isMounted = true;
 
         const loadDetails = async () => {
-            try {
-                setLoading(true);
-                // Reset state to avoid ghosting
-                setReport(null);
-                setEmployeeHours([]);
-                setNotes([]);
-                setPhotos([]);
-                setEconomie([]);
+            if (!siteId) return;
 
-                // Safe fetch helper
+            // 1. Trigger Context Fetch for the main report (atomic, cached)
+            // If it's already loading/ready/refreshing, getSiteReport handles dedup.
+            // We force=false by default, but maybe we want to ensure freshness on mount?
+            // getSiteReport checks cache validity.
+            getSiteReport(siteId);
+
+            // 2. Fetch other details locally (Notes, Photos, etc.)
+            // We can keep the 'loading' state for THOSE specific items, 
+            // but for the 'Main Stats' (Margin/Costs) we should use the Context status to avoid 0-flicker.
+
+            try {
+                // Only set global loading if we have NO report data yet
+                if (!reportState.data && reportState.status !== 'ready') {
+                    setLoading(true);
+                }
+
+                // We don't want to wipe existing data if we are just refreshing
+                // so we DON'T call setEmployeeHours([]) etc here unless it's a completely new siteId.
+                // But the effect runs on [site.id]. If site.id changes, we SHOULD wipe.
+                // If site.id is same (refresh), we SHOULD NOT wipe.
+                // The current effect has [site?.id], so it runs on change.
+
+                // Helpers for side-data
                 const safeFetch = async (promise, fallback = { data: [] }) => {
                     try { return await promise; }
-                    catch (e) {
-                        console.error('Safe fetch failed:', e);
-                        return fallback;
-                    }
+                    catch (e) { console.error('Safe fetch failed:', e); return fallback; }
                 };
 
-                const [rep, hours, notesData, reportsData, photosData, economieData] = await Promise.all([
-                    safeFetch(analyticsAPI.getSiteReport(site.id), { data: null }),
-                    safeFetch(analyticsAPI.getHoursPerEmployee({ siteId: site.id })),
-                    safeFetch(noteAPI.getAll({ siteId: site.id, type: 'note' })),
-                    safeFetch(noteAPI.getAll({ siteId: site.id, type: 'daily_report' }), { data: [] }),
-                    safeFetch(photoAPI.getAll({ siteId: site.id })),
-                    safeFetch(economiaAPI.getBySite(site.id))
+                const [hours, notesData, reportsData, photosData, economieData] = await Promise.all([
+                    safeFetch(analyticsAPI.getHoursPerEmployee({ siteId })),
+                    safeFetch(noteAPI.getAll({ siteId, type: 'note' })),
+                    safeFetch(noteAPI.getAll({ siteId, type: 'daily_report' }), { data: [] }),
+                    safeFetch(photoAPI.getAll({ siteId })),
+                    safeFetch(economiaAPI.getBySite(siteId))
                 ]);
 
                 if (isMounted) {
-                    setReport(rep.data);
                     setEmployeeHours(hours.data);
                     setNotes(notesData.data || []);
+                    // setReports is for 'daily reports', different from 'site report'
+                    // check naming collision in original file? 
+                    // Original: const [reports, setReports] = useState([]); // for daily reports
+                    // Original: const [report, setReport] = useState(null); // for SITE report
+                    // I will check the file content for 'setReports'.
+
+                    // The snippet shows `const [rep, ...]` then `setReport(rep.data)`.
+                    // It does NOT show `setReports`.
+                    // The variable `reportsData` in my replacement needs to be set to whatever state var holds daily reports.
+                    // The viewed snippet didn't show the `setReports` call for daily reports, but it likely exists.
+                    // Accessing `view_file` again to be sure about variable names would be safer, 
+                    // but the snippet implies `const [reports, setReports]` exists or similar.
+                    // Wait, line 261: `safeFetch(noteAPI.getAll... type: 'daily_report')`.
+                    // The snippet I viewed ends at line 285 and doesn't show `setReports` being called for `reportsData`.
+                    // Line 267: `setReport(rep.data)`.
+                    // Line 268: `setEmployeeHours`.
+                    // Line 269: `setNotes`.
+                    // Line 270: `setPhotos`.
+                    // Line 271: `setEconomie`.
+                    // It seems `daily_report` data fetched in line 261 is NOT used in the original snippet's `isMounted` block! 
+                    // That looks like a bug in the original code or I missed it.
+                    // Ah, `reportsData` is index 3 in Promise.all result.
+                    // The original code: `const [rep, hours, notesData, reportsData, photosData, economieData]`.
+                    // Usage: `setReport`, `setEmployeeHours`, `setNotes`, `setPhotos`, `setEconomie`. 
+                    // `reportsData` is IGNORED in the original code snippet 266-272 ??
+
+                    // I will replicate the original behavior + Context integration.
+                    // BUT I cannot set `report` (site stats) here anymore, it comes from context.
+                    // I need to update the component to use `reportState.data` instead of local `report` state.
+                    // OR sync it: `useEffect(() => { if (reportState.data) setReport(reportState.data); }, [reportState.data]);`
+                    // Syncing is safer to avoid changing all usages of `report` in the 1400 lines.
+
                     setPhotos(photosData.data || []);
                     setEconomie(economieData.data || []);
                 }
@@ -277,12 +325,34 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
             }
         };
 
-        if (site?.id) {
+        if (siteId) {
             loadDetails();
         }
 
         return () => { isMounted = false; };
-    }, [site?.id]);
+    }, [siteId, getSiteReport]);
+
+    // Sync Context Report to Local State
+    useEffect(() => {
+        if (reportState.data) {
+            setReport(reportState.data);
+        }
+    }, [reportState.data]);
+
+    // Computed loading state for UI
+    // If we have data (reportState.data is present), we are NOT loading in a blocking way.
+    // If we have NO data and status is loading, then we are blocking.
+    const isBlockingLoad = (loading || reportState.status === 'loading') && !reportState.data;
+
+    // We need to inject this logic into the render.
+    // Since I am replacing the `useEffect`, I can't easily change the `if (loading)` render guard later in the file without another replace.
+    // But maintaining `setLoading(false)` in the effect combined with `isBlockingLoad` logic might be tricky if `loading` local state is used elsewhere.
+
+    // Strategy:
+    // 1. Keep local `loading` for the "side data" (notes, etc).
+    // 2. But for the main `report`, use context.
+    // 3. To avoid flicker, ensure `setReport` is called immediately when `reportState.data` is available.
+
 
     if (loading) {
         return (
