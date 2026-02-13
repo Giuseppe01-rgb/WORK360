@@ -405,12 +405,6 @@ const getSiteReport = async (req, res, next) => {
                 attendanceCountRaw: await Attendance.count({ where: { siteId } }),
                 attendanceWithClockOutCount: await Attendance.count({ where: { siteId, clockOut: { [Op.ne]: null } } }),
                 materialUsageCountRaw: await MaterialUsage.count({ where: { siteId } }),
-                // Check if any attendance exists for this site at all
-                firstAttendance: await Attendance.findOne({
-                    where: { siteId },
-                    attributes: ['id', 'userId', 'date', 'createdAt'],
-                    raw: true
-                }),
                 // Check construction site data
                 siteDbContractValue: site?.contractValue,
                 siteDbCompanyId: site?.companyId
