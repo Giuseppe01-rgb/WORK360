@@ -272,6 +272,32 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                 </div>
             </div>
 
+            {/* DEBUG PROBE UI - Remove after fixing */}
+            {report?.debug && (
+                <div className="bg-red-50 border-2 border-red-200 p-4 rounded-xl mb-6 font-mono text-xs overflow-x-auto">
+                    <p className="font-bold text-red-700 mb-2">🕵️‍♂️ SONDA DIAGNOSTICA (Dati Grezzi Server)</p>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <p><strong>ID Ricevuto:</strong> {report.debug.receivedSiteId} ({report.debug.receivedSiteIdType})</p>
+                            <p><strong>Presenze Totali (DB):</strong> {report.debug.attendanceCountRaw}</p>
+                            <p><strong>Presenze Chiuse (DB):</strong> {report.debug.attendanceWithClockOutCount}</p>
+                        </div>
+                        <div>
+                            <p><strong>Materiali (DB):</strong> {report.debug.materialUsageCountRaw}</p>
+                            <p><strong>Contratto DB:</strong> {report.debug.siteDbContractValue}</p>
+                            <p><strong>Company ID:</strong> {report.debug.siteDbCompanyId}</p>
+                        </div>
+                    </div>
+                    {report.debug.firstAttendance ? (
+                        <div className="mt-2 pt-2 border-t border-red-200">
+                            <p><strong>Esempio Presenza:</strong> ID: {report.debug.firstAttendance.id} | User: {report.debug.firstAttendance.userId} | Date: {report.debug.firstAttendance.date}</p>
+                        </div>
+                    ) : (
+                        <p className="mt-2 text-red-600 font-bold">⚠️ NESSUNA PRESENZA TROVATA NEL DB PER QUESTO SITO!</p>
+                    )}
+                </div>
+            )}
+
             {/* Desktop Tabs */}
             <div className="hidden md:flex border-b border-slate-200 mb-6">
                 {sections.map(section => (

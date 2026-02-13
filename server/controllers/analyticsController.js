@@ -395,7 +395,26 @@ const getSiteReport = async (req, res, next) => {
             totalAttendances: employeeHours.reduce((sum, e) => sum + (e.totalDays || 0), 0),
             uniqueWorkers: employeeHours.length,
             // Margin info with semaphore status for analytics cards
-            ...getSiteMarginInfo({ contractValue, totalCost })
+            ...getSiteMarginInfo({ contractValue, totalCost }),
+            // DEBUG PROBE: Raw DB checks to diagnose missing data
+            debug: {
+                receivedSiteId: siteId,
+                receivedSiteIdType: typeof siteId,
+                params: req.params,
+                // Check raw counts in DB
+                attendanceCountRaw: await Attendance.count({ where: { siteId } }),
+                attendanceWithClockOutCount: await Attendance.count({ where: { siteId, clockOut: { [Op.ne]: null } } }),
+                materialUsageCountRaw: await MaterialUsage.count({ where: { siteId } }),
+                // Check if any attendance exists for this site at all
+                firstAttendance: await Attendance.findOne({
+                    where: { siteId },
+                    attributes: ['id', 'userId', 'date', 'createdAt'],
+                    raw: true
+                }),
+                // Check construction site data
+                siteDbContractValue: site?.contractValue,
+                siteDbCompanyId: site?.companyId
+            }
         });
     } catch (error) {
         next(error);
