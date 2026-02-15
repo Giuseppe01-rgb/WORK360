@@ -15,50 +15,25 @@ export const useData = () => {
 export const DataProvider = ({ children }) => {
     const { user } = useAuth();
 
-    // ─── HELPERS FOR LOCALSTORAGE ────────────────────────────────────────
-    const loadFromStorage = (key, defaultValue) => {
-        try {
-            const stored = localStorage.getItem(key);
-            return stored ? JSON.parse(stored) : defaultValue;
-        } catch (error) {
-            console.error(`[DataContext] Error loading ${key} from localStorage:`, error);
-            return defaultValue;
-        }
-    };
-
-    const saveToStorage = (key, value) => {
-        try {
-            localStorage.setItem(key, JSON.stringify(value));
-        } catch (error) {
-            console.error(`[DataContext] Error saving ${key} to localStorage:`, error);
-        }
-    };
-
     // ─── STATE MANAGEMENT ────────────────────────────────────────────────
     // Structure: { data: any, status: 'idle' | 'loading' | 'refreshing' | 'ready' | 'error', error: null, updatedAt: null }
 
-    const [dashboard, setDashboard] = useState(() => 
-        loadFromStorage('work360_dashboard', {
-            data: null,
-            status: 'idle',
-            error: null,
-            updatedAt: null
-        })
-    );
+    const [dashboard, setDashboard] = useState({
+        data: null,
+        status: 'idle',
+        error: null,
+        updatedAt: null
+    });
 
-    const [sites, setSites] = useState(() => 
-        loadFromStorage('work360_sites', {
-            data: [],
-            status: 'idle',
-            error: null,
-            updatedAt: null
-        })
-    );
+    const [sites, setSites] = useState({
+        data: [],
+        status: 'idle',
+        error: null,
+        updatedAt: null
+    });
 
     // Cache for individual site reports: { [siteId]: { data, status, ... } }
-    const [siteReports, setSiteReports] = useState(() => 
-        loadFromStorage('work360_siteReports', {})
-    );
+    const [siteReports, setSiteReports] = useState({});
 
     // ─── HELPERS ─────────────────────────────────────────────────────────
 
@@ -192,34 +167,8 @@ export const DataProvider = ({ children }) => {
             setDashboard({ data: null, status: 'idle', error: null, updatedAt: null });
             setSites({ data: [], status: 'idle', error: null, updatedAt: null });
             setSiteReports({});
-            // Clear localStorage
-            localStorage.removeItem('work360_dashboard');
-            localStorage.removeItem('work360_sites');
-            localStorage.removeItem('work360_siteReports');
         }
     }, [user]);
-
-    // ─── PERSISTENCE TO LOCALSTORAGE ─────────────────────────────────────
-    // Save dashboard to localStorage whenever it changes
-    useEffect(() => {
-        if (dashboard.data) {
-            saveToStorage('work360_dashboard', dashboard);
-        }
-    }, [dashboard]);
-
-    // Save sites to localStorage whenever they change
-    useEffect(() => {
-        if (sites.data?.length > 0) {
-            saveToStorage('work360_sites', sites);
-        }
-    }, [sites]);
-
-    // Save siteReports to localStorage whenever they change
-    useEffect(() => {
-        if (Object.keys(siteReports).length > 0) {
-            saveToStorage('work360_siteReports', siteReports);
-        }
-    }, [siteReports]);
 
 
     const value = {
