@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { analyticsAPI, noteAPI, photoAPI, economiaAPI, materialUsageAPI, colouraMaterialAPI, siteAPI, workActivityAPI } from '../../utils/api';
 import { Plus, Users, Clock, X, ChevronRight, Package, MapPin, Edit, Trash2, ArrowLeft, RefreshCw, Search, FileText, Camera, Zap, Download, AlertCircle } from 'lucide-react';
@@ -10,7 +10,13 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     const { siteReports, getSiteReport } = useData();
     // Resolve siteId early to ensure it's available for all effects and handlers
     const siteId = site?.id || site?._id;
-    const reportState = siteId ? (siteReports[siteId] || { data: null, status: 'idle' }) : { data: null, status: 'idle' };
+    const cachedReport = siteId ? siteReports[siteId] : null;
+
+    // Ref per tracciare il siteId corrente e prevenire race conditions
+    const currentSiteIdRef = useRef(siteId);
+    useEffect(() => {
+        currentSiteIdRef.current = siteId;
+    }, [siteId]);
 
     const [activeTab, setActiveTab] = useState('dati');
     const [report, setReport] = useState(null);
@@ -241,103 +247,91 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
 
 
 
-    // Sync context report to local state for compatibility with existing UI
-    useEffect(() => {
-        if (reportState.data) {
-            setReport(reportState.data);
-        } else if (reportState.status === 'loading') {
-            setReport(null); // Clear previous site data while loading new one
-        }
-    }, [reportState.data, reportState.status]);
+    // ─── DATA LOADING & CACHE-FIRST LOGIC ────────────────────────────────
 
     useEffect(() => {
         if (!siteId) return;
 
-        console.log(`[SiteDetails] SiteId changed to: ${siteId}. Resetting states...`);
+        console.log(`[SiteDetails] SiteId change detected: ${siteId}. Initializing cache-first flow.`);
 
-        // Reset all local data states when siteId changes to avoid showing stale data
-        setReport(null);
-        setEmployeeHours([]);
-        setNotes([]);
-        setDailyReports([]);
-        setPhotos([]);
-        setEconomie([]);
-        setLoading(true);
-    }, [siteId]);
+        // 1. Mostra subito i dati cached (se esistono)
+        if (cachedReport?.data) {
+            console.log(`[SiteDetails] Loading from cache for ${siteId}`);
+            setReport(cachedReport.data);
+            setEmployeeHours(cachedReport.data.employeeHours || []);
+            setDailyReports(cachedReport.data.dailyReports || []);
+            setLoading(false); // Disabilita lo spinner se abbiamo dati
+        } else {
+            console.log(`[SiteDetails] No cache for ${siteId}. Enabling loading state.`);
+            // Reset states to avoid showing old site data
+            setReport(null);
+            setEmployeeHours([]);
+            setDailyReports([]);
+            setNotes([]);
+            setPhotos([]);
+            setEconomie([]);
+            setLoading(true); // Attiva lo spinner bloccante
+        }
 
+        // 2. Poi ricarica in background il report principale
+        getSiteReport(siteId);
+    }, [siteId]); // eslint-disable-line react-hooks/exhaustive-deps
+    // getSiteReport è stabile dal context, non serve nelle dipendenze
+
+    // Quando arrivano i dati aggiornati dal DataContext
+    useEffect(() => {
+        // Verifica che i dati cached siano per il siteId corrente (previene race conditions)
+        if (cachedReport?.data && siteId === currentSiteIdRef.current) {
+            console.log(`[SiteDetails] Updating local state with fresh data from DataContext for ${siteId}`);
+            setReport(cachedReport.data);
+            setEmployeeHours(cachedReport.data.employeeHours || []);
+            setDailyReports(cachedReport.data.dailyReports || []);
+            setLoading(false);
+        }
+    }, [cachedReport, siteId]);
+
+    // Chiamate extra necessarie (Note, Foto, Economie)
     useEffect(() => {
         let isMounted = true;
-
-        const loadDetails = async () => {
+        const loadExtraData = async () => {
             if (!siteId) return;
 
-            console.log(`[SiteDetails] Triggering load for site ${siteId}...`);
-            getSiteReport(siteId);
-
             try {
-                // If we don't have report data yet, ensure loading state is true
-                if (!reportState.data) {
-                    setLoading(true);
-                }
-
-                // Helper for side-data with logging
-                const safeFetch = async (name, promise, fallback = { data: [] }) => {
+                const safeFetch = async (promise) => {
                     try {
                         const res = await promise;
-                        return res;
-                    }
-                    catch (e) {
-                        console.error(`[SiteDetails] ${name} failed:`, e);
-                        return fallback;
+                        return res.data || [];
+                    } catch (e) {
+                        return [];
                     }
                 };
 
-                const [hours, notesData, reportsData, photosData, economieData] = await Promise.all([
-                    safeFetch('hours', analyticsAPI.getHoursPerEmployee({ siteId })),
-                    safeFetch('notes', noteAPI.getAll({ siteId, type: 'note' })),
-                    safeFetch('daily_reports', workActivityAPI.getAll({ siteId })),
-                    safeFetch('photos', photoAPI.getAll({ siteId })),
-                    safeFetch('economie', economiaAPI.getBySite(siteId))
+                const [notesData, photosData, economieData] = await Promise.all([
+                    safeFetch(noteAPI.getAll({ siteId, type: 'note' })),
+                    safeFetch(photoAPI.getAll({ siteId })),
+                    safeFetch(economiaAPI.getBySite(siteId))
                 ]);
 
                 if (isMounted) {
-                    setEmployeeHours(hours.data || []);
-                    setNotes(notesData.data || []);
-                    setDailyReports(reportsData.data || []);
-                    setPhotos(photosData.data || []);
-                    setEconomie(economieData.data || []);
-                    setLoading(false);
+                    setNotes(notesData);
+                    setPhotos(photosData);
+                    setEconomie(economieData);
                 }
             } catch (err) {
-                console.error("[SiteDetails] Critical error loading site details:", err);
-                if (isMounted) setLoading(false);
+                console.error("[SiteDetails] Error loading extra data:", err);
             }
         };
 
-        loadDetails();
+        loadExtraData();
         return () => { isMounted = false; };
-    }, [siteId, getSiteReport]);
-
-
-    // Computed loading state for UI
-    // Block blocking load ONLY if we have absolutely no data. 
-    // If we have report data (from context or cache), show it while side-data loads.
-    const isBlockingLoad = (!reportState.data && reportState.status === 'loading') || (loading && !reportState.data);
-
-    // We need to inject this logic into the render.
-    // Since I am replacing the `useEffect`, I can't easily change the `if (loading)` render guard later in the file without another replace.
-    // But maintaining `setLoading(false)` in the effect combined with `isBlockingLoad` logic might be tricky if `loading` local state is used elsewhere.
-
-    // Strategy:
-    // 1. Keep local `loading` for the "side data" (notes, etc).
-    // 2. But for the main `report`, use context.
-    // 3. To avoid flicker, ensure `setReport` is called immediately when `reportState.data` is available.
+    }, [siteId]);
 
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
                 <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+                <p className="text-sm text-slate-500">Caricamento dati cantiere...</p>
             </div>
         );
     }
