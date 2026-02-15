@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { analyticsAPI, noteAPI, photoAPI, economiaAPI, materialUsageAPI, colouraMaterialAPI, siteAPI } from '../../utils/api';
-import { Plus, Users, Clock, X, ChevronRight, Package, MapPin, Edit, Trash2, ArrowLeft, RefreshCw, Search, FileText, Camera, Zap } from 'lucide-react';
+import { analyticsAPI, noteAPI, photoAPI, economiaAPI, materialUsageAPI, colouraMaterialAPI, siteAPI, workActivityAPI } from '../../utils/api';
+import { Plus, Users, Clock, X, ChevronRight, Package, MapPin, Edit, Trash2, ArrowLeft, RefreshCw, Search, FileText, Camera, Zap, Download, AlertCircle } from 'lucide-react';
 import PortalModal from '../../components/PortalModal';
 import { useData } from '../../context/DataContext';
+import { exportSiteReport } from '../../utils/excelExport';
 
-const SiteDetails = ({ site, onBack, showConfirm }) => {
+const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     const [activeTab, setActiveTab] = useState('dati');
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
@@ -235,8 +236,16 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
 
 
     const { siteReports, getSiteReport } = useData();
-    const siteId = Number(site.id);
+    // FIX: Remove Number() casting. site.id is a UUID string.
+    const siteId = site.id;
     const reportState = siteReports[siteId] || { data: null, status: 'idle' };
+
+    // Sync context report to local state for compatibility with existing UI
+    useEffect(() => {
+        if (reportState.data) {
+            setReport(reportState.data);
+        }
+    }, [reportState.data]);
 
     useEffect(() => {
         let isMounted = true;
@@ -258,7 +267,7 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                     try {
                         console.log(`[SiteDetails] Fetching ${name}...`);
                         const res = await promise;
-                        console.log(`[SiteDetails] ${name} loaded.`);
+                        console.log(`[SiteDetails] ${name} loaded. Count: ${res.data?.length || 0}`);
                         return res;
                     }
                     catch (e) {
@@ -270,47 +279,17 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                 const [hours, notesData, reportsData, photosData, economieData] = await Promise.all([
                     safeFetch('hours', analyticsAPI.getHoursPerEmployee({ siteId })),
                     safeFetch('notes', noteAPI.getAll({ siteId, type: 'note' })),
-                    safeFetch('daily_reports', noteAPI.getAll({ siteId, type: 'daily_report' }), { data: [] }),
+                    // FIX: Use workActivityAPI instead of noteAPI for daily reports
+                    safeFetch('daily_reports', workActivityAPI.getAll({ siteId })),
                     safeFetch('photos', photoAPI.getAll({ siteId })),
                     safeFetch('economie', economiaAPI.getBySite(siteId))
                 ]);
 
                 if (isMounted) {
-                    console.log('[SiteDetails] All data fetched. Updating state.');
-                    setEmployeeHours(hours.data);
+                    console.log('[SiteDetails] All data fetched successfully.');
+                    setEmployeeHours(hours.data || []);
                     setNotes(notesData.data || []);
-                    // setReports is for 'daily reports', different from 'site report'
-                    // check naming collision in original file? 
-                    // Original: const [reports, setReports] = useState([]); // for daily reports
-                    // Original: const [report, setReport] = useState(null); // for SITE report
-                    // I will check the file content for 'setReports'.
-
-                    // The snippet shows `const [rep, ...]` then `setReport(rep.data)`.
-                    // It does NOT show `setReports`.
-                    // The variable `reportsData` in my replacement needs to be set to whatever state var holds daily reports.
-                    // The viewed snippet didn't show the `setReports` call for daily reports, but it likely exists.
-                    // Accessing `view_file` again to be sure about variable names would be safer, 
-                    // but the snippet implies `const [reports, setReports]` exists or similar.
-                    // Wait, line 261: `safeFetch(noteAPI.getAll... type: 'daily_report')`.
-                    // The snippet I viewed ends at line 285 and doesn't show `setReports` being called for `reportsData`.
-                    // Line 267: `setReport(rep.data)`.
-                    // Line 268: `setEmployeeHours`.
-                    // Line 269: `setNotes`.
-                    // Line 270: `setPhotos`.
-                    // Line 271: `setEconomie`.
-                    // It seems `daily_report` data fetched in line 261 is NOT used in the original snippet's `isMounted` block! 
-                    // That looks like a bug in the original code or I missed it.
-                    // Ah, `reportsData` is index 3 in Promise.all result.
-                    // The original code: `const [rep, hours, notesData, reportsData, photosData, economieData]`.
-                    // Usage: `setReport`, `setEmployeeHours`, `setNotes`, `setPhotos`, `setEconomie`. 
-                    // `reportsData` is IGNORED in the original code snippet 266-272 ??
-
-                    // I will replicate the original behavior + Context integration.
-                    // BUT I cannot set `report` (site stats) here anymore, it comes from context.
-                    // I need to update the component to use `reportState.data` instead of local `report` state.
-                    // OR sync it: `useEffect(() => { if (reportState.data) setReport(reportState.data); }, [reportState.data]);`
-                    // Syncing is safer to avoid changing all usages of `report` in the 1400 lines.
-
+                    setDailyReports(reportsData.data || []);
                     setPhotos(photosData.data || []);
                     setEconomie(economieData.data || []);
                 }
@@ -318,7 +297,6 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
                 console.error("[SiteDetails] Critical error loading site details:", err);
             } finally {
                 if (isMounted) {
-                    console.log('[SiteDetails] Loading complete.');
                     setLoading(false);
                 }
             }
@@ -327,7 +305,6 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
         if (siteId) {
             loadDetails();
         } else {
-            console.error('[SiteDetails] No siteId found, cancelling load.');
             setLoading(false);
         }
 
@@ -382,21 +359,61 @@ const SiteDetails = ({ site, onBack, showConfirm }) => {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 w-full max-w-full overflow-hidden pb-20">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-2">
-                <button
-                    onClick={onBack}
-                    className="p-2 -ml-2 hover:bg-slate-100 rounded-full transition-colors text-slate-900"
-                >
-                    <ArrowLeft className="w-6 h-6" />
-                </button>
-                <div>
-                    <h2 className="text-2xl font-black text-slate-900">{site.name}</h2>
-                    <div className="flex items-center gap-1 text-slate-500 text-sm font-medium">
-                        <MapPin className="w-3.5 h-3.5" />
-                        <span>{site.address}</span>
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={onBack}
+                        className="p-2 -ml-2 hover:bg-slate-100 rounded-full transition-colors text-slate-900"
+                        title="Back"
+                    >
+                        <ArrowLeft className="w-6 h-6" />
+                    </button>
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900">{site.name}</h2>
+                        <div className="flex items-center gap-1 text-slate-500 text-sm font-medium">
+                            <MapPin className="w-3.5 h-3.5" />
+                            <span>{site.address}</span>
+                        </div>
                     </div>
                 </div>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => exportSiteReport(site, report, employeeHours, economie)}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors font-bold text-sm"
+                        title="Esporta Excel"
+                    >
+                        <Download className="w-4 h-4" />
+                        <span className="hidden sm:inline">Esporta</span>
+                    </button>
+                    {onDelete && (
+                        <button
+                            onClick={onDelete}
+                            className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
+                            title="Elimina cantiere"
+                        >
+                            <Trash2 className="w-5 h-5" />
+                        </button>
+                    )}
+                </div>
             </div>
+
+            {/* DUPLICATE SITE WARNING */}
+            {report?.dataSplitWarning && (
+                <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-2 rounded-r-xl shadow-sm">
+                    <div className="flex items-start">
+                        <AlertCircle className="h-6 w-6 text-amber-600 flex-shrink-0" />
+                        <div className="ml-3">
+                            <h3 className="text-sm font-bold text-amber-800">
+                                ⚠️ Attenzione: Possibile duplicazione cantiere
+                            </h3>
+                            <p className="mt-1 text-xs text-amber-700">
+                                {report.dataSplitWarning.message}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* TAB SWITCHER */}
             <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">

@@ -20,7 +20,7 @@ const register = async (req, res) => {
             role = 'owner';
             const compName = parts[2].trim();
 
-            // Check if company exists or create new one (case-insensitive)
+            // Check if company exists (case-insensitive)
             company = await Company.findOne({
                 where: {
                     name: {
@@ -29,12 +29,17 @@ const register = async (req, res) => {
                 }
             });
 
-            if (!company) {
-                company = await Company.create({
-                    name: compName,
-                    ownerName: parts[1]
+            if (company) {
+                return res.status(400).json({
+                    message: `L'azienda "${compName}" è già registrata. Se sei il titolare e hai dimenticato le credenziali, usa il recupero password via email.`
                 });
             }
+
+            // Create new company
+            company = await Company.create({
+                name: compName,
+                ownerName: parts[1]
+            });
         } else if (parts.length === 2) {
             // Worker registration
             role = 'worker';
