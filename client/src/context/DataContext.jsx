@@ -2,6 +2,23 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef } f
 import { analyticsAPI, siteAPI } from '../utils/api';
 import { useAuth } from './AuthContext';
 
+// ─── RETRY ON 429 (Rate Limit) ──────────────────────────────────────────
+const retryOn429 = async (fn, maxRetries = 3) => {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await fn();
+        } catch (error) {
+            if (error?.response?.status === 429 && attempt < maxRetries) {
+                const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+                console.log(`[DataContext] 429 received, retrying in ${delay}ms...`);
+                await new Promise(r => setTimeout(r, delay));
+            } else {
+                throw error;
+            }
+        }
+    }
+};
+
 const DataContext = createContext();
 
 export const useData = () => {
@@ -50,10 +67,10 @@ export const DataProvider = ({ children }) => {
     const [dashboard, setDashboard] = useState(() => {
         const cached = loadFromSession('work360_dashboard', null);
         if (cached && cached.data) {
-            // Se abbiamo dati cached, mostrali ma forza status 'idle' per triggerare il refresh
+            // Show cached data immediately; background refresh will update
             return {
                 ...cached,
-                status: 'idle' // Forza idle così i componenti fanno refresh
+                status: 'refreshing' // Components show cached data while we refresh in background
             };
         }
         return {
@@ -69,7 +86,7 @@ export const DataProvider = ({ children }) => {
         if (cached && cached.data) {
             return {
                 ...cached,
-                status: 'idle' // Forza idle così i componenti fanno refresh
+                status: 'refreshing' // Components show cached data while we refresh in background
             };
         }
         return {
@@ -104,10 +121,16 @@ export const DataProvider = ({ children }) => {
 
     // ─── ACTIONS ─────────────────────────────────────────────────────────
 
+    const lastRefreshTime = useRef(0);
+
     const refreshDashboard = useCallback(async (force = false) => {
-        // Prevent redundant fetches if recently updated (e.g., < 30 seconds) unless forced
-        // const isRecent = dashboard.updatedAt && (new Date() - dashboard.updatedAt < 30000);
-        // if (!force && isRecent && dashboard.status === 'ready') return;
+        // Throttle: at least 5 seconds between refreshes unless forced
+        const now = Date.now();
+        if (!force && now - lastRefreshTime.current < 5000) {
+            console.log('[DataContext] Throttled refreshDashboard (too soon)');
+            return;
+        }
+        lastRefreshTime.current = now;
 
         setDashboard(prev => ({
             ...prev,
@@ -122,8 +145,8 @@ export const DataProvider = ({ children }) => {
         try {
             console.log('[DataContext] Refreshing Dashboard & Sites...');
             const [dashRes, sitesRes] = await Promise.all([
-                analyticsAPI.getDashboard(),
-                siteAPI.getAll()
+                retryOn429(() => analyticsAPI.getDashboard()),
+                retryOn429(() => siteAPI.getAll())
             ]);
 
             // Atomic updates
@@ -134,11 +157,11 @@ export const DataProvider = ({ children }) => {
         } catch (error) {
             console.error('[DataContext] Error refreshing dashboard:', error);
             const err = error.message || 'Errore di connessione';
-            setStatus(setDashboard, 'error', err);
-            setStatus(setSites, 'error', err);
+            // Only set error if we don't have cached data to fall back on
+            setDashboard(prev => prev.data ? { ...prev, status: 'ready' } : { ...prev, status: 'error', error: err });
+            setSites(prev => prev.data?.length > 0 ? { ...prev, status: 'ready' } : { ...prev, status: 'error', error: err });
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
-    // Rimosso dashboard.status dalle dipendenze per evitare loop infiniti
 
     // Track in-flight requests to prevent duplicates
     const fetchingSites = useRef(new Set());
@@ -170,7 +193,7 @@ export const DataProvider = ({ children }) => {
 
         try {
             console.log(`[DataContext] Fetching report for site ${validId} (type: ${typeof validId})...`);
-            const res = await analyticsAPI.getSiteReport(validId); // Pass string ID (UUID or number string)
+            const res = await retryOn429(() => analyticsAPI.getSiteReport(validId));
             console.log(`[DataContext] Received report for site ${validId}:`, res.data ? 'Data present' : 'No data');
             if (res.data) {
                 console.log(`[DataContext] Site ${validId} ContractValue:`, res.data.contractValue);
@@ -203,19 +226,27 @@ export const DataProvider = ({ children }) => {
 
     // ─── INITIALIZATION ──────────────────────────────────────────────────
 
-    // Auto-load dashboard on mount if user is owner
+    // Track whether we've ever had a fully authenticated user (not just from token)
+    const hadFullUser = useRef(false);
     useEffect(() => {
-        if (user?.role === 'owner' && dashboard.status === 'idle') {
+        if (user && !user._fromToken) {
+            hadFullUser.current = true;
+        }
+    }, [user]);
+
+    // Auto-load dashboard on mount if user is owner
+    // Wait for auth to stabilize before loading
+    useEffect(() => {
+        if (!authLoading && user?.role === 'owner' && (dashboard.status === 'idle' || dashboard.status === 'refreshing')) {
             refreshDashboard();
         }
-    }, [user, dashboard.status]); // eslint-disable-line react-hooks/exhaustive-deps
-    // refreshDashboard è stabile via useCallback, non serve nelle dipendenze
+    }, [user, authLoading, dashboard.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // RESET STATE ON LOGOUT
-    // IMPORTANTE: Cancella solo se user è null E non stiamo più caricando l'auth
-    // Questo previene la cancellazione accidentale durante il refresh della pagina
+    // Only clear if user explicitly logged out (hadFullUser was true, now user is null)
+    // This prevents accidental clearing during page refresh auth re-verification
     useEffect(() => {
-        if (!user && !authLoading) {
+        if (!user && !authLoading && hadFullUser.current) {
             console.log('[DataContext] User logged out. Clearing data...');
             setDashboard({ data: null, status: 'idle', error: null, updatedAt: null });
             setSites({ data: [], status: 'idle', error: null, updatedAt: null });
@@ -224,6 +255,7 @@ export const DataProvider = ({ children }) => {
             sessionStorage.removeItem('work360_dashboard');
             sessionStorage.removeItem('work360_sites');
             sessionStorage.removeItem('work360_siteReports');
+            hadFullUser.current = false;
         }
     }, [user, authLoading]);
 
@@ -247,7 +279,7 @@ export const DataProvider = ({ children }) => {
             const readyReports = Object.entries(siteReports)
                 .filter(([_, report]) => report.status === 'ready' && report.data)
                 .reduce((acc, [id, report]) => ({ ...acc, [id]: report }), {});
-            
+
             if (Object.keys(readyReports).length > 0) {
                 saveToSession('work360_siteReports', readyReports);
             }

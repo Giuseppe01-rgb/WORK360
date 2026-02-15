@@ -272,7 +272,7 @@ export default function Home() {
     // Loading State: Only show spinner if NO data at all (first load)
     // If we have cached data, show it even during refresh
     const hasData = dashboard.data || sites.data?.length > 0;
-    const isLoading = (dashboard.status === 'loading' || sites.status === 'loading') && !hasData;
+    const isLoading = dashboard.status === 'loading' && !hasData;
     const isRefreshing = dashboard.status === 'refreshing' || sites.status === 'refreshing';
 
     useEffect(() => {

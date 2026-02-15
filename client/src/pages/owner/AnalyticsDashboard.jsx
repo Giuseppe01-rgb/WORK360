@@ -210,7 +210,7 @@ export default function AnalyticsDashboard() {
     const hasData = dashboard.data || filteredDashboard;
     const isLoading =
         (!selectedSite && dashboard.status === 'loading' && !hasData) ||
-        (selectedSite && filtering && !hasData);
+        (selectedSite && filtering && !filteredDashboard);
 
     if (isLoading) {
         return (

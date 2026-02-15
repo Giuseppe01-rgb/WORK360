@@ -99,8 +99,7 @@ export const AuthProvider = ({ children }) => {
         // Questo permette di mostrare subito i dati base mentre verifichiamo col server
         const initialUser = {
             _id: payload.id,
-            // Il ruolo verrà aggiornato dalla chiamata /auth/me
-            // Per ora settiamo solo l'id per evitare redirect al login
+            role: payload.role, // Include role from JWT so DataContext can start loading immediately
             _fromToken: true // Flag interno per sapere che questi dati vengono dal token
         };
         setUser(initialUser);
