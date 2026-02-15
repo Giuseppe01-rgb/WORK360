@@ -16,21 +16,7 @@ import {
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
-import { analyticsAPI } from '../../utils/api'; // Keep for specific site reports if needed, though they might move to context too
-
-// Helper function to batch async calls to avoid rate limiting (429)
-const batchAsyncCalls = async (items, asyncFn, maxConcurrent = 3) => {
-    const results = [];
-    for (let i = 0; i < items.length; i += maxConcurrent) {
-        const chunk = items.slice(i, i + maxConcurrent);
-        const chunkResults = await Promise.all(chunk.map(asyncFn));
-        results.push(...chunkResults);
-        if (i + maxConcurrent < items.length) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-    }
-    return results;
-};
+// Niente fetch diretti qui: usiamo DataContext per dedupe + rate limit handling.
 
 // ─── CSS for card transitions ────────────────────────────────────────
 const FLIP_STYLES = `
@@ -208,65 +194,48 @@ SiteCard.propTypes = {
 
 export default function Home() {
     const { user } = useAuth();
-    const { dashboard, sites, refreshDashboard } = useData(); // Use Context
-    const [sitePerformance, setSitePerformance] = useState({ top: null, worst: null });
+    const { dashboard, sites, siteReports, getSiteReport, refreshDashboard } = useData();
 
-    // Derived state for site performance calculation
-    // This could also be moved to context if used elsewhere, but Home specific logic is fine here.
-    // We use useEffect to calculate this when sites/dashboard data changes naturally.
+    // Precarica i report dei cantieri attivi per poter calcolare Top/Worst senza fare fetch diretti.
     useEffect(() => {
-        let isMounted = true;
+        if (sites.status !== 'ready' && sites.status !== 'refreshing') return;
+        if (!sites.data || sites.data.length === 0) return;
 
-        const calculateSitePerformance = async () => {
-            // Only calculate if we have sites data
-            if (!sites.data || sites.data.length === 0) return;
-
-            try {
-                const allSites = sites.data;
-                const activeSites = allSites.filter(s => s.status === 'active' && Number.parseFloat(s.contractValue) > 0);
-
-                if (activeSites.length > 0) {
-                    // This specific detail fetch might still need to happen here if not in context siteReports
-                    // Use batching to avoid 429 rate limiting
-                    const siteReports = await batchAsyncCalls(
-                        activeSites,
-                        async (site) => {
-                            try {
-                                const report = await analyticsAPI.getSiteReport(site.id);
-                                const contractValue = Number.parseFloat(site.contractValue) || 0;
-                                const totalCost = report.data?.siteCost?.total || 0;
-                                const margin = contractValue - totalCost;
-                                const costVsRevenue = contractValue > 0 ? Math.round((totalCost / contractValue) * 100) : 0;
-                                return { name: site.name, margin: Math.round(margin), costVsRevenue };
-                            } catch {
-                                return null;
-                            }
-                        },
-                        3 // Max 3 concurrent requests
-                    );
-
-                    if (isMounted) {
-                        const validReports = siteReports.filter(Boolean);
-                        if (validReports.length > 0) {
-                            const sorted = [...validReports].sort((a, b) => b.margin - a.margin);
-                            setSitePerformance({
-                                top: sorted[0],
-                                worst: sorted.length > 1 ? sorted[sorted.length - 1] : null
-                            });
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("Error calculating site performance:", error);
+        const activeSites = sites.data.filter(s => s.status === 'active' && Number.parseFloat(s.contractValue) > 0);
+        for (const s of activeSites) {
+            const id = String(s.id);
+            const cached = siteReports?.[id];
+            if (!cached || cached.status === 'idle') {
+                getSiteReport(id);
             }
-        };
+        }
+    }, [sites.status, sites.data, siteReports, getSiteReport]);
 
-        if (sites.status === 'ready' || sites.status === 'refreshing') {
-            calculateSitePerformance();
+    // Top/Worst calcolati da cache (se un report manca, lo skippo finché non arriva)
+    const sitePerformance = useMemo(() => {
+        if (!sites.data || sites.data.length === 0) return { top: null, worst: null };
+
+        const activeSites = sites.data.filter(s => s.status === 'active' && Number.parseFloat(s.contractValue) > 0);
+        const computed = [];
+
+        for (const s of activeSites) {
+            const id = String(s.id);
+            const rep = siteReports?.[id]?.data;
+            if (!rep) continue;
+            const contractValue = Number.parseFloat(s.contractValue) || 0;
+            const totalCost = rep?.siteCost?.total || 0;
+            const margin = contractValue - totalCost;
+            const costVsRevenue = contractValue > 0 ? Math.round((totalCost / contractValue) * 100) : 0;
+            computed.push({ name: s.name, margin: Math.round(margin), costVsRevenue });
         }
 
-        return () => { isMounted = false; };
-    }, [sites.data, sites.status]); // Recalculate when sites data updates
+        if (computed.length === 0) return { top: null, worst: null };
+        const sorted = [...computed].sort((a, b) => b.margin - a.margin);
+        return {
+            top: sorted[0],
+            worst: sorted.length > 1 ? sorted[sorted.length - 1] : null
+        };
+    }, [sites.data, siteReports]);
 
 
     // Loading State: Only show spinner if NO data at all (first load)

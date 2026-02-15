@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { analyticsAPI, noteAPI, photoAPI, economiaAPI, materialUsageAPI, colouraMaterialAPI, siteAPI, workActivityAPI } from '../../utils/api';
+import { noteAPI, photoAPI, economiaAPI, materialUsageAPI, colouraMaterialAPI, siteAPI, workActivityAPI } from '../../utils/api';
 import { Plus, Users, Clock, X, ChevronRight, Package, MapPin, Edit, Trash2, ArrowLeft, RefreshCw, Search, FileText, Camera, Zap, Download, AlertCircle } from 'lucide-react';
 import PortalModal from '../../components/PortalModal';
 import { useData } from '../../context/DataContext';
@@ -84,8 +84,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             await materialUsageAPI.delete(usageId);
             await loadMaterialUsages();
             // Reload report to update totals
-            const rep = await analyticsAPI.getSiteReport(site.id);
-            setReport(rep.data);
+            const fresh = await getSiteReport(siteId, true);
+            setReport(fresh);
         } catch (error) {
             console.error('Error deleting material usage:', error);
         }
@@ -96,8 +96,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             await materialUsageAPI.update(usageId, updatedData);
             await loadMaterialUsages();
             // Refresh report to update totals
-            const rep = await analyticsAPI.getSiteReport(site.id);
-            setReport(rep.data);
+            const fresh = await getSiteReport(siteId, true);
+            setReport(fresh);
             setEditingMaterial(null);
             setSelectedMaterial(null);
             setNewSelectedMaterial(null);
@@ -137,8 +137,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
         if (!confirmed) return;
         try {
             await workActivityAPI.delete(reportId);
-            const rep = await analyticsAPI.getSiteReport(site.id);
-            setReport(rep.data);
+            const fresh = await getSiteReport(siteId, true);
+            setReport(fresh);
         } catch (error) {
             console.error('Error deleting report:', error);
         }
@@ -158,8 +158,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             const economieData = await economiaAPI.getBySite(site.id);
             setEconomie(economieData.data || []);
             // Refresh report to update totals
-            const rep = await analyticsAPI.getSiteReport(site.id);
-            setReport(rep.data);
+            const fresh = await getSiteReport(siteId, true);
+            setReport(fresh);
             alert('✅ Economia eliminata con successo');
         } catch (error) {
             console.error('Error deleting economia:', error);
@@ -180,8 +180,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
         try {
             const result = await siteAPI.recalculateCosts(site.id);
             // Reload report to get updated costs
-            const rep = await analyticsAPI.getSiteReport(site.id);
-            setReport(rep.data);
+            const fresh = await getSiteReport(siteId, true);
+            setReport(fresh);
             alert(`✅ ${result.data.message}\n\nVecchio costo: €${result.data.oldTotalCost}\nNuovo costo: €${result.data.newTotalCost}\nDifferenza: €${result.data.difference}`);
         } catch (error) {
             console.error('Error recalculating costs:', error);
@@ -214,8 +214,8 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
             const economieData = await economiaAPI.getBySite(site.id);
             setEconomie(economieData.data || []);
             // Refresh report for updated totals
-            const rep = await analyticsAPI.getSiteReport(site.id);
-            setReport(rep.data);
+            const fresh = await getSiteReport(siteId, true);
+            setReport(fresh);
             // Reset form
             setBulkEconomieForm({ hours: '', description: '' });
             setShowBulkEconomieForm(false);

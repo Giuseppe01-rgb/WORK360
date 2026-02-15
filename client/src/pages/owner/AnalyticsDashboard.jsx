@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Layout from '../../components/Layout';
-import { analyticsAPI, siteAPI } from '../../utils/api';
+import { analyticsAPI } from '../../utils/api';
 import { BarChart3, Users, Clock, Building2, Package, Calendar, Filter, FileText, Download } from 'lucide-react';
 import { exportAnalyticsReport } from '../../utils/excelExport';
 
@@ -58,27 +58,9 @@ const getMarginStatusLabel = (marginStatus) => {
 
 import { useData } from '../../context/DataContext';
 
-// Helper function to batch async calls to avoid rate limiting (429)
-// Processes array in chunks of maxConcurrent at a time
-const batchAsyncCalls = async (items, asyncFn, maxConcurrent = 3) => {
-    const results = [];
-    for (let i = 0; i < items.length; i += maxConcurrent) {
-        const chunk = items.slice(i, i + maxConcurrent);
-        const chunkResults = await Promise.all(chunk.map(asyncFn));
-        results.push(...chunkResults);
-        // Small delay between batches to be extra safe with rate limits
-        if (i + maxConcurrent < items.length) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-    }
-    return results;
-};
-
 export default function AnalyticsDashboard() {
-    const { dashboard, sites, refreshDashboard } = useData();
-    const [siteStats, setSiteStats] = useState([]);
+    const { dashboard, sites, siteReports, getSiteReport, refreshDashboard } = useData();
     const [selectedSite, setSelectedSite] = useState('');
-    const [localLoading, setLocalLoading] = useState(false); // Only for the siteStats calculation if needed separately
 
     // Initial load check
     useEffect(() => {
@@ -87,92 +69,40 @@ export default function AnalyticsDashboard() {
         }
     }, [dashboard.status, refreshDashboard]);
 
-    // Calculate detailed stats for sites (these are not in the main dashboard object)
+    // Cache-first: appena ho la lista cantieri, chiedo i report via DataContext.
+    // Il DataContext deduplica e limita la concorrenza globale, evitando 429 e richieste duplicate.
     useEffect(() => {
-        let isMounted = true;
+        if (sites.status !== 'ready' && sites.status !== 'refreshing') return;
+        if (!sites.data || sites.data.length === 0) return;
 
-        const loadSiteStats = async () => {
-            if (sites.status !== 'ready' && sites.status !== 'refreshing') return;
-            if (!sites.data || sites.data.length === 0) return;
-
-            setLocalLoading(true);
-            try {
-                const allSites = sites.data;
-                // Filter if selectedSite is set? No, the filter UI is client-side usually,
-                // but the original code had: const params = selectedSite ? { siteId: selectedSite } : {};
-                // and analyticsAPI.getDashboard(params). 
-                // Context returns GLOBAL dashboard. If we want site-specific dashboard, the API supports it.
-                // However, the current context `refreshDashboard` does NOT take params. 
-                // To stick to the "Global Cache" pattern, `AnalyticsDashboard` main cards should show company data (global).
-                // The "Statistiche per Cantiere" list below shows specific site data.
-                // The "Filtra per Cantiere" dropdown in the original code re-fetched the *entire dashboard* with a siteId param.
-                // This changes the top cards to show only that site's data.
-                // This clashes with a single global "dashboard" cache context.
-
-                // CORRECTION: Standard pattern for "Global Dashboard" vs "Filtered View":
-                // The Context provides the "Company Overview".
-                // If the user selects a site, we typically want to see that site's details.
-                // The original code re-used the `getDashboard` endpoint with `?siteId=...`.
-
-                // DECISION: To avoid breaking the "Filter" feature while using Context:
-                // 1. The Context provides the ALL-COMPANY dashboard.
-                // 2. If `selectedSite` is empty, we use Context data.
-                // 3. If `selectedSite` is active, we must FETCH that specific view (bypass context or use a separate "filteredDashboard" state).
-                // 4. HOWEVER, the user asked to fix SITES DETAILS state sync.
-
-                // Let's implement Hybrid:
-                // - Top cards use `dashboard.data` (Context) when no filter.
-                // - When filter is active, fetch specific data safely.
-
-                // Actually, purely client-side filtering might be better if the data allows, but `getDashboard` aggregates backend side.
-                // Let's keep strict segregation:
-                // If selectedSite is present, we are in "Filtered Mode" -> Local State.
-                // If selectedSite is empty, we are in "Global Mode" -> Context State.
-
-                // Load real stats for each site list
-                // Use batching to avoid 429 rate limiting (max 3 concurrent requests)
-                const siteStatsData = await batchAsyncCalls(
-                    allSites,
-                    async (site) => {
-                        try {
-                            const siteReport = await analyticsAPI.getSiteReport(site.id);
-                            return {
-                                site: site,
-                                totalAttendances: siteReport.data?.totalAttendances || 0,
-                                totalHours: siteReport.data?.totalHours || 0,
-                                uniqueWorkers: siteReport.data?.uniqueWorkers || 0,
-                                materials: siteReport.data?.materials?.slice(0, 5) || [],
-                                marginPercent: siteReport.data?.marginPercent,
-                                marginStatus: siteReport.data?.status || 'unknown'
-                            };
-                        } catch (err) {
-                            console.error(`Error loading stats for site ${site.id}:`, err);
-                            return {
-                                site: site,
-                                totalAttendances: 0,
-                                totalHours: 0,
-                                uniqueWorkers: 0,
-                                materials: [],
-                                marginPercent: null,
-                                marginStatus: 'unknown'
-                            };
-                        }
-                    },
-                    3 // Max 3 concurrent requests at a time
-                );
-
-                if (isMounted) setSiteStats(siteStatsData.filter(Boolean));
-            } catch (err) {
-                console.error('Error loading site stats:', err);
-            } finally {
-                if (isMounted) setLocalLoading(false);
+        for (const s of sites.data) {
+            const id = String(s.id);
+            const cached = siteReports?.[id];
+            if (!cached || cached.status === 'idle') {
+                getSiteReport(id);
             }
-        };
+        }
+    }, [sites.status, sites.data, siteReports, getSiteReport]);
 
-        loadSiteStats();
-
-        return () => { isMounted = false; };
-    }, [sites.data, sites.status]);
+    // Statistiche per cantiere derivate dalla cache (no fetch diretto qui)
+    const siteStats = useMemo(() => {
+        if (!sites.data || sites.data.length === 0) return [];
+        return sites.data.map((s) => {
+            const id = String(s.id);
+            const rep = siteReports?.[id];
+            const data = rep?.data;
+            return {
+                site: s,
+                totalAttendances: data?.totalAttendances ?? null,
+                totalHours: data?.totalHours ?? null,
+                uniqueWorkers: data?.uniqueWorkers ?? null,
+                materials: data?.materials?.slice(0, 5) || [],
+                marginPercent: data?.marginPercent ?? null,
+                marginStatus: data?.status || 'unknown',
+                loading: rep?.status === 'loading' || rep?.status === 'refreshing'
+            };
+        });
+    }, [sites.data, siteReports]);
 
     // Handling the filtered dashboard data
     const [filteredDashboard, setFilteredDashboard] = useState(null);

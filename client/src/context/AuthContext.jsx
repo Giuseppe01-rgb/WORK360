@@ -97,10 +97,13 @@ export const AuthProvider = ({ children }) => {
 
         // Step 2: Token non scaduto, imposta user iniziale dal token
         // Questo permette di mostrare subito i dati base mentre verifichiamo col server
+        // Nota: se il backend non mette ancora `role` nel JWT, usiamo un fallback
+        // salvato dalla sessione precedente (utile per evitare “buchi” al refresh).
+        const lastRole = localStorage.getItem('work360_lastRole');
         const initialUser = {
             _id: payload.id,
-            role: payload.role, // Include role from JWT so DataContext can start loading immediately
-            _fromToken: true // Flag interno per sapere che questi dati vengono dal token
+            role: payload.role || lastRole || undefined,
+            _fromToken: true
         };
         setUser(initialUser);
         console.log('[Auth] User iniziale impostato da token:', initialUser);
@@ -110,6 +113,9 @@ export const AuthProvider = ({ children }) => {
             const response = await authAPI.getMe();
             console.log('[Auth] /auth/me OK, aggiorno user con dati server');
             setUser(response.data);
+            if (response.data?.role) {
+                localStorage.setItem('work360_lastRole', response.data.role);
+            }
             setConnectionError(false);
         } catch (err) {
             console.error('[Auth] Errore in /auth/me:', err);
@@ -142,6 +148,9 @@ export const AuthProvider = ({ children }) => {
 
             localStorage.setItem('token', token);
             setUser(userData);
+            if (userData?.role) {
+                localStorage.setItem('work360_lastRole', userData.role);
+            }
 
             return userData;
         } catch (err) {
@@ -160,6 +169,9 @@ export const AuthProvider = ({ children }) => {
 
             localStorage.setItem('token', token);
             setUser(user);
+            if (user?.role) {
+                localStorage.setItem('work360_lastRole', user.role);
+            }
 
             return user;
         } catch (err) {
@@ -172,6 +184,7 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         console.log('[Auth] Logout eseguito');
         localStorage.removeItem('token');
+        localStorage.removeItem('work360_lastRole');
         setUser(null);
         setConnectionError(false);
     };

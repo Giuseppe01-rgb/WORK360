@@ -30,34 +30,38 @@ export const useData = () => {
 };
 
 export const DataProvider = ({ children }) => {
-    const { user, loading: authLoading } = useAuth(); // Importa anche authLoading
+    const { user, loading: authLoading } = useAuth();
 
-    // ─── HELPERS FOR SESSIONSTORAGE (survives page refresh, not browser close) ───
-    const loadFromSession = (key, defaultValue) => {
+    // ─── PERSISTENCE LAYER ─────────────────────────────────────────────
+    // sessionStorage NON sopravvive a “chiudi e riapri velocemente” (specie su mobile/PWA).
+    // Per un comportamento cache-first anche dopo reopen, usiamo localStorage.
+    // TTL: 24h (modifica liberamente).
+    const STORAGE_TTL_MS = 24 * 60 * 60 * 1000;
+
+    const loadFromStorage = (key, defaultValue) => {
         try {
-            const stored = sessionStorage.getItem(key);
+            const stored = localStorage.getItem(key);
             if (stored) {
                 const parsed = JSON.parse(stored);
-                // Check if data is fresh (less than 5 minutes old)
-                if (parsed.savedAt && (Date.now() - parsed.savedAt < 5 * 60 * 1000)) {
+                if (parsed.savedAt && (Date.now() - parsed.savedAt < STORAGE_TTL_MS)) {
                     return parsed.value;
                 }
             }
             return defaultValue;
         } catch (error) {
-            console.error(`[DataContext] Error loading ${key} from sessionStorage:`, error);
+            console.error(`[DataContext] Error loading ${key} from localStorage:`, error);
             return defaultValue;
         }
     };
 
-    const saveToSession = (key, value) => {
+    const saveToStorage = (key, value) => {
         try {
-            sessionStorage.setItem(key, JSON.stringify({
+            localStorage.setItem(key, JSON.stringify({
                 value,
                 savedAt: Date.now()
             }));
         } catch (error) {
-            console.error(`[DataContext] Error saving ${key} to sessionStorage:`, error);
+            console.error(`[DataContext] Error saving ${key} to localStorage:`, error);
         }
     };
 
@@ -65,7 +69,7 @@ export const DataProvider = ({ children }) => {
     // Structure: { data: any, status: 'idle' | 'loading' | 'refreshing' | 'ready' | 'error', error: null, updatedAt: null }
 
     const [dashboard, setDashboard] = useState(() => {
-        const cached = loadFromSession('work360_dashboard', null);
+        const cached = loadFromStorage('work360_dashboard', null);
         if (cached && cached.data) {
             // Show cached data immediately; background refresh will update
             return {
@@ -82,7 +86,7 @@ export const DataProvider = ({ children }) => {
     });
 
     const [sites, setSites] = useState(() => {
-        const cached = loadFromSession('work360_sites', null);
+        const cached = loadFromStorage('work360_sites', null);
         if (cached && cached.data) {
             return {
                 ...cached,
@@ -99,7 +103,7 @@ export const DataProvider = ({ children }) => {
 
     // Cache for individual site reports: { [siteId]: { data, status, ... } }
     const [siteReports, setSiteReports] = useState(() => {
-        const cached = loadFromSession('work360_siteReports', null);
+        const cached = loadFromStorage('work360_siteReports', null);
         return cached || {};
     });
 
@@ -163,8 +167,34 @@ export const DataProvider = ({ children }) => {
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Track in-flight requests to prevent duplicates
-    const fetchingSites = useRef(new Set());
+    // ─── REQUEST DEDUPE + GLOBAL CONCURRENCY LIMITER ───────────────────
+    // Evita tempeste di richieste (429) e doppioni tra Home/Analytics/SiteDetails.
+    const MAX_REPORT_CONCURRENCY = 2;
+    const inFlight = useRef(new Map()); // siteId -> Promise
+    const queue = useRef([]); // [{ run, resolve, reject }]
+    const activeCount = useRef(0);
+
+    const runNext = useCallback(() => {
+        if (activeCount.current >= MAX_REPORT_CONCURRENCY) return;
+        const next = queue.current.shift();
+        if (!next) return;
+        activeCount.current += 1;
+        next
+            .run()
+            .then(next.resolve)
+            .catch(next.reject)
+            .finally(() => {
+                activeCount.current -= 1;
+                runNext();
+            });
+    }, []);
+
+    const enqueue = useCallback((run) => {
+        return new Promise((resolve, reject) => {
+            queue.current.push({ run, resolve, reject });
+            runNext();
+        });
+    }, [runNext]);
 
     const getSiteReport = useCallback(async (siteId, force = false) => {
         // Allow UUID strings or numbers
@@ -176,51 +206,49 @@ export const DataProvider = ({ children }) => {
         // Normalize ID to string for object keys
         const validId = String(siteId);
 
-        // Prevent duplicate fetches for the same ID
-        if (fetchingSites.current.has(validId)) {
-            console.log(`[DataContext] Request for site ${validId} already in progress. Skipping.`);
-            return;
+        if (!force && inFlight.current.has(validId)) {
+            return inFlight.current.get(validId);
         }
 
-        fetchingSites.current.add(validId);
+        const task = enqueue(async () => {
+            setSiteReports(prev => {
+                const current = prev[validId] || { data: null, status: 'idle' };
+                const nextStatus = current.data ? 'refreshing' : 'loading';
+                return { ...prev, [validId]: { ...current, status: nextStatus } };
+            });
 
-        setSiteReports(prev => {
-            const current = prev[validId] || { data: null, status: 'idle' };
-            // Optimistic update: unique request guaranteed by ref
-            const nextStatus = current.data ? 'refreshing' : 'loading';
-            return { ...prev, [validId]: { ...current, status: nextStatus } };
+            try {
+                console.log(`[DataContext] Fetching report for site ${validId}...`);
+                const res = await retryOn429(() => analyticsAPI.getSiteReport(validId));
+                setSiteReports(prev => ({
+                    ...prev,
+                    [validId]: {
+                        data: res.data,
+                        status: 'ready',
+                        error: null,
+                        updatedAt: new Date()
+                    }
+                }));
+                return res.data;
+            } catch (error) {
+                console.error(`[DataContext] Error fetching site ${validId}:`, error);
+                setSiteReports(prev => ({
+                    ...prev,
+                    [validId]: {
+                        ...prev[validId],
+                        status: prev[validId]?.data ? 'ready' : 'error',
+                        error: error.message
+                    }
+                }));
+                throw error;
+            }
         });
 
+        inFlight.current.set(validId, task);
         try {
-            console.log(`[DataContext] Fetching report for site ${validId} (type: ${typeof validId})...`);
-            const res = await retryOn429(() => analyticsAPI.getSiteReport(validId));
-            console.log(`[DataContext] Received report for site ${validId}:`, res.data ? 'Data present' : 'No data');
-            if (res.data) {
-                console.log(`[DataContext] Site ${validId} ContractValue:`, res.data.contractValue);
-                console.log(`[DataContext] Site ${validId} TotalCost:`, res.data.siteCost?.total);
-            }
-
-            setSiteReports(prev => ({
-                ...prev,
-                [validId]: {
-                    data: res.data,
-                    status: 'ready',
-                    error: null,
-                    updatedAt: new Date()
-                }
-            }));
-        } catch (error) {
-            console.error(`[DataContext] Error fetching site ${validId}:`, error);
-            setSiteReports(prev => ({
-                ...prev,
-                [validId]: {
-                    ...prev[validId],
-                    status: 'error',
-                    error: error.message
-                }
-            }));
+            return await task;
         } finally {
-            fetchingSites.current.delete(validId);
+            inFlight.current.delete(validId);
         }
     }, []);
 
@@ -246,30 +274,30 @@ export const DataProvider = ({ children }) => {
     // Only clear if user explicitly logged out (hadFullUser was true, now user is null)
     // This prevents accidental clearing during page refresh auth re-verification
     useEffect(() => {
-        if (!user && !authLoading && hadFullUser.current) {
+        const token = localStorage.getItem('token');
+        if (!token && !authLoading && hadFullUser.current) {
             console.log('[DataContext] User logged out. Clearing data...');
             setDashboard({ data: null, status: 'idle', error: null, updatedAt: null });
             setSites({ data: [], status: 'idle', error: null, updatedAt: null });
             setSiteReports({});
-            // Clear sessionStorage
-            sessionStorage.removeItem('work360_dashboard');
-            sessionStorage.removeItem('work360_sites');
-            sessionStorage.removeItem('work360_siteReports');
+            // Clear localStorage cache
+            localStorage.removeItem('work360_dashboard');
+            localStorage.removeItem('work360_sites');
+            localStorage.removeItem('work360_siteReports');
             hadFullUser.current = false;
         }
     }, [user, authLoading]);
 
-    // ─── PERSISTENCE TO SESSIONSTORAGE ───────────────────────────────────
-    // SessionStorage: survives page refresh but clears when browser closes
+    // ─── PERSISTENCE TO LOCALSTORAGE ───────────────────────────────────
     useEffect(() => {
         if (dashboard.status === 'ready' && dashboard.data) {
-            saveToSession('work360_dashboard', dashboard);
+            saveToStorage('work360_dashboard', dashboard);
         }
     }, [dashboard]);
 
     useEffect(() => {
         if (sites.status === 'ready' && sites.data?.length > 0) {
-            saveToSession('work360_sites', sites);
+            saveToStorage('work360_sites', sites);
         }
     }, [sites]);
 
@@ -281,7 +309,7 @@ export const DataProvider = ({ children }) => {
                 .reduce((acc, [id, report]) => ({ ...acc, [id]: report }), {});
 
             if (Object.keys(readyReports).length > 0) {
-                saveToSession('work360_siteReports', readyReports);
+                saveToStorage('work360_siteReports', readyReports);
             }
         }
     }, [siteReports]);
