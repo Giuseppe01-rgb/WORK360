@@ -337,7 +337,7 @@ const getSiteReport = async (req, res, next) => {
             };
         });
 
-        res.json({
+        const responsePayload = {
             // Parse numeric fields from raw SQL results
             materials: materials.map(m => ({
                 id: m.id,
@@ -409,7 +409,47 @@ const getSiteReport = async (req, res, next) => {
                 siteDbContractValue: site?.contractValue,
                 siteDbCompanyId: site?.companyId
             }
+        };
+
+        // CHECK FOR DUPLICATES (Data Fragmentation Issue)
+        const duplicateSites = await ConstructionSite.findAll({
+            where: {
+                companyId,
+                name: site.name,
+                id: { [Op.ne]: siteId }
+            },
+            attributes: ['id', 'contractValue', 'createdAt']
         });
+
+        if (duplicateSites.length > 0) {
+            console.warn(`[Analytics] FOUND DUPLICATE SITES for "${site.name}":`, duplicateSites.map(d => d.id));
+
+            // Check if those duplicates have data
+            const duplicatesWithData = [];
+            for (const dup of duplicateSites) {
+                const activityCount = await WorkActivity.count({ where: { siteId: dup.id } });
+                const attendanceCount = await Attendance.count({ where: { siteId: dup.id } });
+
+                if (activityCount > 0 || attendanceCount > 0) {
+                    duplicatesWithData.push({
+                        id: dup.id,
+                        contractValue: dup.contractValue,
+                        createdAt: dup.createdAt,
+                        dataCount: activityCount + attendanceCount
+                    });
+                }
+            }
+
+            if (duplicatesWithData.length > 0) {
+                responsePayload.dataSplitWarning = {
+                    message: `Attenzione: Trovati altri ${duplicatesWithData.length} cantieri con lo stesso nome che contengono dati.`,
+                    duplicates: duplicatesWithData
+                };
+            }
+        }
+
+        res.json(responsePayload);
+
     } catch (error) {
         next(error);
     }

@@ -274,6 +274,46 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                 </div>
             </div>
 
+            {/* DUPLICATE SITE WARNING (Added for diagnosis) */}
+            {report?.dataSplitWarning && (
+                <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6 rounded-r-xl shadow-sm animate-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                            <AlertCircle className="h-6 w-6 text-amber-600" aria-hidden="true" />
+                        </div>
+                        <div className="ml-3 w-full">
+                            <h3 className="text-base font-bold text-amber-800">
+                                ⚠️ Attenzione: Possibile duplicazione cantiere rilevata
+                            </h3>
+                            <div className="mt-2 text-sm text-amber-700">
+                                <p className="mb-2 font-medium">{report.dataSplitWarning.message}</p>
+
+                                {report.dataSplitWarning.duplicates && (
+                                    <div className="bg-white/60 rounded-lg p-3 border border-amber-200 mb-3">
+                                        <p className="text-xs font-semibold text-amber-800 mb-2 uppercase tracking-wide">Cantieri duplicati con dati:</p>
+                                        <ul className="space-y-2">
+                                            {report.dataSplitWarning.duplicates.map(d => (
+                                                <li key={d.id} className="text-xs flex flex-wrap gap-2 items-center bg-white p-2 rounded border border-amber-100 shadow-sm">
+                                                    <span className="font-mono bg-amber-100 px-1 rounded text-amber-900 select-all">{d.id}</span>
+                                                    <span className="text-slate-500">Creato il: {new Date(d.createdAt).toLocaleDateString()}</span>
+                                                    <span className="font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full ml-auto">
+                                                        {d.dataCount} {d.dataCount === 1 ? 'record' : 'records'}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                <p className="mt-2 font-bold text-amber-900 border-t border-amber-200 pt-2">
+                                    💡 Soluzione consigliata: Torna alla lista cantieri e cerca di identificare quello corretto (probabilmente quello creato prima o con un ID diverso).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* DEBUG PROBE UI - ALWAYS VISIBLE FOR DIAGNOSIS */}
             <div className="bg-red-50 border-2 border-red-200 p-4 rounded-xl mb-6 font-mono text-xs overflow-x-auto">
                 <div className="flex justify-between items-start mb-2">

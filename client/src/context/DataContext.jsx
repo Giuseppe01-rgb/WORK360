@@ -151,12 +151,22 @@ export const DataProvider = ({ children }) => {
 
     // ─── INITIALIZATION ──────────────────────────────────────────────────
 
-    // Optional: Auto-load dashboard on mount if user is owner
+    // Auto-load dashboard on mount if user is owner
     useEffect(() => {
         if (user?.role === 'owner' && dashboard.status === 'idle') {
             refreshDashboard();
         }
     }, [user, dashboard.status, refreshDashboard]);
+
+    // RESET STATE ON LOGOUT
+    useEffect(() => {
+        if (!user) {
+            console.log('[DataContext] User logged out. Clearing data...');
+            setDashboard({ data: null, status: 'idle', error: null, updatedAt: null });
+            setSites({ data: [], status: 'idle', error: null, updatedAt: null });
+            setSiteReports({});
+        }
+    }, [user]);
 
 
     const value = {
