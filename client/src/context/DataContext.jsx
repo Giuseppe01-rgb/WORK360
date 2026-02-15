@@ -86,7 +86,8 @@ export const DataProvider = ({ children }) => {
             setStatus(setDashboard, 'error', err);
             setStatus(setSites, 'error', err);
         }
-    }, [dashboard.updatedAt, dashboard.status]); // Depend on status to allow retries? Actually simpler to just allow calls.
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // Rimosso dashboard.status dalle dipendenze per evitare loop infiniti
 
     // Track in-flight requests to prevent duplicates
     const fetchingSites = useRef(new Set());
@@ -156,7 +157,8 @@ export const DataProvider = ({ children }) => {
         if (user?.role === 'owner' && dashboard.status === 'idle') {
             refreshDashboard();
         }
-    }, [user, dashboard.status, refreshDashboard]);
+    }, [user, dashboard.status]); // eslint-disable-line react-hooks/exhaustive-deps
+    // refreshDashboard è stabile via useCallback, non serve nelle dipendenze
 
     // RESET STATE ON LOGOUT
     useEffect(() => {
