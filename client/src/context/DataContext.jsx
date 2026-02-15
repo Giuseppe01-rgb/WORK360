@@ -13,7 +13,7 @@ export const useData = () => {
 };
 
 export const DataProvider = ({ children }) => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth(); // Importa anche authLoading
 
     // ─── HELPERS FOR SESSIONSTORAGE (survives page refresh, not browser close) ───
     const loadFromSession = (key, defaultValue) => {
@@ -212,8 +212,10 @@ export const DataProvider = ({ children }) => {
     // refreshDashboard è stabile via useCallback, non serve nelle dipendenze
 
     // RESET STATE ON LOGOUT
+    // IMPORTANTE: Cancella solo se user è null E non stiamo più caricando l'auth
+    // Questo previene la cancellazione accidentale durante il refresh della pagina
     useEffect(() => {
-        if (!user) {
+        if (!user && !authLoading) {
             console.log('[DataContext] User logged out. Clearing data...');
             setDashboard({ data: null, status: 'idle', error: null, updatedAt: null });
             setSites({ data: [], status: 'idle', error: null, updatedAt: null });
@@ -223,7 +225,7 @@ export const DataProvider = ({ children }) => {
             sessionStorage.removeItem('work360_sites');
             sessionStorage.removeItem('work360_siteReports');
         }
-    }, [user]);
+    }, [user, authLoading]);
 
     // ─── PERSISTENCE TO SESSIONSTORAGE ───────────────────────────────────
     // SessionStorage: survives page refresh but clears when browser closes
