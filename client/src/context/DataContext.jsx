@@ -15,25 +15,63 @@ export const useData = () => {
 export const DataProvider = ({ children }) => {
     const { user } = useAuth();
 
+    // ─── HELPERS FOR SESSIONSTORAGE (survives page refresh, not browser close) ───
+    const loadFromSession = (key, defaultValue) => {
+        try {
+            const stored = sessionStorage.getItem(key);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                // Check if data is fresh (less than 5 minutes old)
+                if (parsed.savedAt && (Date.now() - parsed.savedAt < 5 * 60 * 1000)) {
+                    return parsed.value;
+                }
+            }
+            return defaultValue;
+        } catch (error) {
+            console.error(`[DataContext] Error loading ${key} from sessionStorage:`, error);
+            return defaultValue;
+        }
+    };
+
+    const saveToSession = (key, value) => {
+        try {
+            sessionStorage.setItem(key, JSON.stringify({
+                value,
+                savedAt: Date.now()
+            }));
+        } catch (error) {
+            console.error(`[DataContext] Error saving ${key} to sessionStorage:`, error);
+        }
+    };
+
     // ─── STATE MANAGEMENT ────────────────────────────────────────────────
     // Structure: { data: any, status: 'idle' | 'loading' | 'refreshing' | 'ready' | 'error', error: null, updatedAt: null }
 
-    const [dashboard, setDashboard] = useState({
-        data: null,
-        status: 'idle',
-        error: null,
-        updatedAt: null
+    const [dashboard, setDashboard] = useState(() => {
+        const cached = loadFromSession('work360_dashboard', null);
+        return cached || {
+            data: null,
+            status: 'idle',
+            error: null,
+            updatedAt: null
+        };
     });
 
-    const [sites, setSites] = useState({
-        data: [],
-        status: 'idle',
-        error: null,
-        updatedAt: null
+    const [sites, setSites] = useState(() => {
+        const cached = loadFromSession('work360_sites', null);
+        return cached || {
+            data: [],
+            status: 'idle',
+            error: null,
+            updatedAt: null
+        };
     });
 
     // Cache for individual site reports: { [siteId]: { data, status, ... } }
-    const [siteReports, setSiteReports] = useState({});
+    const [siteReports, setSiteReports] = useState(() => {
+        const cached = loadFromSession('work360_siteReports', null);
+        return cached || {};
+    });
 
     // ─── HELPERS ─────────────────────────────────────────────────────────
 
@@ -167,8 +205,39 @@ export const DataProvider = ({ children }) => {
             setDashboard({ data: null, status: 'idle', error: null, updatedAt: null });
             setSites({ data: [], status: 'idle', error: null, updatedAt: null });
             setSiteReports({});
+            // Clear sessionStorage
+            sessionStorage.removeItem('work360_dashboard');
+            sessionStorage.removeItem('work360_sites');
+            sessionStorage.removeItem('work360_siteReports');
         }
     }, [user]);
+
+    // ─── PERSISTENCE TO SESSIONSTORAGE ───────────────────────────────────
+    // SessionStorage: survives page refresh but clears when browser closes
+    useEffect(() => {
+        if (dashboard.status === 'ready' && dashboard.data) {
+            saveToSession('work360_dashboard', dashboard);
+        }
+    }, [dashboard]);
+
+    useEffect(() => {
+        if (sites.status === 'ready' && sites.data?.length > 0) {
+            saveToSession('work360_sites', sites);
+        }
+    }, [sites]);
+
+    useEffect(() => {
+        if (Object.keys(siteReports).length > 0) {
+            // Only save site reports that are ready
+            const readyReports = Object.entries(siteReports)
+                .filter(([_, report]) => report.status === 'ready' && report.data)
+                .reduce((acc, [id, report]) => ({ ...acc, [id]: report }), {});
+            
+            if (Object.keys(readyReports).length > 0) {
+                saveToSession('work360_siteReports', readyReports);
+            }
+        }
+    }, [siteReports]);
 
 
     const value = {
