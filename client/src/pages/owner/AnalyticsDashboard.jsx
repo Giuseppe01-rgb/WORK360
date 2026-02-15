@@ -491,21 +491,21 @@ export default function AnalyticsDashboard() {
                                     <div className="bg-white p-4 rounded-lg border border-slate-100">
                                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Presenze</div>
                                         <div className="font-bold text-xl text-slate-900">
-                                            {stat.totalAttendances}
+                                            {stat.totalAttendances ?? '—'}
                                         </div>
                                     </div>
 
                                     <div className="bg-white p-4 rounded-lg border border-slate-100">
                                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Ore Lavorate</div>
                                         <div className="font-bold text-xl text-slate-900">
-                                            {stat.totalHours.toFixed(1)}h
+                                            {stat.totalHours != null ? `${stat.totalHours.toFixed(1)}h` : '—'}
                                         </div>
                                     </div>
 
                                     <div className="bg-white p-4 rounded-lg border border-slate-100">
                                         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Dipendenti</div>
                                         <div className="font-bold text-xl text-slate-900">
-                                            {stat.uniqueWorkers}
+                                            {stat.uniqueWorkers ?? '—'}
                                         </div>
                                     </div>
 
