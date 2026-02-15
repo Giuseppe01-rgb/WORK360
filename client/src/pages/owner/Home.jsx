@@ -254,8 +254,10 @@ export default function Home() {
     }, [sites.data, sites.status]); // Recalculate when sites data updates
 
 
-    // Loading State: Only explicit loading (initial load). Refreshing keeps old data visible.
-    const isLoading = dashboard.status === 'loading' || sites.status === 'loading';
+    // Loading State: Only show spinner if NO data at all (first load)
+    // If we have cached data, show it even during refresh
+    const hasData = dashboard.data || sites.data?.length > 0;
+    const isLoading = (dashboard.status === 'loading' || sites.status === 'loading') && !hasData;
     const isRefreshing = dashboard.status === 'refreshing' || sites.status === 'refreshing';
 
     useEffect(() => {
@@ -269,6 +271,7 @@ export default function Home() {
         return () => clearInterval(interval);
     }, [refreshDashboard, dashboard.status]);
 
+    // Only show loading spinner if there's NO data at all (first load)
     if (isLoading) {
         return (
             <Layout title="Home" hideHeader>

@@ -185,12 +185,12 @@ export default function AnalyticsDashboard() {
     const activeData = selectedSite ? filteredDashboard : dashboard.data;
 
     // Loading State
-    // If global mode: loading if context is loading (initial).
-    // If filtered mode: loading if filtering is true.
-    // OPTIMIZATION: Show context data while filtering? No, misleading. Show loading spinner for filter.
+    // Only show spinner if we have NO data at all (first time)
+    // If we have cached data, show it even during refresh
+    const hasData = dashboard.data || filteredDashboard;
     const isLoading =
-        (!selectedSite && (dashboard.status === 'loading' && !dashboard.data)) ||
-        (selectedSite && (filtering && !filteredDashboard));
+        (!selectedSite && dashboard.status === 'loading' && !hasData) ||
+        (selectedSite && filtering && !hasData);
 
     if (isLoading) {
         return (
