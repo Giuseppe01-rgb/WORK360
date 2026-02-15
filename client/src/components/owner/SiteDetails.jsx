@@ -7,6 +7,11 @@ import { useData } from '../../context/DataContext';
 import { exportSiteReport } from '../../utils/excelExport';
 
 const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
+    const { siteReports, getSiteReport } = useData();
+    // Resolve siteId early to ensure it's available for all effects and handlers
+    const siteId = site?.id || site?._id;
+    const reportState = siteId ? (siteReports[siteId] || { data: null, status: 'idle' }) : { data: null, status: 'idle' };
+
     const [activeTab, setActiveTab] = useState('dati');
     const [report, setReport] = useState(null);
     const [employeeHours, setEmployeeHours] = useState([]);
@@ -235,20 +240,30 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     };
 
 
-    const { siteReports, getSiteReport } = useData();
-    // FIX: Remove Number() casting. site.id is a UUID string.
-    const siteId = site.id;
-    const reportState = siteReports[siteId] || { data: null, status: 'idle' };
 
     // Sync context report to local state for compatibility with existing UI
     useEffect(() => {
         if (reportState.data) {
             setReport(reportState.data);
+        } else if (reportState.status === 'loading') {
+            setReport(null); // Clear previous site data while loading new one
         }
-    }, [reportState.data]);
+    }, [reportState.data, reportState.status]);
 
     useEffect(() => {
         let isMounted = true;
+
+        if (!siteId) {
+            setLoading(false);
+            return;
+        }
+
+        // Reset local states when siteId changes to avoid showing stale data from previous cantiere
+        setEmployeeHours([]);
+        setNotes([]);
+        setDailyReports([]);
+        setPhotos([]);
+        setEconomie([]);
 
         const loadDetails = async () => {
             if (!siteId) return;
@@ -311,12 +326,6 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
         return () => { isMounted = false; };
     }, [siteId, getSiteReport]);
 
-    // Sync Context Report to Local State
-    useEffect(() => {
-        if (reportState.data) {
-            setReport(reportState.data);
-        }
-    }, [reportState.data]);
 
     // Computed loading state for UI
     // Block blocking load ONLY if we have absolutely no data. 
