@@ -92,14 +92,14 @@ export const DataProvider = ({ children }) => {
     const fetchingSites = useRef(new Set());
 
     const getSiteReport = useCallback(async (siteId, force = false) => {
-        const id = Number(siteId);
-        if (!id || isNaN(id)) {
-            console.error('[DataContext] Invalid siteId:', siteId);
+        // Allow UUID strings or numbers
+        if (!siteId) {
+            console.error('[DataContext] Invalid siteId (empty):', siteId);
             return;
         }
 
-        // Normalize ID to string for object keys to avoid mismatch
-        const validId = String(id);
+        // Normalize ID to string for object keys
+        const validId = String(siteId);
 
         // Prevent duplicate fetches for the same ID
         if (fetchingSites.current.has(validId)) {
@@ -118,7 +118,7 @@ export const DataProvider = ({ children }) => {
 
         try {
             console.log(`[DataContext] Fetching report for site ${validId} (type: ${typeof validId})...`);
-            const res = await analyticsAPI.getSiteReport(id); // API expects number or string, usually fine
+            const res = await analyticsAPI.getSiteReport(validId); // Pass string ID (UUID or number string)
             console.log(`[DataContext] Received report for site ${validId}:`, res.data ? 'Data present' : 'No data');
             if (res.data) {
                 console.log(`[DataContext] Site ${validId} ContractValue:`, res.data.contractValue);
