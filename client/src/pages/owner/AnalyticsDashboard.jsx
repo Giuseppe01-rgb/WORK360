@@ -58,6 +58,22 @@ const getMarginStatusLabel = (marginStatus) => {
 
 import { useData } from '../../context/DataContext';
 
+// Helper function to batch async calls to avoid rate limiting (429)
+// Processes array in chunks of maxConcurrent at a time
+const batchAsyncCalls = async (items, asyncFn, maxConcurrent = 3) => {
+    const results = [];
+    for (let i = 0; i < items.length; i += maxConcurrent) {
+        const chunk = items.slice(i, i + maxConcurrent);
+        const chunkResults = await Promise.all(chunk.map(asyncFn));
+        results.push(...chunkResults);
+        // Small delay between batches to be extra safe with rate limits
+        if (i + maxConcurrent < items.length) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+    return results;
+};
+
 export default function AnalyticsDashboard() {
     const { dashboard, sites, refreshDashboard } = useData();
     const [siteStats, setSiteStats] = useState([]);
@@ -114,33 +130,37 @@ export default function AnalyticsDashboard() {
                 // If selectedSite is empty, we are in "Global Mode" -> Context State.
 
                 // Load real stats for each site list
-                const siteStatsPromises = allSites.map(async (site) => {
-                    try {
-                        const siteReport = await analyticsAPI.getSiteReport(site.id);
-                        return {
-                            site: site,
-                            totalAttendances: siteReport.data?.totalAttendances || 0,
-                            totalHours: siteReport.data?.totalHours || 0,
-                            uniqueWorkers: siteReport.data?.uniqueWorkers || 0,
-                            materials: siteReport.data?.materials?.slice(0, 5) || [],
-                            marginPercent: siteReport.data?.marginPercent,
-                            marginStatus: siteReport.data?.status || 'unknown'
-                        };
-                    } catch (err) {
-                        console.error(`Error loading stats for site ${site.id}:`, err);
-                        return {
-                            site: site,
-                            totalAttendances: 0,
-                            totalHours: 0,
-                            uniqueWorkers: 0,
-                            materials: [],
-                            marginPercent: null,
-                            marginStatus: 'unknown'
-                        };
-                    }
-                });
+                // Use batching to avoid 429 rate limiting (max 3 concurrent requests)
+                const siteStatsData = await batchAsyncCalls(
+                    allSites,
+                    async (site) => {
+                        try {
+                            const siteReport = await analyticsAPI.getSiteReport(site.id);
+                            return {
+                                site: site,
+                                totalAttendances: siteReport.data?.totalAttendances || 0,
+                                totalHours: siteReport.data?.totalHours || 0,
+                                uniqueWorkers: siteReport.data?.uniqueWorkers || 0,
+                                materials: siteReport.data?.materials?.slice(0, 5) || [],
+                                marginPercent: siteReport.data?.marginPercent,
+                                marginStatus: siteReport.data?.status || 'unknown'
+                            };
+                        } catch (err) {
+                            console.error(`Error loading stats for site ${site.id}:`, err);
+                            return {
+                                site: site,
+                                totalAttendances: 0,
+                                totalHours: 0,
+                                uniqueWorkers: 0,
+                                materials: [],
+                                marginPercent: null,
+                                marginStatus: 'unknown'
+                            };
+                        }
+                    },
+                    3 // Max 3 concurrent requests at a time
+                );
 
-                const siteStatsData = await Promise.all(siteStatsPromises);
                 if (isMounted) setSiteStats(siteStatsData.filter(Boolean));
             } catch (err) {
                 console.error('Error loading site stats:', err);

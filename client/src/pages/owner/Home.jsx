@@ -18,6 +18,20 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { analyticsAPI } from '../../utils/api'; // Keep for specific site reports if needed, though they might move to context too
 
+// Helper function to batch async calls to avoid rate limiting (429)
+const batchAsyncCalls = async (items, asyncFn, maxConcurrent = 3) => {
+    const results = [];
+    for (let i = 0; i < items.length; i += maxConcurrent) {
+        const chunk = items.slice(i, i + maxConcurrent);
+        const chunkResults = await Promise.all(chunk.map(asyncFn));
+        results.push(...chunkResults);
+        if (i + maxConcurrent < items.length) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+    return results;
+};
+
 // ─── CSS for card transitions ────────────────────────────────────────
 const FLIP_STYLES = `
     .hyphens-auto { hyphens: auto; -webkit-hyphens: auto; }
@@ -213,12 +227,12 @@ export default function Home() {
 
                 if (activeSites.length > 0) {
                     // This specific detail fetch might still need to happen here if not in context siteReports
-                    // For now, let's keep it but ensure it doesn't block the main UI render
-                    // OPTIMIZATION: In a real scenario, we might want to lazy load this or have backend return it in dashboard
-                    const siteReports = await Promise.all(
-                        activeSites.map(async (site) => {
+                    // Use batching to avoid 429 rate limiting
+                    const siteReports = await batchAsyncCalls(
+                        activeSites,
+                        async (site) => {
                             try {
-                                const report = await analyticsAPI.getSiteReport(site.id); // Consider caching this too via getSiteReport context action if needed
+                                const report = await analyticsAPI.getSiteReport(site.id);
                                 const contractValue = Number.parseFloat(site.contractValue) || 0;
                                 const totalCost = report.data?.siteCost?.total || 0;
                                 const margin = contractValue - totalCost;
@@ -227,7 +241,8 @@ export default function Home() {
                             } catch {
                                 return null;
                             }
-                        })
+                        },
+                        3 // Max 3 concurrent requests
                     );
 
                     if (isMounted) {
