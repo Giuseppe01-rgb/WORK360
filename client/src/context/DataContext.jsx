@@ -49,7 +49,14 @@ export const DataProvider = ({ children }) => {
 
     const [dashboard, setDashboard] = useState(() => {
         const cached = loadFromSession('work360_dashboard', null);
-        return cached || {
+        if (cached && cached.data) {
+            // Se abbiamo dati cached, mostrali ma forza status 'idle' per triggerare il refresh
+            return {
+                ...cached,
+                status: 'idle' // Forza idle così i componenti fanno refresh
+            };
+        }
+        return {
             data: null,
             status: 'idle',
             error: null,
@@ -59,7 +66,13 @@ export const DataProvider = ({ children }) => {
 
     const [sites, setSites] = useState(() => {
         const cached = loadFromSession('work360_sites', null);
-        return cached || {
+        if (cached && cached.data) {
+            return {
+                ...cached,
+                status: 'idle' // Forza idle così i componenti fanno refresh
+            };
+        }
+        return {
             data: [],
             status: 'idle',
             error: null,
