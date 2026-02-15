@@ -251,38 +251,39 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
     }, [reportState.data, reportState.status]);
 
     useEffect(() => {
-        let isMounted = true;
+        if (!siteId) return;
 
-        if (!siteId) {
-            setLoading(false);
-            return;
-        }
+        console.log(`[SiteDetails] SiteId changed to: ${siteId}. Resetting states...`);
 
-        // Reset local states when siteId changes to avoid showing stale data from previous cantiere
+        // Reset all local data states when siteId changes to avoid showing stale data
+        setReport(null);
         setEmployeeHours([]);
         setNotes([]);
         setDailyReports([]);
         setPhotos([]);
         setEconomie([]);
+        setLoading(true);
+    }, [siteId]);
+
+    useEffect(() => {
+        let isMounted = true;
 
         const loadDetails = async () => {
             if (!siteId) return;
 
-            console.log(`[SiteDetails] Loading details for site ${siteId}...`);
+            console.log(`[SiteDetails] Triggering load for site ${siteId}...`);
             getSiteReport(siteId);
 
             try {
-                // Only show full spinner if we have NO data at all
-                if (!reportState.data && reportState.status !== 'ready') {
+                // If we don't have report data yet, ensure loading state is true
+                if (!reportState.data) {
                     setLoading(true);
                 }
 
                 // Helper for side-data with logging
                 const safeFetch = async (name, promise, fallback = { data: [] }) => {
                     try {
-                        console.log(`[SiteDetails] Fetching ${name}...`);
                         const res = await promise;
-                        console.log(`[SiteDetails] ${name} loaded. Count: ${res.data?.length || 0}`);
                         return res;
                     }
                     catch (e) {
@@ -294,35 +295,26 @@ const SiteDetails = ({ site, onBack, onDelete, showConfirm }) => {
                 const [hours, notesData, reportsData, photosData, economieData] = await Promise.all([
                     safeFetch('hours', analyticsAPI.getHoursPerEmployee({ siteId })),
                     safeFetch('notes', noteAPI.getAll({ siteId, type: 'note' })),
-                    // FIX: Use workActivityAPI instead of noteAPI for daily reports
                     safeFetch('daily_reports', workActivityAPI.getAll({ siteId })),
                     safeFetch('photos', photoAPI.getAll({ siteId })),
                     safeFetch('economie', economiaAPI.getBySite(siteId))
                 ]);
 
                 if (isMounted) {
-                    console.log('[SiteDetails] All data fetched successfully.');
                     setEmployeeHours(hours.data || []);
                     setNotes(notesData.data || []);
                     setDailyReports(reportsData.data || []);
                     setPhotos(photosData.data || []);
                     setEconomie(economieData.data || []);
+                    setLoading(false);
                 }
             } catch (err) {
                 console.error("[SiteDetails] Critical error loading site details:", err);
-            } finally {
-                if (isMounted) {
-                    setLoading(false);
-                }
+                if (isMounted) setLoading(false);
             }
         };
 
-        if (siteId) {
-            loadDetails();
-        } else {
-            setLoading(false);
-        }
-
+        loadDetails();
         return () => { isMounted = false; };
     }, [siteId, getSiteReport]);
 
