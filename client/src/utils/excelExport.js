@@ -627,29 +627,91 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
     sheet['!merges'] = merges;
 
     // ============================================================
-    // Apply cell styles: dark separator rows + light gray T.ASS rows
+    // Apply cell styles
     // ============================================================
-    const darkFill = { fgColor: { rgb: '333333' } };
-    const grayFill = { fgColor: { rgb: 'D9D9D9' } };
-    const whiteFontBold = { color: { rgb: 'FFFFFF' }, bold: true };
 
+    // Reusable style parts
+    const thinBorder = {
+        top: { style: 'thin', color: { rgb: '000000' } },
+        bottom: { style: 'thin', color: { rgb: '000000' } },
+        left: { style: 'thin', color: { rgb: '000000' } },
+        right: { style: 'thin', color: { rgb: '000000' } }
+    };
+    const headerFill = { fgColor: { rgb: 'BFBFBF' } };       // medium gray for header
+    const headerFont = { bold: true, sz: 10 };
+    const darkFill = { fgColor: { rgb: '333333' } };          // dark for separator
+    const grayFill = { fgColor: { rgb: 'E8E8E8' } };          // light gray for T.ASS
+    const nameStyle = {
+        font: { bold: true, sz: 10 },
+        alignment: { vertical: 'center', wrapText: true },
+        border: thinBorder
+    };
+
+    // --- 1. Style header rows (row 0 and row 1) ---
+    for (let c = 0; c < totalCols; c++) {
+        // Row 0: DIPENDENTE / FOGLIO PRESENZE / TOT headers
+        const h0 = XLSX.utils.encode_cell({ r: 0, c });
+        if (!sheet[h0]) sheet[h0] = { v: '', t: 's' };
+        sheet[h0].s = { fill: headerFill, font: { bold: true, sz: 11 }, border: thinBorder, alignment: { horizontal: 'center', vertical: 'center' } };
+
+        // Row 1: day numbers
+        const h1 = XLSX.utils.encode_cell({ r: 1, c });
+        if (!sheet[h1]) sheet[h1] = { v: '', t: 's' };
+        sheet[h1].s = { fill: headerFill, font: headerFont, border: thinBorder, alignment: { horizontal: 'center', vertical: 'center' } };
+    }
+
+    // --- 2. Style employee data rows ---
+    const totalRows = data.length;
     for (let i = 0; i < sortedEmployees.length; i++) {
         const blockStart = dataStartRow + (i * 5);
-        const tassRowIdx = blockStart + 2;  // T.ASS is the 3rd row (index +2)
-        const sepRowIdx = blockStart + 4;   // Separator is the 5th row (index +4)
+        const tassRowIdx = blockStart + 2;  // T.ASS row
+        const sepRowIdx = blockStart + 4;   // Separator row
 
         for (let c = 0; c < totalCols; c++) {
-            // Style T.ASS row — light gray
-            const tassCell = XLSX.utils.encode_cell({ r: tassRowIdx, c });
-            if (!sheet[tassCell]) sheet[tassCell] = { v: '', t: 's' };
-            sheet[tassCell].s = { fill: grayFill };
+            // All 4 data rows: ORD (blockStart), STRA (+1), T.ASS (+2), ASS (+3)
+            for (let r = blockStart; r <= blockStart + 3; r++) {
+                const cellRef = XLSX.utils.encode_cell({ r, c });
+                if (!sheet[cellRef]) sheet[cellRef] = { v: '', t: 's' };
 
-            // Style separator row — dark
+                const style = { border: thinBorder, alignment: { horizontal: 'center', vertical: 'center' } };
+
+                // T.ASS row gets gray fill
+                if (r === tassRowIdx) {
+                    style.fill = grayFill;
+                }
+
+                // Name cell (col A, first row): bold + vertical center
+                if (c === 0 && r === blockStart) {
+                    Object.assign(style, nameStyle);
+                    style.alignment = { vertical: 'center', horizontal: 'left', wrapText: true };
+                }
+
+                // Label cells (col B): bold
+                if (c === 1) {
+                    style.font = { bold: true, sz: 9 };
+                }
+
+                sheet[cellRef].s = style;
+            }
+
+            // Separator row: dark fill, no border needed (visual break)
             const sepCell = XLSX.utils.encode_cell({ r: sepRowIdx, c });
             if (!sheet[sepCell]) sheet[sepCell] = { v: '', t: 's' };
-            sheet[sepCell].s = { fill: darkFill, font: whiteFontBold };
+            sheet[sepCell].s = { fill: darkFill };
         }
     }
+
+    // Set row heights for separator rows (make them thinner)
+    const rows = [];
+    for (let r = 0; r < totalRows; r++) {
+        // Check if this is a separator row
+        let isSep = false;
+        for (let i = 0; i < sortedEmployees.length; i++) {
+            if (r === dataStartRow + (i * 5) + 4) { isSep = true; break; }
+        }
+        rows.push({ hpt: isSep ? 6 : 15 }); // separator = 6pt, normal = 15pt
+    }
+    sheet['!rows'] = rows;
 
     XLSX.utils.book_append_sheet(workbook, sheet, 'Foglio Presenze');
 
