@@ -482,52 +482,64 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
 
     // --- Build the Excel sheet ---
     const data = [];
+    const totalCols = 2 + daysInMonth + 3; // col A (name) + col B (label) + days + 3 totals
 
-    // Header rows
-    data.push(['IMPRESA', companyName || '', '', '', 'CASSA EDILE', '']);
-    data.push([]); // empty row
+    // ============================================================
+    // TABELLA TITOLI — 2-row header band
+    // ============================================================
 
-    // Title row
-    const titleRow = ['', '', `FOGLIO PRESENZE ${monthName} ${year}`];
-    data.push(titleRow);
-    data.push([]); // empty row
-
-    // Column headers
-    const headerRow1 = ['DIPENDENTE', ''];
-    for (let d = 1; d <= daysInMonth; d++) {
-        headerRow1.push(d);
-    }
-    headerRow1.push('TOT. ORD.');
-    headerRow1.push('TOT. STRA.');
-    headerRow1.push('TOT. ASS.');
+    // Row 0: DIPENDENTE | (blank) | "FOGLIO PRESENZE MESE ANNO" (centered) | TOT.ORD. | TOT.STR. | TOT.ASS.
+    const headerRow1 = new Array(totalCols).fill('');
+    headerRow1[0] = 'DIPENDENTE';
+    // Place title roughly in the middle of the day columns
+    const titleCol = 2 + Math.floor(daysInMonth / 2) - 2;
+    headerRow1[titleCol] = `FOGLIO PRESENZE ${monthName} ${year}`;
+    headerRow1[totalCols - 3] = 'TOT.\nORD.';
+    headerRow1[totalCols - 2] = 'TOT.\nSTR.';
+    headerRow1[totalCols - 1] = 'TOT.\nASS.';
     data.push(headerRow1);
+
+    // Row 1: (blank) | (blank) | 1 | 2 | 3 | ... | daysInMonth | (blank) | (blank) | (blank)
+    const headerRow2 = new Array(totalCols).fill('');
+    for (let d = 1; d <= daysInMonth; d++) {
+        headerRow2[1 + d] = d; // columns 2..32 = days
+    }
+    data.push(headerRow2);
+
+    // ============================================================
+    // TABELLA DEGLI OPERAI — 4 rows per employee
+    // ============================================================
 
     // Sort employees alphabetically
     const sortedEmployees = [...employeeMap.entries()].sort((a, b) =>
         a[1].name.localeCompare(b[1].name, 'it')
     );
 
-    // Build rows for each employee
     for (const [, emp] of sortedEmployees) {
-        const ordRow = [emp.name, 'ORD.'];
-        const straRow = ['', 'STRA.'];
-        const tassRow = ['', 'T. ASS'];
-        const assRow = ['', 'ASS.'];
+        // Prepare 4 rows: ORD, STRA, T.ASS, ASS
+        const ordRow = new Array(totalCols).fill('');
+        const straRow = new Array(totalCols).fill('');
+        const tassRow = new Array(totalCols).fill('');
+        const assRow = new Array(totalCols).fill('');
+
+        // Column A: employee name (only on first row)
+        ordRow[0] = emp.name;
+        // Column B: row labels
+        ordRow[1] = 'ORD.';
+        straRow[1] = 'STRA.';
+        tassRow[1] = 'T. ASS';
+        assRow[1] = 'ASS.';
 
         let totalOrd = 0;
         let totalStra = 0;
         let totalAss = 0;
 
         for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+            const colIdx = 1 + dayNum; // column index for this day
             const dayData = emp.days[dayNum];
 
             if (!dayData || (dayData.rawHours <= 0 && !dayData.absenceType)) {
-                // Empty day
-                ordRow.push('');
-                straRow.push('');
-                tassRow.push('');
-                assRow.push('');
-                continue;
+                continue; // leave cells empty
             }
 
             // Calculate ORD and STRA from raw hours
@@ -536,69 +548,80 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
 
             if (dayData.rawHours > 0) {
                 if (dayData.rawHours > 10) {
-                    // Overtime: only if > 10h
+                    // Overtime only if > 10h
                     ordHours = 8;
                     const extra = dayData.rawHours - 8;
                     straHours = Math.round(extra);
                     if (straHours < 1) straHours = 1;
                 } else {
-                    // Normal day: apply rounding (≥6h30m → 8h)
                     ordHours = roundWorkHours(dayData.rawHours);
                     straHours = 0;
                 }
             }
 
-            // Fill ORD
-            ordRow.push(ordHours > 0 ? ordHours : '');
-            totalOrd += ordHours;
-
-            // Fill STRA
-            straRow.push(straHours > 0 ? straHours : '');
-            totalStra += straHours;
-
-            // Fill T.ASS and ASS
+            // Fill day cells
+            if (ordHours > 0) {
+                ordRow[colIdx] = ordHours;
+                totalOrd += ordHours;
+            }
+            if (straHours > 0) {
+                straRow[colIdx] = straHours;
+                totalStra += straHours;
+            }
             if (dayData.absenceType) {
-                tassRow.push(dayData.absenceType);
-                assRow.push(dayData.absenceHours || 8);
+                tassRow[colIdx] = dayData.absenceType;
+                assRow[colIdx] = dayData.absenceHours || 8;
                 totalAss += (dayData.absenceHours || 8);
-            } else {
-                tassRow.push('');
-                assRow.push('');
             }
         }
 
-        // Add totals — all on the ORD row for clean alignment
-        ordRow.push(totalOrd);
-        ordRow.push(totalStra);
-        ordRow.push(totalAss);
-
-        // Empty cells for STRA/T.ASS/ASS rows in total columns
-        straRow.push('', '', '');
-        tassRow.push('', '', '');
-        assRow.push('', '', '');
+        // Totals in the last 3 columns (on the ORD row)
+        ordRow[totalCols - 3] = totalOrd;
+        ordRow[totalCols - 2] = totalStra;
+        ordRow[totalCols - 1] = totalAss;
 
         data.push(ordRow);
         data.push(straRow);
         data.push(tassRow);
         data.push(assRow);
-        data.push([]); // separator row between employees
     }
 
-    // Create sheet
+    // ============================================================
+    // Create sheet with formatting
+    // ============================================================
     const sheet = XLSX.utils.aoa_to_sheet(data);
 
-    // Set column widths
+    // Column widths
     const cols = [
-        { wch: 22 }, // DIPENDENTE
-        { wch: 6 },  // ORD./STRA./T.ASS/ASS.
+        { wch: 24 }, // A: DIPENDENTE
+        { wch: 7 },  // B: ORD./STRA./T.ASS/ASS.
     ];
     for (let d = 1; d <= daysInMonth; d++) {
         cols.push({ wch: 5 }); // day columns
     }
-    cols.push({ wch: 10 }); // TOT. ORD.
-    cols.push({ wch: 10 }); // TOT. STRA.
-    cols.push({ wch: 10 }); // TOT. ASS.
+    cols.push({ wch: 7 }); // TOT. ORD.
+    cols.push({ wch: 7 }); // TOT. STR.
+    cols.push({ wch: 7 }); // TOT. ASS.
     sheet['!cols'] = cols;
+
+    // Merge cells for the title "FOGLIO PRESENZE..." across day columns
+    const merges = [];
+    // Merge title across a range of day columns (row 0)
+    merges.push({
+        s: { r: 0, c: 2 },                     // start: row 0, col 2
+        e: { r: 0, c: 2 + daysInMonth - 1 }    // end: row 0, last day col
+    });
+
+    // Merge employee name cells vertically (4 rows each)
+    const dataStartRow = 2; // data starts after 2 header rows
+    for (let i = 0; i < sortedEmployees.length; i++) {
+        const empRow = dataStartRow + (i * 4);
+        merges.push({
+            s: { r: empRow, c: 0 },     // start: first row of employee block, col A
+            e: { r: empRow + 3, c: 0 }  // end: last row of employee block, col A
+        });
+    }
+    sheet['!merges'] = merges;
 
     XLSX.utils.book_append_sheet(workbook, sheet, 'Foglio Presenze');
 
