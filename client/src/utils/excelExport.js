@@ -1,8 +1,8 @@
 /**
  * Excel Export Utility
- * Uses SheetJS (xlsx) to generate Excel files client-side
+ * Uses xlsx-js-style (SheetJS fork with styling) to generate Excel files client-side
  */
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 
 /**
  * Format currency for Italian locale
@@ -625,6 +625,31 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
         });
     }
     sheet['!merges'] = merges;
+
+    // ============================================================
+    // Apply cell styles: dark separator rows + light gray T.ASS rows
+    // ============================================================
+    const darkFill = { fgColor: { rgb: '333333' } };
+    const grayFill = { fgColor: { rgb: 'D9D9D9' } };
+    const whiteFontBold = { color: { rgb: 'FFFFFF' }, bold: true };
+
+    for (let i = 0; i < sortedEmployees.length; i++) {
+        const blockStart = dataStartRow + (i * 5);
+        const tassRowIdx = blockStart + 2;  // T.ASS is the 3rd row (index +2)
+        const sepRowIdx = blockStart + 4;   // Separator is the 5th row (index +4)
+
+        for (let c = 0; c < totalCols; c++) {
+            // Style T.ASS row — light gray
+            const tassCell = XLSX.utils.encode_cell({ r: tassRowIdx, c });
+            if (!sheet[tassCell]) sheet[tassCell] = { v: '', t: 's' };
+            sheet[tassCell].s = { fill: grayFill };
+
+            // Style separator row — dark
+            const sepCell = XLSX.utils.encode_cell({ r: sepRowIdx, c });
+            if (!sheet[sepCell]) sheet[sepCell] = { v: '', t: 's' };
+            sheet[sepCell].s = { fill: darkFill, font: whiteFontBold };
+        }
+    }
 
     XLSX.utils.book_append_sheet(workbook, sheet, 'Foglio Presenze');
 
