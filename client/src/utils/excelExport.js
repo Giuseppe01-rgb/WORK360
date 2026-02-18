@@ -337,8 +337,10 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
     // Map: employeeId -> { name, days: { dayNum -> { rawHours, absenceType, absenceHours } } }
     const employeeMap = new Map();
 
-    // Initialize all employees
+    // Initialize all employees (only those included in Presenze)
     for (const user of users) {
+        // Skip employees excluded from Foglio Presenze
+        if (user.includeInPresenze === false) continue;
         const fullName = `${(user.lastName || '').toUpperCase()} ${(user.firstName || '').toUpperCase()}`.trim();
         if (!fullName) continue;
         employeeMap.set(user.id, {
@@ -584,6 +586,7 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
         data.push(straRow);
         data.push(tassRow);
         data.push(assRow);
+        data.push(new Array(totalCols).fill('')); // separator row between employees
     }
 
     // ============================================================
@@ -612,13 +615,13 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
         e: { r: 0, c: 2 + daysInMonth - 1 }    // end: row 0, last day col
     });
 
-    // Merge employee name cells vertically (4 rows each)
+    // Merge employee name cells vertically (4 data rows + 1 separator = 5 per block)
     const dataStartRow = 2; // data starts after 2 header rows
     for (let i = 0; i < sortedEmployees.length; i++) {
-        const empRow = dataStartRow + (i * 4);
+        const empRow = dataStartRow + (i * 5); // 5 rows per block (4 data + 1 separator)
         merges.push({
             s: { r: empRow, c: 0 },     // start: first row of employee block, col A
-            e: { r: empRow + 3, c: 0 }  // end: last row of employee block, col A
+            e: { r: empRow + 3, c: 0 }  // end: 4th row of employee block, col A
         });
     }
     sheet['!merges'] = merges;

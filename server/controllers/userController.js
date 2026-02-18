@@ -131,6 +131,7 @@ const updateUser = async (req, res) => {
         if (phone !== undefined) updateData.phone = phone;
         if (birthDate !== undefined) updateData.birthDate = birthDate;
         if (req.body.hourlyCost !== undefined) updateData.hourlyCost = req.body.hourlyCost;
+        if (req.body.includeInPresenze !== undefined) updateData.includeInPresenze = req.body.includeInPresenze;
 
         // Sanitize dates
         const sanitizedUpdate = sanitizeAllDates(updateData);

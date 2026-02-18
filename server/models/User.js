@@ -76,6 +76,11 @@ User.init({
         type: DataTypes.DECIMAL(10, 2),
         defaultValue: 0,
         field: 'hourly_cost'
+    },
+    includeInPresenze: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+        field: 'include_in_presenze'
     }
 }, {
     sequelize,

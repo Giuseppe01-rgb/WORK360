@@ -26,7 +26,8 @@ export default function EmployeeManagement() {
         email: '',
         phone: '',
         birthDate: '',
-        hourlyCost: ''
+        hourlyCost: '',
+        includeInPresenze: true
     });
 
     useEffect(() => {
@@ -81,7 +82,8 @@ export default function EmployeeManagement() {
             email: employee.email || '',
             phone: employee.phone || '',
             birthDate: employee.birthDate ? new Date(employee.birthDate).toISOString().split('T')[0] : '',
-            hourlyCost: employee.hourlyCost || ''
+            hourlyCost: employee.hourlyCost || '',
+            includeInPresenze: employee.includeInPresenze !== false
         });
         setShowModal(true);
     };
@@ -128,7 +130,7 @@ export default function EmployeeManagement() {
     };
 
     const resetForm = () => {
-        setFormData({ role: 'worker', firstName: '', lastName: '', email: '', phone: '', birthDate: '', hourlyCost: '' });
+        setFormData({ role: 'worker', firstName: '', lastName: '', email: '', phone: '', birthDate: '', hourlyCost: '', includeInPresenze: true });
         setEditingEmployee(null);
         setShowModal(false);
     };
@@ -458,6 +460,32 @@ export default function EmployeeManagement() {
                                         onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                                         className="w-full max-w-full block min-h-[50px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-base font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none"
                                     />
+                                </div>
+
+                                <div>
+                                    <span className="block text-sm font-bold text-slate-900 mb-2">Includi nel foglio presenze?</span>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, includeInPresenze: true })}
+                                            className={`p-3 rounded-xl border-2 font-bold transition-all text-sm ${formData.includeInPresenze
+                                                ? 'border-green-600 bg-green-50 text-green-700'
+                                                : 'border-slate-200 hover:border-slate-300 text-slate-500'
+                                                }`}
+                                        >
+                                            ✅ Sì
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, includeInPresenze: false })}
+                                            className={`p-3 rounded-xl border-2 font-bold transition-all text-sm ${!formData.includeInPresenze
+                                                ? 'border-red-600 bg-red-50 text-red-700'
+                                                : 'border-slate-200 hover:border-slate-300 text-slate-500'
+                                                }`}
+                                        >
+                                            ❌ No
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
