@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Layout from '../../components/Layout';
-import { attendanceAPI, siteAPI, userAPI } from '../../utils/api';
+import { attendanceAPI, siteAPI, userAPI, absenceRequestAPI, companyAPI } from '../../utils/api';
 import { Calendar, MapPin, Clock, User, Filter, RefreshCcw, CheckCircle, AlertCircle, Plus, Edit2, Trash2, Zap, Download, FileSpreadsheet, ChevronRight, X } from 'lucide-react';
-import { exportAttendanceReport } from '../../utils/excelExport';
+import { exportAttendanceReport, exportFoglioPresenze } from '../../utils/excelExport';
 import AttendanceModal from '../../components/owner/AttendanceModal';
 import BulkAttendanceModal from '../../components/owner/BulkAttendanceModal';
 import AttendanceExcelImportModal from '../../components/owner/AttendanceExcelImportModal';
@@ -23,6 +23,10 @@ export default function AttendanceList() {
     const [showExcelImportModal, setShowExcelImportModal] = useState(false);
     const [editingAttendance, setEditingAttendance] = useState(null);
     const [selectedAttendance, setSelectedAttendance] = useState(null);
+    const [companyName, setCompanyName] = useState('');
+    const [exportMonth, setExportMonth] = useState(new Date().getMonth() + 1);
+    const [exportYear, setExportYear] = useState(new Date().getFullYear());
+    const [exporting, setExporting] = useState(false);
     const [filters, setFilters] = useState({
         siteId: '',
         userId: '',
@@ -43,12 +47,14 @@ export default function AttendanceList() {
 
     const loadData = async () => {
         try {
-            const [sitesResponse, usersResponse] = await Promise.all([
+            const [sitesResponse, usersResponse, companyResponse] = await Promise.all([
                 siteAPI.getAll(),
-                userAPI.getAll()
+                userAPI.getAll(),
+                companyAPI.get().catch(() => ({ data: {} }))
             ]);
             setSites(sitesResponse.data || []);
             setUsers(usersResponse.data?.filter(u => u.role === 'worker' || u.role === 'owner') || []);
+            setCompanyName(companyResponse.data?.name || '');
         } catch (error) {
             console.error('Error loading data:', error);
             setSites([]);
@@ -187,6 +193,41 @@ export default function AttendanceList() {
         loadAttendances();
     };
 
+    // Handle Foglio Presenze export
+    const handleExportFoglioPresenze = async () => {
+        setExporting(true);
+        try {
+            // Fetch all attendances for the selected month
+            const monthStart = `${exportYear}-${String(exportMonth).padStart(2, '0')}-01`;
+            const daysInMonth = new Date(exportYear, exportMonth, 0).getDate();
+            const monthEnd = `${exportYear}-${String(exportMonth).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+
+            const [attResponse, absResponse] = await Promise.all([
+                attendanceAPI.getAll({ startDate: monthStart, endDate: monthEnd }),
+                absenceRequestAPI.getAll({ status: 'APPROVED', month: `${exportYear}-${String(exportMonth).padStart(2, '0')}`, limit: 50 })
+            ]);
+
+            const monthAttendances = attResponse.data || [];
+            const monthAbsences = absResponse.data?.data || absResponse.data || [];
+
+            exportFoglioPresenze(
+                monthAttendances,
+                monthAbsences,
+                users,
+                companyName,
+                exportMonth,
+                exportYear
+            );
+
+            showSuccess('Foglio presenze esportato con successo');
+        } catch (error) {
+            console.error('Error exporting foglio presenze:', error);
+            showError('Errore durante l\'esportazione del foglio presenze');
+        } finally {
+            setExporting(false);
+        }
+    };
+
     if (loading) {
         return (
             <Layout title="Registro Presenze">
@@ -208,20 +249,13 @@ export default function AttendanceList() {
                     </h3>
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={() => {
-                                const siteName = filters.siteId
-                                    ? sites.find(s => s.id === Number.parseInt(filters.siteId))?.name
-                                    : null;
-                                const dateRange = (filters.startDate || filters.endDate)
-                                    ? `${filters.startDate || 'inizio'} - ${filters.endDate || 'oggi'}`
-                                    : null;
-                                exportAttendanceReport(attendances, { siteName, dateRange });
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-sm font-medium"
-                            title="Esporta presenze in Excel"
+                            onClick={handleExportFoglioPresenze}
+                            disabled={exporting}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-sm font-medium disabled:opacity-50"
+                            title="Esporta foglio presenze mensile"
                         >
                             <Download className="w-4 h-4" />
-                            <span className="hidden sm:inline">Esporta</span>
+                            <span className="hidden sm:inline">{exporting ? 'Esportando...' : 'Foglio Presenze'}</span>
                         </button>
                         <button
                             onClick={() => setFilters({ siteId: '', userId: '', startDate: '', endDate: '', status: 'all' })}
@@ -306,6 +340,42 @@ export default function AttendanceList() {
                                 value={filters.endDate}
                                 onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                             />
+                        </div>
+                    </div>
+
+                    {/* Row 4: Mese/Anno per export Foglio Presenze */}
+                    <div className="pt-3 mt-3 border-t border-slate-100">
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">📋 Foglio Presenze — Seleziona mese</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <select
+                                id="exportMonth"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                value={exportMonth}
+                                onChange={(e) => setExportMonth(Number(e.target.value))}
+                            >
+                                <option value={1}>Gennaio</option>
+                                <option value={2}>Febbraio</option>
+                                <option value={3}>Marzo</option>
+                                <option value={4}>Aprile</option>
+                                <option value={5}>Maggio</option>
+                                <option value={6}>Giugno</option>
+                                <option value={7}>Luglio</option>
+                                <option value={8}>Agosto</option>
+                                <option value={9}>Settembre</option>
+                                <option value={10}>Ottobre</option>
+                                <option value={11}>Novembre</option>
+                                <option value={12}>Dicembre</option>
+                            </select>
+                            <select
+                                id="exportYear"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                                value={exportYear}
+                                onChange={(e) => setExportYear(Number(e.target.value))}
+                            >
+                                {[2024, 2025, 2026, 2027].map(y => (
+                                    <option key={y} value={y}>{y}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 </div>
