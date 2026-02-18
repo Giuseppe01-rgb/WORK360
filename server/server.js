@@ -360,6 +360,22 @@ sequelize.sync({ alter: process.env.NODE_ENV === 'development' })
                 console.error('[Migration] Failed to add hourly_cost column:', err.message);
             }
 
+            // Safe Migration: Add include_in_presenze to users
+            try {
+                const queryInterface = sequelize.getQueryInterface();
+                const usersTable = await queryInterface.describeTable('users');
+                if (!usersTable.include_in_presenze) {
+                    console.log('[Migration] Adding "include_in_presenze" column to users...');
+                    await queryInterface.addColumn('users', 'include_in_presenze', {
+                        type: sequelize.Sequelize.BOOLEAN,
+                        defaultValue: true
+                    });
+                    console.log('[Migration] "include_in_presenze" column added successfully.');
+                }
+            } catch (err) {
+                console.error('[Migration] Failed to add include_in_presenze column:', err.message);
+            }
+
             console.log('✅ Migrations checked');
         } catch (migrationError) {
             console.error('[Migration] Error:', migrationError.message);
