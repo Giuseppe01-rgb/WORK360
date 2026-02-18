@@ -74,6 +74,9 @@ export default defineConfig({
       },
 
       workbox: {
+        // Allow larger bundles in precache (xlsx-js-style adds ~600KB)
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+
         // Import custom push notification handler
         importScripts: ['/sw-push.js'],
 
