@@ -289,16 +289,15 @@ function getItalianHolidays(year) {
 
 /**
  * Round work hours according to business rules:
- * ≥ 6h30m → 8h
- * ≥ 5h30m → 6h
- * ≥ 4h30m → 5h
- * ≥ 3h30m → 4h
- * ≥ 2h30m → 3h
- * otherwise standard rounding
+ * ≤ 10h → 8h (standard full day)
+ * > 10h → overtime kicks in
+ * For short shifts (< 6h30m), keep proportional rounding
  */
 function roundWorkHours(rawDecimalHours) {
     if (rawDecimalHours <= 0) return 0;
+    // Any shift ≥ 6h30m and ≤ 10h → full day = 8h
     if (rawDecimalHours >= 6.5) return 8;
+    // Short shifts: round to nearest hour
     if (rawDecimalHours >= 5.5) return 6;
     if (rawDecimalHours >= 4.5) return 5;
     if (rawDecimalHours >= 3.5) return 4;
@@ -380,6 +379,11 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
             emp.days[dayNum] = { rawHours: 0, absenceType: null, absenceHours: 0 };
         }
         emp.days[dayNum].rawHours += rawHours;
+
+        // Safety cap: max 16h per day (prevent impossible sums from duplicate records)
+        if (emp.days[dayNum].rawHours > 16) {
+            emp.days[dayNum].rawHours = 16;
+        }
     }
 
     // 2. Apply approved absences (FER, PNR, ROL)
@@ -531,13 +535,14 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
             let straHours = 0;
 
             if (dayData.rawHours > 0) {
-                if (dayData.rawHours > 9) {
-                    // Overtime: ORD=8, STRA = round(extra)
+                if (dayData.rawHours > 10) {
+                    // Overtime: only if > 10h
                     ordHours = 8;
                     const extra = dayData.rawHours - 8;
                     straHours = Math.round(extra);
-                    if (straHours < 1) straHours = 1; // at least 1h if > 9h
+                    if (straHours < 1) straHours = 1;
                 } else {
+                    // Normal day: apply rounding (≥6h30m → 8h)
                     ordHours = roundWorkHours(dayData.rawHours);
                     straHours = 0;
                 }
@@ -562,21 +567,15 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
             }
         }
 
-        // Add totals
+        // Add totals — all on the ORD row for clean alignment
         ordRow.push(totalOrd);
-        straRow.push('');
-        tassRow.push('');
-        assRow.push('');
+        ordRow.push(totalStra);
+        ordRow.push(totalAss);
 
-        ordRow.push(''); // TOT.STRA column for ORD row
-        straRow.push(totalStra);
-        tassRow.push('');
-        assRow.push('');
-
-        ordRow.push(''); // TOT.ASS column for ORD row
-        straRow.push('');
-        tassRow.push('');
-        assRow.push(totalAss);
+        // Empty cells for STRA/T.ASS/ASS rows in total columns
+        straRow.push('', '', '');
+        tassRow.push('', '', '');
+        assRow.push('', '', '');
 
         data.push(ordRow);
         data.push(straRow);
