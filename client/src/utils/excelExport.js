@@ -652,7 +652,7 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
         // Row 0: DIPENDENTE / FOGLIO PRESENZE / TOT headers
         const h0 = XLSX.utils.encode_cell({ r: 0, c });
         if (!sheet[h0]) sheet[h0] = { v: '', t: 's' };
-        sheet[h0].s = { fill: headerFill, font: { bold: true, sz: 11 }, border: thinBorder, alignment: { horizontal: 'center', vertical: 'center' } };
+        sheet[h0].s = { fill: headerFill, font: { bold: true, sz: 11 }, border: thinBorder, alignment: { horizontal: 'center', vertical: 'center', wrapText: true } };
 
         // Row 1: day numbers
         const h1 = XLSX.utils.encode_cell({ r: 1, c });
@@ -668,12 +668,33 @@ export function exportFoglioPresenze(attendances = [], absences = [], users = []
         const sepRowIdx = blockStart + 4;   // Separator row
 
         for (let c = 0; c < totalCols; c++) {
+            const isTotCol = c >= totalCols - 3; // last 3 columns = TOT. ORD/STR/ASS
+
             // All 4 data rows: ORD (blockStart), STRA (+1), T.ASS (+2), ASS (+3)
             for (let r = blockStart; r <= blockStart + 3; r++) {
                 const cellRef = XLSX.utils.encode_cell({ r, c });
                 if (!sheet[cellRef]) sheet[cellRef] = { v: '', t: 's' };
 
-                const style = { border: thinBorder, alignment: { horizontal: 'center', vertical: 'center' } };
+                // TOT columns: only vertical borders (left/right), no horizontal lines
+                let cellBorder;
+                if (isTotCol) {
+                    cellBorder = {
+                        left: { style: 'thin', color: { rgb: '000000' } },
+                        right: { style: 'thin', color: { rgb: '000000' } }
+                    };
+                    // Add top border only on first row of block
+                    if (r === blockStart) {
+                        cellBorder.top = { style: 'thin', color: { rgb: '000000' } };
+                    }
+                    // Add bottom border only on last row of block
+                    if (r === blockStart + 3) {
+                        cellBorder.bottom = { style: 'thin', color: { rgb: '000000' } };
+                    }
+                } else {
+                    cellBorder = thinBorder;
+                }
+
+                const style = { border: cellBorder, alignment: { horizontal: 'center', vertical: 'center' } };
 
                 // T.ASS row gets gray fill
                 if (r === tassRowIdx) {
