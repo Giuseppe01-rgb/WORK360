@@ -5,7 +5,6 @@ import {
     TrendingDown,
     Clock,
     ArrowUpRight,
-    ArrowRight,
     Calendar,
     Users,
     Award,
@@ -31,6 +30,42 @@ const FLIP_STYLES = `
     .card-face-visible {
         opacity: 1;
         visibility: visible;
+    }
+    .main-card-gradient-border {
+        position: relative;
+        border-radius: 1.2rem;
+        padding: 2px;
+        background: linear-gradient(135deg, #35316C, #12D2EB);
+    }
+    .main-card-gradient-border-inner {
+        border-radius: calc(1.2rem - 2px);
+        background: #111140;
+        padding: 1.5rem 1.5rem;
+    }
+    .main-card-progress-track {
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+        background: rgba(255,255,255,0.08);
+        overflow: hidden;
+    }
+    .main-card-progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, #35316C, #12D2EB);
+        transition: width 1s ease-out;
+    }
+    .metric-box-green {
+        border: 2px solid #B7FCB0;
+        border-radius: 1rem;
+        padding: 1rem 1.2rem;
+        flex: 1;
+    }
+    .metric-box-red {
+        border: 2px solid #F68A8C;
+        border-radius: 1rem;
+        padding: 1rem 1.2rem;
+        flex: 1;
     }
 `;
 
@@ -294,14 +329,13 @@ export default function Home() {
 
             <div className="max-w-5xl mx-auto pb-12">
                 {/* Welcome Section */}
-                <div className="mb-10 px-2 flex justify-between items-end">
+                <div className="mb-6 px-2 flex justify-between items-end">
                     <div>
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight">
                             Benvenuto, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{user?.firstName || 'Boss'}</span>
                         </h1>
                         <p className="text-slate-500 mt-1 font-medium">Ecco la panoramica in tempo reale per la tua azienda.</p>
                         <p className="text-slate-400 text-xs mt-1 italic">Ricorda, più sarai preciso nell&apos;inserimento dei dati, più il dato sarà realistico.</p>
-                        <p className="text-slate-400 text-xs mt-1 font-medium">👆 Tocca le card per maggiori dettagli.</p>
                     </div>
                     <div className="hidden md:flex items-center gap-3">
                         <button
@@ -319,6 +353,14 @@ export default function Home() {
                     </div>
                 </div>
 
+                {/* Info hint */}
+                <div className="flex items-center gap-2 px-2 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 flex-shrink-0">
+                        <circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" />
+                    </svg>
+                    <p className="text-slate-400 text-xs font-medium">Tocca le card per maggiori dettagli.</p>
+                </div>
+
                 {/* Main Action Area */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
                     <div className="lg:col-span-2 h-full">
@@ -327,73 +369,90 @@ export default function Home() {
                             backContent={insights.status || 'Dati in caricamento...'}
                             showDisclaimer
                         >
-                            <div className="bg-slate-900 rounded-[3rem] p-10 shadow-xl relative overflow-hidden h-full flex flex-col justify-between">
-                                <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
-
-                                <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-4">
-                                    <div className="flex flex-col gap-1 min-w-0 flex-shrink">
-                                        <h3 className="text-white/40 font-bold text-xs uppercase tracking-widest">Growth Performance</h3>
-                                        <p className={`text-3xl sm:text-4xl font-black tracking-tighter ${qStatus.color}`}>
+                            <div
+                                className="rounded-[2rem] p-8 sm:p-10 shadow-xl relative overflow-hidden h-full flex flex-col"
+                                style={{ backgroundColor: '#090925' }}
+                            >
+                                {/* ── Row 1: Title + LIVE badge ── */}
+                                <div className="flex justify-between items-start mb-8">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
                                             {qStatus.label}
-                                        </p>
+                                        </h3>
+                                        <ArrowUpRight className="w-5 h-5" style={{ color: '#B7FCB0' }} />
                                     </div>
-                                    <div className="bg-white/5 p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-white/10 text-right flex-shrink-0">
-                                        <p className="text-[10px] text-white/40 font-bold uppercase mb-1">Margine Azienda</p>
-                                        <p className="text-xl sm:text-2xl font-black text-white">{growthPercent >= 0 ? '+' : ''}{growthPercent.toFixed(1)}%</p>
+                                    <div
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider"
+                                        style={{ border: '1.5px solid #B7FCB0', color: '#B7FCB0' }}
+                                    >
+                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#B7FCB0' }} />
+                                        LIVE
                                     </div>
                                 </div>
 
-                                {/* Linear Status Graph */}
-                                <div className="my-10 relative">
-                                    <div className="flex justify-between text-[10px] font-bold text-white/20 uppercase tracking-widest mb-4">
+                                {/* ── Row 2: Margine Aziendale sub-card ── */}
+                                <div className="main-card-gradient-border mb-8">
+                                    <div className="main-card-gradient-border-inner text-center">
+                                        <p className="text-sm font-bold text-white uppercase tracking-widest mb-2">Margine Aziendale</p>
+                                        <div className="flex items-baseline justify-center gap-3">
+                                            <p className="text-4xl sm:text-5xl font-black text-white">
+                                                {growthPercent >= 0 ? '+' : ''}{growthPercent.toFixed(1)}%
+                                            </p>
+                                            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#B7FCB0' }}>
+                                                vs trimestre scorso
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ── Row 3: Progress bar (Rischio / Salute / Crescita) ── */}
+                                <div className="mb-8">
+                                    <div className="flex justify-between text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>
                                         <span>Rischio</span>
-                                        <span>Soglia Salute</span>
+                                        <span>Salute</span>
                                         <span>Crescita</span>
                                     </div>
-                                    <div className="h-6 bg-white/5 rounded-full p-1 relative overflow-hidden border border-white/5">
-                                        {/* Reference lines (Scale 0-4%) */}
-                                        <div className="absolute left-[12.5%] top-0 bottom-0 w-px bg-white/10 z-10" />
-                                        <div className="absolute left-[37.5%] top-0 bottom-0 w-px bg-white/10 z-10" />
-                                        <div className="absolute left-[62.5%] top-0 bottom-0 w-px bg-white/10 z-10" />
-
+                                    <div className="main-card-progress-track">
                                         <div
-                                            className={`h-full rounded-full transition-all duration-1000 ease-out ${qStatus.bg} ${qStatus.shadow}`}
+                                            className="main-card-progress-fill"
                                             style={{ width: `${Math.min(Math.max((growthPercent / 4) * 100, 0), 100)}%` }}
                                         />
                                     </div>
-                                    <div className="flex justify-between items-start mt-4">
-                                        <div className="text-white/40 max-w-[200px]">
-                                            <p className="text-xs font-bold leading-tight">Analisi Trend Lineare</p>
-                                            <p className="text-[10px] opacity-60 mt-1">{activeSitesCount} cantieri attivi contribuiscono al dato.</p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className={`w-2 h-2 rounded-full ${qStatus.bg}`} />
-                                            <span className="text-[10px] text-white font-bold tracking-widest">LIVE DATA FEED</span>
-                                        </div>
+                                </div>
+
+                                {/* ── Row 4: Margine Totale + Costi Totali boxes ── */}
+                                <div className="flex gap-4 mb-4">
+                                    <div className="metric-box-green">
+                                        <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#B7FCB0' }}>Margine Totale</p>
+                                        <p className="text-2xl sm:text-3xl font-black text-white">
+                                            € {marginValue.toLocaleString('it-IT')}
+                                        </p>
+                                    </div>
+                                    <div className="metric-box-red">
+                                        <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#F68A8C' }}>Costi Totali</p>
+                                        <p className="text-2xl sm:text-3xl font-black text-white">
+                                            € {(dashData?.companyCosts?.total || 0).toLocaleString('it-IT')}
+                                        </p>
                                     </div>
                                 </div>
 
-                                <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-                                    <div className="flex gap-10">
-                                        <div>
-                                            <p className="text-white/20 text-[10px] font-bold uppercase mb-1">Margine Reale</p>
-                                            <p className="text-2xl font-black text-white">€{marginValue.toLocaleString('it-IT')}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-white/20 text-[10px] font-bold uppercase mb-1">Manodopera</p>
-                                            <p className={`text-2xl font-black ${laborPercent > 70 ? 'text-red-400' : laborPercent > 50 ? 'text-yellow-400' : 'text-green-400'}`}>
-                                                {laborPercent.toFixed(0)}%
-                                            </p>
-                                        </div>
+                                {/* ── Row 5: Legend dots ── */}
+                                <div className="flex justify-between mb-6">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#B7FCB0' }} />
+                                        <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#B7FCB0' }}>Margine su fatturato</span>
                                     </div>
-                                    <div className="hidden md:flex flex-col items-end">
-                                        <p className="text-white/20 text-[10px] font-bold uppercase">Info Dettagliate</p>
-                                        <div className="flex items-center gap-1 text-white/60 text-[10px] font-bold mt-1">
-                                            <span>CLICCA PER GIRARE</span>
-                                            <ArrowRight className="w-3 h-3" />
-                                        </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#F68A8C' }} />
+                                        <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#F68A8C' }}>Costi totali su fatturato</span>
                                     </div>
                                 </div>
+
+                                {/* ── Row 6: Active sites footer ── */}
+                                <p className="text-sm text-white/70">
+                                    <span className="font-bold text-white">{activeSitesCount} Cantieri attivi</span>{' '}
+                                    contribuiscono a questo dato in tempo reale.
+                                </p>
                             </div>
                         </FlipCard>
                     </div>
