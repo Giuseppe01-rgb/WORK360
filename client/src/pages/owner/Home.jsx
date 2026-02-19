@@ -388,13 +388,13 @@ export default function Home() {
                         backContent={insights.status || 'Dati in caricamento...'}
                         showDisclaimer
                     >
-                        <div className="w-full bg-[#2A2B3C] rounded-[32px] p-6 flex flex-col items-center gap-6 outline outline-2 outline-[#9EA5FF] -outline-offset-2 overflow-hidden shadow-lg relative">
+                        <div className="w-full bg-[#2A2B3C] rounded-[36px] p-6 flex flex-col items-center gap-6 shadow-[inset_0_0_0_2px_#9EA5FF] overflow-hidden relative">
                             {/* Header: Label + LIVE badge */}
                             <div className="w-full flex justify-between items-center">
                                 <h3 className="text-[#E5E7FF] text-[20px] font-extrabold uppercase leading-[28px] tracking-tight">
                                     {qStatus.label || 'ALTA EFFICIENZA'}
                                 </h3>
-                                <div className="bg-[#CEFDDA] px-3 py-1 rounded-[16px] outline outline-2 outline-[#6DF881] -outline-offset-2 flex items-center gap-2">
+                                <div className="bg-[#CEFDDA] px-3 py-1 rounded-[16px] shadow-[inset_0_0_0_2px_#6DF881] flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 bg-[#6DF881] rounded-full flex items-center justify-center p-[1px]">
                                         <div className="w-full h-full bg-[#138624] rounded-full animate-pulse" />
                                     </div>
@@ -403,7 +403,7 @@ export default function Home() {
                             </div>
 
                             {/* Margine Aziendale section */}
-                            <div className="w-full bg-[#3F415A] rounded-[32px] py-5 flex flex-col items-center gap-2 outline outline-2 outline-[#555777] -outline-offset-2">
+                            <div className="w-full bg-[#3F415A] rounded-[32px] py-5 flex flex-col items-center gap-2 shadow-[inset_0_0_0_2px_#555777]">
                                 <p className="text-white text-[16px] font-normal uppercase leading-[20px]">MARGINE AZIENDALE</p>
                                 <p className="text-[#CEFDDA] text-[40px] font-bold leading-[44px]">
                                     {growthPercent > 0 ? '+' : ''}{growthPercent.toFixed(1)}%
@@ -428,19 +428,19 @@ export default function Home() {
 
                             {/* Stats Split: Margine and Costi */}
                             <div className="w-full flex gap-2">
-                                <div className="flex-1 bg-[#3F415A] rounded-[32px] py-5 px-2 flex flex-col items-center justify-center gap-2 outline outline-2 outline-[#CEFDDA] -outline-offset-2 text-center">
-                                    <p className="text-[#E5E7FF] text-[12px] font-semibold uppercase leading-[16px]">MARGINE TOTALE</p>
-                                    <p className="text-[#CEFDDA] text-[24px] tracking-tight font-bold leading-[30px] whitespace-nowrap">
+                                <div className="flex-1 bg-[#3F415A] rounded-[32px] py-4 px-1 sm:px-2 flex flex-col items-center justify-center gap-1 sm:gap-2 shadow-[inset_0_0_0_2px_#CEFDDA] text-center overflow-hidden">
+                                    <p className="text-[#E5E7FF] text-[10px] sm:text-[12px] font-semibold uppercase leading-[14px] sm:leading-[16px]">MARGINE TOTALE</p>
+                                    <p className="text-[#CEFDDA] text-[18px] sm:text-[24px] tracking-tight font-bold leading-[24px] sm:leading-[30px] w-full px-1 truncate">
                                         € {marginValue.toLocaleString('it-IT')}
                                     </p>
-                                    <p className="text-[#E5E7FF] text-[9px] font-semibold uppercase leading-[16px]">SU FATTURATO</p>
+                                    <p className="text-[#E5E7FF] text-[8px] sm:text-[9px] font-semibold uppercase leading-[12px] sm:leading-[16px]">SU FATTURATO</p>
                                 </div>
-                                <div className="flex-1 bg-[#3F415A] rounded-[32px] py-5 px-2 flex flex-col items-center justify-center gap-2 outline outline-2 outline-[#FDCECE] -outline-offset-2 text-center">
-                                    <p className="text-[#E5E7FF] text-[12px] font-semibold uppercase leading-[16px]">COSTI TOTALI</p>
-                                    <p className="text-[#FDCECE] text-[24px] tracking-tight font-bold leading-[30px] whitespace-nowrap">
+                                <div className="flex-1 bg-[#3F415A] rounded-[32px] py-4 px-1 sm:px-2 flex flex-col items-center justify-center gap-1 sm:gap-2 shadow-[inset_0_0_0_2px_#FDCECE] text-center overflow-hidden">
+                                    <p className="text-[#E5E7FF] text-[10px] sm:text-[12px] font-semibold uppercase leading-[14px] sm:leading-[16px]">COSTI TOTALI</p>
+                                    <p className="text-[#FDCECE] text-[18px] sm:text-[24px] tracking-tight font-bold leading-[24px] sm:leading-[30px] w-full px-1 truncate">
                                         € {(dashData?.companyCosts?.total || 0).toLocaleString('it-IT')}
                                     </p>
-                                    <p className="text-[#E5E7FF] text-[9px] font-semibold uppercase leading-[16px]">SU FATTURATO</p>
+                                    <p className="text-[#E5E7FF] text-[8px] sm:text-[9px] font-semibold uppercase leading-[12px] sm:leading-[16px]">SU FATTURATO</p>
                                 </div>
                             </div>
 
@@ -454,7 +454,7 @@ export default function Home() {
 
                     {/* Secondary Row: Ore/Operai */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white rounded-[32px] p-4 py-6 flex flex-col items-center justify-center gap-2 outline outline-2 outline-[#E5E7FF] -outline-offset-2">
+                        <div className="bg-white rounded-[32px] p-4 py-6 flex flex-col items-center justify-center gap-2 shadow-[inset_0_0_0_2px_#E5E7FF]">
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="text-[#888AAA] text-[12px] font-semibold uppercase leading-[16px]">ORE MENSILI</span>
                                 <div className="w-5 h-5 border-2 border-[#5762FF] rounded-full flex items-center justify-center relative">
@@ -465,7 +465,7 @@ export default function Home() {
                                 {Math.round(monthlyHours)}
                             </p>
                         </div>
-                        <div className="bg-white rounded-[32px] p-4 py-6 flex flex-col items-center justify-center gap-2 outline outline-2 outline-[#E5E7FF] -outline-offset-2">
+                        <div className="bg-white rounded-[32px] p-4 py-6 flex flex-col items-center justify-center gap-2 shadow-[inset_0_0_0_2px_#E5E7FF]">
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="text-[#888AAA] text-[12px] font-semibold uppercase leading-[16px]">OPERAI ATTIVI</span>
                                 <Users className="w-5 h-5 text-[#5762FF]" />
@@ -486,7 +486,7 @@ export default function Home() {
                         <div className="flex flex-col gap-4">
                             {sitePerformance.top && (
                                 <FlipCard backContent={insights.sites}>
-                                    <div className="bg-white rounded-[32px] p-5 flex flex-col gap-4 outline outline-2 outline-[#CEFDDA] -outline-offset-2 pr-6">
+                                    <div className="bg-white rounded-[32px] p-5 flex flex-col gap-4 shadow-[inset_0_0_0_2px_#CEFDDA] pr-6">
                                         <div className="self-start bg-[#CEFDDA] px-3 py-1.5 rounded-[32px] flex items-center gap-2">
                                             <span className="text-[#138624] text-[9px] font-semibold uppercase leading-[16px]">PIÙ REDDITIZIO</span>
                                             <div className="flex gap-[2px]">
@@ -517,7 +517,7 @@ export default function Home() {
 
                             {sitePerformance.worst && (
                                 <FlipCard backContent={insights.labor}>
-                                    <div className="bg-white rounded-[32px] p-5 flex flex-col gap-4 outline outline-2 outline-[#FDCECE] -outline-offset-2 pr-6">
+                                    <div className="bg-white rounded-[32px] p-5 flex flex-col gap-4 shadow-[inset_0_0_0_2px_#FDCECE] pr-6">
                                         <div className="self-start bg-[#FDCECE] px-3 py-1.5 rounded-[32px] flex items-center gap-2">
                                             <span className="text-[#861313] text-[9px] font-semibold uppercase leading-[16px]">MENO REDDITIZIO</span>
                                             <div className="flex gap-[2px]">
