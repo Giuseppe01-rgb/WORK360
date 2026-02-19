@@ -85,7 +85,9 @@ export default function WorkerDashboard() {
             } catch (sitesError) {
                 console.error('Error loading sites:', sitesError);
             }
-            setSites(Array.isArray(sitesData.data) ? sitesData.data : []);
+            const allSites = Array.isArray(sitesData.data) ? sitesData.data : [];
+            // Only show active (in corso) sites in the dropdown
+            setSites(allSites.filter(s => s.status === 'active'));
 
             // Load attendance data
             try {
