@@ -360,268 +360,196 @@ export default function Home() {
         <Layout title="Home" hideHeader>
             <style>{FLIP_STYLES}</style>
 
-            <div className="max-w-5xl mx-auto pb-12">
-                {/* Welcome Section */}
-                <div className="mb-6 px-2 flex justify-between items-end">
-                    <div>
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-                            Benvenuto, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{user?.firstName || 'Boss'}</span>
-                        </h1>
-                        <p className="text-slate-500 mt-1 font-medium">Ecco la panoramica in tempo reale per la tua azienda.</p>
-                        <p className="text-slate-400 text-xs mt-1 italic">Ricorda, più sarai preciso nell&apos;inserimento dei dati, più il dato sarà realistico.</p>
-                    </div>
-                    <div className="hidden md:flex items-center gap-3">
-                        <button
-                            onClick={() => refreshDashboard(true)}
-                            disabled={isRefreshing}
-                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all disabled:opacity-50"
-                            title="Aggiorna dati"
-                            aria-label="Aggiorna dati"
-                        >
-                            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                        </button>
-                        <span className="text-xs font-bold text-slate-400 bg-white border border-slate-100 px-4 py-2 rounded-full shadow-sm">
-                            {dateStr}
-                        </span>
-                    </div>
+            <div className="max-w-md mx-auto pb-12 w-full font-['TASA_Orbiter',sans-serif]">
+
+                {/* Header for Mobile (if needed, otherwise relying on Layout) */}
+                <div className="md:hidden flex items-center justify-between mb-8 px-2">
+                    {/* The burger is managed by Layout in mobile view, but you asked to include an icon if needed. However Layout handles opening the menu. Let's just add padding. */}
                 </div>
 
-                {/* Info hint */}
-                <div className="flex items-center gap-2 px-2 mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 flex-shrink-0">
-                        <circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" />
-                    </svg>
-                    <p className="text-slate-400 text-xs font-medium">Tocca le card per maggiori dettagli.</p>
+                {/* Welcome Section */}
+                <div className="mb-8 px-5">
+                    <h1 className="text-[32px] font-extrabold leading-[40px] tracking-tight text-[#15161E]">
+                        Benvenuto, <span className="text-[#5762FF]">{user?.firstName || 'Boss'}</span>.
+                    </h1>
+                    <p className="text-[#555777] text-[18px] leading-[24px] mt-2 font-normal">
+                        Ecco la panoramica in tempo reale<br />della tua azienda.
+                    </p>
+                    <p className="text-[#888AAA] text-[12px] font-semibold leading-[16px] mt-4 max-w-[90%]">
+                        Ricorda, più sarai preciso nell'inserimento dei dati,<br />più il dato sarà realistico.
+                    </p>
                 </div>
 
                 {/* Main Action Area */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-                    <div className="lg:col-span-2 h-full">
-                        <FlipCard
-                            className="h-full"
-                            backContent={insights.status || 'Dati in caricamento...'}
-                            showDisclaimer
-                        >
-                            <div
-                                className="rounded-[2.5rem] sm:rounded-[3.5rem] p-7 sm:p-12 shadow-xl relative overflow-hidden h-full flex flex-col"
-                                style={{ backgroundColor: '#090925' }}
-                            >
-                                {/* ── Row 1: Title + LIVE badge ── */}
-                                <div className="flex justify-between items-center mb-8 sm:mb-12">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="text-xl sm:text-4xl font-black text-white uppercase tracking-tight">
-                                            {qStatus.label}
-                                        </h3>
-                                        <ArrowUpRight className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: '#B7FCB0' }} />
+                <div className="flex flex-col gap-6 px-5 mb-10">
+                    {/* High Efficiency Card */}
+                    <FlipCard
+                        className="w-full"
+                        backContent={insights.status || 'Dati in caricamento...'}
+                        showDisclaimer
+                    >
+                        <div className="w-full bg-[#2A2B3C] rounded-[32px] p-6 flex flex-col items-center gap-6 outline outline-2 outline-[#9EA5FF] -outline-offset-2 overflow-hidden shadow-lg relative">
+                            {/* Header: Label + LIVE badge */}
+                            <div className="w-full flex justify-between items-center">
+                                <h3 className="text-[#E5E7FF] text-[20px] font-extrabold uppercase leading-[28px] tracking-tight">
+                                    {qStatus.label || 'ALTA EFFICIENZA'}
+                                </h3>
+                                <div className="bg-[#CEFDDA] px-3 py-1 rounded-[16px] outline outline-2 outline-[#6DF881] -outline-offset-2 flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 bg-[#6DF881] rounded-full flex items-center justify-center p-[1px]">
+                                        <div className="w-full h-full bg-[#138624] rounded-full animate-pulse" />
                                     </div>
-                                    <div
-                                        className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-sm font-bold uppercase tracking-wider"
-                                        style={{ border: '2px solid #B7FCB0', color: '#B7FCB0' }}
-                                    >
-                                        <span className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full" style={{ backgroundColor: '#B7FCB0' }} />
-                                        LIVE
-                                    </div>
+                                    <span className="text-[#138624] text-[12px] font-semibold uppercase leading-[16px]">LIVE</span>
                                 </div>
-
-                                {/* ── Row 2: Margine Aziendale sub-card ── */}
-                                <div className="main-card-box-border mb-8 sm:mb-12">
-                                    <div className="main-card-box-inner text-center">
-                                        <p className="text-xs sm:text-lg font-black uppercase tracking-widest mb-2 sm:mb-4" style={{ color: '#6651C3' }}>Margine Aziendale</p>
-                                        <div className="flex items-baseline justify-center gap-2 sm:gap-4">
-                                            <p className="text-3xl sm:text-6xl font-black text-white">
-                                                {growthPercent >= 0 ? '+' : ''}{growthPercent.toFixed(1)}%
-                                            </p>
-                                            <span className="text-[9px] sm:text-sm font-bold uppercase tracking-wider" style={{ color: '#B7FCB0' }}>
-                                                vs trimestre scorso
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* ── Row 3: Progress bar (Rischio / Salute / Crescita) ── */}
-                                <div className="mb-8 sm:mb-12">
-                                    <div className="flex justify-between text-[10px] sm:text-sm font-black uppercase tracking-widest mb-3 sm:mb-5" style={{ color: '#6651C3' }}>
-                                        <span>Rischio</span>
-                                        <span>Salute</span>
-                                        <span>Crescita</span>
-                                    </div>
-                                    <div className="main-card-progress-track">
-                                        <div
-                                            className="main-card-progress-fill"
-                                            style={{ width: `${Math.min(Math.max(growthPercent, 0), 100)}%` }}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* ── Row 4: Margine Totale + Costi Totali boxes ── */}
-                                <div className="flex gap-4 sm:gap-6 mb-4 sm:mb-6">
-                                    <div className="metric-box-green">
-                                        <p className="text-[10px] sm:text-sm font-black uppercase tracking-wider mb-1.5 sm:mb-3" style={{ color: '#6651C3' }}>Margine Totale</p>
-                                        <p className="text-lg sm:text-4xl font-black text-white">
-                                            € {marginValue.toLocaleString('it-IT')}
-                                        </p>
-                                    </div>
-                                    <div className="metric-box-red">
-                                        <p className="text-[10px] sm:text-sm font-black uppercase tracking-wider mb-1.5 sm:mb-3" style={{ color: '#6651C3' }}>Costi Totali</p>
-                                        <p className="text-lg sm:text-4xl font-black text-white">
-                                            € {(dashData?.companyCosts?.total || 0).toLocaleString('it-IT')}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* ── Row 5: Legend dots ── */}
-                                <div className="flex justify-between mb-8 sm:mb-12">
-                                    <div className="flex items-center gap-2 sm:gap-3">
-                                        <span className="w-2.5 h-2.5 sm:w-4 sm:h-4 rounded-full flex-shrink-0" style={{ backgroundColor: '#B7FCB0' }} />
-                                        <span className="text-[8px] sm:text-[11px] font-bold uppercase tracking-wider" style={{ color: '#B7FCB0' }}>Margine su fatturato</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 sm:gap-3">
-                                        <span className="w-2.5 h-2.5 sm:w-4 sm:h-4 rounded-full flex-shrink-0" style={{ backgroundColor: '#F68A8C' }} />
-                                        <span className="text-[8px] sm:text-[11px] font-bold uppercase tracking-wider" style={{ color: '#F68A8C' }}>Costi totali su fatturato</span>
-                                    </div>
-                                </div>
-
-                                {/* ── Row 6: Active sites footer ── */}
-                                <p className="text-[11px] sm:text-lg text-white/70">
-                                    <span className="font-bold text-white">{activeSitesCount} Cantieri attivi</span>{' '}
-                                    contribuiscono a questo dato in tempo reale.
-                                </p>
                             </div>
-                        </FlipCard>
-                    </div>
 
-                    <div className="grid grid-cols-2 lg:grid-cols-1 gap-6">
-                        <MetricCard
-                            title="Ore Mensili"
-                            value={Math.round(monthlyHours)}
-                            unit="h"
-                            icon={Clock}
-                            colorClass="text-blue-600 bg-blue-50"
-                        />
-                        <MetricCard
-                            title="Operai Attivi"
-                            value={totalWorkers}
-                            unit="tot"
-                            icon={Users}
-                            colorClass="text-purple-600 bg-purple-50"
-                        />
-                    </div>
-                </div>
+                            {/* Margine Aziendale section */}
+                            <div className="w-full bg-[#3F415A] rounded-[32px] py-5 flex flex-col items-center gap-2 outline outline-2 outline-[#555777] -outline-offset-2">
+                                <p className="text-white text-[16px] font-normal uppercase leading-[20px]">MARGINE AZIENDALE</p>
+                                <p className="text-[#CEFDDA] text-[40px] font-bold leading-[44px]">
+                                    {growthPercent > 0 ? '+' : ''}{growthPercent.toFixed(1)}%
+                                </p>
+                                <p className="text-[#E5E7FF] text-[9px] font-semibold uppercase leading-[16px]">VS TRIMESTRE SCORSO</p>
+                            </div>
 
-                {/* Top & Worst Sites */}
-                {(sitePerformance.top || sitePerformance.worst) && (
-                    <>
-                        <h3 className="text-xl font-bold text-slate-900 mb-6 px-2 flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-slate-400" />
-                            Focus Performance Cantieri
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                            {sitePerformance.top && (
-                                <SiteCard
-                                    site={sitePerformance.top}
-                                    type="top"
-                                    backContent={insights.sites}
-                                />
-                            )}
-                            {sitePerformance.worst && (
-                                <SiteCard
-                                    site={sitePerformance.worst}
-                                    type="worst"
-                                    backContent={insights.labor}
-                                />
-                            )}
-                        </div>
-                    </>
-                )}
+                            {/* Progress bar info */}
+                            <div className="w-full flex flex-col gap-2">
+                                <div className="flex justify-between w-full px-2">
+                                    <span className="text-[#9EA5FF] text-[12px] font-semibold uppercase leading-[16px]">Rischio</span>
+                                    <span className="text-[#9EA5FF] text-[12px] font-semibold uppercase leading-[16px]">Salute</span>
+                                    <span className="text-[#9EA5FF] text-[12px] font-semibold uppercase leading-[16px]">Crescita</span>
+                                </div>
+                                <div className="w-full h-[11px] bg-[#3F415A] rounded-[16px] overflow-hidden">
+                                    <div
+                                        className="h-full bg-[#6DF881] rounded-[16px] transition-all duration-1000"
+                                        style={{ width: `${Math.min(Math.max(growthPercent, 10), 100)}%` }}
+                                    />
+                                </div>
+                            </div>
 
-                {/* Predictions Section */}
-                <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 mb-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-                        <div>
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Riepilogo Mensile</h3>
-                            <p className="text-slate-500 text-sm mt-1 font-medium">
-                                Dati aggiornati in tempo reale dal database aziendale.
+                            {/* Stats Split: Margine and Costi */}
+                            <div className="w-full flex gap-2">
+                                <div className="flex-1 bg-[#3F415A] rounded-[32px] py-5 px-2 flex flex-col items-center justify-center gap-2 outline outline-2 outline-[#CEFDDA] -outline-offset-2 text-center">
+                                    <p className="text-[#E5E7FF] text-[12px] font-semibold uppercase leading-[16px]">MARGINE TOTALE</p>
+                                    <p className="text-[#CEFDDA] text-[24px] tracking-tight font-bold leading-[30px] whitespace-nowrap">
+                                        € {marginValue.toLocaleString('it-IT')}
+                                    </p>
+                                    <p className="text-[#E5E7FF] text-[9px] font-semibold uppercase leading-[16px]">SU FATTURATO</p>
+                                </div>
+                                <div className="flex-1 bg-[#3F415A] rounded-[32px] py-5 px-2 flex flex-col items-center justify-center gap-2 outline outline-2 outline-[#FDCECE] -outline-offset-2 text-center">
+                                    <p className="text-[#E5E7FF] text-[12px] font-semibold uppercase leading-[16px]">COSTI TOTALI</p>
+                                    <p className="text-[#FDCECE] text-[24px] tracking-tight font-bold leading-[30px] whitespace-nowrap">
+                                        € {(dashData?.companyCosts?.total || 0).toLocaleString('it-IT')}
+                                    </p>
+                                    <p className="text-[#E5E7FF] text-[9px] font-semibold uppercase leading-[16px]">SU FATTURATO</p>
+                                </div>
+                            </div>
+
+                            {/* Footer text */}
+                            <p className="text-center text-[12px] leading-[16px] mt-2">
+                                <span className="text-[#F0F0F4] font-semibold">{activeSitesCount} Cantieri attivi </span>
+                                <span className="text-[#888AAA] font-semibold">contribuiscono a questo dato<br />in tempo reale</span>
                             </p>
                         </div>
-                        <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">
-                            <Calendar className="w-6 h-6 text-slate-400" />
+                    </FlipCard>
+
+                    {/* Secondary Row: Ore/Operai */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white rounded-[32px] p-4 py-6 flex flex-col items-center justify-center gap-2 outline outline-2 outline-[#E5E7FF] -outline-offset-2">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[#888AAA] text-[12px] font-semibold uppercase leading-[16px]">ORE MENSILI</span>
+                                <div className="w-5 h-5 border-2 border-[#5762FF] rounded-full flex items-center justify-center relative">
+                                    <div className="w-1 h-2 border-r-2 border-b-2 border-[#5762FF] absolute -mt-1 -ml-1"></div>
+                                </div>
+                            </div>
+                            <p className="text-[#15161E] text-[28px] font-bold leading-[36px]">
+                                {Math.round(monthlyHours)}
+                            </p>
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                        {/* Margin */}
-                        <FlipCard backContent={insights.margin}>
-                            <div>
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Margine Totale</span>
-                                    <div className={`w-2 h-2 rounded-full ${marginValue >= 0 ? 'bg-green-500' : 'bg-red-500'}`} />
-                                </div>
-                                <p className={`text-4xl font-black tracking-tight ${marginValue >= 0 ? 'text-slate-900' : 'text-red-600'}`}>
-                                    {marginValue.toLocaleString('it-IT')}€
-                                </p>
-                                <div className="mt-6 p-6 rounded-[2rem] bg-slate-50 border border-slate-100 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full -mr-8 -mt-8" />
-                                    <div className="flex justify-between text-[10px] font-bold uppercase text-slate-400 mb-3">
-                                        <span>Ricavo Totale</span>
-                                    </div>
-                                    <span className="text-xl font-black text-slate-900">
-                                        {(dashData?.companyMargin?.totalContractValue || 0).toLocaleString('it-IT')}€
-                                    </span>
-                                </div>
+                        <div className="bg-white rounded-[32px] p-4 py-6 flex flex-col items-center justify-center gap-2 outline outline-2 outline-[#E5E7FF] -outline-offset-2">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[#888AAA] text-[12px] font-semibold uppercase leading-[16px]">OPERAI ATTIVI</span>
+                                <Users className="w-5 h-5 text-[#5762FF]" />
                             </div>
-                        </FlipCard>
-
-                        {/* Labor Incidence */}
-                        <FlipCard backContent={insights.labor}>
-                            <div>
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Peso Manodopera</span>
-                                    <div className={`w-2 h-2 rounded-full ${laborPercent <= 60 ? 'bg-green-500' : 'bg-red-500'}`} />
-                                </div>
-                                <p className="text-4xl font-black text-slate-900 tracking-tight">
-                                    {laborPercent.toFixed(0)}%
-                                </p>
-                                <div className="mt-6 p-6 rounded-[2rem] bg-slate-50 border border-slate-100 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/5 rounded-full -mr-8 -mt-8" />
-                                    <div className="flex justify-between text-[10px] font-bold uppercase text-slate-400 mb-3">
-                                        <span>Costo Totale</span>
-                                    </div>
-                                    <span className="text-xl font-black text-slate-900">
-                                        {(dashData?.companyCosts?.total || 0).toLocaleString('it-IT')}€
-                                    </span>
-                                </div>
-                            </div>
-                        </FlipCard>
-
-                        {/* Hours & Sites */}
-                        <FlipCard backContent={insights.sites}>
-                            <div>
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Cantieri Attivi</span>
-                                    <div className={`w-2 h-2 rounded-full ${activeSitesCount > 0 ? 'bg-green-500' : 'bg-slate-400'}`} />
-                                </div>
-                                <p className="text-4xl font-black text-slate-900 tracking-tight">
-                                    {activeSitesCount}
-                                </p>
-                                <div className="mt-6 p-6 rounded-[2rem] bg-slate-50 border border-slate-100 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-500/5 rounded-full -mr-8 -mt-8" />
-                                    <div className="flex justify-between text-[10px] font-bold uppercase text-slate-400 mb-3">
-                                        <span>Ore Questo Mese</span>
-                                        <Building2 className="w-3 h-3 text-indigo-400" />
-                                    </div>
-                                    <span className="text-xl font-black text-slate-900">
-                                        {monthlyHours.toFixed(0)}h
-                                    </span>
-                                </div>
-                            </div>
-                        </FlipCard>
+                            <p className="text-[#15161E] text-[28px] font-bold leading-[36px]">
+                                {totalWorkers}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <p className="text-center text-slate-400 text-xs mt-8">
-                    WORK360 Analytics Engine v2.0 — Dati aggiornati automaticamente
-                </p>
-            </div >
-        </Layout >
+                {/* Focus Performance Cantieri */}
+                {(sitePerformance.top || sitePerformance.worst) && (
+                    <div className="px-5 mb-10 w-full flex flex-col gap-6">
+                        <h3 className="text-center text-black text-[20px] font-extrabold uppercase leading-[28px]">
+                            FOCUS PERFORMANCE CANTIERI
+                        </h3>
+                        <div className="flex flex-col gap-4">
+                            {sitePerformance.top && (
+                                <FlipCard backContent={insights.sites}>
+                                    <div className="bg-white rounded-[32px] p-5 flex flex-col gap-4 outline outline-2 outline-[#CEFDDA] -outline-offset-2 pr-6">
+                                        <div className="self-start bg-[#CEFDDA] px-3 py-1.5 rounded-[32px] flex items-center gap-2">
+                                            <span className="text-[#138624] text-[9px] font-semibold uppercase leading-[16px]">PIÙ REDDITIZIO</span>
+                                            <div className="flex gap-[2px]">
+                                                <div className="w-1.5 h-1.5 border border-[#138624]"></div>
+                                                <div className="w-1.5 h-1.5 border border-[#138624]"></div>
+                                            </div>
+                                        </div>
+                                        <h4 className="text-[#15161E] text-[20px] font-extrabold uppercase leading-[28px] tracking-tight">
+                                            {sitePerformance.top.name}
+                                        </h4>
+                                        <div className="flex gap-10 mt-2">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[#888AAA] text-[9px] font-semibold uppercase leading-[16px]">MARGINE</span>
+                                                <span className="text-black text-[14px] font-semibold leading-[18px]">
+                                                    € {sitePerformance.top.margin.toLocaleString('it-IT')}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[#888AAA] text-[9px] font-semibold uppercase leading-[16px]">COSTO/RICAVO</span>
+                                                <span className="text-black text-[14px] font-semibold leading-[18px]">
+                                                    {sitePerformance.top.costVsRevenue}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </FlipCard>
+                            )}
+
+                            {sitePerformance.worst && (
+                                <FlipCard backContent={insights.labor}>
+                                    <div className="bg-white rounded-[32px] p-5 flex flex-col gap-4 outline outline-2 outline-[#FDCECE] -outline-offset-2 pr-6">
+                                        <div className="self-start bg-[#FDCECE] px-3 py-1.5 rounded-[32px] flex items-center gap-2">
+                                            <span className="text-[#861313] text-[9px] font-semibold uppercase leading-[16px]">MENO REDDITIZIO</span>
+                                            <div className="flex gap-[2px]">
+                                                <div className="w-1.5 h-1.5 border border-[#861313]"></div>
+                                                <div className="w-1.5 h-1.5 border border-[#861313]"></div>
+                                            </div>
+                                        </div>
+                                        <h4 className="text-[#15161E] text-[20px] font-extrabold uppercase leading-[28px] tracking-tight">
+                                            {sitePerformance.worst.name}
+                                        </h4>
+                                        <div className="flex gap-10 mt-2">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[#888AAA] text-[9px] font-semibold uppercase leading-[16px]">MARGINE</span>
+                                                <span className="text-black text-[14px] font-semibold leading-[18px]">
+                                                    € {sitePerformance.worst.margin.toLocaleString('it-IT')}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[#888AAA] text-[9px] font-semibold uppercase leading-[16px]">COSTO/RICAVO</span>
+                                                <span className="text-black text-[14px] font-semibold leading-[18px]">
+                                                    {sitePerformance.worst.costVsRevenue}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </FlipCard>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+            </div>
+        </Layout>
     );
 }
