@@ -31,37 +31,37 @@ const FLIP_STYLES = `
         opacity: 1;
         visibility: visible;
     }
-    .main-card-gradient-border {
+    .main-card-box-border {
         position: relative;
-        border-radius: 1rem;
-        padding: 2px;
-        background: linear-gradient(135deg, #35316C, #12D2EB);
+        border-radius: 1.25rem;
+        padding: 1.5px;
+        background: #383857;
     }
-    .main-card-gradient-border-inner {
-        border-radius: calc(1rem - 2px);
-        background: #111140;
-        padding: 1rem 1.2rem;
+    .main-card-box-inner {
+        border-radius: calc(1.25rem - 1.5px);
+        background: #202042;
+        padding: 1.25rem 1.25rem;
     }
     @media (min-width: 640px) {
-        .main-card-gradient-border {
-            border-radius: 1.2rem;
+        .main-card-box-border {
+            border-radius: 1.5rem;
         }
-        .main-card-gradient-border-inner {
-            border-radius: calc(1.2rem - 2px);
-            padding: 1.5rem 1.5rem;
+        .main-card-box-inner {
+            border-radius: calc(1.5rem - 1.5px);
+            padding: 1.75rem 1.75rem;
         }
     }
     .main-card-progress-track {
         width: 100%;
-        height: 6px;
-        border-radius: 3px;
+        height: 8px;
+        border-radius: 4px;
         background: rgba(255,255,255,0.08);
         overflow: hidden;
     }
     @media (min-width: 640px) {
         .main-card-progress-track {
-            height: 8px;
-            border-radius: 4px;
+            height: 10px;
+            border-radius: 5px;
         }
     }
     .main-card-progress-fill {
@@ -71,18 +71,27 @@ const FLIP_STYLES = `
         transition: width 1s ease-out;
     }
     .metric-box-green {
-        border: 1.5px solid #B7FCB0;
-        border-radius: 0.75rem;
-        padding: 0.6rem 0.8rem;
+        border: 2px solid #B7FCB0;
+        border-radius: 1.25rem;
+        padding: 0.8rem 1rem;
+        background: #202042;
         flex: 1;
         min-width: 0;
     }
     .metric-box-red {
-        border: 1.5px solid #F68A8C;
-        border-radius: 0.75rem;
-        padding: 0.6rem 0.8rem;
+        border: 2px solid #F68A8C;
+        border-radius: 1.25rem;
+        padding: 0.8rem 1rem;
+        background: #202042;
         flex: 1;
         min-width: 0;
+    }
+    @media (min-width: 640px) {
+        .metric-box-green, .metric-box-red {
+            border-width: 2.5px;
+            border-radius: 1.5rem;
+            padding: 1.25rem 1.5rem;
+        }
     }
     @media (min-width: 640px) {
         .metric-box-green, .metric-box-red {
@@ -394,35 +403,35 @@ export default function Home() {
                             showDisclaimer
                         >
                             <div
-                                className="rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 shadow-xl relative overflow-hidden h-full flex flex-col"
+                                className="rounded-[2.5rem] sm:rounded-[3.5rem] p-7 sm:p-12 shadow-xl relative overflow-hidden h-full flex flex-col"
                                 style={{ backgroundColor: '#090925' }}
                             >
                                 {/* ── Row 1: Title + LIVE badge ── */}
-                                <div className="flex justify-between items-center mb-4 sm:mb-8">
-                                    <div className="flex items-center gap-1.5">
-                                        <h3 className="text-lg sm:text-3xl font-black text-white uppercase tracking-tight">
+                                <div className="flex justify-between items-center mb-8 sm:mb-12">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="text-xl sm:text-4xl font-black text-white uppercase tracking-tight">
                                             {qStatus.label}
                                         </h3>
-                                        <ArrowUpRight className="w-3.5 h-3.5 sm:w-5 sm:h-5" style={{ color: '#B7FCB0' }} />
+                                        <ArrowUpRight className="w-5 h-5 sm:w-7 sm:h-7" style={{ color: '#B7FCB0' }} />
                                     </div>
                                     <div
-                                        className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-bold uppercase tracking-wider"
-                                        style={{ border: '1.5px solid #B7FCB0', color: '#B7FCB0' }}
+                                        className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-sm font-bold uppercase tracking-wider"
+                                        style={{ border: '2px solid #B7FCB0', color: '#B7FCB0' }}
                                     >
-                                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" style={{ backgroundColor: '#B7FCB0' }} />
+                                        <span className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full" style={{ backgroundColor: '#B7FCB0' }} />
                                         LIVE
                                     </div>
                                 </div>
 
                                 {/* ── Row 2: Margine Aziendale sub-card ── */}
-                                <div className="main-card-gradient-border mb-4 sm:mb-8">
-                                    <div className="main-card-gradient-border-inner text-center">
-                                        <p className="text-[11px] sm:text-sm font-bold text-white uppercase tracking-widest mb-1 sm:mb-2">Margine Aziendale</p>
-                                        <div className="flex items-baseline justify-center gap-2 sm:gap-3">
-                                            <p className="text-xl sm:text-5xl font-black text-white">
+                                <div className="main-card-box-border mb-8 sm:mb-12">
+                                    <div className="main-card-box-inner text-center">
+                                        <p className="text-xs sm:text-lg font-black uppercase tracking-widest mb-2 sm:mb-4" style={{ color: '#6651C3' }}>Margine Aziendale</p>
+                                        <div className="flex items-baseline justify-center gap-2 sm:gap-4">
+                                            <p className="text-3xl sm:text-6xl font-black text-white">
                                                 {growthPercent >= 0 ? '+' : ''}{growthPercent.toFixed(1)}%
                                             </p>
-                                            <span className="text-[8px] sm:text-xs font-bold uppercase tracking-wider" style={{ color: '#B7FCB0' }}>
+                                            <span className="text-[9px] sm:text-sm font-bold uppercase tracking-wider" style={{ color: '#B7FCB0' }}>
                                                 vs trimestre scorso
                                             </span>
                                         </div>
@@ -430,8 +439,8 @@ export default function Home() {
                                 </div>
 
                                 {/* ── Row 3: Progress bar (Rischio / Salute / Crescita) ── */}
-                                <div className="mb-4 sm:mb-8">
-                                    <div className="flex justify-between text-[9px] sm:text-xs font-bold uppercase tracking-widest mb-1.5 sm:mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                                <div className="mb-8 sm:mb-12">
+                                    <div className="flex justify-between text-[10px] sm:text-sm font-black uppercase tracking-widest mb-3 sm:mb-5" style={{ color: '#6651C3' }}>
                                         <span>Rischio</span>
                                         <span>Salute</span>
                                         <span>Crescita</span>
@@ -445,35 +454,35 @@ export default function Home() {
                                 </div>
 
                                 {/* ── Row 4: Margine Totale + Costi Totali boxes ── */}
-                                <div className="flex gap-2.5 sm:gap-4 mb-2 sm:mb-4">
+                                <div className="flex gap-4 sm:gap-6 mb-4 sm:mb-6">
                                     <div className="metric-box-green">
-                                        <p className="text-[9px] sm:text-xs font-bold uppercase tracking-wider mb-0.5 sm:mb-2" style={{ color: '#B7FCB0' }}>Margine Totale</p>
-                                        <p className="text-base sm:text-3xl font-black text-white">
+                                        <p className="text-[10px] sm:text-sm font-black uppercase tracking-wider mb-1.5 sm:mb-3" style={{ color: '#6651C3' }}>Margine Totale</p>
+                                        <p className="text-lg sm:text-4xl font-black text-white">
                                             € {marginValue.toLocaleString('it-IT')}
                                         </p>
                                     </div>
                                     <div className="metric-box-red">
-                                        <p className="text-[9px] sm:text-xs font-bold uppercase tracking-wider mb-0.5 sm:mb-2" style={{ color: '#F68A8C' }}>Costi Totali</p>
-                                        <p className="text-base sm:text-3xl font-black text-white">
+                                        <p className="text-[10px] sm:text-sm font-black uppercase tracking-wider mb-1.5 sm:mb-3" style={{ color: '#6651C3' }}>Costi Totali</p>
+                                        <p className="text-lg sm:text-4xl font-black text-white">
                                             € {(dashData?.companyCosts?.total || 0).toLocaleString('it-IT')}
                                         </p>
                                     </div>
                                 </div>
 
                                 {/* ── Row 5: Legend dots ── */}
-                                <div className="flex justify-between mb-3 sm:mb-6">
-                                    <div className="flex items-center gap-1">
-                                        <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0" style={{ backgroundColor: '#B7FCB0' }} />
-                                        <span className="text-[7px] sm:text-[10px] font-bold uppercase tracking-wider" style={{ color: '#B7FCB0' }}>Margine su fatturato</span>
+                                <div className="flex justify-between mb-8 sm:mb-12">
+                                    <div className="flex items-center gap-2 sm:gap-3">
+                                        <span className="w-2.5 h-2.5 sm:w-4 sm:h-4 rounded-full flex-shrink-0" style={{ backgroundColor: '#B7FCB0' }} />
+                                        <span className="text-[8px] sm:text-[11px] font-bold uppercase tracking-wider" style={{ color: '#B7FCB0' }}>Margine su fatturato</span>
                                     </div>
-                                    <div className="flex items-center gap-1">
-                                        <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0" style={{ backgroundColor: '#F68A8C' }} />
-                                        <span className="text-[7px] sm:text-[10px] font-bold uppercase tracking-wider" style={{ color: '#F68A8C' }}>Costi totali su fatturato</span>
+                                    <div className="flex items-center gap-2 sm:gap-3">
+                                        <span className="w-2.5 h-2.5 sm:w-4 sm:h-4 rounded-full flex-shrink-0" style={{ backgroundColor: '#F68A8C' }} />
+                                        <span className="text-[8px] sm:text-[11px] font-bold uppercase tracking-wider" style={{ color: '#F68A8C' }}>Costi totali su fatturato</span>
                                     </div>
                                 </div>
 
                                 {/* ── Row 6: Active sites footer ── */}
-                                <p className="text-[10px] sm:text-sm text-white/70">
+                                <p className="text-[11px] sm:text-lg text-white/70">
                                     <span className="font-bold text-white">{activeSitesCount} Cantieri attivi</span>{' '}
                                     contribuiscono a questo dato in tempo reale.
                                 </p>
@@ -612,7 +621,7 @@ export default function Home() {
                 <p className="text-center text-slate-400 text-xs mt-8">
                     WORK360 Analytics Engine v2.0 — Dati aggiornati automaticamente
                 </p>
-            </div>
-        </Layout>
+            </div >
+        </Layout >
     );
 }
