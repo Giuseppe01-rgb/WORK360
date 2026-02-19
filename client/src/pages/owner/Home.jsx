@@ -415,7 +415,7 @@ export default function Home() {
                                     <div className="main-card-progress-track">
                                         <div
                                             className="main-card-progress-fill"
-                                            style={{ width: `${Math.min(Math.max((growthPercent / 4) * 100, 0), 100)}%` }}
+                                            style={{ width: `${Math.min(Math.max(growthPercent, 0), 100)}%` }}
                                         />
                                     </div>
                                 </div>
