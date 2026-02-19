@@ -360,7 +360,7 @@ export default function Home() {
         <Layout title="Home" hideHeader>
             <style>{FLIP_STYLES}</style>
 
-            <div className="max-w-md mx-auto pb-12 w-full font-['TASA_Orbiter',sans-serif]">
+            <div className="max-w-2xl mx-auto pb-12 w-full font-['TASA_Orbiter',sans-serif]">
 
                 {/* Header for Mobile (if needed, otherwise relying on Layout) */}
                 <div className="md:hidden flex items-center justify-between mb-8 px-2">
@@ -368,7 +368,7 @@ export default function Home() {
                 </div>
 
                 {/* Welcome Section */}
-                <div className="mb-8 px-5">
+                <div className="mb-8 px-3 sm:px-4">
                     <h1 className="text-[32px] font-extrabold leading-[40px] tracking-tight text-[#15161E]">
                         Benvenuto, <span className="text-[#5762FF]">{user?.firstName || 'Boss'}</span>.
                     </h1>
@@ -381,7 +381,7 @@ export default function Home() {
                 </div>
 
                 {/* Main Action Area */}
-                <div className="flex flex-col gap-6 px-5 mb-10">
+                <div className="flex flex-col gap-6 px-3 sm:px-4 mb-10">
                     {/* High Efficiency Card */}
                     <FlipCard
                         className="w-full"
@@ -479,7 +479,7 @@ export default function Home() {
 
                 {/* Focus Performance Cantieri */}
                 {(sitePerformance.top || sitePerformance.worst) && (
-                    <div className="px-5 mb-10 w-full flex flex-col gap-6">
+                    <div className="px-3 sm:px-4 mb-10 w-full flex flex-col gap-6">
                         <h3 className="text-center text-black text-[20px] font-extrabold uppercase leading-[28px]">
                             FOCUS PERFORMANCE CANTIERI
                         </h3>
