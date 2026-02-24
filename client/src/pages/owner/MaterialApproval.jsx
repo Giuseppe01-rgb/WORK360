@@ -365,7 +365,14 @@ const ApproveModal = ({ report, onClose, onSuccess }) => {
             tabIndex={0}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-            onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') onClose(); }}
+            onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                    onClose();
+                } else if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    onClose();
+                }
+            }}
         >
             <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="p-6 border-b border-slate-200 sticky top-0 bg-white z-10">
@@ -531,7 +538,14 @@ const LinkModal = ({ report, catalogMaterials, onClose, onSuccess }) => {
             tabIndex={0}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-            onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') onClose(); }}
+            onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                    onClose();
+                } else if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    onClose();
+                }
+            }}
         >
             <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                 <div className="p-6 border-b border-slate-200">
