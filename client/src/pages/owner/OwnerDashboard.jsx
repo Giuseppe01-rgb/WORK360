@@ -259,7 +259,7 @@ export default function OwnerDashboard() {
                     </div>
 
                     {/* Filters Scrollable */}
-                    <div className="flex w-full overflow-x-auto no-scrollbar items-center gap-3 snap-x pb-2">
+                    <div className="flex w-full overflow-x-auto no-scrollbar items-center gap-3 snap-x pb-2 -mx-4 px-4 md:-mx-8 md:px-8 lg:-mx-10 lg:px-10" style={{ paddingRight: '24px' }}>
                         {filters.map(filter => {
                             const isActive = statusFilter === filter.id;
                             return (
@@ -328,17 +328,17 @@ export default function OwnerDashboard() {
                                     </div>
                                 </div>
                                 <div style={{ alignSelf: 'stretch', justifyContent: 'space-between', alignItems: 'flex-start', display: 'flex', gap: 8 }}>
-                                    <div style={{ flex: 1, height: 44, paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#F0F0F4', overflow: 'hidden', borderRadius: 12, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-                                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>INIZIO</div>
-                                        <div style={{ color: '#15161E', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>{getFormattedStartDate(site.startDate)}</div>
+                                    <div style={{ flex: 1, height: 50, paddingLeft: 8, paddingRight: 8, paddingTop: 6, paddingBottom: 6, background: '#F0F0F4', overflow: 'hidden', borderRadius: 12, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
+                                        <div style={{ color: '#888AAA', fontSize: 11, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>INIZIO</div>
+                                        <div style={{ color: '#15161E', fontSize: 12, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap', marginTop: 2 }}>{getFormattedStartDate(site.startDate)}</div>
                                     </div>
-                                    <div style={{ flex: 1, height: 44, paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#F0F0F4', overflow: 'hidden', borderRadius: 12, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-                                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>DURATA</div>
-                                        <div style={{ color: '#15161E', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>{getDuration(site.startDate, site.endDate)}</div>
+                                    <div style={{ flex: 1, height: 50, paddingLeft: 8, paddingRight: 8, paddingTop: 6, paddingBottom: 6, background: '#F0F0F4', overflow: 'hidden', borderRadius: 12, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
+                                        <div style={{ color: '#888AAA', fontSize: 11, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>DURATA</div>
+                                        <div style={{ color: '#15161E', fontSize: 12, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap', marginTop: 2 }}>{getDuration(site.startDate, site.endDate)}</div>
                                     </div>
-                                    <div style={{ flex: 1, height: 44, paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#F0F0F4', overflow: 'hidden', borderRadius: 12, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-                                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>PATTUITO</div>
-                                        <div style={{ color: '#15161E', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>€ {Number(site.contractValue || 0).toLocaleString('it-IT', { minimumFractionDigits: 1 })}</div>
+                                    <div style={{ flex: 1, height: 50, paddingLeft: 8, paddingRight: 8, paddingTop: 6, paddingBottom: 6, background: '#F0F0F4', overflow: 'hidden', borderRadius: 12, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
+                                        <div style={{ color: '#888AAA', fontSize: 11, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>PATTUITO</div>
+                                        <div style={{ color: '#15161E', fontSize: 12, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap', marginTop: 2 }}>€ {Number(site.contractValue || 0).toLocaleString('it-IT', { minimumFractionDigits: 1 })}</div>
                                     </div>
                                 </div>
                                 <div style={{ alignSelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
