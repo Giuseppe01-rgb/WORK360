@@ -170,32 +170,32 @@ export default function OwnerDashboard() {
         switch (status) {
             case 'active':
                 return (
-                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#CEFDDA', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
-                        <div style={{ color: '#138624', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>IN CORSO</div>
+                    <div style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#CEFDDA', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#138624', fontSize: 11, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase', letterSpacing: '0.02em' }}>IN CORSO</div>
                     </div>
                 );
             case 'planned':
                 return (
-                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#E5E7FF', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
-                        <div style={{ color: '#5762FF', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>PIANIFICATO</div>
+                    <div style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#E5E7FF', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#5762FF', fontSize: 11, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase', letterSpacing: '0.02em' }}>PIANIFICATO</div>
                     </div>
                 );
             case 'completed':
                 return (
-                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#F0F0F4', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
-                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>COMPLETATO</div>
+                    <div style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#F0F0F4', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#888AAA', fontSize: 11, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase', letterSpacing: '0.02em' }}>COMPLETATO</div>
                     </div>
                 );
             case 'suspended':
                 return (
-                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#FDCECE', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
-                        <div style={{ color: '#861313', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>SOSPESO</div>
+                    <div style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#FDCECE', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#861313', fontSize: 11, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase', letterSpacing: '0.02em' }}>SOSPESO</div>
                     </div>
                 );
             default:
                 return (
-                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#F0F0F4', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
-                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>SCONOSCIUTO</div>
+                    <div style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#F0F0F4', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#888AAA', fontSize: 11, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase', letterSpacing: '0.02em' }}>SCONOSCIUTO</div>
                     </div>
                 );
         }
@@ -246,13 +246,14 @@ export default function OwnerDashboard() {
                 </div>
             )}
 
-            <div className="space-y-6 pb-20">
+            {/* Container for the page: applies a full background and negative margins to offset Layout padding */}
+            <div className="pb-20 bg-[#F0F0F4] min-h-[calc(100vh-64px)] -mt-4 -mx-4 md:-mx-8 lg:-mx-10" style={{ paddingTop: 16 }}>
 
                 {/* Search, Filters, Nuovo Cantiere Container */}
-                <div style={{ background: '#F0F0F4', overflow: 'hidden', flexDirection: 'column', justifyContent: 'flex-start', gap: 24, display: 'flex', marginBottom: 24, padding: '0 16px', paddingTop: 16 }}>
+                <div style={{ flexDirection: 'column', justifyContent: 'flex-start', gap: 24, display: 'flex', marginBottom: 24, padding: '0 16px' }}>
 
                     {/* Nuovo Cantiere Button */}
-                    <div onClick={() => setShowModal(true)} style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12, background: '#5762FF', borderRadius: 12, justifyContent: 'center', alignItems: 'center', gap: 12, display: 'flex', cursor: 'pointer' }}>
+                    <div onClick={() => setShowModal(true)} style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 14, paddingBottom: 14, background: '#5762FF', borderRadius: 12, justifyContent: 'center', alignItems: 'center', gap: 12, display: 'flex', cursor: 'pointer' }}>
                         <Plus className="w-6 h-6 text-[#F0F0F4]" />
                         <div style={{ color: '#F0F0F4', fontSize: 18, fontFamily: 'TASA Orbiter', fontWeight: 800, lineHeight: '24px', wordWrap: 'break-word' }}>Nuovo Cantiere</div>
                     </div>
@@ -266,11 +267,11 @@ export default function OwnerDashboard() {
                                     key={filter.id}
                                     onClick={() => setStatusFilter(filter.id)}
                                     className="snap-start shrink-0 cursor-pointer"
-                                    style={{ padding: 10, background: isActive ? '#5762FF' : 'white', borderRadius: 24, outline: '1px #C2C6FF solid', outlineOffset: -1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', gap: 10, display: 'flex' }}
+                                    style={{ padding: '12px 14px', background: isActive ? '#5762FF' : 'white', borderRadius: 24, outline: '1px #C2C6FF solid', outlineOffset: -1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', gap: 10, display: 'flex' }}
                                 >
                                     <div style={{ alignSelf: 'stretch', justifyContent: 'center', alignItems: 'center', gap: 10, display: 'flex' }}>
-                                        <div style={{ color: isActive ? '#F0F0F4' : '#15161E', fontSize: 14, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word' }}>{filter.label}</div>
-                                        <div style={{ color: isActive ? '#D2D3DF' : '#6A6D95', fontSize: 14, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word' }}>{filter.count}</div>
+                                        <div style={{ color: isActive ? '#F0F0F4' : '#15161E', fontSize: 15, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '18px', wordWrap: 'break-word' }}>{filter.label}</div>
+                                        <div style={{ color: isActive ? '#D2D3DF' : '#6A6D95', fontSize: 15, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '18px', wordWrap: 'break-word' }}>{filter.count}</div>
                                     </div>
                                 </div>
                             );
@@ -279,14 +280,14 @@ export default function OwnerDashboard() {
 
                     {/* Search Input */}
                     <div style={{ alignSelf: 'stretch', overflow: 'hidden', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', gap: 8, display: 'flex' }}>
-                        <div style={{ alignSelf: 'stretch', height: 48, paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12, background: 'white', overflow: 'hidden', borderRadius: 32, outline: '2px #D2D3DF solid', outlineOffset: -2, justifyContent: 'flex-start', alignItems: 'center', gap: 12, display: 'flex' }}>
+                        <div style={{ alignSelf: 'stretch', height: 56, paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12, background: 'white', overflow: 'hidden', borderRadius: 32, outline: '2px #D2D3DF solid', outlineOffset: -2, justifyContent: 'flex-start', alignItems: 'center', gap: 12, display: 'flex' }}>
                             <Search className="w-6 h-6 text-[#D2D3DF]" />
                             <input
                                 type="text"
                                 placeholder="Cerca cantieri..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#15161E', fontSize: 16, fontFamily: 'TASA Orbiter', fontWeight: 500, lineHeight: '20px', wordWrap: 'break-word' }}
+                                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#15161E', fontSize: 17, fontFamily: 'TASA Orbiter', fontWeight: 500, lineHeight: '22px', wordWrap: 'break-word' }}
                                 className="placeholder:text-[#D2D3DF]"
                             />
                         </div>
@@ -302,17 +303,17 @@ export default function OwnerDashboard() {
                                 <div style={{ alignSelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
                                     <div style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center', gap: 12, display: 'flex', minWidth: 0 }}>
                                         <div style={{ justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
-                                            <div style={{ width: 32, height: 32, background: colorInfo.pastello, overflow: 'hidden', borderRadius: 8, justifyContent: 'center', alignItems: 'center', gap: 10, display: 'flex' }}>
-                                                <div style={{ width: 24, height: 24, position: 'relative', overflow: 'hidden' }}>
-                                                    <div style={{ width: 5, height: 10, left: 2.67, top: 10.91, position: 'absolute', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
-                                                    <div style={{ width: 5, height: 14, left: 20.67, top: 20.91, position: 'absolute', transform: 'rotate(180deg)', transformOrigin: 'top left', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
-                                                    <div style={{ width: 8, height: 19, left: 7.67, top: 1.91, position: 'absolute', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
+                                            <div style={{ width: 44, height: 44, background: colorInfo.pastello, overflow: 'hidden', borderRadius: 12, justifyContent: 'center', alignItems: 'center', display: 'flex', position: 'relative' }}>
+                                                <div style={{ width: 28, height: 28, position: 'relative', overflow: 'hidden' }}>
+                                                    <div style={{ width: 6, height: 12, left: 3, top: 12, position: 'absolute', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
+                                                    <div style={{ width: 6, height: 16, left: 24, top: 24, position: 'absolute', transform: 'rotate(180deg)', transformOrigin: 'top left', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
+                                                    <div style={{ width: 10, height: 22, left: 9, top: 2, position: 'absolute', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', display: 'flex', minWidth: 0, overflow: 'hidden' }}>
-                                            <div style={{ alignSelf: 'stretch', color: 'black', fontSize: 24, fontFamily: 'TASA Orbiter', fontWeight: 800, lineHeight: '32px', wordWrap: 'break-word', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{site.name}</div>
-                                            <div style={{ alignSelf: 'stretch', color: '#888AAA', fontSize: 14, fontFamily: 'TASA Orbiter', fontWeight: 500, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{site.address || 'Nessun indirizzo'}</div>
+                                            <div style={{ alignSelf: 'stretch', color: 'black', fontSize: 26, fontFamily: 'TASA Orbiter', fontWeight: 800, lineHeight: '30px', wordWrap: 'break-word', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{site.name}</div>
+                                            <div style={{ alignSelf: 'stretch', color: '#888AAA', fontSize: 15, fontFamily: 'TASA Orbiter', fontWeight: 500, lineHeight: '20px', wordWrap: 'break-word', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{site.address || 'Nessun indirizzo'}</div>
                                         </div>
                                     </div>
                                     <div style={{ height: 48, justifyContent: 'flex-end', alignItems: 'center', gap: 10, display: 'flex', paddingLeft: 8 }}>
