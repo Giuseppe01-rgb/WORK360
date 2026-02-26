@@ -304,11 +304,14 @@ export default function OwnerDashboard() {
                                     <div style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center', gap: 12, display: 'flex', minWidth: 0 }}>
                                         <div style={{ justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
                                             <div style={{ width: 44, height: 44, background: colorInfo.pastello, overflow: 'hidden', borderRadius: 12, justifyContent: 'center', alignItems: 'center', display: 'flex', position: 'relative' }}>
-                                                <div style={{ width: 28, height: 28, position: 'relative', overflow: 'hidden' }}>
-                                                    <div style={{ width: 6, height: 12, left: 3, top: 12, position: 'absolute', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
-                                                    <div style={{ width: 6, height: 16, left: 24, top: 24, position: 'absolute', transform: 'rotate(180deg)', transformOrigin: 'top left', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
-                                                    <div style={{ width: 10, height: 22, left: 9, top: 2, position: 'absolute', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
-                                                </div>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M7.66559 10.9111H4.66559C3.99892 10.9111 2.66559 11.3111 2.66559 12.9111C2.66559 14.9111 2.66559 17.9111 2.66559 18.9111C2.66559 19.9111 2.66559 20.9111 4.66559 20.9111C6.26559 20.9111 7.33226 20.9111 7.66559 20.9111V11.4111" stroke={colorInfo.pieno} strokeWidth="2" />
+                                                    <path d="M15.6656 6.91113H18.6656C19.3323 6.91113 20.6656 7.47113 20.6656 9.71113C20.6656 12.5111 20.6656 16.7111 20.6656 18.1111C20.6656 19.5111 20.6656 20.9111 18.6656 20.9111C17.0656 20.9111 15.9989 20.9111 15.6656 20.9111V7.61113" stroke={colorInfo.pieno} strokeWidth="2" />
+                                                    <path d="M7.66559 20.9111V3.81113C7.66559 2.29113 8.99892 1.91113 9.66559 1.91113H13.1656C15.1656 1.91113 15.6656 3.1778 15.6656 3.81113V20.9111H7.66559Z" stroke={colorInfo.pieno} strokeWidth="2" />
+                                                    <path d="M10.6656 9.91113H12.6656" stroke={colorInfo.pieno} strokeWidth="2" strokeLinecap="round" />
+                                                    <path d="M10.6656 5.91113H12.6656" stroke={colorInfo.pieno} strokeWidth="2" strokeLinecap="round" />
+                                                    <path d="M10.1656 14.9111C10.1656 14.0827 10.8372 13.4111 11.6656 13.4111C12.494 13.4111 13.1656 14.0827 13.1656 14.9111H11.6656H10.1656ZM13.1656 19.9111V21.4111H10.1656V19.9111H11.6656H13.1656ZM11.6656 14.9111H13.1656V19.9111H11.6656H10.1656V14.9111H11.6656Z" fill={colorInfo.pieno} />
+                                                </svg>
                                             </div>
                                         </div>
                                         <div style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', display: 'flex', minWidth: 0, overflow: 'hidden' }}>
