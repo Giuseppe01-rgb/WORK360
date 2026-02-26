@@ -142,6 +142,73 @@ export default function OwnerDashboard() {
         setShowModal(false);
     };
 
+    const getDuration = (start, end) => {
+        if (!start) return '-';
+        const s = new Date(start);
+        const e = end ? new Date(end) : new Date();
+        const diffTime = Math.abs(e - s);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return `${diffDays} giorni`;
+    };
+
+    const getFormattedStartDate = (dateString) => {
+        if (!dateString) return '-';
+        const d = new Date(dateString);
+        return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
+    };
+
+    const getSiteColorPalette = (index) => {
+        const colors = [
+            { pastello: '#C8DCF5', pieno: '#70A6E7' }, // Ciano
+            { pastello: '#C8F5CF', pieno: '#71E685' }, // Verde
+            { pastello: '#C9C8F5', pieno: '#6765E3' }, // Viola
+        ];
+        return colors[index % colors.length];
+    };
+
+    const renderStatusBadge = (status) => {
+        switch (status) {
+            case 'active':
+                return (
+                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#CEFDDA', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#138624', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>IN CORSO</div>
+                    </div>
+                );
+            case 'planned':
+                return (
+                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#E5E7FF', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#5762FF', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>PIANIFICATO</div>
+                    </div>
+                );
+            case 'completed':
+                return (
+                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#F0F0F4', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>COMPLETATO</div>
+                    </div>
+                );
+            case 'suspended':
+                return (
+                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#FDCECE', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#861313', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>SOSPESO</div>
+                    </div>
+                );
+            default:
+                return (
+                    <div style={{ paddingLeft: 8, paddingRight: 8, paddingTop: 2, paddingBottom: 2, background: '#F0F0F4', borderRadius: 32, justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', textTransform: 'uppercase' }}>SCONOSCIUTO</div>
+                    </div>
+                );
+        }
+    };
+
+    const filters = [
+        { label: 'TUTTI', id: 'all', count: sites.length },
+        { label: 'IN CORSO', id: 'active', count: sites.filter(s => s.status === 'active').length },
+        { label: 'COMPLETATI', id: 'completed', count: sites.filter(s => s.status === 'completed').length },
+        { label: 'PIANIFICATI', id: 'planned', count: sites.filter(s => s.status === 'planned').length },
+        { label: 'SOSPESI', id: 'suspended', count: sites.filter(s => s.status === 'suspended').length },
+    ];
+
     const filteredSites = sites.filter(site => {
         // Status filter
         const matchesStatus = statusFilter === 'all' || site.status === statusFilter;
@@ -181,194 +248,108 @@ export default function OwnerDashboard() {
 
             <div className="space-y-6 pb-20">
 
-                {/* SEARCH - UPDATED */}
-                <div className="relative mb-6">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                        aria-label="Cerca cantiere"
-                        type="text"
-                        placeholder="Cerca cantiere..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-white pl-12 pr-4 py-4 rounded-[2.5rem] border-none shadow-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
-                    />
-                </div>
+                {/* Search, Filters, Nuovo Cantiere Container */}
+                <div style={{ background: '#F0F0F4', overflow: 'hidden', flexDirection: 'column', justifyContent: 'flex-start', gap: 24, display: 'flex', marginBottom: 24, padding: '0 16px', paddingTop: 16 }}>
 
-                {/* STATUS FILTER TABS - Clean & Scrollable */}
-                <div className="relative mb-6">
-                    {/* Fade gradient to indicate scrollability */}
-                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-100 to-transparent pointer-events-none z-10 md:hidden"></div>
+                    {/* Nuovo Cantiere Button */}
+                    <div onClick={() => setShowModal(true)} style={{ paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12, background: '#5762FF', borderRadius: 12, justifyContent: 'center', alignItems: 'center', gap: 12, display: 'flex', cursor: 'pointer' }}>
+                        <Plus className="w-6 h-6 text-[#F0F0F4]" />
+                        <div style={{ color: '#F0F0F4', fontSize: 18, fontFamily: 'TASA Orbiter', fontWeight: 800, lineHeight: '24px', wordWrap: 'break-word' }}>Nuovo Cantiere</div>
+                    </div>
 
-                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
-                        {[
-                            { value: 'all', label: 'Tutti' },
-                            { value: 'active', label: 'In corso' },
-                            { value: 'completed', label: 'Completati' },
-                            { value: 'planned', label: 'Pianificati' },
-                            { value: 'suspended', label: 'Sospesi' }
-                        ].map(tab => {
-                            const count = tab.value === 'all'
-                                ? sites.length
-                                : sites.filter(s => s.status === tab.value).length;
-                            const isActive = statusFilter === tab.value;
+                    {/* Filters Scrollable */}
+                    <div className="flex w-full overflow-x-auto no-scrollbar items-center gap-3 snap-x pb-2">
+                        {filters.map(filter => {
+                            const isActive = statusFilter === filter.id;
                             return (
-                                <button
-                                    key={tab.value}
-                                    onClick={() => setStatusFilter(tab.value)}
-                                    className={`flex-shrink-0 px-4 py-2.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${isActive
-                                        ? 'bg-slate-900 text-white'
-                                        : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-                                        }`}
+                                <div
+                                    key={filter.id}
+                                    onClick={() => setStatusFilter(filter.id)}
+                                    className="snap-start shrink-0 cursor-pointer"
+                                    style={{ padding: 10, background: isActive ? '#5762FF' : 'white', borderRadius: 24, outline: '1px #C2C6FF solid', outlineOffset: -1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', gap: 10, display: 'flex' }}
                                 >
-                                    {tab.label}
-                                    <span className={`ml-1.5 ${isActive ? 'text-white/60' : 'text-slate-400'}`}>
-                                        {count}
-                                    </span>
-                                </button>
+                                    <div style={{ alignSelf: 'stretch', justifyContent: 'center', alignItems: 'center', gap: 10, display: 'flex' }}>
+                                        <div style={{ color: isActive ? '#F0F0F4' : '#15161E', fontSize: 14, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word' }}>{filter.label}</div>
+                                        <div style={{ color: isActive ? '#D2D3DF' : '#6A6D95', fontSize: 14, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word' }}>{filter.count}</div>
+                                    </div>
+                                </div>
                             );
                         })}
                     </div>
+
+                    {/* Search Input */}
+                    <div style={{ alignSelf: 'stretch', overflow: 'hidden', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', gap: 8, display: 'flex' }}>
+                        <div style={{ alignSelf: 'stretch', height: 48, paddingLeft: 16, paddingRight: 16, paddingTop: 12, paddingBottom: 12, background: 'white', overflow: 'hidden', borderRadius: 32, outline: '2px #D2D3DF solid', outlineOffset: -2, justifyContent: 'flex-start', alignItems: 'center', gap: 12, display: 'flex' }}>
+                            <Search className="w-6 h-6 text-[#D2D3DF]" />
+                            <input
+                                type="text"
+                                placeholder="Cerca cantieri..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#15161E', fontSize: 16, fontFamily: 'TASA Orbiter', fontWeight: 500, lineHeight: '20px', wordWrap: 'break-word' }}
+                                className="placeholder:text-[#D2D3DF]"
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                {/* NEW SITE BUTTON */}
-                <button
-                    onClick={() => setShowModal(true)}
-                    className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-4 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/40 flex items-center justify-center gap-2 mb-8 transition-all active:scale-95 hover:shadow-2xl hover:shadow-blue-500/50"
-                >
-                    <Plus className="w-6 h-6" />
-                    Nuovo Cantiere
-                </button>
-
                 {/* SITES LIST */}
-                <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-slate-900 text-lg">
-                            {statusFilter === 'all' ? 'Tutti i cantieri' :
-                                statusFilter === 'active' ? 'Cantieri attivi' :
-                                    statusFilter === 'completed' ? 'Cantieri completati' :
-                                        statusFilter === 'planned' ? 'Cantieri pianificati' : 'Cantieri sospesi'}
-                        </h3>
-                        <span className="text-slate-500 text-sm font-medium">{filteredSites.length} risultati</span>
-                    </div>
-
-                    {filteredSites.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-center">
-                            <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-                                <Building2 className="w-12 h-12 text-slate-300" />
-                            </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">Nessun cantiere trovato</h3>
-                            <p className="text-slate-500 max-w-xs mx-auto">
-                                Non ci sono cantieri che corrispondono ai filtri selezionati.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {filteredSites.map((site) => {
-                                // Status config
-                                const statusConfig = {
-                                    active: { label: 'In corso', bgClass: 'bg-green-100', textClass: 'text-green-700' },
-                                    completed: { label: 'Completato', bgClass: 'bg-blue-100', textClass: 'text-blue-700' },
-                                    planned: { label: 'Pianificato', bgClass: 'bg-amber-100', textClass: 'text-amber-700' },
-                                    suspended: { label: 'Sospeso', bgClass: 'bg-red-100', textClass: 'text-red-700' }
-                                }[site.status] || { label: 'Sconosciuto', bgClass: 'bg-slate-100', textClass: 'text-slate-700' };
-
-                                // Calculate days since start
-                                const startDate = new Date(site.startDate);
-                                const today = new Date();
-                                const durationDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-
-                                // Has contract value
-                                const hasContract = Number.parseFloat(site.contractValue) > 0;
-                                const contractValue = Number.parseFloat(site.contractValue) || 0;
-
-                                return (
-                                    <SquircleCard key={site.id} onClick={() => setSelectedSite(site)}>
-                                        <div className="p-5">
-                                            <div className="flex justify-between items-start mb-5">
-                                                <div className="flex gap-4">
-                                                    {(() => {
-                                                        const siteColor = getSiteColor(site.id);
-                                                        return (
-                                                            <div className={`flex-shrink-0 w-12 h-12 rounded-2xl ${siteColor.iconBg} flex items-center justify-center ${siteColor.text} group-hover:scale-105 transition-transform`}>
-                                                                <Building2 className="w-6 h-6" />
-                                                            </div>
-                                                        );
-                                                    })()}
-                                                    <div>
-                                                        <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 line-clamp-2 pr-2">
-                                                            {site.name}
-                                                        </h3>
-                                                        <div className="flex items-center gap-1.5 text-slate-500 text-sm">
-                                                            <MapPin className="w-3.5 h-3.5" />
-                                                            <span className="truncate max-w-[180px]">{site.address}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-1">
-                                                    <button onClick={(e) => { e.stopPropagation(); handleEdit(e, site); }} className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
-                                                        <Edit className="w-4 h-4" />
-                                                    </button>
-                                                    <button onClick={(e) => { e.stopPropagation(); handleDelete(e, site.id); }} className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            {/* Metrics Row */}
-                                            <div className="grid grid-cols-3 gap-3 mb-5">
-                                                <div className="bg-slate-50/80 rounded-2xl p-3 text-center">
-                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Inizio</p>
-                                                    <p className="text-slate-900 font-bold text-sm">
-                                                        {new Date(site.startDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }).replace('.', '')}
-                                                    </p>
-                                                </div>
-
-                                                <div className="bg-slate-50/80 rounded-2xl p-3 text-center">
-                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Durata</p>
-                                                    <p className="text-slate-900 font-bold text-sm">
-                                                        {durationDays > 0 ? `${durationDays} gg` : '-'}
-                                                    </p>
-                                                </div>
-
-                                                <div className={`rounded-2xl p-3 text-center ${hasContract ? 'bg-indigo-50/50' : 'bg-slate-50/80'}`}>
-                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Valore</p>
-                                                    {hasContract ? (
-                                                        <p className="text-slate-900 font-bold text-sm whitespace-nowrap">
-                                                            € {contractValue.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                                        </p>
-                                                    ) : (
-                                                        <p className="text-slate-400 font-medium text-sm">—</p>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Footer - Status Badge + CTA */}
-                                            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                                                <div className="flex items-center gap-3">
-                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${site.status === 'active'
-                                                        ? 'bg-green-50 border-green-200 text-green-700'
-                                                        : statusConfig.bgClass.replace('bg-', 'bg-opacity-10 bg-').replace('text-', 'border-').replace('text-amber-700', 'border-amber-200 text-amber-700').replace('text-blue-700', 'border-blue-200 text-blue-700').replace('text-red-700', 'border-red-200 text-red-700').replace('text-slate-700', 'border-slate-200 text-slate-600')
-                                                        }`}>
-                                                        {statusConfig.label}
-                                                    </span>
-                                                    {site.assignedWorkers?.length > 0 && (
-                                                        <div className="flex items-center gap-1 text-xs text-slate-400">
-                                                            <Users className="w-3.5 h-3.5" />
-                                                            <span>{site.assignedWorkers.length}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-1 text-slate-400 group-hover:text-blue-600 transition-colors">
-                                                    <span className="text-xs font-semibold">Dettagli</span>
-                                                    <ChevronRight className="w-4 h-4" />
+                <div style={{ flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', gap: 24, display: 'flex', width: '100%', padding: '0 16px' }}>
+                    {filteredSites.map((site, index) => {
+                        const colorInfo = getSiteColorPalette(index);
+                        return (
+                            <div key={site.id} style={{ alignSelf: 'stretch', padding: 16, background: 'white', overflow: 'hidden', borderRadius: 32, outline: '2px #E5E7FF solid', outlineOffset: -2, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', gap: 16, display: 'flex' }}>
+                                <div style={{ alignSelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
+                                    <div style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center', gap: 12, display: 'flex', minWidth: 0 }}>
+                                        <div style={{ justifyContent: 'flex-start', alignItems: 'center', gap: 10, display: 'flex' }}>
+                                            <div style={{ width: 32, height: 32, background: colorInfo.pastello, overflow: 'hidden', borderRadius: 8, justifyContent: 'center', alignItems: 'center', gap: 10, display: 'flex' }}>
+                                                <div style={{ width: 24, height: 24, position: 'relative', overflow: 'hidden' }}>
+                                                    <div style={{ width: 5, height: 10, left: 2.67, top: 10.91, position: 'absolute', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
+                                                    <div style={{ width: 5, height: 14, left: 20.67, top: 20.91, position: 'absolute', transform: 'rotate(180deg)', transformOrigin: 'top left', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
+                                                    <div style={{ width: 8, height: 19, left: 7.67, top: 1.91, position: 'absolute', outline: `2px ${colorInfo.pieno} solid`, outlineOffset: -1 }}></div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </SquircleCard>
-                                );
-                            })}
-                        </div>
-                    )}
+                                        <div style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', display: 'flex', minWidth: 0, overflow: 'hidden' }}>
+                                            <div style={{ alignSelf: 'stretch', color: 'black', fontSize: 24, fontFamily: 'TASA Orbiter', fontWeight: 800, lineHeight: '32px', wordWrap: 'break-word', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{site.name}</div>
+                                            <div style={{ alignSelf: 'stretch', color: '#888AAA', fontSize: 14, fontFamily: 'TASA Orbiter', fontWeight: 500, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{site.address || 'Nessun indirizzo'}</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ height: 48, justifyContent: 'flex-end', alignItems: 'center', gap: 10, display: 'flex', paddingLeft: 8 }}>
+                                        <div style={{ justifyContent: 'flex-end', alignItems: 'center', gap: 12, display: 'flex' }}>
+                                            <button onClick={(e) => handleEdit(e, site)} className="hover:opacity-75 transition-opacity" title="Modifica">
+                                                <Edit className="w-5 h-5 text-[#888AAA]" />
+                                            </button>
+                                            <button onClick={(e) => handleDelete(e, site.id)} className="hover:opacity-75 transition-opacity" title="Elimina">
+                                                <Trash2 className="w-5 h-5 text-[#888AAA]" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ alignSelf: 'stretch', justifyContent: 'space-between', alignItems: 'flex-start', display: 'flex', gap: 8 }}>
+                                    <div style={{ flex: 1, height: 44, paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#F0F0F4', overflow: 'hidden', borderRadius: 12, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
+                                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>INIZIO</div>
+                                        <div style={{ color: '#15161E', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>{getFormattedStartDate(site.startDate)}</div>
+                                    </div>
+                                    <div style={{ flex: 1, height: 44, paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#F0F0F4', overflow: 'hidden', borderRadius: 12, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
+                                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>DURATA</div>
+                                        <div style={{ color: '#15161E', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>{getDuration(site.startDate, site.endDate)}</div>
+                                    </div>
+                                    <div style={{ flex: 1, height: 44, paddingLeft: 12, paddingRight: 12, paddingTop: 4, paddingBottom: 4, background: '#F0F0F4', overflow: 'hidden', borderRadius: 12, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
+                                        <div style={{ color: '#888AAA', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>PATTUITO</div>
+                                        <div style={{ color: '#15161E', fontSize: 9, fontFamily: 'TASA Orbiter', fontWeight: 600, lineHeight: '16px', wordWrap: 'break-word', whiteSpace: 'nowrap' }}>€ {Number(site.contractValue || 0).toLocaleString('it-IT', { minimumFractionDigits: 1 })}</div>
+                                    </div>
+                                </div>
+                                <div style={{ alignSelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', display: 'flex' }}>
+                                    {renderStatusBadge(site.status)}
+                                    <div onClick={() => setSelectedSite(site)} className="cursor-pointer hover:bg-[#E5E7FF] transition-colors" style={{ paddingLeft: 12, paddingRight: 12, paddingTop: 8, paddingBottom: 8, borderRadius: 12, justifyContent: 'center', alignItems: 'center', gap: 4, display: 'flex' }}>
+                                        <div style={{ color: '#5762FF', fontSize: 14, fontFamily: 'TASA Orbiter', fontWeight: 700, lineHeight: '16px', wordWrap: 'break-word' }}>Dettagli</div>
+                                        <ArrowRight className="w-5 h-5 text-[#5762FF]" />
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
