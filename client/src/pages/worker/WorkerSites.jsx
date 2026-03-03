@@ -204,7 +204,7 @@ const SiteDetails = ({ site, onBack }) => {
                                                     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                                                 })}
                                             </span>
-                                            {report.userId === user?.id && (
+                                            {(report.userId || report.user_id) === user?.id && (
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -259,7 +259,7 @@ const SiteDetails = ({ site, onBack }) => {
                                                         day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                                                     })}
                                                 </span>
-                                                {note.userId === user?.id && (
+                                                {(note.userId || note.user_id) === user?.id && (
                                                     <button
                                                         onClick={() => {
                                                             setEditingReport(note);
