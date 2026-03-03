@@ -50,6 +50,33 @@ const getNotes = async (req, res, next) => {
     }
 };
 
+const updateNote = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { content } = req.body;
+        const companyId = getCompanyId(req);
+
+        const note = await Note.findOne({
+            where: {
+                id,
+                companyId,
+                userId: getUserId(req)
+            }
+        });
+
+        if (!note) {
+            return res.status(404).json({ message: 'Nota non trovata o non sei autorizzato a modificarla' });
+        }
+
+        note.content = content;
+        await note.save();
+
+        res.json(note);
+    } catch (error) {
+        next(error);
+    }
+};
+
 const deleteNote = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -74,4 +101,4 @@ const deleteNote = async (req, res, next) => {
     }
 };
 
-module.exports = { createNote, getNotes, deleteNote };
+module.exports = { createNote, getNotes, updateNote, deleteNote };

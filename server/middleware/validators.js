@@ -238,7 +238,7 @@ const validateNote = [
         .trim(),
     body('type')
         .optional()
-        .isIn(['note', 'warning', 'info']).withMessage('Tipo di nota non valido.'),
+        .isIn(['note', 'warning', 'info', 'daily_report']).withMessage('Tipo di nota non valido.'),
     handleValidation,
 ];
 

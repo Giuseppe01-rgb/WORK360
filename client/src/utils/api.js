@@ -124,6 +124,7 @@ export const equipmentAPI = {
 export const noteAPI = {
     create: (data) => api.post('/notes', data),
     getAll: (params) => api.get('/notes', { params }),
+    update: (id, data) => api.put(`/notes/${id}`, data),
     delete: (id) => api.delete(`/notes/${id}`),
 };
 

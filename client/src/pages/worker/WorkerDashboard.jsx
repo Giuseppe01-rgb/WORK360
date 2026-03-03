@@ -63,6 +63,11 @@ export default function WorkerDashboard() {
     const [editingCartItem, setEditingCartItem] = useState(null);
     const [submittingCart, setSubmittingCart] = useState(false);
 
+    // Daily report editing states
+    const [dailyReports, setDailyReports] = useState([]);
+    const [editingDailyReport, setEditingDailyReport] = useState(null);
+    const [dailyReportText, setDailyReportText] = useState('');
+
     // Specific loading states for optimistic UI
     const [clockingIn, setClockingIn] = useState(false);
     const [clockingOut, setClockingOut] = useState(false);
@@ -139,6 +144,23 @@ export default function WorkerDashboard() {
             console.error('Error loading today activities:', error);
         }
     };
+
+    const loadDailyReports = async (siteId) => {
+        if (!siteId) return;
+        try {
+            const response = await noteAPI.getAll({ siteId, type: 'daily_report' });
+            setDailyReports(response.data || []);
+        } catch (error) {
+            console.error('Error loading daily reports:', error);
+        }
+    };
+
+    // Reload daily reports when selected site changes
+    useEffect(() => {
+        if (selectedSite && activeTab === 'daily-report') {
+            loadDailyReports(selectedSite);
+        }
+    }, [selectedSite, activeTab]);
 
     // Custom Select Component for better UI
     const CustomSelect = ({ value, onChange, options, placeholder, disabled }) => (
@@ -1323,6 +1345,31 @@ export default function WorkerDashboard() {
                                 <FileText className="w-6 h-6 text-slate-900" />
                                 Note Aggiuntive Report
                             </h3>
+
+                            {/* Editing banner */}
+                            {editingDailyReport && (
+                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 bg-blue-100 rounded-lg">
+                                            <FileText className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-blue-900 text-sm">Modifica in corso</h4>
+                                            <p className="text-sm text-blue-700">Stai modificando un report esistente</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setEditingDailyReport(null);
+                                            setDailyReportText('');
+                                        }}
+                                        className="px-3 py-1.5 bg-blue-100 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-200 transition-colors"
+                                    >
+                                        Annulla
+                                    </button>
+                                </div>
+                            )}
+
                             <form onSubmit={(e) => {
                                 e.preventDefault();
                                 const submitReport = async () => {
@@ -1331,15 +1378,24 @@ export default function WorkerDashboard() {
                                         return;
                                     }
                                     try {
-                                        await noteAPI.create({
-                                            siteId: selectedSite,
-                                            content: noteText,
-                                            type: 'daily_report'
-                                        });
-                                        showSuccess('Report testuale salvato');
-                                        setNoteText('');
+                                        if (editingDailyReport) {
+                                            await noteAPI.update(editingDailyReport.id, {
+                                                content: dailyReportText
+                                            });
+                                            showSuccess('✅ Report aggiornato con successo');
+                                            setEditingDailyReport(null);
+                                        } else {
+                                            await noteAPI.create({
+                                                siteId: selectedSite,
+                                                content: dailyReportText,
+                                                type: 'daily_report'
+                                            });
+                                            showSuccess('✅ Report salvato con successo');
+                                        }
+                                        setDailyReportText('');
+                                        loadDailyReports(selectedSite);
                                     } catch (error) {
-                                        showError('Errore salvataggio report');
+                                        showError(editingDailyReport ? 'Errore aggiornamento report' : 'Errore salvataggio report');
                                     }
                                 };
                                 submitReport();
@@ -1350,19 +1406,81 @@ export default function WorkerDashboard() {
                                         id="report_notes"
                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none min-h-[120px]"
                                         placeholder="Descrivi eventuali problemi o dettagli extra..."
-                                        value={noteText}
-                                        onChange={(e) => setNoteText(e.target.value)}
+                                        value={dailyReportText}
+                                        onChange={(e) => setDailyReportText(e.target.value)}
                                         required
                                     />
                                 </div>
-                                <button
-                                    type="submit"
-                                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
-                                >
-                                    <FileText className="w-5 h-5" />
-                                    Salva Note Report
-                                </button>
+                                <div className="flex gap-3">
+                                    {editingDailyReport && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingDailyReport(null);
+                                                setDailyReportText('');
+                                            }}
+                                            className="flex-1 py-3 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-all"
+                                        >
+                                            Annulla
+                                        </button>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        className={`py-3 font-semibold rounded-lg transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 ${editingDailyReport ? 'flex-1 bg-blue-600 text-white hover:bg-blue-700' : 'w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'}`}
+                                    >
+                                        <FileText className="w-5 h-5" />
+                                        {editingDailyReport ? 'Aggiorna Report' : 'Salva Note Report'}
+                                    </button>
+                                </div>
                             </form>
+
+                            {/* List of existing daily reports */}
+                            {dailyReports.length > 0 && (
+                                <div className="mt-8 border-t border-slate-100 pt-6">
+                                    <h4 className="font-semibold text-slate-900 text-sm uppercase tracking-wider mb-4">Report Salvati</h4>
+                                    <div className="space-y-3">
+                                        {dailyReports.map((report) => (
+                                            <div key={report.id} className={`p-4 rounded-xl border transition-all ${editingDailyReport?.id === report.id
+                                                    ? 'bg-blue-50 border-blue-200'
+                                                    : 'bg-slate-50 border-slate-100'
+                                                }`}>
+                                                <div className="flex justify-between items-start gap-3">
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-slate-900 text-sm whitespace-pre-wrap break-words">{report.content}</p>
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <span className="text-xs text-slate-400">
+                                                                {new Date(report.createdAt).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                            {report.user && (
+                                                                <span className="text-xs text-slate-500 font-medium">
+                                                                    — {report.user.firstName} {report.user.lastName}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {/* Show edit button only for own reports */}
+                                                    {report.userId === user?.id && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setEditingDailyReport(report);
+                                                                setDailyReportText(report.content);
+                                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                            }}
+                                                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
+                                                            title="Modifica report"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
