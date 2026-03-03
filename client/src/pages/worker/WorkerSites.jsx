@@ -58,6 +58,7 @@ const SiteDetails = ({ site, onBack }) => {
     const [expandedReport, setExpandedReport] = useState(null);
     const [editingReport, setEditingReport] = useState(null);
     const [editReportText, setEditReportText] = useState('');
+    const [editType, setEditType] = useState(null); // 'activity' or 'note'
 
     const sections = [
         { id: 'reports', label: 'Rapporti giornalieri' },
@@ -92,13 +93,23 @@ const SiteDetails = ({ site, onBack }) => {
     const handleSaveReportEdit = async () => {
         if (!editingReport || !editReportText.trim()) return;
         try {
-            await noteAPI.update(editingReport.id, { content: editReportText });
+            if (editType === 'activity') {
+                await workActivityAPI.update(editingReport.id, {
+                    activityType: editReportText
+                });
+                setReports(prev => prev.map(r =>
+                    r.id === editingReport.id ? { ...r, activityType: editReportText } : r
+                ));
+            } else {
+                await noteAPI.update(editingReport.id, { content: editReportText });
+                setDailyReportNotes(prev => prev.map(r =>
+                    r.id === editingReport.id ? { ...r, content: editReportText } : r
+                ));
+            }
             showSuccess('✅ Report aggiornato con successo');
-            setDailyReportNotes(prev => prev.map(r =>
-                r.id === editingReport.id ? { ...r, content: editReportText } : r
-            ));
             setEditingReport(null);
             setEditReportText('');
+            setEditType(null);
         } catch (error) {
             showError('Errore nell\'aggiornamento del report');
         }
@@ -187,11 +198,29 @@ const SiteDetails = ({ site, onBack }) => {
                                                 {report.user?.firstName ? `${report.user.firstName} ${report.user.lastName}` : (report.user?.username || 'Utente')}
                                             </span>
                                         </div>
-                                        <span className="text-xs text-slate-500 font-medium">
-                                            {new Date(report.date || report.createdAt).toLocaleString('it-IT', {
-                                                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                                            })}
-                                        </span>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-xs text-slate-500 font-medium">
+                                                {new Date(report.date || report.createdAt).toLocaleString('it-IT', {
+                                                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                })}
+                                            </span>
+                                            {report.userId === user?.id && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingReport(report);
+                                                        setEditReportText(report.activityType || report.description || '');
+                                                        setEditType('activity');
+                                                    }}
+                                                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Modifica report"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <p className={`text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ${expandedReport?.id === report.id ? '' : 'line-clamp-3'}`}>
@@ -235,6 +264,7 @@ const SiteDetails = ({ site, onBack }) => {
                                                         onClick={() => {
                                                             setEditingReport(note);
                                                             setEditReportText(note.content);
+                                                            setEditType('note');
                                                         }}
                                                         className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                         title="Modifica report"
