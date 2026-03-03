@@ -7,6 +7,7 @@ import {
 import { siteAPI, workActivityAPI, noteAPI, photoAPI } from '../../utils/api';
 import Layout from '../../components/Layout';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 
 // Helper function to get status badge classes
 const getSiteStatusClasses = (status) => {
@@ -46,13 +47,17 @@ const getTabActiveColor = (colorName) => {
 
 
 const SiteDetails = ({ site, onBack }) => {
-    const { showError } = useToast();
+    const { showError, showSuccess } = useToast();
+    const { user } = useAuth();
     const [reports, setReports] = useState([]);
+    const [dailyReportNotes, setDailyReportNotes] = useState([]);
     const [notes, setNotes] = useState([]);
     const [photos, setPhotos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState('reports');
-    const [expandedReport, setExpandedReport] = useState(null); // For viewing full report
+    const [expandedReport, setExpandedReport] = useState(null);
+    const [editingReport, setEditingReport] = useState(null);
+    const [editReportText, setEditReportText] = useState('');
 
     const sections = [
         { id: 'reports', label: 'Rapporti giornalieri' },
@@ -64,13 +69,15 @@ const SiteDetails = ({ site, onBack }) => {
         const loadDetails = async () => {
             try {
                 setLoading(true);
-                const [reportsData, notesData, photosData] = await Promise.all([
+                const [reportsData, notesData, dailyReportData, photosData] = await Promise.all([
                     workActivityAPI.getAll({ siteId: site.id }),
-                    noteAPI.getAll({ siteId: site.id }),
+                    noteAPI.getAll({ siteId: site.id, type: 'note' }),
+                    noteAPI.getAll({ siteId: site.id, type: 'daily_report' }),
                     photoAPI.getAll({ siteId: site.id })
                 ]);
                 setReports(reportsData.data || []);
                 setNotes(notesData.data || []);
+                setDailyReportNotes(dailyReportData.data || []);
                 setPhotos(photosData.data || []);
             } catch (err) {
                 console.error("Error loading site details:", err);
@@ -81,6 +88,21 @@ const SiteDetails = ({ site, onBack }) => {
         };
         loadDetails();
     }, [site]);
+
+    const handleSaveReportEdit = async () => {
+        if (!editingReport || !editReportText.trim()) return;
+        try {
+            await noteAPI.update(editingReport.id, { content: editReportText });
+            showSuccess('✅ Report aggiornato con successo');
+            setDailyReportNotes(prev => prev.map(r =>
+                r.id === editingReport.id ? { ...r, content: editReportText } : r
+            ));
+            setEditingReport(null);
+            setEditReportText('');
+        } catch (error) {
+            showError('Errore nell\'aggiornamento del report');
+        }
+    };
 
     if (loading) {
         return (
@@ -144,7 +166,8 @@ const SiteDetails = ({ site, onBack }) => {
             {/* Content - Rapporti giornalieri */}
             {activeSection === 'reports' && (
                 <div className="space-y-4">
-                    {reports.length > 0 ? (
+                    {/* Work Activities */}
+                    {reports.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {reports.map((report) => (
                                 <div
@@ -175,7 +198,6 @@ const SiteDetails = ({ site, onBack }) => {
                                         {report.activityType || report.description}
                                     </p>
 
-                                    {/* Show expand hint */}
                                     {(report.activityType?.length > 150 || report.description?.length > 150) && (
                                         <p className="text-xs text-blue-600 mt-2 font-medium">
                                             {expandedReport?.id === report.id ? '▲ Clicca per chiudere' : '▼ Clicca per espandere'}
@@ -184,13 +206,94 @@ const SiteDetails = ({ site, onBack }) => {
                                 </div>
                             ))}
                         </div>
-                    ) : (
+                    )}
+
+                    {/* Daily Report Notes */}
+                    {dailyReportNotes.length > 0 && (
+                        <div className="mt-4">
+                            <h4 className="font-semibold text-slate-500 text-xs uppercase tracking-wider mb-3">Note Report</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {dailyReportNotes.map((note) => (
+                                    <div key={note.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xs">
+                                                    {note.user?.firstName ? note.user.firstName.charAt(0) + note.user.lastName?.charAt(0) : (note.user?.username?.charAt(0).toUpperCase() || '?')}
+                                                </div>
+                                                <span className="font-semibold text-slate-900 text-sm">
+                                                    {note.user?.firstName ? `${note.user.firstName} ${note.user.lastName}` : (note.user?.username || 'Utente')}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-xs text-slate-500 font-medium">
+                                                    {new Date(note.createdAt).toLocaleString('it-IT', {
+                                                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                    })}
+                                                </span>
+                                                {note.userId === user?.id && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingReport(note);
+                                                            setEditReportText(note.content);
+                                                        }}
+                                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                        title="Modifica report"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-600 text-sm whitespace-pre-wrap">{note.content}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {reports.length === 0 && dailyReportNotes.length === 0 && (
                         <div className="bg-white rounded-[2.5rem] p-12 text-center shadow-sm animate-in fade-in duration-200">
                             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Calendar className="w-8 h-8 text-slate-400" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 mb-2">Rapporti Giornalieri</h3>
                             <p className="text-slate-500">Nessun rapporto giornaliero registrato per questo cantiere.</p>
+                        </div>
+                    )}
+
+                    {/* Edit Report Modal */}
+                    {editingReport && (
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md p-6">
+                                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <FileText className="w-6 h-6 text-blue-600" />
+                                    Modifica Report
+                                </h3>
+                                <textarea
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-none min-h-[150px]"
+                                    value={editReportText}
+                                    onChange={(e) => setEditReportText(e.target.value)}
+                                />
+                                <div className="flex gap-3 mt-4">
+                                    <button
+                                        onClick={() => {
+                                            setEditingReport(null);
+                                            setEditReportText('');
+                                        }}
+                                        className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                                    >
+                                        Annulla
+                                    </button>
+                                    <button
+                                        onClick={handleSaveReportEdit}
+                                        className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors"
+                                    >
+                                        Salva
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

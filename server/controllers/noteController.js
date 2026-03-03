@@ -25,13 +25,16 @@ const createNote = async (req, res, next) => {
 
 const getNotes = async (req, res, next) => {
     try {
-        const { siteId } = req.query;
+        const { siteId, type } = req.query;
         const companyId = getCompanyId(req);
 
         const where = { companyId };
         if (siteId) {
             await assertSiteBelongsToCompany(siteId, companyId);
             where.siteId = siteId;
+        }
+        if (type) {
+            where.type = type;
         }
 
         const notes = await Note.findAll({
