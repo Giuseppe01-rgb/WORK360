@@ -59,11 +59,13 @@ const updateNote = async (req, res, next) => {
         const { content } = req.body;
         const companyId = getCompanyId(req);
 
+        const isOwner = req.user.role === 'owner';
+
         const note = await Note.findOne({
             where: {
                 id,
                 companyId,
-                userId: getUserId(req)
+                ...(isOwner ? {} : { userId: getUserId(req) })
             }
         });
 
@@ -85,11 +87,13 @@ const deleteNote = async (req, res, next) => {
         const { id } = req.params;
         const companyId = getCompanyId(req);
 
+        const isOwner = req.user.role === 'owner';
+
         const note = await Note.findOne({
             where: {
                 id,
                 companyId,
-                userId: getUserId(req)
+                ...(isOwner ? {} : { userId: getUserId(req) })
             }
         });
 
